@@ -14,7 +14,7 @@ class Config:
             "PASSWORD": os.getenv("PASSWORD"),
             "GRANT_TYPE": os.getenv("GRANT_TYPE"),
             "SCOPE": os.getenv("SCOPE"),
-            "DATABASE_URL" : os.getenv("DATABASE_URL"),
+            "HOST_PSTGRS" : os.getenv("HOST_PSTGRS"),
             "DATABASE_PSTGRS" : os.getenv("DATABASE_PSTGRS"),
             "USER_PSTGRS" : os.getenv("USER_PSTGRS"),
             "PASSWORD_PSTGRS" : os.getenv("PASSWORD_PSTGRS"),
