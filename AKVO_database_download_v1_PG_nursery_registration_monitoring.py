@@ -60,7 +60,7 @@ for all_pages in url_list:
 
 #print(url_list)
 #connect to Postgresql database
-conn = psycopg2.connect(host= config.CONF["HOST_PSTGRS"],database= config.CONF["DATABASE_PSTGRS"],user= config.CONF["USER_PSTGRS"],password= config.CONF["PASSWORD_PSTGRS"])
+conn = psycopg2.connect(host= config.CONF["DATABASE_URL"],database= config.CONF["DATABASE_PSTGRS"],user= config.CONF["USER_PSTGRS"],password= config.CONF["PASSWORD_PSTGRS"])
 
 cur = conn.cursor()
 
