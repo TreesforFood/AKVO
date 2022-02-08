@@ -1,5 +1,4 @@
 requests
-json
 re
 geojson
 psycopg2
