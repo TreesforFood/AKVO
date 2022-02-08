@@ -3,7 +3,7 @@ import json
 import re
 import geojson
 import psycopg2
-import geodaisy.converters as convert
+import geodaisy
 from area import area
 from dotenv import load_dotenv, find_dotenv
 import os
