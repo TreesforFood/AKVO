@@ -1,5 +1,4 @@
 requests
-re
 geojson
 psycopg2
 geodaisy
