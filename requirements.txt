@@ -7,3 +7,12 @@ json
 re
 dotenv
 os
+requests
+json
+re
+geojson
+psycopg2
+geodaisy
+area
+dotenv
+os
