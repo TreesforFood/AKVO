@@ -3,5 +3,4 @@ geojson
 psycopg2
 geodaisy
 area
-dotenv
 os
