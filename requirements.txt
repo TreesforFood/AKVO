@@ -8,7 +8,6 @@ re
 dotenv
 os
 requests
-json
 re
 geojson
 psycopg2
