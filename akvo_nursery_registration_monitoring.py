@@ -44,7 +44,7 @@ for all_pages in url_list:
 
 #print(url_list)
 #connect to Postgresql database
-conn = psycopg2.connect(host= os.environ["DATABASE_URL"],database= os.environ["DATABASE_PSTGRS"],user= os.environ["USER_PSTGRS"],password= os.environ["PASSWORD_PSTGRS"])
+conn = psycopg2.connect(host= os.environ["HOST_PSTGRS"],database= os.environ["DATABASE_PSTGRS"],user= os.environ["USER_PSTGRS"],password= os.environ["PASSWORD_PSTGRS"])
 
 cur = conn.cursor()
 
