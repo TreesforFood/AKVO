@@ -1,7 +1,6 @@
 import requests
 import json
 import re
-import geojson
 import psycopg2
 import geodaisy.converters as convert
 from area import area
@@ -44,8 +43,8 @@ for all_pages in url_list:
 
 #print(url_list)
 #connect to Postgresql database
-#conn = psycopg2.connect(host= os.environ["HOST_PSTGRS"],database= os.environ["DATABASE_PSTGRS"],user= os.environ["USER_PSTGRS"],password= os.environ["PASSWORD_PSTGRS"])
-conn = psycopg2.connect(os.environ["DATABASE_URL"], sslmode='require')
+conn = psycopg2.connect(host= os.environ["HOST_PSTGRS"],database= os.environ["DATABASE_PSTGRS"],user= os.environ["USER_PSTGRS"],password= os.environ["PASSWORD_PSTGRS"])
+
 cur = conn.cursor()
 
 cur.execute('''
@@ -152,6 +151,13 @@ for all_data in url_list:
             geometry = None
             get_geom_type = None
 
+
+        # Populate the tree registration table
+        #cur.execute('''INSERT INTO Tree_external_audits_areas (identifier_akvo, instance, submitter, test, farmer_reported_tree_nr, farmer_reported_nr_tree_species, farmer_reported_died_trees, audit_reported_trees, option_tree_count, manual_tree_count, display_name, impression_site, calc_area, polygon)
+        #VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)''', (identifier, instance, submitter, test, farmer_reported_tree_nr, farmer_reported_tree_species, farmer_reported_died_trees, audit_reported_trees, option_tree_count, manual_tree_count, display_name, impression_site, area_ha, polygon))
+
+
+        #cur.execute('''INSERT INTO Tree_external_audits_areas(polygon) VALUES (ST_GeomFromText(%s))''', (polygon,))
 
         cur.execute('''INSERT INTO AKVO_Tree_external_audits_areas (identifier_akvo, instance, submitter, test, farmer_reported_tree_nr, farmer_reported_nr_tree_species, farmer_reported_died_trees, audit_reported_trees, option_tree_count, manual_tree_count, display_name, impression_site, calc_area, polygon)
         VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)''', (identifier, instance, submitter, test, farmer_reported_tree_nr, farmer_reported_tree_species, farmer_reported_died_trees, audit_reported_trees, option_tree_count, manual_tree_count, display_name, impression_site, area_ha, polygon))
