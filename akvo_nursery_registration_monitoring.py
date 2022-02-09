@@ -1,12 +1,7 @@
 import requests
 import json
-import re
-import geojson
 import psycopg2
-import geodaisy.converters as convert
-from area import area
 import os
-
 
 
 # AKVO url entry levels. Modify the id to get the right folder/survey:
@@ -48,8 +43,8 @@ for all_pages in url_list:
 
 #print(url_list)
 #connect to Postgresql database
-#conn = psycopg2.connect(host= os.environ["HOST_PSTGRS"],database= os.environ["DATABASE_PSTGRS"],user= os.environ["USER_PSTGRS"],password= os.environ["PASSWORD_PSTGRS"])
-conn = psycopg2.connect(os.environ["DATABASE_URL"], sslmode='require')
+conn = psycopg2.connect(host= os.environ["DATABASE_URL"],database= os.environ["DATABASE_PSTGRS"],user= os.environ["USER_PSTGRS"],password= os.environ["PASSWORD_PSTGRS"])
+
 cur = conn.cursor()
 
 
@@ -77,7 +72,7 @@ CREATE TABLE AKVO_Nursery_monitoring_photos (identifier_akvo TEXT, instance INTE
 CREATE TABLE AKVO_Nursery_monitoring_tree_species (identifier_akvo TEXT, instance NUMERIC, tree_species_latin TEXT,
 tree_species_local TEXT);
 
-''')
+''');
 
 
 def left(var, amount):
