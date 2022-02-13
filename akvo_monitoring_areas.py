@@ -1,10 +1,6 @@
 import requests
 import json
-import sqlite3
-import re
-import geojson
-import geodaisy.converters as convert
-from area import area
+daisy.converters as convert
 import psycopg2
 import os
 
