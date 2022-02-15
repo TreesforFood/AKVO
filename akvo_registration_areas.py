@@ -57,7 +57,8 @@ for all_pages in url_list:
     else:
         url_subseq_page = json_instance.get('nextPageUrl')
         url_list.append(url_subseq_page)
-        print('urls loaded')
+        
+print('all urls loaded')
 
 #connect to Postgresql database
 #conn = psycopg2.connect(host= os.environ["HOST_PSTGRS"],database= os.environ["DATABASE_PSTGRS"],user= os.environ["USER_PSTGRS"],password= os.environ["PASSWORD_PSTGRS"])
@@ -252,7 +253,7 @@ for all_data in url_list:
             geometry = None
             get_geom_type = None
 
-        print('the following identifier was parsed: ', identifier)
+        print('the following area registration identifier was parsed: ', identifier)
 
         # Populate the tree registration table
         cur.execute('''INSERT INTO AKVO_Tree_registration_areas (identifier_akvo, display_name, device_id, instance, submission, submission_year, submissiontime, submitter, modifiedAt, AKVO_form_version, country, test, organisation, contract_number, id_planting_site, land_title, name_village, name_region, name_owner, gender_owner, objective_site, site_preparation, planting_technique, planting_system, remark, nr_trees_option, planting_date, tree_number, estimated_area, calc_area, lat_y, lon_x, number_coord_polygon, centroid_coord, polygon, multipoint)
@@ -288,8 +289,9 @@ for all_data in url_list:
                         photo_lat = None
                         photo_lon = None
                         photo_r4_location = None
+                    
 
-                    #print('photo:',photo_url, photo_location, identifier, count) Prints well multiple photos and id's up to here.
+                    print('photo identifier:',identifier_akvo)
                     cur.execute('''INSERT INTO AKVO_Tree_registration_photos (identifier_akvo, instance, photo_url, photo_location)
                     VALUES (%s,%s,%s,%s)''', (identifier, instance, photo_r4_url, photo_r4_location))
 
@@ -375,7 +377,8 @@ for all_data in url_list:
                     species_local = x['50340047'][1]['name']
 
                 number_species = x.get('50530001', 0)
-                #print(code, name, get_number_species)
+                
+                print('Species identifier: ', identifier_akvo)
 
                 cur.execute('''INSERT INTO AKVO_Tree_registration_species (identifier_akvo, instance, lat_name_species, local_name_species, number_species)
                 VALUES (%s,%s,%s,%s,%s)''', (identifier, instance, species_latin, species_local, number_species))
