@@ -1,1 +1,0 @@
-worker: python3 akvo_nursery_registration_monitoring.py
