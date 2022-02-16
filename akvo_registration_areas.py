@@ -57,23 +57,18 @@ for all_pages in url_list:
     else:
         url_subseq_page = json_instance.get('nextPageUrl')
         url_list.append(url_subseq_page)
-        
+
 print('all urls loaded')
 
 #connect to Postgresql database
+#conn = psycopg2.connect(host= os.environ["HOST_PSTGRS"],database= os.environ["DATABASE_PSTGRS"],user= os.environ["USER_PSTGRS"],password= os.environ["PASSWORD_PSTGRS"])
 conn = psycopg2.connect(os.environ["DATABASE_URL"], sslmode='require')
 cur = conn.cursor()
 
 cur.execute('''
-DROP TABLE IF EXISTS AKVO_Tree_registration_species;
-DROP TABLE IF EXISTS AKVO_Tree_registration_photos;
 DROP TABLE IF EXISTS AKVO_Tree_registration_areas;
 
 CREATE TABLE AKVO_Tree_registration_areas (identifier_akvo TEXT PRIMARY KEY, display_name TEXT, device_id TEXT, instance INTEGER, submission TEXT, submission_year SMALLINT, submissiontime TEXT, submitter TEXT, modifiedAt TEXT, AKVO_form_version TEXT, country TEXT, test TEXT, organisation TEXT, contract_number NUMERIC(20,2), id_planting_site TEXT, land_title TEXT, name_village TEXT, name_region TEXT, name_owner TEXT, gender_owner TEXT, objective_site TEXT, site_preparation TEXT, planting_technique TEXT, planting_system TEXT, remark TEXT, nr_trees_option TEXT, planting_date TEXT, tree_number INTEGER, estimated_area NUMERIC(20,3), calc_area NUMERIC(20,3), lat_y REAL, lon_x REAL, number_coord_polygon INTEGER, centroid_coord geography(POINT, 4326), polygon geography(POLYGON, 4326), multipoint geography(MULTIPOINT, 4326));
-
-CREATE TABLE AKVO_Tree_registration_photos (identifier_akvo TEXT, instance INTEGER, photo_url TEXT, photo_location geography(POINT, 4326), FOREIGN KEY (identifier_akvo) REFERENCES AKVO_Tree_registration_areas (identifier_akvo) ON DELETE CASCADE);
-
-CREATE TABLE AKVO_Tree_registration_species (identifier_akvo TEXT, instance INTEGER, lat_name_species TEXT, local_name_species TEXT, number_species INTEGER, FOREIGN KEY (identifier_akvo) REFERENCES AKVO_Tree_registration_areas (identifier_akvo) ON DELETE CASCADE);
 
 ''')
 
@@ -252,134 +247,10 @@ for all_data in url_list:
             geometry = None
             get_geom_type = None
 
-        print('the following area registration identifier was parsed: ', identifier)
+        print('the following identifier was parsed: ', identifier)
 
         # Populate the tree registration table
         cur.execute('''INSERT INTO AKVO_Tree_registration_areas (identifier_akvo, display_name, device_id, instance, submission, submission_year, submissiontime, submitter, modifiedAt, AKVO_form_version, country, test, organisation, contract_number, id_planting_site, land_title, name_village, name_region, name_owner, gender_owner, objective_site, site_preparation, planting_technique, planting_system, remark, nr_trees_option, planting_date, tree_number, estimated_area, calc_area, lat_y, lon_x, number_coord_polygon, centroid_coord, polygon, multipoint)
         VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)''', (identifier, displayname, deviceidentifier, instance, submissiondate_trunc, submissiondate_trunc_year, submissiontime, submitter, modifiedat, formversion, country, test, name_organisation, contract_number, id_planting_site, land_title, name_village, name_region, name_owner, gender_owner, landuse_objective, site_preparation, planting_technique, planting_system, remark, more_less_200_trees, planting_date_trunc, nr_trees_planted, estimated_area, area_ha, lat_centr, lon_centr, number_coord_pol, centroid_coord, polygon, multipoint))
 
         conn.commit()
-
-        try:
-            level1['responses']['1960007']
-        except KeyError:
-            photo_r4_location = None
-            photo_r4_url = None
-        else:
-            for photo in level1['responses']['1960007']: # Get first 4 photos from registration. This loop was tested in file: AKVO_database_download_v7_test_first_4_reg_photos.py
-                photo.pop('5900011', None)
-                photo.pop('50110008', None)
-                photo.pop('25860015', None)
-                photo_items4 = list(photo.values())
-
-
-                for url4 in photo_items4:
-                    photo_r4_url = url4['filename']
-
-                    try: #print(photo_url) # print multiple rows well up to here with only urls
-                        if url4['location'] is not None:
-                            photo_lat = url4['location']['latitude']
-                            photo_lon = url4['location']['longitude']
-                            photo_lat = str(photo_lat)
-                            photo_lon = str(photo_lon)
-                            photo_r4_location = 'POINT('+ photo_lon + ' ' + photo_lat + ')'
-
-                    except:
-                        photo_lat = None
-                        photo_lon = None
-                        photo_r4_location = None
-                    
-
-                    print('photo identifier:',identifier_akvo)
-                    cur.execute('''INSERT INTO AKVO_Tree_registration_photos (identifier_akvo, instance, photo_url, photo_location)
-                    VALUES (%s,%s,%s,%s)''', (identifier, instance, photo_r4_url, photo_r4_location))
-
-                    conn.commit()
-
-
-        try:
-            for photo in level1['responses']['3990009']: # Get other 36 photos from registration form. This loop was tested in file: AKVO_database_download_v7_test_rest_36_reg_photos.py
-                photo_items36 = list(photo.values())
-                for url36 in photo_items36:
-                    try:
-                        photo_r36_url = url36['filename']
-                    except KeyError:
-                        photo_r36_url = None
-                    else:
-                        photo_r36_url = url36['filename']
-                        try:
-                            if url36['location'] is not None:
-                                photo_lat = url36['location']['latitude']
-                                photo_lat = str(photo_lat)
-                                photo_lon = url36['location']['longitude']
-                                photo_lon = str(photo_lon)
-                                photo_r36_location = 'POINT('+ photo_lon + ' ' + photo_lat + ')'
-
-                            else:
-                                photo_lat = None
-                                photo_lon = None
-                                photo_r36_location = None
-
-                        except KeyError:
-                            photo_lat = None
-                            photo_lon = None
-                            photo_r36_location = None
-
-
-
-                    cur.execute('''INSERT INTO AKVO_Tree_registration_photos (identifier_akvo, instance, photo_url, photo_location)
-                    VALUES (%s,%s,%s,%s)''', (identifier, instance, photo_r36_url, photo_r36_location))
-
-                    conn.commit()
-
-
-
-        except (IndexError,KeyError):
-            photo = ''
-            photo_r36_url = ''
-            photo_r36_location = ''
-
-
-        # Create table for the registration of tree species and number per species. This is a loop within the instance
-        try:
-            level1['responses']['50330190']
-
-        except KeyError:
-            species_latin = ''
-            species_local = ''
-            number_species = 0
-
-        else:
-            for x in level1['responses']['50330190']:
-                try:
-                    species_latin = x['50340047'][1]['code']
-                except (KeyError, IndexError):
-                    try:
-                        species_latin = x['50340047'][0]['code']
-                    except (KeyError, IndexError):
-                        species_latin = ''
-                    else:
-                        species_latin = x['50340047'][0]['code']
-                else:
-                    species_latin = x['50340047'][1]['code']
-
-                try:
-                    species_local = x['50340047'][1]['name']
-                except (KeyError, IndexError):
-                    try:
-                        species_local = x['50340047'][0]['name']
-                    except (KeyError, IndexError):
-                        species_local = ''
-                    else:
-                        species_local = x['50340047'][0]['name']
-                else:
-                    species_local = x['50340047'][1]['name']
-
-                number_species = x.get('50530001', 0)
-                
-                print('Species identifier: ', identifier_akvo)
-
-                cur.execute('''INSERT INTO AKVO_Tree_registration_species (identifier_akvo, instance, lat_name_species, local_name_species, number_species)
-                VALUES (%s,%s,%s,%s,%s)''', (identifier, instance, species_latin, species_local, number_species))
-
-                conn.commit()
