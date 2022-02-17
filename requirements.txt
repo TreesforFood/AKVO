@@ -1,1 +1,1 @@
-requestsjsonregeojsonpsycopg2geodaisy.converters as convertareadotenvos
+requestsgeojsonpsycopg2geodaisy.converters as convertarea

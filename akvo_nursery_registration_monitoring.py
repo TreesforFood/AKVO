@@ -5,28 +5,16 @@ import geojson
 import psycopg2
 import geodaisy.converters as convert
 from area import area
-from dotenv import load_dotenv, find_dotenv
 import os
-from akvo_api_config import Config
 
-config = Config()
+
 
 # AKVO url entry levels. Modify the id to get the right folder/survey:
 form_registration_nursery = 'https://api-auth0.akvo.org/flow/orgs/ecosia/form_instances?survey_id=38030003&form_id=30050006'
 form_monitoring_nursery = 'https://api-auth0.akvo.org/flow/orgs/ecosia/form_instances?survey_id=38030003&form_id=6070006'
 
-#this (diect) option also works:
-#load_dotenv()
-#client_id = os.getenv("CLIENT_ID")
-#username = os.getenv("USERNAME")
-#password = os.getenv("PASSWORD")
-#grant_type = os.getenv("GRANT_TYPE")
-#scope = os.getenv("SCOPE")
-#data = {"client_id": client_id, "username" : username, "password": password, "grant_type": grant_type, "scope": scope}
-
-
 # get the token from AKVO
-data = {"client_id": config.CONF["CLIENT_ID"], "username" : config.CONF["USERNAME"], "password": config.CONF["PASSWORD"], "grant_type": config.CONF["GRANT_TYPE"], "scope": config.CONF["SCOPE"]}
+data = {"client_id": os.environ["CLIENT_ID"], "username" : os.environ["USERNAME"], "password": os.environ["PASSWORD"], "grant_type": os.environ["GRANT_TYPE"], "scope": os.environ["SCOPE"]}
 response = requests.post("https://akvofoundation.eu.auth0.com/oauth/token", data=data)
 
 if response.status_code in [200]: # in case good response from AKVO server
@@ -60,8 +48,8 @@ for all_pages in url_list:
 
 #print(url_list)
 #connect to Postgresql database
-conn = psycopg2.connect(host= config.CONF["HOST_PSTGRS"],database= config.CONF["DATABASE_PSTGRS"],user= config.CONF["USER_PSTGRS"],password= config.CONF["PASSWORD_PSTGRS"])
-
+#conn = psycopg2.connect(host= os.environ["HOST_PSTGRS"],database= os.environ["DATABASE_PSTGRS"],user= os.environ["USER_PSTGRS"],password= os.environ["PASSWORD_PSTGRS"])
+conn = psycopg2.connect(os.environ["DATABASE_URL"], sslmode='require')
 cur = conn.cursor()
 
 
@@ -89,7 +77,7 @@ CREATE TABLE AKVO_Nursery_monitoring_photos (identifier_akvo TEXT, instance INTE
 CREATE TABLE AKVO_Nursery_monitoring_tree_species (identifier_akvo TEXT, instance NUMERIC, tree_species_latin TEXT,
 tree_species_local TEXT);
 
-''');
+''')
 
 
 def left(var, amount):

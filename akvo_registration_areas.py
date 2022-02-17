@@ -194,22 +194,31 @@ for all_data in url_list:
         except (KeyError, IndexError):
             estimated_area = None
 
+
         try:
             lat_centr = level1['responses']['1960007'][0]['25860015']['lat']
-            lat_centr_conv = str(lat_centr)
         except (KeyError, IndexError):
             lat_centr = None
 
         try:
             lon_centr = level1['responses']['1960007'][0]['25860015']['long']
-            lon_centr_conv = str(lon_centr)
         except (KeyError, IndexError):
             lon_centr = None
 
-        try:
-            centroid_coord = 'POINT (' + lon_centr_conv +' '+ lat_centr_conv +')'
-        except (KeyError, IndexError):
+        if lat_centr is not None:
+            lat_centr_conv = str(lat_centr)
+        else:
+            lat_centr_conv = ''
+
+        if lon_centr is not None:
+            lon_centr_conv = str(lon_centr)
+        else:
+            lon_centr_conv = ''
+
+        if not lat_centr_conv or not lon_centr_conv:
             centroid_coord = None
+        else:
+            centroid_coord = 'POINT (' + lon_centr_conv +' '+ lat_centr_conv +')'
 
         try:
             geom_get = level1['responses']['1960007'][0]['50110008'] # Up to this level it can go wrong (due to empty entry)
