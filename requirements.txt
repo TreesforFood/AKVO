@@ -1,5 +1,0 @@
-requests
-geojson
-psycopg2
-geodaisy
-area
