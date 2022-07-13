@@ -2,6 +2,17 @@
 # The PG database is then dumped onto Heroku. Reaseon for this approach is that the AWS where AKVO is running
 # given a too long time-out while the script is running. This causes Heroku to stop the script.
 
+# This script ONLY downloads the Tree Registration data and the Tree Monitoring data.
+# For the downloading of other data (e.g. NUrsery registration data or Verification data)
+# other scripts must be runned.
+
+# For a full download of all AKVO data, this is the first script that needs to be runned,
+# as this script also downloads the first 'NextSyncUrl' URL that is needed for the sync script.
+# The NextSyncUrl stored changes for all AKVO data. So the this NextSyncUrl
+# is used for syncing Tree regnistration and monitoring database as well as
+# the Nursery registration and monitoring data, the Verification data etc. This is why, this scripts
+# needs to be run first.
+
 import requests
 import json
 import sqlite3
@@ -27,19 +38,23 @@ initial_sync_request = 'https://api-auth0.akvo.org/flow/orgs/ecosia/sync?initial
 data = {"client_id": config.CONF["CLIENT_ID"], "username" : config.CONF["USERNAME"], "password": config.CONF["PASSWORD"], "grant_type": config.CONF["GRANT_TYPE"], "scope": config.CONF["SCOPE"]}
 response = requests.post("https://akvofoundation.eu.auth0.com/oauth/token", data=data)
 
-if response.status_code in [200]: # in case good response from AKVO server
+if response.status_code in [200]:
     tok_dict = json.loads(response.text)
     expires_in = tok_dict["expires_in"]
     token_type = tok_dict["token_type"]
     access_token = tok_dict["access_token"]
     token_id = tok_dict["id_token"]
-else: # in case of error from AKVO server
+else: #
     print(response.text)
 
 headers = {'Authorization': "Bearer {}".format(token_id), 'Accept': 'application/vnd.akvo.flow.v2+json'}
 
-# The code block below must only be executed during a full download of the database. The NextSyncUrl that restuls from the Initial Request is used
-# to update (sync) the database. As can be seen, thsi URL is written to a file (sync_urls.txt) that is used to store the url for later sync requests.
+# The NextSyncUrl that is assigned to the initial_syncurl variable is used as a starting URL
+# that stores all changes from the moment the full AKVO download is completed.
+# This NextSyncUrl is first written to a pickle file (sync_urls_PG.pkl). With a second script
+# (akvo_update_sync_url_v2.py) this NextSyncUrl is written into a PG table
+# called url_latest_sync (located in the same PG database as where the AKVO data is stored)
+
 get_initial_syncurl = requests.get(initial_sync_request, headers = headers)
 converturltotxt = get_initial_syncurl.text
 converttojson = json.loads(converturltotxt)
@@ -53,7 +68,7 @@ with open('sync_initial_url_after download_PG.pkl', 'wb') as f:
 print("This is the first NextSyncUrl after the initial request: ", initial_syncurl)
 
 
-# Create list with first url from registration form
+# Create list with the first url from registration form
 url_list = list()
 url_list.append(form_response_tree) # this one is needed to add the first url to the url list
 
