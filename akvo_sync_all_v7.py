@@ -1,3 +1,5 @@
+# THis script needs to be executed after a full download of the AKVO database.
+
 import requests
 import json
 import re
@@ -31,17 +33,24 @@ conn = psycopg2.connect(os.environ["DATABASE_URL"], sslmode='require')
 
 cur = conn.cursor()
 
+# Get the first NextSyncUrl from the PG database to start harvest the first changes
 cur.execute('''Select sync_url FROM url_latest_sync where id=1;''')
 fetch_latest_sync_url = cur.fetchall()
 for latest_sync_url in fetch_latest_sync_url:
     open_sync_url = latest_sync_url[0]
     print("Latest sync url used to start sync: ", open_sync_url)
 
+# Put NextSyncUrl in a list
 url_list = list()
 url_list.append(open_sync_url)
 
 
 get_status_akvo_server = requests.get(open_sync_url, headers=headers) # gives ouyput in bytes
+
+# Open first NextSyncUrl and read the NextSyncUrl in that page. Do this in a loop: parsing to every page
+# and read the NextSyncUrl in every page. Populate those NextSyncUrl's in a list
+# When there is a page without a NextSyncUrl, the script stores the latest NextSyncUrl
+# in the postgres table. This will again be read by the next run of the script.
 
 if get_status_akvo_server.status_code in [200]:
     print("Connection with server was successful (code: 200)")
