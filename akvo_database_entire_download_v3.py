@@ -1,3 +1,7 @@
+# This script downloads the entire AKVO database into a local Postgres (PG) database.
+# The PG database is then dumped onto Heroku. Reaseon for this approach is that the AWS where AKVO is running
+# given a too long time-out while the script is running. This causes Heroku to stop the script.
+
 import requests
 import json
 import sqlite3
