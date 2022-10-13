@@ -1,3 +1,6 @@
+# This script is to download ONLY the NUrsery registration and monitoring data.
+# It should be run preferably after running the Tree registration and monitoring script.
+
 import requests
 import json
 import sqlite3

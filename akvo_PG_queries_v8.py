@@ -197,7 +197,7 @@ AS "Total number of photos taken",
 
 (SELECT COUNT(*) FROM AKVO_Tree_registration_photos WHERE
 AKVO_Tree_registration_areas.identifier_akvo = AKVO_Tree_registration_photos.identifier_akvo AND AKVO_Tree_registration_areas.polygon NOTNULL AND
-AKVO_Tree_registration_photos.photo_location NOTNULL) AS "Number of photos with geotag",
+AKVO_Tree_registration_photos.photo_geotag_location NOTNULL) AS "Number of photos with geotag",
 
 (SELECT COUNT(*) FROM AKVO_Tree_registration_species WHERE AKVO_Tree_registration_areas.identifier_akvo = AKVO_Tree_registration_species.identifier_akvo
 AND AKVO_Tree_registration_areas.polygon NOTNULL) AS "Number of tree species registered",
