@@ -882,6 +882,13 @@ order by akvo_nursery_monitoring.submission_date desc'''
 
 conn.commit()
 
+# Arrange RSL's for all partners and re-assign them (need to do this after deleting the tables, also the RSL's are removed and need to be reassigned)
+create_a17 = '''
+ALTER TABLE calc_tab_error_check_on_site_registration enable ROW LEVEL SECURITY;
+GRANT SELECT ON TABLE public.calc_tab_error_check_on_site_registration TO kenya_mkec;
+CREATE POLICY mkec_policy ON akvo_tree_registration_areas TO kenya_mkec USING (akvo_tree_registration_areas.organisation = 'Mount Kenya Environmental Conservation');'''
+
+
 # Execute create tables
 cur.execute(drop_a1)
 cur.execute(drop_a2)
@@ -914,6 +921,7 @@ cur.execute(create_a13)
 cur.execute(create_a14)
 cur.execute(create_a15)
 cur.execute(create_a16)
+cur.execute(create_a17)
 
 conn.commit()
 
