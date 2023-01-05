@@ -888,6 +888,7 @@ ALTER TABLE calc_tab_error_check_on_site_registration enable ROW LEVEL SECURITY;
 GRANT SELECT ON TABLE public.calc_tab_error_check_on_site_registration TO kenya_mkec;
 CREATE POLICY mkec_policy ON calc_tab_error_check_on_site_registration TO kenya_mkec USING (akvo_tree_registration_areas.organisation = 'Mount Kenya Environmental Conservation');'''
 
+conn.commit()
 
 # Execute create tables
 cur.execute(drop_a1)
