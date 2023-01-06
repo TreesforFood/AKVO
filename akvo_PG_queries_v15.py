@@ -823,17 +823,17 @@ GROUP BY table_y.contract_number)
 	CTE_total_tree_registrations.country,
 	CTE_total_tree_registrations.organisation,
 	CTE_total_tree_registrations.contract_number AS "Contract number",
-	CTE_total_tree_registrations."Nr of sites registered",
-	CTE_total_tree_registrations."Registered tree number",
+	CTE_total_tree_registrations."Nr of sites registered" AS "Total number of sites registered",
+	CTE_total_tree_registrations."Registered tree number" AS "Total number of trees registered",
+	cte_registered_tree_number_monitored_sites.total_registered_trees_on_monitored_sites AS "Total nr of registered trees on sites that have been monitored",
 	CTE_total_tree_registrations."Latest submitted registration",
-	CTE_tree_monitoring.nr_of_monitorings AS "Total number of monitorings",
+	CTE_tree_monitoring.nr_of_monitorings AS "Total number of monitoring submissions",
 	CTE_tree_monitoring.nr_sites_monitored AS "Number of sites monitored at least 1 time",
 	CTE_tree_monitoring."Latest submitted monitoring",
-	cte_registered_tree_number_monitored_sites.total_registered_trees_on_monitored_sites,
 	cte_monitored_tree_number_monitored_sites.monitored_tree_number,
 	ROUND(cte_monitored_tree_number_monitored_sites.monitored_tree_number/
 	  NULLIF(cte_registered_tree_number_monitored_sites.total_registered_trees_on_monitored_sites,0)*100
-	 ,2) AS tree_percentage_survived_on_monitored_sites,
+	 ,2) AS "Survived tree percentage on monitored sites",
 	CTE_tree_species."Number of tree species registered"
 
 	FROM CTE_total_tree_registrations
@@ -901,11 +901,29 @@ order by akvo_nursery_monitoring.submission_date desc;'''
 
 conn.commit()
 
-# Arrange RSL's for all partners and re-assign them (need to do this after deleting the tables, also the RSL's are removed and need to be reassigned)
 create_a17 = '''
-ALTER TABLE calc_tab_error_check_on_site_registration enable ROW LEVEL SECURITY;
-GRANT SELECT ON TABLE public.calc_tab_error_check_on_site_registration TO kenya_mkec;
-CREATE POLICY mkec_policy ON calc_tab_error_check_on_site_registration TO kenya_mkec USING (calc_tab_error_check_on_site_registration.name_organisation = 'Mount Kenya Environmental Conservation');'''
+GRANT USAGE ON SCHEMA PUBLIC TO kenya_mkec;
+GRANT USAGE ON SCHEMA HEROKU_EXT TO kenya_mkec;
+
+ALTER TABLE akvo_tree_registration_areas_updated enable ROW LEVEL SECURITY;
+ALTER TABLE akvo_tree_monitoring_areas enable ROW LEVEL SECURITY;
+ALTER TABLE akvo_nursery_registration enable ROW LEVEL SECURITY;
+ALTER TABLE akvo_nursery_monitoring enable ROW LEVEL SECURITY;
+ALTER TABLE CALC_TAB_Error_partner_report_on_site_registration enable ROW LEVEL SECURITY;
+
+GRANT SELECT ON TABLE public.akvo_tree_registration_areas_updated TO kenya_mkec;
+GRANT SELECT ON TABLE public.akvo_tree_monitoring_areas TO kenya_mkec;
+GRANT SELECT ON TABLE public.akvo_nursery_registration TO kenya_mkec;
+GRANT SELECT ON TABLE public.akvo_nursery_monitoring TO kenya_mkec;
+GRANT SELECT ON TABLE public.CALC_TAB_Error_partner_report_on_site_registration TO kenya_mkec;
+
+CREATE POLICY mkec_policy ON akvo_tree_registration_areas_updated TO kenya_mkec USING (organisation = 'Mount Kenya Environmental Conservation');
+CREATE POLICY mkec_policy ON akvo_tree_monitoring_areas TO kenya_mkec USING (EXISTS (SELECT * FROM akvo_tree_monitoring_areas INNER JOIN
+akvo_tree_registration_areas_updated ON akvo_tree_monitoring_areas.identifier_akvo = akvo_tree_registration_areas_updated.identifier_akvo
+WHERE akvo_tree_registration_areas_updated.organisation = 'Mount Kenya Environmental Conservation'));
+CREATE POLICY mkec_policy ON akvo_nursery_registration TO kenya_mkec USING (organisation = 'Mount Kenya Environmental Conservation');
+--CREATE POLICY mkec_policy ON akvo_nursery_monitoring TO kenya_mkec USING (organisation = 'Mount Kenya Environmental Conservation');
+CREATE POLICY mkec_policy ON CALC_TAB_Error_partner_report_on_site_registration TO kenya_mkec USING (calc_tab_error_check_on_site_registration.name_organisation = 'Mount Kenya Environmental Conservation');'''
 
 conn.commit()
 
