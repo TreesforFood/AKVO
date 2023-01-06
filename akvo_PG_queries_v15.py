@@ -104,11 +104,30 @@ akvo_tree_registration_areas.id_planting_site,
 akvo_tree_monitoring_areas.submission
 ORDER BY akvo_tree_monitoring_areas.submission),
 
+
+-- Create CTE with REGISTRATION instances and add them to the table so that the registration submission date is also included
+registration_instances_grouped AS (SELECT
+akvo_tree_registration_areas.identifier_akvo,
+akvo_tree_registration_areas.instance,
+akvo_tree_registration_areas.id_planting_site,
+akvo_tree_registration_areas.submission
+FROM akvo_tree_registration_areas
+JOIN AKVO_Tree_monitoring_areas ON AKVO_Tree_monitoring_areas.identifier_akvo = akvo_tree_registration_areas.identifier_akvo
+WHERE (akvo_tree_registration_areas.test = '' OR AKVO_Tree_monitoring_areas.test = 'This is real, valid data')
+GROUP BY
+akvo_tree_registration_areas.identifier_akvo,
+akvo_tree_registration_areas.instance,
+akvo_tree_registration_areas.id_planting_site,
+akvo_tree_registration_areas.submission),
+
+
 --UNION OF COUNTS and PCQ's into 1 table. Instances are grouped. This table enters the calculate to add strata (= days distance between instances) to instances
 monitoring_instances_grouped AS
 (SELECT * FROM pcq_instances_grouped
 UNION
-SELECT * FROM count_instances_grouped),
+SELECT * FROM count_instances_grouped
+UNION
+SELECT * FROM registration_instances_grouped),
 
 
 -- Create CTE to calculate relative distances between submission dates/instances and give each (grouped instance) a strata label
