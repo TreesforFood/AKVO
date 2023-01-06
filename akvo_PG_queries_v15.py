@@ -14,7 +14,7 @@ conn = psycopg2.connect(os.environ["DATABASE_URL"], sslmode='require')
 cur = conn.cursor()
 
 
-drop_a1 = '''DROP TABLE IF EXISTS AKVO_tree_registration_areas_updated;'''
+drop_a1 = '''DROP TABLE IF EXISTS AKVO_tree_registration_areas_updated CASCADE;'''
 drop_a2 = '''DROP TABLE IF EXISTS CALC_TAB_monitoring_calculations_per_site_by_partner;'''
 
 drop_a4 = '''DROP TABLE IF EXISTS CALC_TAB_Error_check_on_site_registration;'''
