@@ -928,7 +928,7 @@ akvo_tree_registration_areas_updated ON akvo_tree_monitoring_areas.identifier_ak
 WHERE akvo_tree_registration_areas_updated.organisation = 'Mount Kenya Environmental Conservation'));
 CREATE POLICY mkec_policy ON akvo_nursery_registration TO kenya_mkec USING (organisation = 'Mount Kenya Environmental Conservation');
 --CREATE POLICY mkec_policy ON akvo_nursery_monitoring TO kenya_mkec USING (organisation = 'Mount Kenya Environmental Conservation');
-CREATE POLICY mkec_policy ON CALC_TAB_Error_partner_report_on_site_registration TO kenya_mkec USING (calc_tab_error_check_on_site_registration.name_organisation = 'Mount Kenya Environmental Conservation');'''
+CREATE POLICY mkec_policy ON CALC_TAB_Error_partner_report_on_site_registration TO kenya_mkec USING (CALC_TAB_Error_partner_report_on_site_registration.name_organisation = 'Mount Kenya Environmental Conservation');'''
 
 conn.commit()
 
