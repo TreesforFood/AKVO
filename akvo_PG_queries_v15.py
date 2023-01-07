@@ -927,7 +927,7 @@ DROP POLICY IF EXISTS mkec_policy ON CALC_TAB_Error_partner_report_on_site_regis
 DROP POLICY IF EXISTS mkec_policy ON calc_tab_tree_submissions_per_contract;
 
 CREATE POLICY mkec_policy ON akvo_tree_registration_areas_updated TO kenya_mkec USING (organisation = 'Mount Kenya Environmental Conservation');
-CREATE POLICY mkec_policy ON akvo_tree_monitoring_areas TO kenya_mkec USING (EXISTS (SELECT * FROM akvo_tree_monitoring_areas
+CREATE POLICY mkec_policy ON akvo_tree_monitoring_areas TO kenya_mkec USING (EXISTS (SELECT * FROM akvo_tree_registration_areas_updated
 WHERE akvo_tree_registration_areas_updated.organisation = 'Mount Kenya Environmental Conservation'
 AND akvo_tree_monitoring_areas.identifier_akvo = akvo_tree_registration_areas_updated.identifier_akvo));
 CREATE POLICY mkec_policy ON akvo_nursery_registration TO kenya_mkec USING (organisation = 'Mount Kenya Environmental Conservation');
