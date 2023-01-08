@@ -23,13 +23,18 @@ drop_a6 = '''DROP TABLE IF EXISTS CALC_GEOM_pcq_calculations_per_site_by_externa
 drop_a7 = '''DROP TABLE IF EXISTS CALC_GEOM_Trees_counted_per_site_by_external_audit;'''
 drop_a8 = '''DROP TABLE IF EXISTS CALC_GEOM_AKVO_tree_registration_submissions_yesterday;'''
 drop_a9 = '''DROP TABLE IF EXISTS CALC_GEOM_AKVO_nursery_registration_submissions_yesterday;'''
+
 drop_a10 = '''DROP TABLE IF EXISTS CALC_GEOM_AKVO_check_photo_registrations;'''
+
 drop_a11 = '''DROP TABLE IF EXISTS CALC_GEOM_AKVO_check_species_registrations;'''
+
 drop_a12 = '''DROP TABLE IF EXISTS CALC_GEOM_locations_registration_versus_externalaudits;'''
+
 drop_a13 = '''DROP TABLE IF EXISTS CALC_GEOM_Trees_counted_per_site_by_partner;'''
 drop_a14 = '''DROP TABLE IF EXISTS CALC_TAB_overall_statistics;'''
 drop_a15 = '''DROP TABLE IF EXISTS CALC_TAB_tree_submissions_per_contract;'''
 drop_a16 = '''DROP TABLE IF EXISTS CALC_TAB_Error_check_on_nursery_registration;'''
+drop_a18 = '''DROP TABLE IF EXISTS akvo_tree_monitoring_areas_geom;'''
 
 conn.commit()
 
@@ -901,6 +906,19 @@ order by akvo_nursery_monitoring.submission_date desc;'''
 
 conn.commit()
 
+create_a18 = ''''CREATE TABLE akvo_tree_monitoring_areas_geom AS
+SELECT
+akvo_tree_monitoring_areas.*,
+akvo_tree_registration_areas.polygon,
+akvo_tree_registration_areas.multipoint,
+akvo_tree_registration_areas.centroid_coord
+FROM akvo_tree_monitoring_areas
+LEFT JOIN akvo_tree_registration_areas
+ON akvo_tree_monitoring_areas.identifier_akvo = akvo_tree_registration_areas.identifier_akvo;
+'''
+
+conn.commit()
+
 create_a17_mkec = '''
 GRANT USAGE ON SCHEMA PUBLIC TO kenya_mkec;
 GRANT USAGE ON SCHEMA HEROKU_EXT TO kenya_mkec;
@@ -959,6 +977,7 @@ cur.execute(drop_a13)
 cur.execute(drop_a14)
 cur.execute(drop_a15)
 cur.execute(drop_a16)
+cur.execute(drop_a18)
 
 cur.execute(create_a1)
 cur.execute(create_a2)
@@ -976,6 +995,7 @@ cur.execute(create_a14)
 cur.execute(create_a15)
 cur.execute(create_a16)
 cur.execute(create_a17_mkec)
+cur.execute(create_a18)
 
 conn.commit()
 
