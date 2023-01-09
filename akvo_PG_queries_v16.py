@@ -941,6 +941,7 @@ GRANT SELECT ON TABLE public.calc_tab_tree_submissions_per_contract TO kenya_mke
 DROP POLICY IF EXISTS mkec_policy ON akvo_tree_registration_areas_updated;
 DROP POLICY IF EXISTS mkec_policy ON akvo_tree_monitoring_areas_geom;
 DROP POLICY IF EXISTS mkec_policy ON akvo_nursery_registration;
+DROP POLICY IF EXISTS mkec_policy ON akvo_nursery_monitoring;
 DROP POLICY IF EXISTS mkec_policy ON CALC_TAB_Error_partner_report_on_site_registration;
 DROP POLICY IF EXISTS mkec_policy ON CALC_TAB_Error_check_on_nursery_registration;
 DROP POLICY IF EXISTS mkec_policy ON calc_tab_tree_submissions_per_contract;
