@@ -906,7 +906,7 @@ order by akvo_nursery_monitoring.submission_date desc;'''
 
 conn.commit()
 
-create_a18 = ''''CREATE TABLE akvo_tree_monitoring_areas_geom AS
+create_a18 = '''CREATE TABLE akvo_tree_monitoring_areas_geom AS
 SELECT
 akvo_tree_monitoring_areas.*,
 akvo_tree_registration_areas.polygon,
