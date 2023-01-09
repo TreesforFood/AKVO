@@ -34,6 +34,7 @@ drop_a13 = '''DROP TABLE IF EXISTS CALC_GEOM_Trees_counted_per_site_by_partner;'
 drop_a14 = '''DROP TABLE IF EXISTS CALC_TAB_overall_statistics;'''
 drop_a15 = '''DROP TABLE IF EXISTS CALC_TAB_tree_submissions_per_contract;'''
 drop_a16 = '''DROP TABLE IF EXISTS CALC_TAB_Error_check_on_nursery_registration;'''
+drop_a17 = '''DROP TABLE IF EXISTS CALC_TAB_Error_partner_report_on_nursery_registration;'''
 drop_a18 = '''DROP TABLE IF EXISTS akvo_tree_monitoring_areas_geom;'''
 
 conn.commit()
@@ -427,7 +428,9 @@ ROUND(COUNT_Total_number_of_photos_taken.count/NULLIF(AKVO_Tree_registration_are
 
 number_coord_polygon AS "Number of points in registered polygon",
 
-ROUND(AKVO_Tree_registration_areas.tree_number/NULLIF(AKVO_Tree_registration_areas.calc_area,0),0) AS "Registered tree density (trees/ha)"
+ROUND(AKVO_Tree_registration_areas.tree_number/NULLIF(AKVO_Tree_registration_areas.calc_area,0),0) AS "Registered tree density (trees/ha)",
+
+AKVO_Tree_registration_areas.centroid_coord
 
 FROM AKVO_Tree_registration_areas
 LEFT JOIN LABEL_type_geometry
@@ -449,7 +452,8 @@ akvo_tree_registration_areas.id_planting_site, akvo_tree_registration_areas.cont
 akvo_tree_registration_areas.number_coord_polygon, akvo_tree_registration_areas.tree_number,
 Geometric_feature, COUNT_Total_number_of_photos_taken.count,COUNT_Number_of_photos_with_geotag.count,
 COUNT_Number_of_tree_species_registered.count, COUNT_Number_of_tree_species_with_0_number.count,
-AKVO_Tree_registration_areas.akvo_form_version
+AKVO_Tree_registration_areas.akvo_form_version,
+AKVO_Tree_registration_areas.centroid_coord
 ORDER BY AKVO_Tree_registration_areas.submission desc;'''
 
 conn.commit()
@@ -497,7 +501,7 @@ WHEN Geometric_feature = 'polygon'
 AND "Number of points in registered polygon" < 4 AND "Number of points in registered polygon" > 0
 THEN 'Polygons does not have enough points. Should be 4 at minimum but, preferably at least 8'
 WHEN Geometric_feature = 'centroid point'
-THEN 'Not applicable. Point location'
+THEN 'Not applicable: The location of the site was mapped with a point, not a polygon'
 ELSE 'Sufficient nr of points (>=4) have been taken to map the area'
 END AS "Check nr of points in polygon",
 
@@ -795,14 +799,6 @@ JOIN akvo_tree_registration_species
 	ON akvo_tree_registration_areas.identifier_akvo	= akvo_tree_registration_species.identifier_akvo
 	GROUP BY akvo_tree_registration_areas.contract_number),
 
---CTE_tree_survival_rate AS (Select
---CALC_TAB_monitoring_calculations_per_site_by_partner."Total nr trees on site (registered/monitored)"/COUNT(tree_number) AS tree_survival_on_site
---FROM akvo_tree_registration_areas
---JOIN CALC_TAB_monitoring_calculations_per_site_by_partner
---WHERE MAX(CALC_TAB_monitoring_calculations_per_site_by_partner.table_label_strata)
---AND CALC_TAB_monitoring_calculations_per_site_by_partner.table_label_strata > 0
---GROUP BY akvo_tree_registration_areas.contract_number),
-
 cte_registered_tree_number_monitored_sites AS (select akvo_tree_registration_areas.contract_number,
 SUM(akvo_tree_registration_areas.tree_number) as total_registered_trees_on_monitored_sites
 from akvo_tree_registration_areas
@@ -866,7 +862,8 @@ akvo_nursery_registration.submission as registration_date,
 akvo_nursery_monitoring.submission_date as monitoring_date,
 species.species_list as "species currently produced in nursery",
 nr_photos_monitoring.counted_photos_monitoring as "nr of photos taken during monitoring",
-nr_photos_registration.counted_photos_registration as "nr of photos taken during registration"
+nr_photos_registration.counted_photos_registration as "nr of photos taken during registration",
+akvo_nursery_registration.centroid_coord
 
 from akvo_nursery_monitoring
 JOIN akvo_nursery_registration
@@ -900,9 +897,44 @@ akvo_nursery_registration.nursery_name,
 species.species_list,
 nr_photos_monitoring.counted_photos_monitoring,
 nr_photos_registration.counted_photos_registration,
-akvo_nursery_registration.identifier_akvo
+akvo_nursery_registration.identifier_akvo,
+akvo_nursery_registration.centroid_coord
 
 order by akvo_nursery_monitoring.submission_date desc;'''
+
+conn.commit()
+
+create_a17 = ''' CREATE TABLE CALC_TAB_Error_partner_report_on_nursery_registration
+AS SELECT
+identifier_akvo,
+nursery_name,
+organisation,
+"maximum/full tree capacity of nursery",
+number_trees_produced_currently,
+month_planting_stock,
+registration_date,
+monitoring_date,
+"species currently produced in nursery",
+"nr of photos taken during registration",
+"nr of photos taken during monitoring",
+
+CASE
+WHEN "nr of photos taken during registration" < 4
+THEN 'Not enough photos have been taken from the nursery during the initial registration. Should be 4 photos as minimum'
+WHEN "nr of photos taken during registration" >= 4
+THEN 'Enough photos have been taken from the nursery (4 photos). Correctly done'
+END AS "Check nr of photos taken during registration of the nursery",
+
+CASE
+WHEN "nr of photos taken during monitoring" < 4
+THEN 'Not enough photos have been taken from the nursery during the monitoring. Should be 4 photos as minimum'
+WHEN "nr of photos taken during monitoring" >= 4
+THEN 'Enough photos have been taken from the nursery (4 photos). Correctly done'
+END AS "Check nr of photos taken during monitoring of the nursery",
+
+centroid_coord
+
+FROM CALC_TAB_Error_check_on_nursery_registration'''
 
 conn.commit()
 
@@ -927,7 +959,7 @@ ALTER TABLE akvo_tree_monitoring_areas_geom enable ROW LEVEL SECURITY;
 ALTER TABLE akvo_nursery_registration enable ROW LEVEL SECURITY;
 ALTER TABLE akvo_nursery_monitoring enable ROW LEVEL SECURITY;
 ALTER TABLE CALC_TAB_Error_partner_report_on_site_registration enable ROW LEVEL SECURITY;
-ALTER TABLE CALC_TAB_Error_check_on_nursery_registration enable ROW LEVEL SECURITY;
+ALTER TABLE CALC_TAB_Error_partner_report_on_nursery_registration enable ROW LEVEL SECURITY;
 ALTER TABLE calc_tab_tree_submissions_per_contract enable ROW LEVEL SECURITY;
 
 GRANT SELECT ON TABLE public.akvo_tree_registration_areas_updated TO kenya_mkec;
@@ -935,7 +967,7 @@ GRANT SELECT ON TABLE public.akvo_tree_monitoring_areas_geom TO kenya_mkec;
 GRANT SELECT ON TABLE public.akvo_nursery_registration TO kenya_mkec;
 GRANT SELECT ON TABLE public.akvo_nursery_monitoring TO kenya_mkec;
 GRANT SELECT ON TABLE public.CALC_TAB_Error_partner_report_on_site_registration TO kenya_mkec;
-GRANT SELECT ON TABLE public.CALC_TAB_Error_check_on_nursery_registration TO kenya_mkec;
+GRANT SELECT ON TABLE public.CALC_TAB_Error_partner_report_on_nursery_registration TO kenya_mkec;
 GRANT SELECT ON TABLE public.calc_tab_tree_submissions_per_contract TO kenya_mkec;
 
 DROP POLICY IF EXISTS mkec_policy ON akvo_tree_registration_areas_updated;
@@ -943,7 +975,7 @@ DROP POLICY IF EXISTS mkec_policy ON akvo_tree_monitoring_areas_geom;
 DROP POLICY IF EXISTS mkec_policy ON akvo_nursery_registration;
 DROP POLICY IF EXISTS mkec_policy ON akvo_nursery_monitoring;
 DROP POLICY IF EXISTS mkec_policy ON CALC_TAB_Error_partner_report_on_site_registration;
-DROP POLICY IF EXISTS mkec_policy ON CALC_TAB_Error_check_on_nursery_registration;
+DROP POLICY IF EXISTS mkec_policy ON CALC_TAB_Error_partner_report_on_nursery_registration;
 DROP POLICY IF EXISTS mkec_policy ON calc_tab_tree_submissions_per_contract;
 
 CREATE POLICY mkec_policy ON akvo_tree_registration_areas_updated TO kenya_mkec USING (organisation = 'Mount Kenya Environmental Conservation');
@@ -955,7 +987,7 @@ CREATE POLICY mkec_policy ON akvo_nursery_monitoring TO kenya_mkec USING (EXISTS
 WHERE akvo_nursery_registration.organisation = 'Mount Kenya Environmental Conservation'
 AND akvo_nursery_monitoring.identifier_akvo = akvo_nursery_registration.identifier_akvo));
 CREATE POLICY mkec_policy ON CALC_TAB_Error_partner_report_on_site_registration TO kenya_mkec USING (CALC_TAB_Error_partner_report_on_site_registration.name_organisation = 'Mount Kenya Environmental Conservation');
-CREATE POLICY mkec_policy ON CALC_TAB_Error_check_on_nursery_registration TO kenya_mkec USING (CALC_TAB_Error_check_on_nursery_registration.organisation = 'Mount Kenya Environmental Conservation');
+CREATE POLICY mkec_policy ON CALC_TAB_Error_partner_report_on_nursery_registration TO kenya_mkec USING (CALC_TAB_Error_partner_report_on_nursery_registration.organisation = 'Mount Kenya Environmental Conservation');
 CREATE POLICY mkec_policy ON calc_tab_tree_submissions_per_contract TO kenya_mkec USING (calc_tab_tree_submissions_per_contract.organisation = 'Mount Kenya Environmental Conservation');'''
 
 conn.commit()
@@ -975,9 +1007,9 @@ cur.execute(drop_a12)
 cur.execute(drop_a13)
 cur.execute(drop_a14)
 cur.execute(drop_a15)
-cur.execute(drop_a18)
 cur.execute(drop_a16)
-
+cur.execute(drop_a17)
+cur.execute(drop_a18)
 
 cur.execute(create_a1)
 cur.execute(create_a2)
@@ -994,6 +1026,7 @@ cur.execute(create_a13)
 cur.execute(create_a14)
 cur.execute(create_a15)
 cur.execute(create_a16)
+cur.execute(create_a17)
 cur.execute(create_a18)
 cur.execute(create_a17_mkec)
 
