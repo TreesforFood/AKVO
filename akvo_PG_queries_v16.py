@@ -924,7 +924,7 @@ GRANT USAGE ON SCHEMA PUBLIC TO kenya_mkec;
 GRANT USAGE ON SCHEMA HEROKU_EXT TO kenya_mkec;
 
 ALTER TABLE akvo_tree_registration_areas_updated enable ROW LEVEL SECURITY;
-ALTER TABLE akvo_tree_monitoring_areas enable ROW LEVEL SECURITY;
+ALTER TABLE akvo_tree_monitoring_areas_geom enable ROW LEVEL SECURITY;
 ALTER TABLE akvo_nursery_registration enable ROW LEVEL SECURITY;
 ALTER TABLE akvo_nursery_monitoring enable ROW LEVEL SECURITY;
 ALTER TABLE CALC_TAB_Error_partner_report_on_site_registration enable ROW LEVEL SECURITY;
@@ -932,7 +932,7 @@ ALTER TABLE CALC_TAB_Error_check_on_nursery_registration enable ROW LEVEL SECURI
 ALTER TABLE calc_tab_tree_submissions_per_contract enable ROW LEVEL SECURITY;
 
 GRANT SELECT ON TABLE public.akvo_tree_registration_areas_updated TO kenya_mkec;
-GRANT SELECT ON TABLE public.akvo_tree_monitoring_areas TO kenya_mkec;
+GRANT SELECT ON TABLE public.akvo_tree_monitoring_areas_geom TO kenya_mkec;
 GRANT SELECT ON TABLE public.akvo_nursery_registration TO kenya_mkec;
 GRANT SELECT ON TABLE public.akvo_nursery_monitoring TO kenya_mkec;
 GRANT SELECT ON TABLE public.CALC_TAB_Error_partner_report_on_site_registration TO kenya_mkec;
@@ -940,24 +940,23 @@ GRANT SELECT ON TABLE public.CALC_TAB_Error_check_on_nursery_registration TO ken
 GRANT SELECT ON TABLE public.calc_tab_tree_submissions_per_contract TO kenya_mkec;
 
 DROP POLICY IF EXISTS mkec_policy ON akvo_tree_registration_areas_updated;
-DROP POLICY IF EXISTS mkec_policy ON akvo_tree_monitoring_areas;
+DROP POLICY IF EXISTS mkec_policy ON akvo_tree_monitoring_areas_geom;
 DROP POLICY IF EXISTS mkec_policy ON akvo_nursery_registration;
 DROP POLICY IF EXISTS mkec_policy ON CALC_TAB_Error_partner_report_on_site_registration;
 DROP POLICY IF EXISTS mkec_policy ON CALC_TAB_Error_check_on_nursery_registration;
 DROP POLICY IF EXISTS mkec_policy ON calc_tab_tree_submissions_per_contract;
 
 CREATE POLICY mkec_policy ON akvo_tree_registration_areas_updated TO kenya_mkec USING (organisation = 'Mount Kenya Environmental Conservation');
-CREATE POLICY mkec_policy ON akvo_tree_monitoring_areas TO kenya_mkec USING (EXISTS (SELECT * FROM akvo_tree_registration_areas_updated
+CREATE POLICY mkec_policy ON akvo_tree_monitoring_areas_geom TO kenya_mkec USING (EXISTS (SELECT * FROM akvo_tree_registration_areas_updated
 WHERE akvo_tree_registration_areas_updated.organisation = 'Mount Kenya Environmental Conservation'
-AND akvo_tree_monitoring_areas.identifier_akvo = akvo_tree_registration_areas_updated.identifier_akvo));
+AND akvo_tree_monitoring_areas_geom.identifier_akvo = akvo_tree_registration_areas_updated.identifier_akvo));
 CREATE POLICY mkec_policy ON akvo_nursery_registration TO kenya_mkec USING (organisation = 'Mount Kenya Environmental Conservation');
 CREATE POLICY mkec_policy ON akvo_nursery_monitoring TO kenya_mkec USING (EXISTS (SELECT * FROM akvo_nursery_registration
 WHERE akvo_nursery_registration.organisation = 'Mount Kenya Environmental Conservation'
-AND akvo_nursery_registration.identifier_akvo = akvo_nursery_monitoring.identifier_akvo));
+AND akvo_tree_monitoring_areas.identifier_akvo = akvo_tree_registration_areas_updated.identifier_akvo));
 CREATE POLICY mkec_policy ON CALC_TAB_Error_partner_report_on_site_registration TO kenya_mkec USING (CALC_TAB_Error_partner_report_on_site_registration.name_organisation = 'Mount Kenya Environmental Conservation');
 CREATE POLICY mkec_policy ON CALC_TAB_Error_check_on_nursery_registration TO kenya_mkec USING (CALC_TAB_Error_check_on_nursery_registration.organisation = 'Mount Kenya Environmental Conservation');
 CREATE POLICY mkec_policy ON calc_tab_tree_submissions_per_contract TO kenya_mkec USING (calc_tab_tree_submissions_per_contract.organisation = 'Mount Kenya Environmental Conservation');'''
-
 
 conn.commit()
 
