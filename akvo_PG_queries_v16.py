@@ -914,8 +914,7 @@ akvo_tree_registration_areas.multipoint,
 akvo_tree_registration_areas.centroid_coord
 FROM akvo_tree_monitoring_areas
 LEFT JOIN akvo_tree_registration_areas
-ON akvo_tree_monitoring_areas.identifier_akvo = akvo_tree_registration_areas.identifier_akvo;
-'''
+ON akvo_tree_monitoring_areas.identifier_akvo = akvo_tree_registration_areas.identifier_akvo;'''
 
 conn.commit()
 
@@ -975,8 +974,9 @@ cur.execute(drop_a12)
 cur.execute(drop_a13)
 cur.execute(drop_a14)
 cur.execute(drop_a15)
-cur.execute(drop_a16)
 cur.execute(drop_a18)
+cur.execute(drop_a16)
+
 
 cur.execute(create_a1)
 cur.execute(create_a2)
@@ -993,8 +993,9 @@ cur.execute(create_a13)
 cur.execute(create_a14)
 cur.execute(create_a15)
 cur.execute(create_a16)
-cur.execute(create_a17_mkec)
 cur.execute(create_a18)
+cur.execute(create_a17_mkec)
+
 
 conn.commit()
 
