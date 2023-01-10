@@ -967,14 +967,6 @@ create_a17_mkec = '''
 GRANT USAGE ON SCHEMA PUBLIC TO kenya_mkec;
 GRANT USAGE ON SCHEMA HEROKU_EXT TO kenya_mkec;
 
-ALTER TABLE akvo_tree_registration_areas_updated enable ROW LEVEL SECURITY;
-ALTER TABLE akvo_tree_monitoring_areas_geom enable ROW LEVEL SECURITY;
-ALTER TABLE akvo_nursery_registration enable ROW LEVEL SECURITY;
-ALTER TABLE akvo_nursery_monitoring_geom enable ROW LEVEL SECURITY;
-ALTER TABLE CALC_TAB_Error_partner_report_on_site_registration enable ROW LEVEL SECURITY;
-ALTER TABLE CALC_TAB_Error_partner_report_on_nursery_registration enable ROW LEVEL SECURITY;
-ALTER TABLE calc_tab_tree_submissions_per_contract enable ROW LEVEL SECURITY;
-
 GRANT SELECT ON TABLE public.akvo_tree_registration_areas_updated TO kenya_mkec;
 GRANT SELECT ON TABLE public.akvo_tree_monitoring_areas_geom TO kenya_mkec;
 GRANT SELECT ON TABLE public.akvo_nursery_registration TO kenya_mkec;
@@ -990,6 +982,14 @@ DROP POLICY IF EXISTS mkec_policy ON akvo_nursery_monitoring_geom;
 DROP POLICY IF EXISTS mkec_policy ON CALC_TAB_Error_partner_report_on_site_registration;
 DROP POLICY IF EXISTS mkec_policy ON CALC_TAB_Error_partner_report_on_nursery_registration;
 DROP POLICY IF EXISTS mkec_policy ON calc_tab_tree_submissions_per_contract;
+
+ALTER TABLE akvo_tree_registration_areas_updated enable ROW LEVEL SECURITY;
+ALTER TABLE akvo_tree_monitoring_areas_geom enable ROW LEVEL SECURITY;
+ALTER TABLE akvo_nursery_registration enable ROW LEVEL SECURITY;
+ALTER TABLE akvo_nursery_monitoring_geom enable ROW LEVEL SECURITY;
+ALTER TABLE CALC_TAB_Error_partner_report_on_site_registration enable ROW LEVEL SECURITY;
+ALTER TABLE CALC_TAB_Error_partner_report_on_nursery_registration enable ROW LEVEL SECURITY;
+ALTER TABLE calc_tab_tree_submissions_per_contract enable ROW LEVEL SECURITY;
 
 CREATE POLICY mkec_policy ON akvo_tree_registration_areas_updated TO kenya_mkec USING (organisation = 'Mount Kenya Environmental Conservation');
 CREATE POLICY mkec_policy ON akvo_tree_monitoring_areas_geom TO kenya_mkec USING (EXISTS (SELECT * FROM akvo_tree_registration_areas_updated
@@ -1009,14 +1009,6 @@ create_a18_fdia = '''
 GRANT USAGE ON SCHEMA PUBLIC TO nicaragua_fdia;
 GRANT USAGE ON SCHEMA HEROKU_EXT TO nicaragua_fdia;
 
-ALTER TABLE akvo_tree_registration_areas_updated enable ROW LEVEL SECURITY;
-ALTER TABLE akvo_tree_monitoring_areas_geom enable ROW LEVEL SECURITY;
-ALTER TABLE akvo_nursery_registration enable ROW LEVEL SECURITY;
-ALTER TABLE akvo_nursery_monitoring_geom enable ROW LEVEL SECURITY;
-ALTER TABLE CALC_TAB_Error_partner_report_on_site_registration enable ROW LEVEL SECURITY;
-ALTER TABLE CALC_TAB_Error_partner_report_on_nursery_registration enable ROW LEVEL SECURITY;
-ALTER TABLE calc_tab_tree_submissions_per_contract enable ROW LEVEL SECURITY;
-
 GRANT SELECT ON TABLE public.akvo_tree_registration_areas_updated TO nicaragua_fdia;
 GRANT SELECT ON TABLE public.akvo_tree_monitoring_areas_geom TO nicaragua_fdia;
 GRANT SELECT ON TABLE public.akvo_nursery_registration TO nicaragua_fdia;
@@ -1026,12 +1018,22 @@ GRANT SELECT ON TABLE public.CALC_TAB_Error_partner_report_on_nursery_registrati
 GRANT SELECT ON TABLE public.calc_tab_tree_submissions_per_contract TO nicaragua_fdia;
 
 DROP POLICY IF EXISTS fdia_policy ON akvo_tree_registration_areas_updated;
+DROP POLICY IF EXISTS fdia_policy ON akvo_tree_registration_areas;
 DROP POLICY IF EXISTS fdia_policy ON akvo_tree_monitoring_areas_geom;
 DROP POLICY IF EXISTS fdia_policy ON akvo_nursery_registration;
 DROP POLICY IF EXISTS fdia_policy ON akvo_nursery_monitoring_geom;
 DROP POLICY IF EXISTS fdia_policy ON CALC_TAB_Error_partner_report_on_site_registration;
 DROP POLICY IF EXISTS fdia_policy ON CALC_TAB_Error_partner_report_on_nursery_registration;
 DROP POLICY IF EXISTS fdia_policy ON calc_tab_tree_submissions_per_contract;
+
+ALTER TABLE akvo_tree_registration_areas_updated enable ROW LEVEL SECURITY;
+ALTER TABLE akvo_tree_registration_areas enable ROW LEVEL SECURITY;
+ALTER TABLE akvo_tree_monitoring_areas_geom enable ROW LEVEL SECURITY;
+ALTER TABLE akvo_nursery_registration enable ROW LEVEL SECURITY;
+ALTER TABLE akvo_nursery_monitoring_geom enable ROW LEVEL SECURITY;
+ALTER TABLE CALC_TAB_Error_partner_report_on_site_registration enable ROW LEVEL SECURITY;
+ALTER TABLE CALC_TAB_Error_partner_report_on_nursery_registration enable ROW LEVEL SECURITY;
+ALTER TABLE calc_tab_tree_submissions_per_contract enable ROW LEVEL SECURITY;
 
 CREATE POLICY fdia_policy ON akvo_tree_registration_areas_updated TO nicaragua_fdia USING (organisation = 'Fundacion DIA');
 CREATE POLICY fdia_policy ON akvo_tree_monitoring_areas_geom TO nicaragua_fdia USING (EXISTS (SELECT * FROM akvo_tree_registration_areas_updated
