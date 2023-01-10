@@ -1005,6 +1005,46 @@ CREATE POLICY mkec_policy ON calc_tab_tree_submissions_per_contract TO kenya_mke
 
 conn.commit()
 
+create_a18_fdia = '''
+GRANT USAGE ON SCHEMA PUBLIC TO nicaragua_fdia;
+GRANT USAGE ON SCHEMA HEROKU_EXT TO nicaragua_fdia;
+
+ALTER TABLE akvo_tree_registration_areas_updated enable ROW LEVEL SECURITY;
+ALTER TABLE akvo_tree_monitoring_areas_geom enable ROW LEVEL SECURITY;
+ALTER TABLE akvo_nursery_registration enable ROW LEVEL SECURITY;
+ALTER TABLE akvo_nursery_monitoring_geom enable ROW LEVEL SECURITY;
+ALTER TABLE CALC_TAB_Error_partner_report_on_site_registration enable ROW LEVEL SECURITY;
+ALTER TABLE CALC_TAB_Error_partner_report_on_nursery_registration enable ROW LEVEL SECURITY;
+ALTER TABLE calc_tab_tree_submissions_per_contract enable ROW LEVEL SECURITY;
+
+GRANT SELECT ON TABLE public.akvo_tree_registration_areas_updated TO nicaragua_fdia;
+GRANT SELECT ON TABLE public.akvo_tree_monitoring_areas_geom TO nicaragua_fdia;
+GRANT SELECT ON TABLE public.akvo_nursery_registration TO nicaragua_fdia;
+GRANT SELECT ON TABLE public.akvo_nursery_monitoring_geom TO nicaragua_fdia;
+GRANT SELECT ON TABLE public.CALC_TAB_Error_partner_report_on_site_registration TO nicaragua_fdia;
+GRANT SELECT ON TABLE public.CALC_TAB_Error_partner_report_on_nursery_registration TO nicaragua_fdia;
+GRANT SELECT ON TABLE public.calc_tab_tree_submissions_per_contract TO nicaragua_fdia;
+
+DROP POLICY IF EXISTS fdia_policy ON akvo_tree_registration_areas_updated;
+DROP POLICY IF EXISTS fdia_policy ON akvo_tree_monitoring_areas_geom;
+DROP POLICY IF EXISTS fdia_policy ON akvo_nursery_registration;
+DROP POLICY IF EXISTS fdia_policy ON akvo_nursery_monitoring_geom;
+DROP POLICY IF EXISTS fdia_policy ON CALC_TAB_Error_partner_report_on_site_registration;
+DROP POLICY IF EXISTS fdia_policy ON CALC_TAB_Error_partner_report_on_nursery_registration;
+DROP POLICY IF EXISTS fdia_policy ON calc_tab_tree_submissions_per_contract;
+
+CREATE POLICY fdia_policy ON akvo_tree_registration_areas_updated TO nicaragua_fdia USING (organisation = 'Fundacion DIA');
+CREATE POLICY fdia_policy ON akvo_tree_monitoring_areas_geom TO nicaragua_fdia USING (EXISTS (SELECT * FROM akvo_tree_registration_areas_updated
+WHERE akvo_tree_registration_areas_updated.organisation = 'Fundacion DIA'
+AND akvo_tree_monitoring_areas_geom.identifier_akvo = akvo_tree_registration_areas_updated.identifier_akvo));
+CREATE POLICY fdia_policy ON akvo_nursery_registration TO nicaragua_fdia USING (organisation = 'Fundacion DIA');
+CREATE POLICY fdia_policy ON akvo_nursery_monitoring_geom TO nicaragua_fdia USING (EXISTS (SELECT * FROM akvo_nursery_registration
+WHERE akvo_nursery_registration.organisation = 'Fundacion DIA'
+AND akvo_nursery_monitoring_geom.identifier_akvo = akvo_nursery_registration.identifier_akvo));
+CREATE POLICY fdia_policy ON CALC_TAB_Error_partner_report_on_site_registration TO nicaragua_fdia USING (CALC_TAB_Error_partner_report_on_site_registration.name_organisation = 'Fundacion DIA');
+CREATE POLICY fdia_policy ON CALC_TAB_Error_partner_report_on_nursery_registration TO nicaragua_fdia USING (CALC_TAB_Error_partner_report_on_nursery_registration.organisation = 'Fundacion DIA');
+CREATE POLICY fdia_policy ON calc_tab_tree_submissions_per_contract TO nicaragua_fdia USING (calc_tab_tree_submissions_per_contract.organisation = 'Fundacion DIA');'''
+
 # Execute create tables
 cur.execute(drop_a1)
 cur.execute(drop_a2)
@@ -1044,6 +1084,7 @@ cur.execute(create_a17)
 cur.execute(create_a18)
 cur.execute(create_a19)
 cur.execute(create_a17_mkec)
+cur.execute(create_a18_fdia)
 
 
 conn.commit()
