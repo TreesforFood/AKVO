@@ -1005,6 +1005,14 @@ GRANT SELECT ON TABLE error_partner_report_on_site_registration TO kenya_mkec;
 GRANT SELECT ON TABLE error_partner_report_on_nursery_registration TO kenya_mkec;
 GRANT SELECT ON TABLE akvo_ecosia_contract_overview TO kenya_mkec;
 
+DROP POLICY IF EXISTS mkec_policy ON akvo_tree_registration_areas_updated;
+DROP POLICY IF EXISTS mkec_policy ON akvo_tree_monitoring_areas_geom;
+DROP POLICY IF EXISTS mkec_policy ON akvo_nursery_registration;
+DROP POLICY IF EXISTS mkec_policy ON akvo_nursery_monitoring_geom;
+DROP POLICY IF EXISTS mkec_policy ON CALC_TAB_Error_partner_report_on_site_registration;
+DROP POLICY IF EXISTS mkec_policy ON CALC_TAB_Error_partner_report_on_nursery_registration;
+DROP POLICY IF EXISTS mkec_policy ON calc_tab_tree_submissions_per_contract;
+
 DROP POLICY IF EXISTS mkec_policy ON akvo_ecosia_tree_area_registration;
 DROP POLICY IF EXISTS mkec_policy ON akvo_ecosia_tree_area_monitoring;
 DROP POLICY IF EXISTS mkec_policy ON akvo_ecosia_nursery_registration;
@@ -1046,6 +1054,16 @@ GRANT SELECT ON TABLE akvo_ecosia_nursery_monitoring TO nicaragua_fdia;
 GRANT SELECT ON TABLE error_partner_report_on_site_registration TO nicaragua_fdia;
 GRANT SELECT ON TABLE error_partner_report_on_nursery_registration TO nicaragua_fdia;
 GRANT SELECT ON TABLE akvo_ecosia_contract_overview TO nicaragua_fdia;
+
+DROP POLICY IF EXISTS fdia_policy ON akvo_tree_registration_areas_updated;
+DROP POLICY IF EXISTS fdia_policy ON akvo_tree_registration_areas;
+DROP POLICY IF EXISTS fdia_policy ON akvo_tree_monitoring_areas_geom;
+DROP POLICY IF EXISTS fdia_policy ON akvo_nursery_registration;
+DROP POLICY IF EXISTS fdia_policy ON akvo_nursery_monitoring_geom;
+DROP POLICY IF EXISTS fdia_policy ON CALC_TAB_Error_partner_report_on_site_registration;
+DROP POLICY IF EXISTS fdia_policy ON CALC_TAB_Error_partner_report_on_nursery_registration;
+DROP POLICY IF EXISTS fdia_policy ON calc_tab_tree_submissions_per_contract;
+
 
 DROP POLICY IF EXISTS fdia_policy ON akvo_ecosia_tree_area_registration;
 DROP POLICY IF EXISTS fdia_policy ON akvo_ecosia_tree_area_monitoring;
