@@ -994,6 +994,8 @@ AS SELECT * FROM calc_tab_tree_submissions_per_contract;'''
 conn.commit()
 
 create_a17_mkec = '''
+REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA public FROM kenya_mkec;
+
 GRANT USAGE ON SCHEMA PUBLIC TO kenya_mkec;
 GRANT USAGE ON SCHEMA HEROKU_EXT TO kenya_mkec;
 
@@ -1044,6 +1046,8 @@ CREATE POLICY mkec_policy ON akvo_ecosia_contract_overview TO kenya_mkec USING (
 conn.commit()
 
 create_a18_fdia = '''
+REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA public FROM nicaragua_fdia;
+
 GRANT USAGE ON SCHEMA PUBLIC TO nicaragua_fdia;
 GRANT USAGE ON SCHEMA HEROKU_EXT TO nicaragua_fdia;
 
