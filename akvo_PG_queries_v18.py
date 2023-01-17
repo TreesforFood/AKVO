@@ -1042,7 +1042,7 @@ WHERE akvo_ecosia_nursery_registration.organisation = 'Mount Kenya Environmental
 AND akvo_ecosia_nursery_monitoring.identifier_akvo = akvo_ecosia_nursery_registration.identifier_akvo));
 CREATE POLICY mkec_policy ON error_partner_report_on_site_registration TO kenya_mkec USING (error_partner_report_on_site_registration.name_organisation = 'Mount Kenya Environmental Conservation');
 CREATE POLICY mkec_policy ON error_partner_report_on_nursery_registration TO kenya_mkec USING (error_partner_report_on_nursery_registration.organisation = 'Mount Kenya Environmental Conservation');
-CREATE POLICY mkec_policy ON akvo_ecosia_contract_overview TO kenya_mkec USING (akvo_ecosia_contract_overview.name_organisation = 'Mount Kenya Environmental Conservation');'''
+CREATE POLICY mkec_policy ON akvo_ecosia_contract_overview TO kenya_mkec USING (akvo_ecosia_contract_overview.name_organisation = 'mount kenya environmental conservation');'''
 
 conn.commit()
 
@@ -1096,7 +1096,7 @@ WHERE akvo_ecosia_nursery_registration.organisation = 'Fundacion DIA'
 AND akvo_ecosia_nursery_monitoring.identifier_akvo = akvo_ecosia_nursery_registration.identifier_akvo));
 CREATE POLICY fdia_policy ON error_partner_report_on_site_registration TO nicaragua_fdia USING (error_partner_report_on_site_registration.name_organisation = 'Fundacion DIA');
 CREATE POLICY fdia_policy ON error_partner_report_on_nursery_registration TO nicaragua_fdia USING (error_partner_report_on_nursery_registration.organisation = 'Fundacion DIA');
-CREATE POLICY fdia_policy ON akvo_ecosia_contract_overview TO nicaragua_fdia USING (akvo_ecosia_contract_overview.name_organisation = 'Fundacion DIA');'''
+CREATE POLICY fdia_policy ON akvo_ecosia_contract_overview TO nicaragua_fdia USING (akvo_ecosia_contract_overview.name_organisation = 'fundacion dia');'''
 
 conn.commit()
 
