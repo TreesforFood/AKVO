@@ -951,6 +951,7 @@ SELECT
 akvo_tree_registration_areas.country,
 akvo_tree_registration_areas.organisation,
 akvo_tree_registration_areas.contract_number,
+akvo_tree_registration_areas.id_planting_site,
 akvo_tree_monitoring_areas.*,
 akvo_tree_registration_areas.polygon,
 akvo_tree_registration_areas.multipoint,
