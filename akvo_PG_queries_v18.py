@@ -772,8 +772,8 @@ conn.commit()
 create_a15 = '''CREATE TABLE CALC_TAB_tree_submissions_per_contract
 AS WITH CTE_total_tree_registrations AS (
 select
-akvo_tree_registration_areas.country,
-akvo_tree_registration_areas.organisation,
+lower(akvo_tree_registration_areas.country) as name_country,
+lower(akvo_tree_registration_areas.organisation) as name_organisation,
 akvo_tree_registration_areas.contract_number,
 SUM(akvo_tree_registration_areas.tree_number) AS "Registered tree number",
 MAX(akvo_tree_registration_areas.submission) AS "Latest submitted registration",
@@ -781,9 +781,10 @@ COUNT(*) AS "Nr of sites registered",
 count(DISTINCT AKVO_Tree_registration_areas.identifier_akvo) AS "Number of site registrations"
 FROM akvo_tree_registration_areas
 WHERE (akvo_tree_registration_areas.test = '' OR akvo_tree_registration_areas.test = 'This is real, valid data')
+AND NOT akvo_tree_registration_areas.id_planting_site = 'placeholder' AND NOT country = '' AND NOT organisation = ''
 GROUP BY akvo_tree_registration_areas.contract_number,
-akvo_tree_registration_areas.country,
-akvo_tree_registration_areas.organisation),
+name_country,
+name_organisation),
 
 CTE_tree_monitoring AS (select
 akvo_tree_registration_areas.contract_number,
@@ -827,8 +828,8 @@ order by CALC_TAB_monitoring_calculations_per_site_by_partner.contract_number) t
 GROUP BY table_y.contract_number)
 
 	SELECT
-	CTE_total_tree_registrations.country,
-	CTE_total_tree_registrations.organisation,
+	CTE_total_tree_registrations.name_country as "Name Country",
+	CTE_total_tree_registrations.name_organisation as "Name organisation",
 	CTE_total_tree_registrations.contract_number AS "Contract number",
 	CTE_total_tree_registrations."Nr of sites registered" AS "Total number of sites registered",
 	CTE_total_tree_registrations."Registered tree number" AS "Total number of trees registered",
