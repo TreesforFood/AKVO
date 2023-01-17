@@ -1002,9 +1002,7 @@ akvo_tree_registration_areas_updated.contract_number,
 akvo_tree_registration_areas_updated.id_planting_site,
 AKVO_tree_registration_photos.* FROM AKVO_tree_registration_photos
 JOIN akvo_tree_registration_areas_updated
-ON AKVO_tree_registration_photos.identifier_akvo = akvo_tree_registration_areas_updated.identifier_akvo
-where akvo_tree_registration_areas_updated.contract_number = 158
-order by akvo_tree_registration_areas_updated.id_planting_site'''
+ON AKVO_tree_registration_photos.identifier_akvo = akvo_tree_registration_areas_updated.identifier_akvo'''
 
 conn.commit()
 
