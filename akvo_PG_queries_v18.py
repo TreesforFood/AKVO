@@ -42,6 +42,7 @@ drop_a21 = '''DROP TABLE IF EXISTS akvo_ecosia_nursery_monitoring;'''
 drop_a22 = '''DROP TABLE IF EXISTS akvo_ecosia_nursery_registration;'''
 drop_a23 = '''DROP TABLE IF EXISTS akvo_ecosia_tree_area_monitoring;'''
 drop_a24 = '''DROP TABLE IF EXISTS akvo_ecosia_tree_area_registration;'''
+drop_a25 = '''DROP TABLE IF EXISTS akvo_ecosia_tree_photo_registration;'''
 
 conn.commit()
 
@@ -994,6 +995,19 @@ AS SELECT * FROM calc_tab_tree_submissions_per_contract;'''
 
 conn.commit()
 
+create_a25 = ''' CREATE TABLE akvo_ecosia_tree_photo_registration
+AS SELECT akvo_tree_registration_areas_updated.country,
+akvo_tree_registration_areas_updated.organisation,
+akvo_tree_registration_areas_updated.contract_number,
+akvo_tree_registration_areas_updated.id_planting_site,
+AKVO_tree_registration_photos.* FROM AKVO_tree_registration_photos
+JOIN akvo_tree_registration_areas_updated
+ON AKVO_tree_registration_photos.identifier_akvo = akvo_tree_registration_areas_updated.identifier_akvo
+where akvo_tree_registration_areas_updated.contract_number = 158
+order by akvo_tree_registration_areas_updated.id_planting_site'''
+
+conn.commit()
+
 create_a17_mkec = '''
 REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA public FROM kenya_mkec;
 
@@ -1007,6 +1021,8 @@ GRANT SELECT ON TABLE akvo_ecosia_nursery_monitoring TO kenya_mkec;
 GRANT SELECT ON TABLE error_partner_report_on_site_registration TO kenya_mkec;
 GRANT SELECT ON TABLE error_partner_report_on_nursery_registration TO kenya_mkec;
 GRANT SELECT ON TABLE akvo_ecosia_contract_overview TO kenya_mkec;
+GRANT SELECT ON TABLE akvo_ecosia_tree_photo_registration TO kenya_mkec;
+
 
 DROP POLICY IF EXISTS mkec_policy ON akvo_tree_registration_areas_updated;
 DROP POLICY IF EXISTS mkec_policy ON akvo_tree_monitoring_areas_geom;
@@ -1023,6 +1039,7 @@ DROP POLICY IF EXISTS mkec_policy ON akvo_ecosia_nursery_monitoring;
 DROP POLICY IF EXISTS mkec_policy ON error_partner_report_on_site_registration;
 DROP POLICY IF EXISTS mkec_policy ON error_partner_report_on_nursery_registration;
 DROP POLICY IF EXISTS mkec_policy ON akvo_ecosia_contract_overview;
+DROP POLICY IF EXISTS mkec_policy ON akvo_ecosia_tree_photo_registration;
 
 ALTER TABLE akvo_ecosia_tree_area_registration enable ROW LEVEL SECURITY;
 ALTER TABLE akvo_ecosia_tree_area_monitoring enable ROW LEVEL SECURITY;
@@ -1031,6 +1048,7 @@ ALTER TABLE akvo_ecosia_nursery_monitoring enable ROW LEVEL SECURITY;
 ALTER TABLE error_partner_report_on_site_registration enable ROW LEVEL SECURITY;
 ALTER TABLE error_partner_report_on_nursery_registration enable ROW LEVEL SECURITY;
 ALTER TABLE akvo_ecosia_contract_overview enable ROW LEVEL SECURITY;
+ALTER TABLE akvo_ecosia_tree_photo_registration ROW LEVEL SECURITY;
 
 CREATE POLICY mkec_policy ON akvo_ecosia_tree_area_registration TO kenya_mkec USING (organisation = 'Mount Kenya Environmental Conservation');
 CREATE POLICY mkec_policy ON akvo_ecosia_tree_area_monitoring TO kenya_mkec USING (EXISTS (SELECT * FROM akvo_ecosia_tree_area_registration
@@ -1042,7 +1060,9 @@ WHERE akvo_ecosia_nursery_registration.organisation = 'Mount Kenya Environmental
 AND akvo_ecosia_nursery_monitoring.identifier_akvo = akvo_ecosia_nursery_registration.identifier_akvo));
 CREATE POLICY mkec_policy ON error_partner_report_on_site_registration TO kenya_mkec USING (error_partner_report_on_site_registration.name_organisation = 'Mount Kenya Environmental Conservation');
 CREATE POLICY mkec_policy ON error_partner_report_on_nursery_registration TO kenya_mkec USING (error_partner_report_on_nursery_registration.organisation = 'Mount Kenya Environmental Conservation');
-CREATE POLICY mkec_policy ON akvo_ecosia_contract_overview TO kenya_mkec USING (akvo_ecosia_contract_overview.name_organisation = 'mount kenya environmental conservation');'''
+CREATE POLICY mkec_policy ON akvo_ecosia_contract_overview TO kenya_mkec USING (akvo_ecosia_contract_overview.name_organisation = 'mount kenya environmental conservation');
+CREATE POLICY mkec_policy ON akvo_ecosia_tree_photo_registration TO kenya_mkec USING (akvo_ecosia_contract_overview.organisation = 'Mount Kenya Environmental Conservation');'''
+
 
 conn.commit()
 
@@ -1059,6 +1079,8 @@ GRANT SELECT ON TABLE akvo_ecosia_nursery_monitoring TO nicaragua_fdia;
 GRANT SELECT ON TABLE error_partner_report_on_site_registration TO nicaragua_fdia;
 GRANT SELECT ON TABLE error_partner_report_on_nursery_registration TO nicaragua_fdia;
 GRANT SELECT ON TABLE akvo_ecosia_contract_overview TO nicaragua_fdia;
+GRANT SELECT ON TABLE akvo_ecosia_tree_photo_registration TO nicaragua_fdia;
+
 
 DROP POLICY IF EXISTS fdia_policy ON akvo_tree_registration_areas_updated;
 DROP POLICY IF EXISTS fdia_policy ON akvo_tree_registration_areas;
@@ -1077,6 +1099,7 @@ DROP POLICY IF EXISTS fdia_policy ON akvo_ecosia_nursery_monitoring;
 DROP POLICY IF EXISTS fdia_policy ON error_partner_report_on_site_registration;
 DROP POLICY IF EXISTS fdia_policy ON error_partner_report_on_nursery_registration;
 DROP POLICY IF EXISTS fdia_policy ON akvo_ecosia_contract_overview;
+DROP POLICY IF EXISTS fdia_policy ON akvo_ecosia_tree_photo_registration;
 
 ALTER TABLE akvo_ecosia_tree_area_registration enable ROW LEVEL SECURITY;
 ALTER TABLE akvo_ecosia_tree_area_monitoring enable ROW LEVEL SECURITY;
@@ -1085,6 +1108,7 @@ ALTER TABLE akvo_ecosia_nursery_monitoring enable ROW LEVEL SECURITY;
 ALTER TABLE error_partner_report_on_site_registration enable ROW LEVEL SECURITY;
 ALTER TABLE error_partner_report_on_nursery_registration enable ROW LEVEL SECURITY;
 ALTER TABLE akvo_ecosia_contract_overview enable ROW LEVEL SECURITY;
+ALTER TABLE akvo_ecosia_tree_photo_registration enable ROW LEVEL SECURITY;
 
 CREATE POLICY fdia_policy ON akvo_ecosia_tree_area_registration TO nicaragua_fdia USING (organisation = 'Fundacion DIA');
 CREATE POLICY fdia_policy ON akvo_ecosia_tree_area_monitoring TO nicaragua_fdia USING (EXISTS (SELECT * FROM akvo_ecosia_tree_area_registration
@@ -1096,7 +1120,9 @@ WHERE akvo_ecosia_nursery_registration.organisation = 'Fundacion DIA'
 AND akvo_ecosia_nursery_monitoring.identifier_akvo = akvo_ecosia_nursery_registration.identifier_akvo));
 CREATE POLICY fdia_policy ON error_partner_report_on_site_registration TO nicaragua_fdia USING (error_partner_report_on_site_registration.name_organisation = 'Fundacion DIA');
 CREATE POLICY fdia_policy ON error_partner_report_on_nursery_registration TO nicaragua_fdia USING (error_partner_report_on_nursery_registration.organisation = 'Fundacion DIA');
-CREATE POLICY fdia_policy ON akvo_ecosia_contract_overview TO nicaragua_fdia USING (akvo_ecosia_contract_overview.name_organisation = 'fundacion dia');'''
+CREATE POLICY fdia_policy ON akvo_ecosia_contract_overview TO nicaragua_fdia USING (akvo_ecosia_contract_overview.name_organisation = 'fundacion dia');
+CREATE POLICY fdia_policy ON akvo_ecosia_tree_photo_registration TO nicaragua_fdia USING (akvo_ecosia_contract_overview.organisation = 'Fundacion DIA');'''
+
 
 conn.commit()
 
@@ -1124,6 +1150,7 @@ cur.execute(drop_a21)
 cur.execute(drop_a22)
 cur.execute(drop_a23)
 cur.execute(drop_a24)
+cur.execute(drop_a25)
 
 cur.execute(create_a1)
 cur.execute(create_a2)
@@ -1148,6 +1175,7 @@ cur.execute(create_a21)
 cur.execute(create_a22)
 cur.execute(create_a23)
 cur.execute(create_a24)
+cur.execute(create_a25)
 cur.execute(create_a17_mkec)
 cur.execute(create_a18_fdia)
 
