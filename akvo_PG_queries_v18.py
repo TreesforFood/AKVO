@@ -1048,7 +1048,7 @@ ALTER TABLE akvo_ecosia_nursery_monitoring enable ROW LEVEL SECURITY;
 ALTER TABLE error_partner_report_on_site_registration enable ROW LEVEL SECURITY;
 ALTER TABLE error_partner_report_on_nursery_registration enable ROW LEVEL SECURITY;
 ALTER TABLE akvo_ecosia_contract_overview enable ROW LEVEL SECURITY;
-ALTER TABLE akvo_ecosia_tree_photo_registration ROW LEVEL SECURITY;
+ALTER TABLE akvo_ecosia_tree_photo_registration enable ROW LEVEL SECURITY;
 
 CREATE POLICY mkec_policy ON akvo_ecosia_tree_area_registration TO kenya_mkec USING (organisation = 'Mount Kenya Environmental Conservation');
 CREATE POLICY mkec_policy ON akvo_ecosia_tree_area_monitoring TO kenya_mkec USING (EXISTS (SELECT * FROM akvo_ecosia_tree_area_registration
