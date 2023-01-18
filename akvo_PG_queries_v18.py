@@ -229,9 +229,9 @@ table_label_strata.monitoring_strata,
 table_label_strata.submission AS latest_submission,
 
 CASE
-WHEN AKVO_Tree_monitoring_areas.identifier_akvo != AKVO_Tree_monitoring_counts.identifier_akvo
-THEN SUM(AKVO_Tree_monitoring_counts.number_species)
 WHEN AKVO_Tree_monitoring_areas.identifier_akvo = AKVO_Tree_monitoring_counts.identifier_akvo
+THEN SUM(AKVO_Tree_monitoring_counts.number_species)
+WHEN AKVO_Tree_monitoring_areas.identifier_akvo != AKVO_Tree_monitoring_counts.identifier_akvo
 THEN AVG(AKVO_Tree_monitoring_areas.number_living_trees)
 END AS monitored_tree_number,
 
