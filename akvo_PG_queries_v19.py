@@ -153,6 +153,22 @@ OVER (PARTITION BY monitoring_instances_grouped.identifier_akvo ORDER BY monitor
 WHEN (monitoring_instances_grouped.submission-LAG(monitoring_instances_grouped.submission)
 OVER (PARTITION BY monitoring_instances_grouped.identifier_akvo ORDER BY monitoring_instances_grouped.submission ASC))
 	  Between 901 AND 1080 THEN 1080
+WHEN (monitoring_instances_grouped.submission-LAG(monitoring_instances_grouped.submission)
+OVER (PARTITION BY monitoring_instances_grouped.identifier_akvo ORDER BY monitoring_instances_grouped.submission ASC))
+	  Between 1081 AND 1260 THEN 1260
+WHEN (monitoring_instances_grouped.submission-LAG(monitoring_instances_grouped.submission)
+OVER (PARTITION BY monitoring_instances_grouped.identifier_akvo ORDER BY monitoring_instances_grouped.submission ASC))
+	  Between 1261 AND 1440 THEN 1440
+WHEN (monitoring_instances_grouped.submission-LAG(monitoring_instances_grouped.submission)
+OVER (PARTITION BY monitoring_instances_grouped.identifier_akvo ORDER BY monitoring_instances_grouped.submission ASC))
+	  Between 1441 AND 1620 THEN 1620
+WHEN (monitoring_instances_grouped.submission-LAG(monitoring_instances_grouped.submission)
+OVER (PARTITION BY monitoring_instances_grouped.identifier_akvo ORDER BY monitoring_instances_grouped.submission ASC))
+	  Between 1621 AND 1800 THEN 1800
+WHEN (monitoring_instances_grouped.submission-LAG(monitoring_instances_grouped.submission)
+OVER (PARTITION BY monitoring_instances_grouped.identifier_akvo ORDER BY monitoring_instances_grouped.submission ASC))
+	  Between 1801 AND 1980 THEN 1980
+ELSE 1111111111111
 END AS monitoring_strata
 FROM monitoring_instances_grouped),
 
@@ -267,6 +283,7 @@ calc_interm_results_tree_numbers_count.monitoring_strata,
 'tree count' as monitoring_method,
 0 AS nr_samples_pcq,
 ROUND(AVG(calc_interm_results_tree_numbers_count.monitored_tree_number),0) as monitored_tree_number,
+--calc_interm_results_tree_numbers_count.monitored_tree_number as monitored_tree_number,
 0 AS avg_tree_distance,
 0 AS avg_tree_density,
 SUM(calc_interm_results_tree_numbers_count.avg_tree_height) AS average_tree_height,
@@ -314,21 +331,21 @@ UNION
 -- including a '0' value for strata '0' (initial tree number). Only for polygons
 SELECT
 akvo_tree_registration_areas.identifier_akvo,
-'0' AS monitoring_strata,
+0 AS monitoring_strata,
 'tree registration' as method_data_collection,
 akvo_tree_registration_areas.submission,
 akvo_tree_registration_areas.id_planting_site,
 akvo_tree_registration_areas.contract_number,
 akvo_tree_registration_areas.organisation,
-NULL as number_of_PCQ_samples,
+0 as number_of_PCQ_samples,
 akvo_tree_registration_areas.calc_area as "calcul/estim Area (ha)",
 ROUND(100/NULLIF(SQRT(akvo_tree_registration_areas.tree_number/NULLIF(akvo_tree_registration_areas.calc_area,0)),0),2)
 AS "Average tree distance (m)",
-NULL AS "Average tree height (m)",
+0 AS "Average tree height (m)",
 ROUND((akvo_tree_registration_areas.tree_number/NULLIF(akvo_tree_registration_areas.calc_area,0)),0)
 AS "Tree density (trees/ha)",
 akvo_tree_registration_areas.tree_number AS "Total nr trees on site (registered/monitored)",
-'100' AS "Percentage of trees survived"
+100 AS "Percentage of trees survived"
 
 FROM akvo_tree_registration_areas
 WHERE polygon NOTNULL
@@ -339,22 +356,30 @@ UNION
 -- including a '0' value for strata '0' (initial tree number). Only for NON-polygons
 SELECT
 akvo_tree_registration_areas.identifier_akvo,
-'0' AS monitoring_strata,
+0 AS monitoring_strata,
 'tree registration' as method_data_collection,
 akvo_tree_registration_areas.submission,
 akvo_tree_registration_areas.id_planting_site,
 akvo_tree_registration_areas.contract_number,
 akvo_tree_registration_areas.organisation,
-NULL as number_of_PCQ_samples,
+0 as number_of_PCQ_samples,
 akvo_tree_registration_areas.estimated_area as "calcul/estim Area (ha)",
-NULL AS "Average tree distance (m)",
-NULL AS "Average tree height (m)",
-NULL AS "Tree density (trees/ha)",
+0 AS "Average tree distance (m)",
+0 AS "Average tree height (m)",
+0 AS "Tree density (trees/ha)",
 akvo_tree_registration_areas.tree_number AS "Total nr trees on site (registered/monitored)",
-'100' AS "Percentage of trees survived"
+100 AS "Percentage of trees survived"
 FROM akvo_tree_registration_areas
 WHERE polygon ISNULL
 ORDER BY contract_number, id_planting_site, monitoring_strata;'''
+
+conn.commit()
+
+create_a3 = '''UPDATE akvo_tree_registration_photos
+SET photo_url = RIGHT(photo_url, strpos(reverse(photo_url),'/'));
+
+UPDATE akvo_tree_registration_photos
+SET photo_url = CONCAT('https://akvoflow-201.s3.amazonaws.com/images',photo_url);'''
 
 conn.commit()
 
@@ -1132,6 +1157,7 @@ cur.execute(drop_a25)
 
 cur.execute(create_a1)
 cur.execute(create_a2)
+cur.execute(create_a3)
 cur.execute(create_a4)
 cur.execute(create_a5)
 cur.execute(create_a6)
