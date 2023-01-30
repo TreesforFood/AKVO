@@ -186,13 +186,15 @@ table_label_strata.submission AS latest_submission,
 table_label_strata.monitoring_strata,
 
 CASE
-WHEN AKVO_Tree_monitoring_areas.identifier_akvo = AKVO_Tree_monitoring_pcq.identifier_akvo
+--WHEN AKVO_Tree_monitoring_areas.identifier_akvo = AKVO_Tree_monitoring_pcq.identifier_akvo
+WHEN AKVO_Tree_monitoring_areas.method_selection = 'Number of living trees is unknown. Go to PCQ method.'
 THEN ROUND((ROUND((((1/NULLIF(POWER(((AVG(Q1_dist) + AVG(Q2_dist) + AVG(Q3_dist) + AVG(Q4_dist))/4),2),0))*10000)*AKVO_Tree_registration_areas.calc_area)/NULLIF(akvo_tree_registration_areas.tree_number,0),2)*100),0)
 ELSE ROUND(((SUM(AKVO_Tree_monitoring_areas.number_living_trees)/NULLIF(akvo_tree_registration_areas.tree_number,0))*100),2)
 END AS perc_trees_survived,
 
 CASE
-WHEN AKVO_Tree_monitoring_areas.identifier_akvo = AKVO_Tree_monitoring_pcq.identifier_akvo
+--WHEN AKVO_Tree_monitoring_areas.identifier_akvo = AKVO_Tree_monitoring_pcq.identifier_akvo
+WHEN AKVO_Tree_monitoring_areas.method_selection = 'Number of living trees is unknown. Go to PCQ method.'
 THEN ROUND(((AVG(Q1_hgt) + AVG(Q2_hgt) + AVG(Q3_hgt) + AVG(Q4_hgt))/4),2)
 ELSE akvo_tree_monitoring_areas.avg_tree_height
 END AS avg_tree_height
@@ -212,26 +214,30 @@ AKVO_Tree_monitoring_pcq.identifier_akvo,
 AKVO_Tree_registration_areas.calc_area,
 akvo_tree_registration_areas.tree_number,
 akvo_tree_monitoring_areas.avg_tree_height,
-table_label_strata.submission),
+table_label_strata.submission,
+AKVO_Tree_monitoring_areas.method_selection),
 
 
 -- Sub CTE table to calculate COUNTS results with CASE more easy and transparent. If we would do this in a subquery it results in
 -- a complex issues of multiple rows combined with grouping problems. This is why this intermediary table is more easy.
 calc_interm_results_tree_numbers_count AS (SELECT
-AKVO_Tree_monitoring_areas.identifier_akvo,
+--AKVO_Tree_monitoring_areas.identifier_akvo,
+AKVO_Tree_monitoring_counts.identifier_akvo,
 AKVO_Tree_registration_areas.calc_area,
 akvo_tree_registration_areas.tree_number as registered_tree_number,
 table_label_strata.monitoring_strata,
 table_label_strata.submission AS latest_submission,
 
 CASE
-WHEN AKVO_Tree_monitoring_areas.identifier_akvo = AKVO_Tree_monitoring_counts.identifier_akvo
+--WHEN AKVO_Tree_monitoring_areas.identifier_akvo = AKVO_Tree_monitoring_counts.identifier_akvo
+WHEN AKVO_Tree_monitoring_areas.method_selection = 'The trees were counted'
 THEN SUM(AKVO_Tree_monitoring_counts.number_species)
 ELSE SUM(AKVO_Tree_monitoring_areas.number_living_trees)
 END AS monitored_tree_number,
 
 CASE
-WHEN AKVO_Tree_monitoring_areas.identifier_akvo = AKVO_Tree_monitoring_counts.identifier_akvo
+--WHEN AKVO_Tree_monitoring_areas.identifier_akvo = AKVO_Tree_monitoring_counts.identifier_akvo
+WHEN AKVO_Tree_monitoring_areas.method_selection = 'The trees were counted'
 THEN CAST(SUM(AKVO_Tree_monitoring_counts.number_species*1.0)/NULLIF(akvo_tree_registration_areas.tree_number*1.0,0)*100 AS NUMERIC)
 ELSE SUM(AKVO_Tree_monitoring_areas.number_living_trees)/NULLIF(akvo_tree_registration_areas.tree_number,0)*100
 END AS perc_trees_survived,
@@ -253,7 +259,8 @@ AKVO_Tree_monitoring_counts.identifier_akvo,
 AKVO_Tree_registration_areas.calc_area,
 akvo_tree_registration_areas.tree_number,
 akvo_tree_monitoring_areas.avg_tree_height,
-table_label_strata.submission),
+table_label_strata.submission,
+AKVO_Tree_monitoring_areas.method_selection),
 
 -- Calculate the monitoring results from the PCQ's per label strata (and instance)
 monitoring_tree_numbers_pcq AS
@@ -949,17 +956,54 @@ conn.commit()
 
 create_a18 = '''CREATE TABLE akvo_ecosia_tree_area_monitoring AS
 SELECT
+akvo_tree_monitoring_areas.identifier_akvo,
 akvo_tree_registration_areas.country,
 akvo_tree_registration_areas.organisation,
 akvo_tree_registration_areas.contract_number,
 akvo_tree_registration_areas.id_planting_site,
-akvo_tree_monitoring_areas.*,
+akvo_tree_monitoring_areas.display_name,
+akvo_tree_monitoring_areas.submitter,
+akvo_tree_monitoring_areas.akvo_form_version,
+akvo_tree_monitoring_areas.method_selection,
+monitoring_results.COUNT-1 AS "Number of times site has been monitored",
+akvo_tree_registration_areas.tree_number AS "Registered tree number",
+monitoring_results."Latest monitored nr trees on site",
+monitoring_results."Latest monitored percentage of survived trees",
+monitoring_results."Latest monitoring submission date",
 akvo_tree_registration_areas.polygon,
 akvo_tree_registration_areas.multipoint,
 akvo_tree_registration_areas.centroid_coord
 FROM akvo_tree_monitoring_areas
 LEFT JOIN akvo_tree_registration_areas
-ON akvo_tree_monitoring_areas.identifier_akvo = akvo_tree_registration_areas.identifier_akvo;'''
+ON akvo_tree_monitoring_areas.identifier_akvo = akvo_tree_registration_areas.identifier_akvo
+LEFT JOIN (SELECT CALC_TAB_monitoring_calculations_per_site_by_partner.identifier_akvo,
+		   COUNT(CALC_TAB_monitoring_calculations_per_site_by_partner.monitoring_strata),
+		   MAX(CALC_TAB_monitoring_calculations_per_site_by_partner."Total nr trees on site (registered/monitored)") AS "Latest monitored nr trees on site",
+MAX(CALC_TAB_monitoring_calculations_per_site_by_partner."Percentage of survived trees") AS "Latest monitored percentage of survived trees",
+MAX(CALC_TAB_monitoring_calculations_per_site_by_partner.submission) AS "Latest monitoring submission date"
+FROM CALC_TAB_monitoring_calculations_per_site_by_partner
+GROUP BY CALC_TAB_monitoring_calculations_per_site_by_partner.identifier_akvo) monitoring_results
+ON akvo_tree_monitoring_areas.identifier_akvo = monitoring_results.identifier_akvo
+WHERE contract_number = 114
+GROUP BY akvo_tree_monitoring_areas.identifier_akvo,
+akvo_tree_registration_areas.country,
+akvo_tree_registration_areas.organisation,
+akvo_tree_registration_areas.contract_number,
+akvo_tree_registration_areas.id_planting_site,
+akvo_tree_monitoring_areas.display_name,
+akvo_tree_monitoring_areas.submission_year,
+akvo_tree_monitoring_areas.submitter,
+akvo_tree_monitoring_areas.akvo_form_version,
+akvo_tree_monitoring_areas.test,
+monitoring_results."Latest monitored nr trees on site",
+monitoring_results."Latest monitored percentage of survived trees",
+monitoring_results."Latest monitoring submission date",
+akvo_tree_registration_areas.polygon,
+akvo_tree_registration_areas.multipoint,
+akvo_tree_registration_areas.centroid_coord,
+monitoring_results.COUNT,
+akvo_tree_registration_areas.tree_number,
+akvo_tree_monitoring_areas.method_selection;'''
 
 conn.commit()
 
@@ -1126,8 +1170,62 @@ CREATE POLICY fdia_policy ON error_partner_report_on_nursery_registration TO nic
 CREATE POLICY fdia_policy ON akvo_ecosia_contract_overview TO nicaragua_fdia USING (akvo_ecosia_contract_overview.name_organisation = 'fundacion dia');
 CREATE POLICY fdia_policy ON akvo_ecosia_tree_photo_registration TO nicaragua_fdia USING (akvo_ecosia_tree_photo_registration.organisation = 'Fundacion DIA');'''
 
-
 conn.commit()
+
+create_a19_haf = '''
+REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA public FROM morocco_haf;
+
+GRANT USAGE ON SCHEMA PUBLIC TO morocco_haf;
+GRANT USAGE ON SCHEMA HEROKU_EXT TO morocco_haf;
+
+GRANT SELECT ON TABLE akvo_ecosia_tree_area_registration TO morocco_haf;
+GRANT SELECT ON TABLE akvo_ecosia_tree_area_monitoring TO morocco_haf;
+GRANT SELECT ON TABLE akvo_ecosia_nursery_registration TO morocco_haf;
+GRANT SELECT ON TABLE akvo_ecosia_nursery_monitoring TO morocco_haf;
+GRANT SELECT ON TABLE error_partner_report_on_site_registration TO morocco_haf;
+GRANT SELECT ON TABLE error_partner_report_on_nursery_registration TO morocco_haf;
+GRANT SELECT ON TABLE akvo_ecosia_contract_overview TO morocco_haf;
+GRANT SELECT ON TABLE akvo_ecosia_tree_photo_registration TO morocco_haf;
+
+DROP POLICY IF EXISTS haf_policy ON akvo_tree_registration_areas_updated;
+DROP POLICY IF EXISTS haf_policy ON akvo_tree_registration_areas;
+DROP POLICY IF EXISTS haf_policy ON akvo_tree_monitoring_areas_geom;
+DROP POLICY IF EXISTS haf_policy ON akvo_nursery_registration;
+DROP POLICY IF EXISTS haf_policy ON akvo_nursery_monitoring_geom;
+DROP POLICY IF EXISTS haf_policy ON CALC_TAB_Error_partner_report_on_site_registration;
+DROP POLICY IF EXISTS haf_policy ON CALC_TAB_Error_partner_report_on_nursery_registration;
+DROP POLICY IF EXISTS haf_policy ON calc_tab_tree_submissions_per_contract;
+
+DROP POLICY IF EXISTS haf_policy ON akvo_ecosia_tree_area_registration;
+DROP POLICY IF EXISTS haf_policy ON akvo_ecosia_tree_area_monitoring;
+DROP POLICY IF EXISTS haf_policy ON akvo_ecosia_nursery_registration;
+DROP POLICY IF EXISTS haf_policy ON akvo_ecosia_nursery_monitoring;
+DROP POLICY IF EXISTS haf_policy ON error_partner_report_on_site_registration;
+DROP POLICY IF EXISTS haf_policy ON error_partner_report_on_nursery_registration;
+DROP POLICY IF EXISTS haf_policy ON akvo_ecosia_contract_overview;
+DROP POLICY IF EXISTS haf_policy ON akvo_ecosia_tree_photo_registration;
+
+ALTER TABLE akvo_ecosia_tree_area_registration enable ROW LEVEL SECURITY;
+ALTER TABLE akvo_ecosia_tree_area_monitoring enable ROW LEVEL SECURITY;
+ALTER TABLE akvo_ecosia_nursery_registration enable ROW LEVEL SECURITY;
+ALTER TABLE akvo_ecosia_nursery_monitoring enable ROW LEVEL SECURITY;
+ALTER TABLE error_partner_report_on_site_registration enable ROW LEVEL SECURITY;
+ALTER TABLE error_partner_report_on_nursery_registration enable ROW LEVEL SECURITY;
+ALTER TABLE akvo_ecosia_contract_overview enable ROW LEVEL SECURITY;
+ALTER TABLE akvo_ecosia_tree_photo_registration enable ROW LEVEL SECURITY;
+
+CREATE POLICY haf_policy ON akvo_ecosia_tree_area_registration TO morocco_haf USING (organisation = 'High Atlas Foundation');
+CREATE POLICY haf_policy ON akvo_ecosia_tree_area_monitoring TO morocco_haf USING (EXISTS (SELECT * FROM akvo_ecosia_tree_area_registration
+WHERE akvo_ecosia_tree_area_registration.organisation = 'High Atlas Foundation'
+AND akvo_ecosia_tree_area_monitoring.identifier_akvo = akvo_ecosia_tree_area_registration.identifier_akvo));
+CREATE POLICY haf_policy ON akvo_ecosia_nursery_registration TO morocco_haf USING (organisation = 'High Atlas Foundation');
+CREATE POLICY haf_policy ON akvo_ecosia_nursery_monitoring TO morocco_haf USING (EXISTS (SELECT * FROM akvo_ecosia_nursery_registration
+WHERE akvo_ecosia_nursery_registration.organisation = 'High Atlas Foundation'
+AND akvo_ecosia_nursery_monitoring.identifier_akvo = akvo_ecosia_nursery_registration.identifier_akvo));
+CREATE POLICY haf_policy ON error_partner_report_on_site_registration TO morocco_haf USING (error_partner_report_on_site_registration.name_organisation = 'High Atlas Foundation');
+CREATE POLICY haf_policy ON error_partner_report_on_nursery_registration TO morocco_haf USING (error_partner_report_on_nursery_registration.organisation = 'High Atlas Foundation');
+CREATE POLICY haf_policy ON akvo_ecosia_contract_overview TO morocco_haf USING (akvo_ecosia_contract_overview.name_organisation = 'high atlas foundation');
+CREATE POLICY haf_policy ON akvo_ecosia_tree_photo_registration TO morocco_haf USING (akvo_ecosia_tree_photo_registration.organisation = 'High Atlas Foundation');'''
 
 # Execute create tables
 cur.execute(drop_a1)
