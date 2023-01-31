@@ -984,7 +984,6 @@ MAX(CALC_TAB_monitoring_calculations_per_site_by_partner.submission) AS "Latest 
 FROM CALC_TAB_monitoring_calculations_per_site_by_partner
 GROUP BY CALC_TAB_monitoring_calculations_per_site_by_partner.identifier_akvo) monitoring_results
 ON akvo_tree_monitoring_areas.identifier_akvo = monitoring_results.identifier_akvo
-WHERE contract_number = 114
 GROUP BY akvo_tree_monitoring_areas.identifier_akvo,
 akvo_tree_registration_areas.country,
 akvo_tree_registration_areas.organisation,
