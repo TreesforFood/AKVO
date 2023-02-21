@@ -86,7 +86,7 @@ for i in content_page['features']:
     health_trend_normalized = i.get('properties')['health_indicator']['health_trend_normalized']
 
     # Populate the tree registration table
-    cur.execute('''INSERT INTO S4G_API_data_general (identifier_akvo, partner_site_id, contract_number, country, nr_photos_taken, trees_planted, issues, invalid_polygon, invalid_point, unconnected, area_too_large, area_too_small, overlap, circumference_too_large,
+    cur.execute('''INSERT INTO S4G_API_data_quality_health (identifier_akvo, partner_site_id, contract_number, country, nr_photos_taken, trees_planted, issues, invalid_polygon, invalid_point, unconnected, area_too_large, area_too_small, overlap, circumference_too_large,
     site_not_in_country, area_water_ha, area_urban_ha, artificially_created_polygon, health_index, health_index_normalized,
     health_trend, health_trend_normalized)
     VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)''', (identifier_akvo,
