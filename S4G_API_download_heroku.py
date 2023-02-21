@@ -1,16 +1,12 @@
 import requests
 import json
-import sqlite3
 from requests.auth import HTTPBasicAuth
 import re
-import geojson
 import geodaisy.converters as convert
-from area import area
 import psycopg2
-from dotenv import load_dotenv, find_dotenv
 import os
 from akvo_api_config import Config
-import time
+
 
 
 config = Config()
