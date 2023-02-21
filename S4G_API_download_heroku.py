@@ -7,7 +7,6 @@ import psycopg2
 import os
 
 
-config = Config()
 username = os.environ["USERNAME_S4G"]
 password = os.environ["PASSWORD_S4G"]
 response = requests.get("https://ecosia.space4good.com/dashboard/site/?page_size=100000", auth=HTTPBasicAuth(username, password), allow_redirects=True)
