@@ -14,27 +14,24 @@ response = requests.get("https://ecosia.space4good.com/dashboard/site/?page_size
 
 content_page = json.loads(response.text)
 
-
-
 #connect to Postgresql database
 conn = psycopg2.connect(os.environ["DATABASE_URL"], sslmode='require')
 cur = conn.cursor()
 
 cur.execute('''
-DROP TABLE IF EXISTS S4G_API_data_general;
+DROP TABLE IF EXISTS S4G_API_data_quality_health;
 DROP TABLE IF EXISTS S4G_API_data_fires;
 DROP TABLE IF EXISTS S4G_API_data_deforestation;
 
-CREATE TABLE S4G_API_data_general (identifier_akvo TEXT, partner_site_id TEXT, contract_number NUMERIC(20,2), country TEXT,
+CREATE TABLE S4G_API_data_quality_health (identifier_akvo TEXT, partner_site_id TEXT, contract_number NUMERIC(20,2), country TEXT,
 nr_photos_taken INTEGER, trees_planted INTEGER, issues INTEGER, invalid_polygon BOOLEAN, invalid_point BOOLEAN, unconnected BOOLEAN,
 area_too_large BOOLEAN, area_too_small BOOLEAN, overlap BOOLEAN, circumference_too_large BOOLEAN, site_not_in_country BOOLEAN, area_water_ha NUMERIC(10,2)
 , area_urban_ha NUMERIC(10,2), artificially_created_polygon BOOLEAN, health_index NUMERIC(20,15), health_index_normalized NUMERIC(20,15),
 health_trend NUMERIC(20,15), health_trend_normalized NUMERIC(20,15));
 
---CREATE TABLE S4G_API_data_fires (identifier_akvo TEXT, );
+CREATE TABLE S4G_API_data_fires (identifier_akvo TEXT, detection_date DATE, confidence_level NUMERIC(3,2), area_ha NUMERIC(10,3));
 
---CREATE TABLE S4G_API_data_deforestation (identifier_akvo TEXT, );
-
+CREATE TABLE S4G_API_data_deforestation (identifier_akvo TEXT, deforestation_date DATE, deforestation_area NUMERIC(10,3), deforestation_nr_alerts NUMERIC(20,2));
 
 ''')
 
@@ -65,11 +62,21 @@ for i in content_page['features']:
         deforestation_area = deforestation.get('area_ha')
         deforestation_nr_alerts = deforestation.get('n_alerts')
 
+        cur.execute('''INSERT INTO S4G_API_data_deforestation (identifier_akvo, deforestation_date, deforestation_area, deforestation_nr_alerts)
+        VALUES (%s,%s,%s,%s)''', (identifier_akvo,
+        deforestation_date, deforestation_area, deforestation_nr_alerts))
+
+        conn.commit()
 
     for fire in i.get('properties')['fires']:
-        fires = fire.get('detect_date')
+        detection_date = fire.get('detect_date')
         confidence = fire.get('confidence')
         area_ha = fire.get('area_ha')
+
+        cur.execute('''INSERT INTO S4G_API_data_fires (identifier_akvo, detection_date, confidence_level, area_ha)
+        VALUES (%s,%s,%s,%s)''', (identifier_akvo, detection_date, confidence, area_ha))
+
+        conn.commit()
 
 
     artificially_created_polygon = i.get('properties')['artificially_created_polygon']
