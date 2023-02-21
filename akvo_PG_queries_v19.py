@@ -1062,8 +1062,9 @@ s4G_api_data_general.*,
 akvo_tree_registration_areas.centroid_coord
 FROM akvo_tree_registration_areas
 LEFT JOIN s4G_api_data_general
-ON akvo_tree_registration_areas.identifier_akvo = s4G_api_data_general.identifier_akvo''''
+ON akvo_tree_registration_areas.identifier_akvo = s4G_api_data_general.identifier_akvo'''
 
+con.commit()
 
 create_a17_mkec = '''
 REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA public FROM kenya_mkec;
