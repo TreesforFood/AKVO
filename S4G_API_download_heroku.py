@@ -7,11 +7,9 @@ import geojson
 import geodaisy.converters as convert
 from area import area
 import psycopg2
-from hanging_threads import start_monitoring
 from dotenv import load_dotenv, find_dotenv
 import os
 from akvo_api_config import Config
-from twilio.rest import Client
 import time
 
 
