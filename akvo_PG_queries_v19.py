@@ -43,6 +43,7 @@ drop_a22 = '''DROP TABLE IF EXISTS akvo_ecosia_nursery_registration;'''
 drop_a23 = '''DROP TABLE IF EXISTS akvo_ecosia_tree_area_monitoring;'''
 drop_a24 = '''DROP TABLE IF EXISTS akvo_ecosia_tree_area_registration;'''
 drop_a25 = '''DROP TABLE IF EXISTS akvo_ecosia_tree_photo_registration;'''
+drop_a26 = '''DROP TABLE IF EXISTS s4g_ecosia_monitoring;'''
 
 conn.commit()
 
@@ -1054,6 +1055,16 @@ ON AKVO_tree_registration_photos.identifier_akvo = akvo_tree_registration_areas_
 
 conn.commit()
 
+create_a26 = ''' CREATE TABLE s4g_ecosia_monitoring
+AS SELECT akvo_tree_registration_areas.identifier_akvo,
+akvo_tree_registration_areas.organisation,
+s4G_api_data_general.*,
+akvo_tree_registration_areas.centroid_coord
+FROM akvo_tree_registration_areas
+LEFT JOIN s4G_api_data_general
+ON akvo_tree_registration_areas.identifier_akvo = s4G_api_data_general.identifier_akvo''''
+
+
 create_a17_mkec = '''
 REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA public FROM kenya_mkec;
 
@@ -1251,6 +1262,7 @@ cur.execute(drop_a22)
 cur.execute(drop_a23)
 cur.execute(drop_a24)
 cur.execute(drop_a25)
+cur.execute(drop_a26)
 
 cur.execute(create_a1)
 cur.execute(create_a2)
@@ -1277,6 +1289,7 @@ cur.execute(create_a22)
 cur.execute(create_a23)
 cur.execute(create_a24)
 cur.execute(create_a25)
+cur.execute(create_a26)
 cur.execute(create_a17_mkec)
 cur.execute(create_a18_fdia)
 
