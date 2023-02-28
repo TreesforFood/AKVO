@@ -69,7 +69,7 @@ if get_status_akvo_server.status_code in [200]:
             break
 
 else:
-    print("Connection with server failed. Server status code received: ", get_status_akvo_server.status_code)
+    print("Connection with server failed or empty content. Server status code received: ", get_status_akvo_server.status_code)
 
 
 # create list_sync
@@ -1564,10 +1564,15 @@ for level1_exaudits in changes_form_141500001_lst:
     conn.commit()
 
     # Part of the Group 2 sheet questions: PCQ method
-    # Part of the Group 2 sheet questions: PCQ method
     try:
-        if len(identifier_m) > 0:
-            for pcq_results in level1_monitoring['responses']['39860004']:
+        create_Qlist = list()
+        Q1 = '156360017'
+        Q2 = '158160026'
+        Q3 = '137590011'
+        Q4 = '154610120'
+
+        for pcq_results in level1_exaudits['responses']['158130010']:
+            if (Q1 in pcq_results.keys() or Q2 in pcq_results.keys() or Q3 in pcq_results.keys() or Q4 in pcq_results.keys()):
 
                 try:
                     lat_sample_pcq = pcq_results['158130011']['lat']
@@ -1684,7 +1689,7 @@ for level1_exaudits in changes_form_141500001_lst:
 
                 # Create the tree monitoring pcq method table
                 cur.execute('''INSERT INTO AKVO_Tree_external_audits_pcq (identifier_akvo, instance, lat_pcq_sample, lon_pcq_sample, pcq_location, height_pcq_sample, Q1_dist, Q1_hgt, Q1_spec, Q2_dist, Q2_hgt, Q2_spec, Q3_dist, Q3_hgt, Q3_spec, Q4_dist, Q4_hgt, Q4_spec)
-                VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);''', (identifier, instance, lat_sample_pcq, lon_sample_pcq, pcq_location, elev_sample_pcq, Q1_distance, Q1_height, Q1_species, Q2_distance, Q2_height, Q2_species, Q3_distance, Q3_height, Q3_species, Q4_distance, Q4_height, Q4_species))
+                VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)''', (identifier, instance, lat_sample_pcq, lon_sample_pcq, pcq_location, elev_sample_pcq, Q1_distance, Q1_height, Q1_species, Q2_distance, Q2_height, Q2_species, Q3_distance, Q3_height, Q3_species, Q4_distance, Q4_height, Q4_species))
 
                 conn.commit()
 
