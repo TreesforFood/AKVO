@@ -57,7 +57,8 @@ json_build_object(
 
 FROM
   akvo_tree_registration_areas AS t
-  where t.polygon NOTNULL;'''
+  where t.polygon NOTNULL
+  AND organisation = 'Green Belt Movement';'''
 
 conn.commit()
 
