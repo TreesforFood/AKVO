@@ -45,7 +45,7 @@ drop_a24 = '''DROP TABLE IF EXISTS akvo_ecosia_tree_area_registration;'''
 drop_a25 = '''DROP TABLE IF EXISTS akvo_ecosia_tree_photo_registration;'''
 drop_a26 = '''DROP TABLE IF EXISTS s4g_ecosia_monitoring;'''
 drop_a0 = '''DROP TABLE IF EXISTS TESTING_GEOJSON;'''
-
+drop_a1 = '''DROP TABLE IF EXISTS TESTING_BACKGROUD;'''
 
 conn.commit()
 
@@ -57,8 +57,16 @@ json_build_object(
 
 FROM
   akvo_tree_registration_areas AS t
-  where t.polygon NOTNULL
-  AND organisation = 'Green Belt Movement';'''
+  where t.polygon NOTNULL;'''
+
+create_a01 = '''CREATE TABLE TESTING_BACKGROUD AS SELECT
+country,
+json_build_object(
+    'type', 'Polygon',
+    'geometry', ST_AsGeoJSON(t.geom)::json)::text as geojson
+FROM
+  World_Countries AS t;'''
+
 
 conn.commit()
 
@@ -1276,6 +1284,7 @@ CREATE POLICY haf_policy ON akvo_ecosia_tree_photo_registration TO morocco_haf U
 
 # Execute create tables
 cur.execute(drop_a0)
+cur.execute(drop_a01)
 cur.execute(drop_a1)
 cur.execute(drop_a2)
 cur.execute(drop_a4)
@@ -1303,6 +1312,7 @@ cur.execute(drop_a25)
 cur.execute(drop_a26)
 
 cur.execute(create_a0)
+cur.execute(create_a01)
 cur.execute(create_a1)
 cur.execute(create_a2)
 cur.execute(create_a3)
