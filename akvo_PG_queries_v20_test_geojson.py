@@ -62,12 +62,12 @@ FROM
 conn.commit()
 
 create_a01 = '''CREATE TABLE TESTING_BACKGROUD AS SELECT
-country,
+name,
 json_build_object(
     'type', 'Polygon',
-    'geometry', ST_AsGeoJSON(t.geom)::json)::text as geojson
+    'geometry', ST_AsGeoJSON(w.geom)::json)::text as geojson
 FROM
-  World_Countries AS t;'''
+  biodiversity_hotspots AS w;'''
 
 
 conn.commit()
