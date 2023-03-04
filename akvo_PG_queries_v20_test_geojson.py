@@ -45,7 +45,7 @@ drop_a24 = '''DROP TABLE IF EXISTS akvo_ecosia_tree_area_registration;'''
 drop_a25 = '''DROP TABLE IF EXISTS akvo_ecosia_tree_photo_registration;'''
 drop_a26 = '''DROP TABLE IF EXISTS s4g_ecosia_monitoring;'''
 drop_a0 = '''DROP TABLE IF EXISTS TESTING_GEOJSON;'''
-drop_a1 = '''DROP TABLE IF EXISTS TESTING_BACKGROUD;'''
+drop_a01 = '''DROP TABLE IF EXISTS TESTING_BACKGROUD;'''
 
 conn.commit()
 
@@ -58,6 +58,8 @@ json_build_object(
 FROM
   akvo_tree_registration_areas AS t
   where t.polygon NOTNULL;'''
+
+conn.commit()
 
 create_a01 = '''CREATE TABLE TESTING_BACKGROUD AS SELECT
 country,
