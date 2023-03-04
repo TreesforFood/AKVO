@@ -53,7 +53,7 @@ create_a0 = '''CREATE TABLE TESTING_GEOJSON AS SELECT
 country, organisation,
 json_build_object(
     'type', 'Polygon',
-    'geometry', ST_AsGeoJSON(t.polygon)::json)
+    'geometry', ST_AsGeoJSON(t.polygon)::json)::text as geojson
 
 FROM
   akvo_tree_registration_areas AS t
