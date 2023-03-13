@@ -65,7 +65,7 @@ FROM
 conn.commit()
 
 create_a01 = '''CREATE TABLE akvo_registration_areas_point_geojson AS SELECT
-name,
+country, organisation,
 json_build_object(
     'type', 'Point',
     'geometry', ST_AsGeoJSON(w.geom)::json)::text as geojson
@@ -76,7 +76,7 @@ FROM
 conn.commit()
 
 create_a02 = '''CREATE TABLE akvo_monitoring_pcq_point_geojson AS SELECT
-name,
+identifier_akvo,
 json_build_object(
     'type', 'Point',
     'geometry', ST_AsGeoJSON(y.geom)::json)::text as geojson
