@@ -44,12 +44,15 @@ drop_a23 = '''DROP TABLE IF EXISTS akvo_ecosia_tree_area_monitoring;'''
 drop_a24 = '''DROP TABLE IF EXISTS akvo_ecosia_tree_area_registration;'''
 drop_a25 = '''DROP TABLE IF EXISTS akvo_ecosia_tree_photo_registration;'''
 drop_a26 = '''DROP TABLE IF EXISTS s4g_ecosia_monitoring;'''
-drop_a0 = '''DROP TABLE IF EXISTS TESTING_GEOJSON;'''
-drop_a01 = '''DROP TABLE IF EXISTS TESTING_BACKGROUD;'''
+drop_a0 = '''DROP TABLE IF EXISTS akvo_registration_areas_polygon_geojson;'''
+drop_a01 = '''DROP TABLE IF EXISTS akvo_registration_areas_point_geojson;'''
+drop_a02 = '''DROP TABLE IF EXISTS akvo_monitoring_pcq_point_geojson;'''
+cur.execute('''DROP TABLE IF EXISTS testing_background;''')
+cur.execute('''DROP TABLE IF EXISTS testing_geojson;''')
 
 conn.commit()
 
-create_a0 = '''CREATE TABLE TESTING_GEOJSON AS SELECT
+create_a0 = '''CREATE TABLE akvo_registration_areas_polygon_geojson AS SELECT
 country, organisation,
 json_build_object(
     'type', 'Polygon',
@@ -61,14 +64,24 @@ FROM
 
 conn.commit()
 
-create_a01 = '''CREATE TABLE TESTING_BACKGROUD AS SELECT
+create_a01 = '''CREATE TABLE akvo_registration_areas_point_geojson AS SELECT
 name,
 json_build_object(
-    'type', 'Polygon',
+    'type', 'Point',
     'geometry', ST_AsGeoJSON(w.geom)::json)::text as geojson
 FROM
-  biodiversity_hotspots AS w;'''
+  akvo_tree_registration_areas AS w
+  where t.polygon ISNULL;'''
 
+conn.commit()
+
+create_a02 = '''CREATE TABLE akvo_monitoring_pcq_point_geojson AS SELECT
+name,
+json_build_object(
+    'type', 'Point',
+    'geometry', ST_AsGeoJSON(y.geom)::json)::text as geojson
+FROM
+  akvo_tree_monitoring_pcq AS y;'''
 
 conn.commit()
 
@@ -1287,6 +1300,7 @@ CREATE POLICY haf_policy ON akvo_ecosia_tree_photo_registration TO morocco_haf U
 # Execute create tables
 cur.execute(drop_a0)
 cur.execute(drop_a01)
+cur.execute(drop_a02)
 cur.execute(drop_a1)
 cur.execute(drop_a2)
 cur.execute(drop_a4)
@@ -1315,6 +1329,7 @@ cur.execute(drop_a26)
 
 cur.execute(create_a0)
 cur.execute(create_a01)
+cur.execute(create_a02)
 cur.execute(create_a1)
 cur.execute(create_a2)
 cur.execute(create_a3)
