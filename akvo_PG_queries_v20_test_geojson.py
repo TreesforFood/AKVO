@@ -68,7 +68,7 @@ create_a01 = '''CREATE TABLE akvo_registration_areas_point_geojson AS SELECT
 country, organisation,
 json_build_object(
     'type', 'Point',
-    'geometry', ST_AsGeoJSON(w.geom)::json)::text as geojson
+    'geometry', ST_AsGeoJSON(w.centroid_coord)::json)::text as geojson
 FROM
   akvo_tree_registration_areas AS w
   where w.polygon ISNULL;'''
@@ -79,7 +79,7 @@ create_a02 = '''CREATE TABLE akvo_monitoring_pcq_point_geojson AS SELECT
 identifier_akvo,
 json_build_object(
     'type', 'Point',
-    'geometry', ST_AsGeoJSON(y.geom)::json)::text as geojson
+    'geometry', ST_AsGeoJSON(y.pcq_location)::json)::text as geojson
 FROM
   akvo_tree_monitoring_pcq AS y;'''
 
