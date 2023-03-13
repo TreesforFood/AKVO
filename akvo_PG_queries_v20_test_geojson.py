@@ -71,7 +71,7 @@ json_build_object(
     'geometry', ST_AsGeoJSON(w.geom)::json)::text as geojson
 FROM
   akvo_tree_registration_areas AS w
-  where t.polygon ISNULL;'''
+  where w.polygon ISNULL;'''
 
 conn.commit()
 
