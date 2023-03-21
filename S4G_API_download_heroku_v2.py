@@ -14,12 +14,8 @@ response_landcover = requests.get("https://ecosia.space4good.com/dashboard/landc
 
 #Processing status indicator done, can be checked with:
 #https://ecosia.space4good.com/dashboard/processingstatus/?data_quality_check_issues_gt_0=true&site__country_code=per
-
-
 content_page = json.loads(response.text)
 content_page_landcover = json.loads(response_landcover.text)
-
-content_page = json.loads(response.text)
 
 #connect to Postgresql database
 conn = psycopg2.connect(os.environ["DATABASE_URL"], sslmode='require')
