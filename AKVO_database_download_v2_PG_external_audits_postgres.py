@@ -5,7 +5,6 @@ import re
 import geojson
 import geodaisy.converters as convert
 from area import area
-from dotenv import load_dotenv, find_dotenv
 import os
 #from akvo_api_config import Config
 
