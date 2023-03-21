@@ -7,8 +7,6 @@ import geodaisy.converters as convert
 from area import area
 import os
 
-config = Config()
-
 # get the token from AKVO
 data = {"client_id": config.CONF["CLIENT_ID"], "username" : config.CONF["USERNAME"], "password": config.CONF["PASSWORD"], "grant_type": config.CONF["GRANT_TYPE"], "scope": config.CONF["SCOPE"]}
 response = requests.post("https://akvofoundation.eu.auth0.com/oauth/token", data=data)
