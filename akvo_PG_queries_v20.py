@@ -624,7 +624,7 @@ ORDER BY AKVO_Tree_registration_areas.organisation, AKVO_Tree_registration_areas
 conn.commit()
 
 create_a7 = '''CREATE TABLE CALC_GEOM_Trees_counted_per_site_by_external_audit
-AS SELECT AKVO_Tree_registration_areas.centroid_coord,
+AS SELECT AKVO_Tree_external_audits_areas.location_external_audit,
 AKVO_Tree_registration_areas.identifier_akvo,
 AKVO_Tree_registration_areas.organisation AS "Name organisation",
 AKVO_Tree_registration_areas.submitter AS "Name submitter registration data",
@@ -633,7 +633,8 @@ AKVO_Tree_registration_areas.id_planting_site AS "ID planting site",
 AKVO_Tree_registration_areas.contract_number AS "Contract number",
 AKVO_Tree_registration_areas.tree_number AS "Nr. trees registered",
 AKVO_Tree_external_audits_areas.manual_tree_count AS "Nr. trees counted by auditor"
-FROM AKVO_Tree_registration_areas JOIN AKVO_Tree_external_audits_areas
+FROM AKVO_Tree_registration_areas
+JOIN AKVO_Tree_external_audits_areas
 ON AKVO_Tree_registration_areas.identifier_akvo = AKVO_Tree_external_audits_areas.identifier_akvo
 WHERE AKVO_Tree_external_audits_areas.manual_tree_count NOTNULL
 ORDER BY AKVO_Tree_registration_areas.organisation;'''
