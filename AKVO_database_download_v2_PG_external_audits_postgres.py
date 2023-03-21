@@ -6,9 +6,7 @@ import geojson
 import geodaisy.converters as convert
 from area import area
 import os
-#from akvo_api_config import Config
 
-from akvo_api_config import Config
 config = Config()
 
 # get the token from AKVO
