@@ -10,7 +10,14 @@ import os
 username = os.environ["USERNAME_S4G"]
 password = os.environ["PASSWORD_S4G"]
 response = requests.get("https://ecosia.space4good.com/dashboard/site/?page_size=100000", auth=HTTPBasicAuth(username, password), allow_redirects=True)
+response_landcover = requests.get("https://ecosia.space4good.com/dashboard/landcover/?page_size=10000", auth=HTTPBasicAuth(username, password), allow_redirects=True)
 
+#Processing status indicator done, can be checked with:
+#https://ecosia.space4good.com/dashboard/processingstatus/?data_quality_check_issues_gt_0=true&site__country_code=per
+
+
+content_page = json.loads(response.text)
+content_page_landcover = json.loads(response_landcover.text)
 
 content_page = json.loads(response.text)
 
