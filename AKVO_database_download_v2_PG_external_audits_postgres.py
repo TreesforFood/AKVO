@@ -51,7 +51,7 @@ DROP TABLE IF EXISTS AKVO_Tree_external_audits_areas;
 DROP TABLE IF EXISTS AKVO_Tree_external_audits_photos;
 DROP TABLE IF EXISTS AKVO_Tree_external_audits_pcq;
 
-CREATE TABLE AKVO_Tree_external_audits_areas (identifier_akvo TEXT, instance INTEGER, submitter TEXT, test TEXT, farmer_reported_tree_nr NUMERIC, farmer_reported_nr_tree_species NUMERIC, farmer_reported_died_trees NUMERIC, audit_reported_trees NUMERIC, option_tree_count TEXT, manual_tree_count NUMERIC, display_name TEXT, impression_site TEXT, lat_y REAL, lon_x REAL, calc_area NUMERIC(20,2), location_external_audit geography(POINT, 4326), polygon geography(POLYGON, 4326));
+CREATE TABLE AKVO_Tree_external_audits_areas (identifier_akvo TEXT, instance INTEGER, submitter TEXT, submissiondate DATE, test TEXT, farmer_reported_tree_nr NUMERIC, farmer_reported_nr_tree_species NUMERIC, farmer_reported_died_trees NUMERIC, audit_reported_trees NUMERIC, option_tree_count TEXT, manual_tree_count NUMERIC, display_name TEXT, impression_site TEXT, lat_y REAL, lon_x REAL, calc_area NUMERIC(20,2), location_external_audit geography(POINT, 4326), polygon geography(POLYGON, 4326));
 CREATE TABLE AKVO_Tree_external_audits_photos (identifier_akvo TEXT, instance INTEGER, lat_photo REAL, lon_photo REAL, url_photo TEXT, location_photo geography(POINT, 4326));
 CREATE TABLE AKVO_Tree_external_audits_pcq (identifier_akvo TEXT, instance INTEGER, lat_pcq_sample REAL, lon_pcq_sample REAL, pcq_location geography(POINT, 4326), height_pcq_sample NUMERIC(20,2), Q1_dist NUMERIC(20,2), Q1_hgt NUMERIC(20,2), Q1_spec TEXT, Q2_dist NUMERIC(20,2), Q2_hgt NUMERIC(20,2), Q2_spec TEXT, Q3_dist NUMERIC(20,2), Q3_hgt NUMERIC(20,2), Q3_spec TEXT, Q4_dist NUMERIC(20,2), Q4_hgt NUMERIC(20,2), Q4_spec TEXT);
 
@@ -69,6 +69,7 @@ for all_data in url_list:
         identifier = level1_exaudits['identifier']
         instance = level1_exaudits['id']
         submitter = level1_exaudits['submitter']
+        submissiondate = level1_exaudits['submissionDate']
         display_name = level1_exaudits['displayName']
 
         try:
@@ -173,8 +174,8 @@ for all_data in url_list:
 
         #cur.execute('''INSERT INTO Tree_external_audits_areas(polygon) VALUES (ST_GeomFromText(%s))''', (polygon,))
 
-        cur.execute('''INSERT INTO AKVO_Tree_external_audits_areas (identifier_akvo, instance, submitter, test, farmer_reported_tree_nr, farmer_reported_nr_tree_species, farmer_reported_died_trees, audit_reported_trees, option_tree_count, manual_tree_count, display_name, impression_site, lat_y, lon_x, calc_area, location_external_audit, polygon)
-        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);''', (identifier, instance, submitter, test, farmer_reported_tree_nr, farmer_reported_tree_species, farmer_reported_died_trees, audit_reported_trees, option_tree_count, manual_tree_count, display_name, impression_site, location_external_audit_lat, location_external_audit_lon, area_ha, location_external_audit, polygon))
+        cur.execute('''INSERT INTO AKVO_Tree_external_audits_areas (identifier_akvo, instance, submitter, submissiondate, test, farmer_reported_tree_nr, farmer_reported_nr_tree_species, farmer_reported_died_trees, audit_reported_trees, option_tree_count, manual_tree_count, display_name, impression_site, lat_y, lon_x, calc_area, location_external_audit, polygon)
+        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);''', (identifier, instance, submitter, submissiondate, test, farmer_reported_tree_nr, farmer_reported_tree_species, farmer_reported_died_trees, audit_reported_trees, option_tree_count, manual_tree_count, display_name, impression_site, location_external_audit_lat, location_external_audit_lon, area_ha, location_external_audit, polygon))
 
         conn.commit()
 
