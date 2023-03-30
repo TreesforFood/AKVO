@@ -1407,9 +1407,9 @@ ALTER TABLE superset_ecosia_nursery_registration enable ROW LEVEL SECURITY;
 ALTER TABLE superset_ecosia_tree_registration_polygon enable ROW LEVEL SECURITY;
 ALTER TABLE superset_ecosia_tree_monitoring enable ROW LEVEL SECURITY;
 
-CREATE POLICY ecosia_superset_policy ON superset_ecosia_nursery_registration TO ecosia_superset USING (SELECT * FROM superset_ecosia_nursery_registration);
-CREATE POLICY ecosia_superset_policy ON superset_ecosia_tree_registration_polygon TO ecosia_superset USING (SELECT * FROM superset_ecosia_tree_registration_polygon);
-CREATE POLICY ecosia_superset_policy ON superset_ecosia_tree_monitoring TO ecosia_superset USING (SELECT * FROM superset_ecosia_tree_monitoring);'''
+CREATE POLICY ecosia_superset_policy ON superset_ecosia_nursery_registration TO ecosia_superset USING (true);
+CREATE POLICY ecosia_superset_policy ON superset_ecosia_tree_registration_polygon TO ecosia_superset USING (true);
+CREATE POLICY ecosia_superset_policy ON superset_ecosia_tree_monitoring TO ecosia_superset USING (true);'''
 
 conn.commit()
 
