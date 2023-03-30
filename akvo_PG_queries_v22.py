@@ -1216,14 +1216,6 @@ AS SELECT * FROM akvo_nursery_monitoring;'''
 conn.commit()
 
 
-
-
-
-
-
-
-
-
 create_a17_mkec = '''
 REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA public FROM kenya_mkec;
 
@@ -1414,9 +1406,9 @@ ALTER TABLE superset_ecosia_nursery_registration enable ROW LEVEL SECURITY;
 ALTER TABLE superset_ecosia_tree_registration_polygon enable ROW LEVEL SECURITY;
 ALTER TABLE superset_ecosia_tree_monitoring enable ROW LEVEL SECURITY;
 
-CREATE POLICY ecosia_superset_policy ON superset_ecosia_nursery_registration TO ecosia_superset;
-CREATE POLICY ecosia_superset_policy ON superset_ecosia_tree_registration_polygon TO ecosia_superset;
-CREATE POLICY ecosia_superset_policy ON superset_ecosia_tree_monitoring TO ecosia_superset;'''
+CREATE POLICY ecosia_superset_policy ON superset_ecosia_nursery_registration TO ecosia_superset USING (ecosia_superset = current_user);
+CREATE POLICY ecosia_superset_policy ON superset_ecosia_tree_registration_polygon TO ecosia_superset USING (ecosia_superset = current_user);
+CREATE POLICY ecosia_superset_policy ON superset_ecosia_tree_monitoring TO ecosia_superset USING (ecosia_superset = current_user);'''
 
 conn.commit()
 
