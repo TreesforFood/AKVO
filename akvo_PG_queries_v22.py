@@ -44,7 +44,8 @@ DROP TABLE IF EXISTS s4g_ecosia_deforestation;
 DROP TABLE IF EXISTS s4g_ecosia_landuse_cover;
 DROP TABLE IF EXISTS superset_ecosia_nursery_registration;
 DROP TABLE IF EXISTS superset_ecosia_tree_registration_polygon;
-DROP TABLE IF EXISTS superset_ecosia_tree_monitoring;'''
+DROP TABLE IF EXISTS superset_ecosia_tree_monitoring;
+DROP TABLE IF EXISTS s4g_ecosia_data_quality;'''
 
 conn.commit()
 
