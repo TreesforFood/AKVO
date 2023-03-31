@@ -123,21 +123,39 @@ for i in content_page['features']:
                 conn.commit()
 
         artificially_created_polygon = i.get('properties')['artificially_created_polygon']
-        health_index = i.get('properties')['health_indicator']['health_index']
-        health_index_normalized = i.get('properties')['health_indicator']['health_index_normalized']
-        health_trend = i.get('properties')['health_indicator']['health_trend']
-        health_trend_normalized = i.get('properties')['health_indicator']['health_trend_normalized']
+        if i.get('properties')['health_indicator']['health_index'] is not None:
+            health_index_power = i.get('properties')['health_indicator']['health_index']
+            #force scientific power e numbers to decimals
+            health_index = float(health_index_power)
+            #health_index = f'{health_index_power:.20f}'
 
-        # Populate the tree registration table
-        cur.execute('''INSERT INTO S4G_API_data_quality_health (identifier_akvo, partner_site_id, contract_number, country, nr_photos_taken, trees_planted, issues, invalid_polygon, invalid_point, unconnected, area_too_large, area_too_small, overlap, circumference_too_large,
-        site_not_in_country, area_water_ha, area_urban_ha, artificially_created_polygon, health_index, health_index_normalized,
-        health_trend, health_trend_normalized)
-        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)''', (identifier_akvo,
-        partner_site_id, contract_number, country, nr_photos_taken, trees_planted, issues, invalid_polygon, invalid_point, unconnected,
-        area_too_large, area_too_small, overlap, circumference_too_large, site_not_in_country, area_water_ha, area_urban_ha, artificially_created_polygon,
-        health_index, health_index_normalized, health_trend, health_trend_normalized))
 
-        conn.commit()
+        if i.get('properties')['health_indicator']['health_index_normalized'] is not None:
+            health_index_normalized_power = i.get('properties')['health_indicator']['health_index_normalized']
+            #force scientific power e numbers to decimals
+            health_index_normalized = float(health_index_normalized_power)
+
+
+        if i.get('properties')['health_indicator']['health_trend'] is not None:
+            health_trend_power = i.get('properties')['health_indicator']['health_trend']
+            #force scientific power e numbers to decimals
+            health_trend = float(health_trend_power)
+
+        if i.get('properties')['health_indicator']['health_trend_normalized'] is not None:
+            health_trend_normalized_power = i.get('properties')['health_indicator']['health_trend_normalized']
+            #force scientific power e numbers to decimals
+            health_trend_normalized = float(health_trend_normalized_power)
+
+            # Populate the tree registration table
+            cur.execute('''INSERT INTO S4G_API_data_quality_health (identifier_akvo, partner_site_id, contract_number, country, nr_photos_taken, trees_planted, issues, invalid_polygon, invalid_point, unconnected, area_too_large, area_too_small, overlap, circumference_too_large,
+            site_not_in_country, area_water_ha, area_urban_ha, artificially_created_polygon, health_index, health_index_normalized,
+            health_trend, health_trend_normalized)
+            VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)''', (identifier_akvo,
+            partner_site_id, contract_number, country, nr_photos_taken, trees_planted, issues, invalid_polygon, invalid_point, unconnected,
+            area_too_large, area_too_small, overlap, circumference_too_large, site_not_in_country, area_water_ha, area_urban_ha, artificially_created_polygon,
+            health_index, health_index_normalized, health_trend, health_trend_normalized))
+
+            conn.commit()
 
 for j in content_page_landcover['features']:
     #print("LANDCOVER: ", j)
