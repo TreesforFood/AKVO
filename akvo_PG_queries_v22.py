@@ -1212,7 +1212,27 @@ where t.polygon NOTNULL;'''
 conn.commit()
 
 create_a33 = '''CREATE TABLE superset_ecosia_tree_monitoring
-AS SELECT * FROM akvo_nursery_monitoring;'''
+AS SELECT akvo_tree_monitoring_areas.*,
+akvo_tree_registration_areas_updated.country,
+akvo_tree_registration_areas_updated.organisation,
+akvo_tree_registration_areas_updated.contract_number,
+akvo_tree_registration_areas_updated.lat_y,
+akvo_tree_registration_areas_updated.lon_x
+FROM akvo_tree_monitoring_areas
+LEFT JOIN akvo_tree_registration_areas_updated
+ON akvo_tree_monitoring_areas.identifier_akvo = akvo_tree_registration_areas_updated.identifier_akvo;'''
+
+conn.commit()
+
+create_a34 = '''CREATE TABLE superset_ecosia_s4g_site_health
+AS SELECT s4g_ecosia_site_health.* FROM s4g_ecosia_site_health;'''
+
+conn.commit()
+
+create_a35 = '''CREATE TABLE superset_ecosia_tree_registration_point
+AS SELECT * FROM
+akvo_tree_registration_areas_updated
+where polygon ISNULL;'''
 
 conn.commit()
 
@@ -1398,18 +1418,27 @@ GRANT USAGE ON SCHEMA HEROKU_EXT TO ecosia_superset;
 GRANT SELECT ON TABLE superset_ecosia_nursery_registration TO ecosia_superset;
 GRANT SELECT ON TABLE superset_ecosia_tree_registration_polygon TO ecosia_superset;
 GRANT SELECT ON TABLE superset_ecosia_tree_monitoring TO ecosia_superset;
+GRANT SELECT ON TABLE superset_ecosia_s4g_site_health TO ecosia_superset;
+GRANT SELECT ON TABLE superset_ecosia_tree_registration_point TO ecosia_superset;
+
 
 DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_nursery_registration;
 DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_tree_registration_polygon;
 DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_tree_monitoring;
+DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_s4g_site_health;
+DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_tree_registration_point;
 
 ALTER TABLE superset_ecosia_nursery_registration enable ROW LEVEL SECURITY;
 ALTER TABLE superset_ecosia_tree_registration_polygon enable ROW LEVEL SECURITY;
 ALTER TABLE superset_ecosia_tree_monitoring enable ROW LEVEL SECURITY;
+ALTER TABLE superset_ecosia_s4g_site_health enable ROW LEVEL SECURITY;
+ALTER TABLE superset_ecosia_tree_registration_point enable ROW LEVEL SECURITY;
 
 CREATE POLICY ecosia_superset_policy ON superset_ecosia_nursery_registration TO ecosia_superset USING (true);
 CREATE POLICY ecosia_superset_policy ON superset_ecosia_tree_registration_polygon TO ecosia_superset USING (true);
-CREATE POLICY ecosia_superset_policy ON superset_ecosia_tree_monitoring TO ecosia_superset USING (true);'''
+CREATE POLICY ecosia_superset_policy ON superset_ecosia_tree_monitoring TO ecosia_superset USING (true);
+CREATE POLICY ecosia_superset_policy ON superset_ecosia_s4g_site_health TO ecosia_superset USING (true);
+CREATE POLICY ecosia_superset_policy ON superset_ecosia_tree_registration_point TO ecosia_superset USING (true);'''
 
 conn.commit()
 
@@ -1418,7 +1447,7 @@ conn.commit()
 cur.execute(drop_tables)
 conn.commit()
 
-
+# Execute create tables
 cur.execute(create_a1)
 cur.execute(create_a2)
 cur.execute(create_a3)
@@ -1452,6 +1481,8 @@ cur.execute(create_a30)
 cur.execute(create_a31)
 cur.execute(create_a32)
 cur.execute(create_a33)
+cur.execute(create_a34)
+cur.execute(create_a35)
 
 cur.execute(create_a17_mkec)
 cur.execute(create_a18_fdia)
