@@ -1620,7 +1620,7 @@ GRANT SELECT ON TABLE superset_ecosia_nursery_monitoring TO ecosia_superset;
 GRANT SELECT ON TABLE superset_ecosia_nursery_monitoring_species TO ecosia_superset;
 GRANT SELECT ON TABLE superset_ecosia_nursery_registration_pictures TO ecosia_superset;
 GRANT SELECT ON TABLE superset_ecosia_nursery_monitoring_pictures TO ecosia_superset;
-GRANT SELECT ON TABLE superset_ecosia_tree_registration_picturesTO ecosia_superset;
+GRANT SELECT ON TABLE superset_ecosia_tree_registration_pictures TO ecosia_superset;
 GRANT SELECT ON TABLE superset_ecosia_tree_registration_species TO ecosia_superset;
 GRANT SELECT ON TABLE superset_ecosia_s4g_fires TO ecosia_superset;
 GRANT SELECT ON TABLE superset_ecosia_s4g_deforestation TO ecosia_superset;
