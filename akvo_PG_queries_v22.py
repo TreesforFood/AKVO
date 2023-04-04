@@ -22,6 +22,8 @@ DROP TABLE IF EXISTS CALC_GEOM_pcq_calculations_per_site_by_external_audit;
 DROP TABLE IF EXISTS CALC_GEOM_Trees_counted_per_site_by_external_audit;
 DROP TABLE IF EXISTS CALC_GEOM_AKVO_tree_registration_submissions_today;
 DROP TABLE IF EXISTS CALC_GEOM_AKVO_nursery_registration_submissions_today;
+DROP TABLE IF EXISTS CALC_GEOM_AKVO_tree_registration_submissions_yesterday;
+DROP TABLE IF EXISTS CALC_GEOM_AKVO_nursery_registration_submissions_yesterday;
 DROP TABLE IF EXISTS CALC_GEOM_AKVO_check_photo_registrations;
 DROP TABLE IF EXISTS CALC_GEOM_AKVO_check_species_registrations;
 DROP TABLE IF EXISTS CALC_GEOM_locations_registration_versus_externalaudits;
@@ -688,17 +690,17 @@ ORDER BY AKVO_Tree_registration_areas.organisation;'''
 
 conn.commit()
 
-create_a8 = '''CREATE TABLE CALC_GEOM_AKVO_tree_registration_submissions_yesterday
+create_a8 = '''CREATE TABLE CALC_GEOM_AKVO_tree_registration_submissions_today
 AS SELECT * FROM AKVO_Tree_registration_areas
-WHERE AKVO_Tree_registration_areas.submission = current_date -1
+WHERE AKVO_Tree_registration_areas.submission = current_date
 ORDER BY submissiontime ASC;'''
 
 conn.commit()
 
-create_a9 = '''CREATE TABLE CALC_GEOM_AKVO_nursery_registration_submissions_yesterday
+create_a9 = '''CREATE TABLE CALC_GEOM_AKVO_nursery_registration_submissions_today
 AS SELECT *
 FROM AKVO_Nursery_registration
-WHERE AKVO_Nursery_registration.submission = current_date -1
+WHERE AKVO_Nursery_registration.submission = current_date
 ORDER BY submission ASC;'''
 
 create_a10 = '''CREATE TABLE CALC_GEOM_AKVO_check_photo_registrations
