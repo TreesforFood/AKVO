@@ -20,8 +20,8 @@ DROP TABLE IF EXISTS CALC_TAB_Error_check_on_site_registration;
 DROP TABLE IF EXISTS CALC_TAB_Error_partner_report_on_site_registration;
 DROP TABLE IF EXISTS CALC_GEOM_pcq_calculations_per_site_by_external_audit;
 DROP TABLE IF EXISTS CALC_GEOM_Trees_counted_per_site_by_external_audit;
-DROP TABLE IF EXISTS CALC_GEOM_AKVO_tree_registration_submissions_yesterday;
-DROP TABLE IF EXISTS CALC_GEOM_AKVO_nursery_registration_submissions_yesterday;
+DROP TABLE IF EXISTS CALC_GEOM_AKVO_tree_registration_submissions_today;
+DROP TABLE IF EXISTS CALC_GEOM_AKVO_nursery_registration_submissions_today;
 DROP TABLE IF EXISTS CALC_GEOM_AKVO_check_photo_registrations;
 DROP TABLE IF EXISTS CALC_GEOM_AKVO_check_species_registrations;
 DROP TABLE IF EXISTS CALC_GEOM_locations_registration_versus_externalaudits;
@@ -47,7 +47,19 @@ DROP TABLE IF EXISTS superset_ecosia_tree_registration_polygon;
 DROP TABLE IF EXISTS superset_ecosia_tree_monitoring;
 DROP TABLE IF EXISTS s4g_ecosia_data_quality;
 DROP TABLE IF EXISTS superset_ecosia_s4g_site_health;
-DROP TABLE IF EXISTS superset_ecosia_tree_registration_point'''
+DROP TABLE IF EXISTS superset_ecosia_tree_registration_point;
+DROP TABLE IF EXISTS superset_ecosia_nursery_monitoring_species;
+DROP TABLE IF EXISTS superset_ecosia_tree_registration_polygon;
+DROP TABLE IF EXISTS superset_ecosia_nursery_monitoring;
+DROP TABLE IF EXISTS superset_ecosia_nursery_registration_pictures;
+DROP TABLE IF EXISTS superset_ecosia_nursery_monitoring_pictures;
+DROP TABLE IF EXISTS superset_ecosia_tree_registration_pictures;
+DROP TABLE IF EXISTS superset_ecosia_tree_registration_species;
+DROP TABLE IF EXISTS superset_ecosia_tree_monitoring_species;
+DROP TABLE IF EXISTS superset_ecosia_tree_monitoring_pictures;
+DROP TABLE IF EXISTS superset_ecosia_s4g_fires;
+DROP TABLE IF EXISTS superset_ecosia_s4g_deforestation;
+DROP TABLE IF EXISTS superset_ecosia_tree_registration;'''
 
 conn.commit()
 
@@ -1197,26 +1209,60 @@ ORDER BY S4G_API_data_quality_health.issues DESC'''
 conn.commit()
 
 create_a31 = '''CREATE TABLE superset_ecosia_nursery_registration
-AS SELECT * from akvo_nursery_registration;'''
+AS SELECT
+akvo_nursery_registration.*,
+CALC_TAB_Error_partner_report_on_nursery_registration."species currently produced in nursery",
+CALC_TAB_Error_partner_report_on_nursery_registration."nr of photos taken during registration",
+CALC_TAB_Error_partner_report_on_nursery_registration."Check nr of photos taken during registration of the nursery"
+
+FROM akvo_nursery_registration
+JOIN CALC_TAB_Error_partner_report_on_nursery_registration
+ON CALC_TAB_Error_partner_report_on_nursery_registration.identifier_akvo = akvo_nursery_registration.identifier_akvo;'''
 
 conn.commit()
 
-create_a32 = '''CREATE TABLE superset_ecosia_tree_registration_polygon
-AS SELECT *,
+
+create_a32 = '''CREATE TABLE superset_ecosia_tree_registration
+AS SELECT
+t.*,
+s4g_ecosia_data_quality.nr_photos_taken AS "number of tree photos taken",
+s4g_ecosia_data_quality.geometric_sum_errors_detected AS "total nr of mapping errors detected",
+s4g_ecosia_data_quality.geometric_error_polygon AS "site was mapped with too few points (less than 3)",
+s4g_ecosia_data_quality.geometric_error_point AS "site was mapped wrongly",
+s4g_ecosia_data_quality.geometric_error_sliver_polygon AS "mapped site has multiple areas",
+s4g_ecosia_data_quality.geometric_error_area_too_large AS "area of the site is unrealisticly large",
+s4g_ecosia_data_quality.geometric_error_area_too_small AS "area of the site is unrealisticly small",
+s4g_ecosia_data_quality.geometric_error_area_boundary_overlap_other_site AS "mapped site has overlap with another site",
+s4g_ecosia_data_quality.geometric_error_boundary_too_large AS "boundary of mapped site seems unrealistic",
+s4g_ecosia_data_quality.geometric_error_site_not_in_country AS "mapped site not located in country of project",
+s4g_ecosia_data_quality.geometric_error_water_body_located_in_site AS "mapped site contains water area",
+s4g_ecosia_data_quality.geometric_error_urban_body_located_in_site AS "mapped site contains urban area",
+s4g_ecosia_data_quality.buffer_area_around_point_location AS "artificial 50m buffer placed around mapped site (points)",
+
+S4G_API_health_indicators.health_index,
+S4G_API_health_indicators.health_index_normalized,
+S4G_API_health_indicators.health_trend,
+S4G_API_health_indicators.health_trend_normalized,
+
 json_build_object(
 'type', 'Polygon',
 'geometry', ST_AsGeoJSON(t.polygon)::json)::text as geojson
 
 FROM
 akvo_tree_registration_areas_updated AS t
-where t.polygon NOTNULL;'''
+LEFT JOIN s4g_ecosia_data_quality
+ON t.identifier_akvo = s4g_ecosia_data_quality.identifier_akvo
+LEFT JOIN S4G_API_health_indicators
+ON t.identifier_akvo = S4G_API_health_indicators.identifier_akvo;
+--where t.polygon NOTNULL;
+'''
 
 conn.commit()
 
 create_a33 = '''CREATE TABLE superset_ecosia_tree_monitoring
 AS SELECT akvo_tree_monitoring_areas.*,
 akvo_tree_registration_areas_updated.country,
-akvo_tree_registration_areas_updated.organisation,
+LOWER(akvo_tree_registration_areas_updated.organisation) AS organisation,
 akvo_tree_registration_areas_updated.contract_number,
 akvo_tree_registration_areas_updated.lat_y,
 akvo_tree_registration_areas_updated.lon_x
@@ -1227,17 +1273,161 @@ ON akvo_tree_monitoring_areas.identifier_akvo = akvo_tree_registration_areas_upd
 conn.commit()
 
 create_a34 = '''CREATE TABLE superset_ecosia_s4g_site_health
-AS SELECT s4g_ecosia_site_health.* FROM s4g_ecosia_site_health;'''
+AS SELECT
+s4g_ecosia_site_health.*,
+akvo_tree_registration_areas.lat_y,
+akvo_tree_registration_areas.lon_x
+
+FROM s4g_ecosia_site_health
+JOIN akvo_tree_registration_areas
+ON akvo_tree_registration_areas.identifier_akvo = s4g_ecosia_site_health.identifier_akvo;'''
 
 conn.commit()
 
+# THIS ONE IS DE-ACTIVATED IN THE EXECUTE!!
 create_a35 = '''CREATE TABLE superset_ecosia_tree_registration_point
-AS SELECT * FROM
+AS SELECT
+
+akvo_tree_registration_areas_updated.*,
+s4g_ecosia_data_quality.nr_photos_taken AS "number of tree photos taken",
+s4g_ecosia_data_quality.geometric_sum_errors_detected AS "total nr of mapping errors detected",
+s4g_ecosia_data_quality.geometric_error_polygon AS "site was mapped with too few points (less than 3)",
+s4g_ecosia_data_quality.geometric_error_point AS "site was mapped wrongly",
+s4g_ecosia_data_quality.geometric_error_sliver_polygon AS "mapped site has multiple areas",
+s4g_ecosia_data_quality.geometric_error_area_too_large AS "area of the site is unrealisticly large",
+s4g_ecosia_data_quality.geometric_error_area_too_small AS "area of the site is unrealisticly small",
+s4g_ecosia_data_quality.geometric_error_area_boundary_overlap_other_site AS "mapped site has overlap with another site",
+s4g_ecosia_data_quality.geometric_error_boundary_too_large AS "boundary of mapped site seems unrealistic",
+s4g_ecosia_data_quality.geometric_error_site_not_in_country AS "mapped site not located in country of project",
+s4g_ecosia_data_quality.geometric_error_water_body_located_in_site AS "mapped site contains water area",
+s4g_ecosia_data_quality.geometric_error_urban_body_located_in_site AS "mapped site contains urban area",
+s4g_ecosia_data_quality.buffer_area_around_point_location AS "artificial 50m buffer placed around mapped site (points)",
+
+FROM
 akvo_tree_registration_areas_updated
+JOIN s4g_ecosia_data_quality
+ON akvo_tree_registration_areas_updated.identifier_akvo = s4g_ecosia_data_quality.identifier_akvo
 where polygon ISNULL;'''
 
 conn.commit()
 
+create_a36 = '''CREATE TABLE superset_ecosia_nursery_monitoring
+AS SELECT
+akvo_nursery_registration.country,
+LOWER(akvo_nursery_registration.organisation) AS organisation,
+akvo_nursery_registration.nursery_name,
+akvo_nursery_monitoring.*,
+akvo_nursery_registration.lat_y,
+akvo_nursery_registration.lon_x
+
+FROM akvo_nursery_monitoring
+JOIN akvo_nursery_registration
+ON akvo_nursery_registration.identifier_akvo = akvo_nursery_monitoring.identifier_akvo;'''
+
+conn.commit()
+
+create_a37 = '''CREATE TABLE superset_ecosia_nursery_monitoring_species
+AS SELECT
+akvo_nursery_registration.country,
+LOWER(akvo_nursery_registration.organisation) AS organisation,
+akvo_nursery_registration.nursery_name,
+akvo_nursery_monitoring.submission_date,
+akvo_nursery_monitoring_tree_species.*
+
+FROM akvo_nursery_monitoring_tree_species
+JOIN akvo_nursery_registration
+ON akvo_nursery_monitoring_tree_species.identifier_akvo = akvo_nursery_registration.identifier_akvo
+JOIN akvo_nursery_monitoring
+ON akvo_nursery_monitoring.instance = akvo_nursery_monitoring_tree_species.instance;'''
+
+conn.commit()
+
+create_a38 = '''CREATE TABLE superset_ecosia_nursery_registration_pictures
+AS SELECT
+akvo_nursery_registration.country,
+LOWER(akvo_nursery_registration.organisation) AS organisation,
+akvo_nursery_registration.nursery_name,
+akvo_nursery_registration.submission AS submission_date,
+akvo_nursery_registration_photos.*
+
+FROM akvo_nursery_registration_photos
+JOIN akvo_nursery_registration
+ON akvo_nursery_registration_photos.identifier_akvo =  akvo_nursery_registration.identifier_akvo;'''
+
+conn.commit()
+
+create_a39 = '''CREATE TABLE superset_ecosia_nursery_monitoring_pictures
+AS SELECT
+akvo_nursery_registration.country,
+LOWER(akvo_nursery_registration.organisation) AS organisation,
+akvo_nursery_registration.nursery_name,
+akvo_nursery_monitoring.submission_date,
+akvo_nursery_monitoring_photos.*
+
+FROM akvo_nursery_monitoring_photos
+JOIN akvo_nursery_monitoring
+ON akvo_nursery_monitoring.instance = akvo_nursery_monitoring_photos.instance
+JOIN akvo_nursery_registration
+ON akvo_nursery_monitoring_photos.identifier_akvo =  akvo_nursery_registration.identifier_akvo;'''
+
+conn.commit()
+
+create_a40 = '''CREATE TABLE superset_ecosia_tree_registration_pictures
+AS SELECT
+akvo_tree_registration_areas.country,
+LOWER(akvo_tree_registration_areas.organisation) AS organisation,
+akvo_tree_registration_areas.contract_number,
+akvo_tree_registration_areas.id_planting_site,
+akvo_tree_registration_areas.submission AS submission_date,
+akvo_tree_registration_photos.*
+
+FROM
+akvo_tree_registration_photos
+JOIN akvo_tree_registration_areas
+ON akvo_tree_registration_areas.identifier_akvo = akvo_tree_registration_photos.identifier_akvo;'''
+
+conn.commit()
+
+create_a41 = '''CREATE TABLE superset_ecosia_tree_registration_species
+AS SELECT
+akvo_tree_registration_areas.country,
+LOWER(akvo_tree_registration_areas.organisation) AS organisation,
+akvo_tree_registration_areas.contract_number,
+akvo_tree_registration_areas.id_planting_site,
+akvo_tree_registration_areas.submission AS submission_date,
+AKVO_tree_registration_species.*
+
+FROM AKVO_tree_registration_species
+JOIN akvo_tree_registration_areas
+ON AKVO_tree_registration_species.identifier_akvo = akvo_tree_registration_areas.identifier_akvo;'''
+
+conn.commit()
+
+create_a42 = '''CREATE TABLE superset_ecosia_s4g_fires
+AS SELECT
+
+s4g_ecosia_fires.*,
+akvo_tree_registration_areas.lat_y,
+akvo_tree_registration_areas.lon_x
+
+FROM s4g_ecosia_fires
+JOIN akvo_tree_registration_areas
+ON akvo_tree_registration_areas.identifier_akvo = s4g_ecosia_fires.identifier_akvo;'''
+
+conn.commit()
+
+create_a43 = '''CREATE TABLE superset_ecosia_s4g_deforestation
+AS SELECT
+s4g_ecosia_deforestation.*,
+akvo_tree_registration_areas.lat_y,
+akvo_tree_registration_areas.lon_x
+
+FROM s4g_ecosia_deforestation
+JOIN akvo_tree_registration_areas
+ON akvo_tree_registration_areas.identifier_akvo = s4g_ecosia_deforestation.identifier_akvo;'''
+
+
+conn.commit()
 
 create_a17_mkec = '''
 REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA public FROM kenya_mkec;
@@ -1411,6 +1601,8 @@ CREATE POLICY haf_policy ON error_partner_report_on_nursery_registration TO moro
 CREATE POLICY haf_policy ON akvo_ecosia_contract_overview TO morocco_haf USING (akvo_ecosia_contract_overview.name_organisation = 'high atlas foundation');
 CREATE POLICY haf_policy ON akvo_ecosia_tree_photo_registration TO morocco_haf USING (akvo_ecosia_tree_photo_registration.organisation = 'High Atlas Foundation');'''
 
+conn.commit()
+
 create_a20_ecosia_superset = '''
 REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA public FROM ecosia_superset;
 
@@ -1418,29 +1610,64 @@ GRANT USAGE ON SCHEMA PUBLIC TO ecosia_superset;
 GRANT USAGE ON SCHEMA HEROKU_EXT TO ecosia_superset;
 
 GRANT SELECT ON TABLE superset_ecosia_nursery_registration TO ecosia_superset;
-GRANT SELECT ON TABLE superset_ecosia_tree_registration_polygon TO ecosia_superset;
+GRANT SELECT ON TABLE superset_ecosia_tree_registration TO ecosia_superset;
 GRANT SELECT ON TABLE superset_ecosia_tree_monitoring TO ecosia_superset;
 GRANT SELECT ON TABLE superset_ecosia_s4g_site_health TO ecosia_superset;
-GRANT SELECT ON TABLE superset_ecosia_tree_registration_point TO ecosia_superset;
+--GRANT SELECT ON TABLE superset_ecosia_tree_registration_point TO ecosia_superset;
+GRANT SELECT ON TABLE superset_ecosia_nursery_monitoring TO ecosia_superset;
+GRANT SELECT ON TABLE superset_ecosia_nursery_monitoring_species TO ecosia_superset;
+GRANT SELECT ON TABLE superset_ecosia_nursery_registration_pictures TO ecosia_superset;
+GRANT SELECT ON TABLE superset_ecosia_nursery_monitoring_pictures TO ecosia_superset;
+GRANT SELECT ON TABLE superset_ecosia_tree_registration_picturesTO ecosia_superset;
+GRANT SELECT ON TABLE superset_ecosia_tree_registration_species TO ecosia_superset;
+GRANT SELECT ON TABLE superset_ecosia_s4g_fires TO ecosia_superset;
+GRANT SELECT ON TABLE superset_ecosia_s4g_deforestation TO ecosia_superset;
 
 
 DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_nursery_registration;
-DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_tree_registration_polygon;
+DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_tree_registration;
 DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_tree_monitoring;
 DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_s4g_site_health;
-DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_tree_registration_point;
+--DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_tree_registration_point;
+DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_nursery_monitoring;
+DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_nursery_monitoring_species;
+DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_nursery_registration_pictures;
+DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_nursery_monitoring_pictures;
+DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_tree_registration_pictures;
+DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_tree_registration_species;
+DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_s4g_fires;
+DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_s4g_deforestation;
+
 
 ALTER TABLE superset_ecosia_nursery_registration enable ROW LEVEL SECURITY;
-ALTER TABLE superset_ecosia_tree_registration_polygon enable ROW LEVEL SECURITY;
+ALTER TABLE superset_ecosia_tree_registration enable ROW LEVEL SECURITY;
 ALTER TABLE superset_ecosia_tree_monitoring enable ROW LEVEL SECURITY;
 ALTER TABLE superset_ecosia_s4g_site_health enable ROW LEVEL SECURITY;
-ALTER TABLE superset_ecosia_tree_registration_point enable ROW LEVEL SECURITY;
+--ALTER TABLE superset_ecosia_tree_registration_point enable ROW LEVEL SECURITY;
+ALTER TABLE superset_ecosia_nursery_monitoring enable ROW LEVEL SECURITY;
+ALTER TABLE superset_ecosia_nursery_monitoring_species enable ROW LEVEL SECURITY;
+ALTER TABLE superset_ecosia_nursery_registration_pictures enable ROW LEVEL SECURITY;
+ALTER TABLE superset_ecosia_nursery_monitoring_pictures enable ROW LEVEL SECURITY;
+ALTER TABLE superset_ecosia_tree_registration_pictures enable ROW LEVEL SECURITY;
+ALTER TABLE superset_ecosia_tree_registration_species enable ROW LEVEL SECURITY;
+ALTER TABLE superset_ecosia_s4g_fires enable ROW LEVEL SECURITY;
+ALTER TABLE superset_ecosia_s4g_deforestation enable ROW LEVEL SECURITY;
+
 
 CREATE POLICY ecosia_superset_policy ON superset_ecosia_nursery_registration TO ecosia_superset USING (true);
-CREATE POLICY ecosia_superset_policy ON superset_ecosia_tree_registration_polygon TO ecosia_superset USING (true);
+CREATE POLICY ecosia_superset_policy ON superset_ecosia_tree_registration TO ecosia_superset USING (true);
 CREATE POLICY ecosia_superset_policy ON superset_ecosia_tree_monitoring TO ecosia_superset USING (true);
 CREATE POLICY ecosia_superset_policy ON superset_ecosia_s4g_site_health TO ecosia_superset USING (true);
-CREATE POLICY ecosia_superset_policy ON superset_ecosia_tree_registration_point TO ecosia_superset USING (true);'''
+--CREATE POLICY ecosia_superset_policy ON superset_ecosia_tree_registration_point TO ecosia_superset USING (true);
+CREATE POLICY ecosia_superset_policy ON superset_ecosia_nursery_monitoring TO ecosia_superset USING (true);
+CREATE POLICY ecosia_superset_policy ON superset_ecosia_nursery_monitoring_species TO ecosia_superset USING (true);
+CREATE POLICY ecosia_superset_policy ON superset_ecosia_nursery_registration_pictures TO ecosia_superset USING (true);
+CREATE POLICY ecosia_superset_policy ON superset_ecosia_nursery_monitoring_pictures TO ecosia_superset USING (true);
+CREATE POLICY ecosia_superset_policy ON superset_ecosia_tree_registration_pictures TO ecosia_superset USING (true);
+CREATE POLICY ecosia_superset_policy ON superset_ecosia_tree_registration_species TO ecosia_superset USING (true);
+CREATE POLICY ecosia_superset_policy ON superset_ecosia_s4g_fires TO ecosia_superset USING (true);
+CREATE POLICY ecosia_superset_policy ON superset_ecosia_s4g_deforestation TO ecosia_superset USING (true);'''
+
 
 conn.commit()
 
@@ -1484,7 +1711,16 @@ cur.execute(create_a31)
 cur.execute(create_a32)
 cur.execute(create_a33)
 cur.execute(create_a34)
-cur.execute(create_a35)
+#cur.execute(create_a35)
+cur.execute(create_a36)
+cur.execute(create_a37)
+cur.execute(create_a38)
+cur.execute(create_a39)
+cur.execute(create_a40)
+cur.execute(create_a41)
+cur.execute(create_a42)
+cur.execute(create_a43)
+
 
 cur.execute(create_a17_mkec)
 cur.execute(create_a18_fdia)

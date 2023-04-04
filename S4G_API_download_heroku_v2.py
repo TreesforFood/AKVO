@@ -23,7 +23,9 @@ conn = psycopg2.connect(os.environ["DATABASE_URL"], sslmode='require')
 cur = conn.cursor()
 
 cur.execute('''
+DROP TABLE IF EXISTS S4G_API_data_quality;
 DROP TABLE IF EXISTS S4G_API_data_quality_health;
+DROP TABLE IF EXISTS S4G_API_health_indicators;
 DROP TABLE IF EXISTS S4G_API_data_fires;
 DROP TABLE IF EXISTS S4G_API_fires;
 DROP TABLE IF EXISTS S4G_API_data_deforestation;
@@ -35,15 +37,17 @@ DROP TABLE IF EXISTS S4G_NDVI_timeseries;
 DROP TABLE IF EXISTS S4G_health_timeseries;
 DROP TABLE IF EXISTS S4G_landcover_change;
 
-CREATE TABLE S4G_API_data_quality_health (identifier_akvo TEXT, partner_site_id TEXT, contract_number NUMERIC(20,2), country TEXT,
+CREATE TABLE S4G_API_data_quality (identifier_akvo TEXT, partner_site_id TEXT, contract_number NUMERIC(20,2), country TEXT,
 nr_photos_taken INTEGER, trees_planted INTEGER, issues INTEGER, invalid_polygon BOOLEAN, invalid_point BOOLEAN, unconnected BOOLEAN,
 area_too_large BOOLEAN, area_too_small BOOLEAN, overlap BOOLEAN, circumference_too_large BOOLEAN, site_not_in_country BOOLEAN, area_water_ha NUMERIC(10,2)
-, area_urban_ha NUMERIC(10,2), artificially_created_polygon BOOLEAN, health_index NUMERIC, health_index_normalized NUMERIC,
-health_trend NUMERIC, health_trend_normalized NUMERIC);
+, area_urban_ha NUMERIC(10,2), artificially_created_polygon BOOLEAN);
 
-CREATE TABLE S4G_API_NDVI_timeseries (identifier_akvo TEXT, date DATE, ndvi_timeseries DECIMAL);
+CREATE TABLE S4G_API_health_indicators (identifier_akvo TEXT, partner_site_id TEXT, contract_number NUMERIC(20,2), country TEXT,
+health_index NUMERIC, health_index_normalized NUMERIC,health_trend NUMERIC, health_trend_normalized NUMERIC);
 
-CREATE TABLE S4G_API_health_timeseries (identifier_akvo TEXT, date DATE, health_timeseries DECIMAL);
+CREATE TABLE S4G_API_NDVI_timeseries (identifier_akvo TEXT, date DATE, ndvi_timeseries NUMERIC);
+
+CREATE TABLE S4G_API_health_timeseries (identifier_akvo TEXT, date DATE, health_timeseries NUMERIC);
 
 CREATE TABLE S4G_API_landcover_change (identifier_akvo TEXT, year INTEGER, month INTEGER, water DECIMAL, trees DECIMAL, grass DECIMAL, flooded_vegetation DECIMAL,
 crops DECIMAL, shrub_scrub DECIMAL, built DECIMAL, bare DECIMAL, snow_ice DECIMAL);
@@ -78,6 +82,16 @@ for i in content_page['features']:
     site_not_in_country = i.get('properties')['data_quality']['site_not_in_country']
     area_water_ha = i.get('properties')['data_quality']['area_water_ha']
     area_urban_ha = i.get('properties')['data_quality']['area_urban_ha']
+    artificially_created_polygon = i.get('properties')['artificially_created_polygon']
+
+    # Populate the data quality table
+    cur.execute('''INSERT INTO S4G_API_data_quality (identifier_akvo, partner_site_id, contract_number, country, nr_photos_taken, trees_planted, issues, invalid_polygon, invalid_point, unconnected, area_too_large, area_too_small, overlap, circumference_too_large,
+    site_not_in_country, area_water_ha, area_urban_ha, artificially_created_polygon)
+    VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)''', (identifier_akvo,
+    partner_site_id, contract_number, country, nr_photos_taken, trees_planted, issues, invalid_polygon, invalid_point, unconnected,
+    area_too_large, area_too_small, overlap, circumference_too_large, site_not_in_country, area_water_ha, area_urban_ha, artificially_created_polygon))
+
+
 
     for deforestation in i.get('properties')['deforestation_point']:
         deforestation_date = deforestation.get('detect_date')
@@ -122,7 +136,6 @@ for i in content_page['features']:
 
                 conn.commit()
 
-        artificially_created_polygon = i.get('properties')['artificially_created_polygon']
         if i.get('properties')['health_indicator']['health_index'] is not None:
             health_index_power = i.get('properties')['health_indicator']['health_index']
             #force scientific power e numbers to decimals
@@ -146,14 +159,11 @@ for i in content_page['features']:
             #force scientific power e numbers to decimals
             health_trend_normalized = float(health_trend_normalized_power)
 
-            # Populate the tree registration table
-            cur.execute('''INSERT INTO S4G_API_data_quality_health (identifier_akvo, partner_site_id, contract_number, country, nr_photos_taken, trees_planted, issues, invalid_polygon, invalid_point, unconnected, area_too_large, area_too_small, overlap, circumference_too_large,
-            site_not_in_country, area_water_ha, area_urban_ha, artificially_created_polygon, health_index, health_index_normalized,
-            health_trend, health_trend_normalized)
-            VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)''', (identifier_akvo,
-            partner_site_id, contract_number, country, nr_photos_taken, trees_planted, issues, invalid_polygon, invalid_point, unconnected,
-            area_too_large, area_too_small, overlap, circumference_too_large, site_not_in_country, area_water_ha, area_urban_ha, artificially_created_polygon,
-            health_index, health_index_normalized, health_trend, health_trend_normalized))
+
+            # Populate the health indicators table
+            cur.execute('''INSERT INTO S4G_API_health_indicators (identifier_akvo, partner_site_id, contract_number, country, health_index, health_index_normalized ,health_trend, health_trend_normalized)
+            VALUES (%s,%s,%s,%s,%s,%s,%s,%s)''', (identifier_akvo,
+            partner_site_id, contract_number, country, health_index, health_index_normalized, health_trend, health_trend_normalized))
 
             conn.commit()
 
