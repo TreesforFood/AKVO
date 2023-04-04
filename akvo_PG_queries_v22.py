@@ -1108,19 +1108,19 @@ conn.commit()
 create_a26 = ''' CREATE TABLE s4g_ecosia_site_health
 AS SELECT akvo_tree_registration_areas.identifier_akvo,
 akvo_tree_registration_areas.organisation,
-S4G_API_data_quality_health.partner_site_id,
-S4G_API_data_quality_health.contract_number,
-S4G_API_data_quality_health.country,
-S4G_API_data_quality_health.trees_planted AS number_trees_registered,
-S4G_API_data_quality_health.health_index,
-S4G_API_data_quality_health.health_index_normalized,
-S4G_API_data_quality_health.health_trend,
-S4G_API_data_quality_health.health_trend_normalized,
+akvo_tree_registration_areas.id_planting_site,
+akvo_tree_registration_areas.contract_number,
+akvo_tree_registration_areas.country,
+akvo_tree_registration_areas.tree_number AS number_trees_registered,
+S4G_API_health_indicators.health_index,
+S4G_API_health_indicators.health_index_normalized,
+S4G_API_health_indicators.health_trend,
+S4G_API_health_indicators.health_trend_normalized,
 akvo_tree_registration_areas.centroid_coord
 
 FROM akvo_tree_registration_areas
-JOIN S4G_API_data_quality_health
-ON akvo_tree_registration_areas.identifier_akvo = S4G_API_data_quality_health.identifier_akvo'''
+JOIN S4G_API_health_indicators
+ON akvo_tree_registration_areas.identifier_akvo = S4G_API_health_indicators.identifier_akvo'''
 
 conn.commit()
 
