@@ -664,7 +664,6 @@ species_audited."Species audited",
 species_audited."Number of species audited",
 AKVO_Tree_external_audits_areas.submissiondate,
 AKVO_Tree_registration_areas.planting_date,
-CALC_TAB_monitoring_calculations_per_site_by_partner."Tree density (trees/ha)",
 latest_monitoring_results."Latest monitored tree density (trees/ha)",
 latest_monitoring_results."Latest monitored survival percentage"
 
@@ -766,7 +765,11 @@ PERCENTILE_CONT(0.95) WITHIN GROUP (ORDER BY AKVO_Tree_registration_areas.calc_a
 PERCENTILE_CONT(0.95) WITHIN GROUP (ORDER BY AKVO_Tree_registration_areas.calc_area) AS percentile_99
 FROM AKVO_Tree_registration_areas
 
-), summary_stats_nurseries AS(
+), summary_number_sites_monitored AS(
+SELECT COUNT(DISTINCT identifier_akvo) AS nr_sites_monitored FROM akvo_tree_monitoring_areas
+),
+
+summary_stats_nurseries AS(
 SELECT COUNT(*) AS total_nursery_instances
 FROM AKVO_nursery_registration
 ),
@@ -797,31 +800,34 @@ UNION
 SELECT 3, 'Total number of trees in database', total_tree_number
 FROM summary_stats_trees
 UNION
-SELECT 4, 'Largest estimated site in database (ha)', largest_area_ha
+SELECT 4, 'Total number of sites monitores (at least 1 time)', nr_sites_monitored
+FROM summary_number_sites_monitored
+UNION
+SELECT 5, 'Largest estimated site in database (ha)', largest_area_ha
 FROM summary_stats_trees
 UNION
-SELECT 5, 'Smalles estimated site in database (ha)', smallest_area_ha
+SELECT 6, 'Smalles estimated site in database (ha)', smallest_area_ha
 FROM summary_stats_trees
 UNION
-SELECT 6, '50th percentile of area size', percentile_50
+SELECT 7, '50th percentile of area size', percentile_50
 FROM summary_stats_trees
 UNION
-SELECT 7, '90th percentile of area size', percentile_90
+SELECT 8, '90th percentile of area size', percentile_90
 FROM summary_stats_trees
 UNION
-SELECT 8, '95th percentile of area size', percentile_95
+SELECT 9, '95th percentile of area size', percentile_95
 FROM summary_stats_trees
 UNION
-SELECT 9, '99th percentile of area size', percentile_99
+SELECT 10, '99th percentile of area size', percentile_99
 FROM summary_stats_trees
 UNION
-SELECT 10, 'Number of nursery registrations', total_nursery_instances
+SELECT 11, 'Number of nursery registrations', total_nursery_instances
 FROM summary_stats_nurseries
 UNION
-SELECT 11, 'Number of tree species', number_of_species
+SELECT 12, 'Number of tree species', number_of_species
 FROM summary_stats_species
 UNION
-SELECT 12, 'Number of registered photos', number_of_photos_registered
+SELECT 13, 'Number of registered photos', number_of_photos_registered
 FROM summary_stats_photos)
 SELECT * FROM row_summary_stats
 ORDER BY sno
@@ -1273,6 +1279,8 @@ LEFT JOIN akvo_tree_registration_areas_updated
 ON akvo_tree_monitoring_areas.identifier_akvo = akvo_tree_registration_areas_updated.identifier_akvo;'''
 
 conn.commit()
+
+
 
 create_a34 = '''CREATE TABLE superset_ecosia_s4g_site_health
 AS SELECT
