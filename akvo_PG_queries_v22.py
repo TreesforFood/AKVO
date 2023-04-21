@@ -590,7 +590,30 @@ END) AS "Latest monitored survival percentage"
 FROM CALC_TAB_monitoring_calculations_per_site_by_partner
 
 GROUP BY
-CALC_TAB_monitoring_calculations_per_site_by_partner.identifier_akvo)
+CALC_TAB_monitoring_calculations_per_site_by_partner.identifier_akvo),
+
+merge_pcq AS (select
+identifier_akvo,
+Q1_dist AS pcq_results_merged
+FROM akvo_tree_external_audits_pcq
+UNION ALL
+Select identifier_akvo,	Q2_dist AS pcq_results_merged
+FROM akvo_tree_external_audits_pcq
+UNION ALL
+Select identifier_akvo, Q3_dist AS pcq_results_merged
+FROM akvo_tree_external_audits_pcq
+UNION ALL
+Select identifier_akvo, Q4_dist AS pcq_results_merged
+FROM akvo_tree_external_audits_pcq),
+
+skipped_pcq_outliers AS (Select
+* FROM merge_pcq
+where merge_pcq.pcq_results_merged > 0 AND merge_pcq.pcq_results_merged < 1000),
+
+average_audited_tree_distance AS (SELECT skipped_pcq_outliers.identifier_akvo,
+AVG(skipped_pcq_outliers.pcq_results_merged) AS avg_audited_tree_distance
+FROM skipped_pcq_outliers
+GROUP BY skipped_pcq_outliers.identifier_akvo)
 
 SELECT
 -- Implement results from registrations
@@ -614,7 +637,7 @@ WHEN AKVO_Tree_registration_areas.calc_area NOTNULL AND AKVO_Tree_registration_a
 THEN CAST(SQRT(AKVO_Tree_registration_areas.calc_area*10000)/NULLIF(SQRT(AKVO_Tree_registration_areas.tree_number),0) AS NUMERIC(8,2))
 END AS "Registered avg tree distance (m)",
 
-ROUND(((AVG(Q1_dist) + AVG(Q2_dist) + AVG(Q3_dist) + AVG(Q4_dist))/4),2) AS "Average audited tree distance",
+average_audited_tree_distance.avg_audited_tree_distance AS "Average audited tree distance",
 
 ROUND((1/NULLIF(POWER(((AVG(Q1_dist) + AVG(Q2_dist) + AVG(Q3_dist) + AVG(Q4_dist))/4),2),0)*10000),0) AS "Audited tree density (trees/ha)",
 
@@ -637,14 +660,18 @@ species_audited."Number of species audited",
 species_audited."Species audited"
 
 FROM AKVO_Tree_external_audits_areas
-JOIN AKVO_Tree_external_audits_pcq ON AKVO_Tree_external_audits_areas.identifier_akvo = AKVO_Tree_external_audits_pcq.identifier_akvo
-JOIN AKVO_Tree_registration_areas ON AKVO_Tree_registration_areas.identifier_akvo = AKVO_Tree_external_audits_areas.identifier_akvo
+JOIN AKVO_Tree_external_audits_pcq
+ON AKVO_Tree_external_audits_areas.identifier_akvo = AKVO_Tree_external_audits_pcq.identifier_akvo
+JOIN AKVO_Tree_registration_areas
+ON AKVO_Tree_registration_areas.identifier_akvo = AKVO_Tree_external_audits_areas.identifier_akvo
 LEFT JOIN species_audited
 ON AKVO_Tree_external_audits_areas.identifier_akvo = species_audited.identifier_akvo
 LEFT JOIN CALC_TAB_monitoring_calculations_per_site_by_partner
 ON CALC_TAB_monitoring_calculations_per_site_by_partner.identifier_akvo = AKVO_Tree_registration_areas.identifier_akvo
 LEFT JOIN latest_monitoring_results
 ON AKVO_Tree_external_audits_areas.identifier_akvo = latest_monitoring_results.identifier_akvo
+LEFT JOIN average_audited_tree_distance
+ON AKVO_Tree_external_audits_areas.identifier_akvo = average_audited_tree_distance.identifier_akvo
 
 
 GROUP BY
@@ -664,6 +691,8 @@ species_audited."Species audited",
 species_audited."Number of species audited",
 AKVO_Tree_external_audits_areas.submissiondate,
 AKVO_Tree_registration_areas.planting_date,
+average_audited_tree_distance.avg_audited_tree_distance,
+--CALC_TAB_monitoring_calculations_per_site_by_partner."Tree density (trees/ha)",
 latest_monitoring_results."Latest monitored tree density (trees/ha)",
 latest_monitoring_results."Latest monitored survival percentage"
 
