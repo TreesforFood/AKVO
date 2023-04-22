@@ -639,7 +639,7 @@ END AS "Registered avg tree distance (m)",
 
 average_audited_tree_distance.avg_audited_tree_distance AS "Average audited tree distance",
 
-ROUND((1/NULLIF(POWER(((average_audited_tree_distance.avg_audited_tree_distance)/4),2),0)*10000),0) AS "Audited tree density (trees/ha)",
+ROUND((1/NULLIF(POWER(average_audited_tree_distance.avg_audited_tree_distance,2),0)*10000),0) AS "Audited tree density (trees/ha)",
 
 CASE
 WHEN AKVO_Tree_external_audits_areas.calc_area NOTNULL
