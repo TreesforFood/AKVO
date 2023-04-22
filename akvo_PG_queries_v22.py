@@ -1309,8 +1309,6 @@ ON akvo_tree_monitoring_areas.identifier_akvo = akvo_tree_registration_areas_upd
 
 conn.commit()
 
-
-
 create_a34 = '''CREATE TABLE superset_ecosia_s4g_site_health
 AS SELECT
 s4g_ecosia_site_health.*,
@@ -1352,6 +1350,9 @@ conn.commit()
 
 create_a36 = '''CREATE TABLE superset_ecosia_nursery_monitoring
 AS SELECT
+--akvo_nursery_registration.identifier_akvo,
+--akvo_nursery_registration.instance,
+akvo_nursery_registration.display_name,
 akvo_nursery_registration.country,
 LOWER(akvo_nursery_registration.organisation) AS organisation,
 akvo_nursery_registration.nursery_name,
@@ -1367,6 +1368,9 @@ conn.commit()
 
 create_a37 = '''CREATE TABLE superset_ecosia_nursery_monitoring_species
 AS SELECT
+--akvo_nursery_registration.identifier_akvo,
+--akvo_nursery_registration.instance,
+akvo_nursery_registration.display_name,
 akvo_nursery_registration.country,
 LOWER(akvo_nursery_registration.organisation) AS organisation,
 akvo_nursery_registration.nursery_name,
@@ -1381,8 +1385,11 @@ ON akvo_nursery_monitoring.instance = akvo_nursery_monitoring_tree_species.insta
 
 conn.commit()
 
-create_a38 = '''CREATE TABLE superset_ecosia_nursery_registration_pictures
+create_a38 = '''CREATE TABLE superset_ecosia_nursery_registration_photos
 AS SELECT
+--akvo_nursery_registration.identifier_akvo,
+--akvo_nursery_registration.instance,
+akvo_nursery_registration.display_name,
 akvo_nursery_registration.country,
 LOWER(akvo_nursery_registration.organisation) AS organisation,
 akvo_nursery_registration.nursery_name,
@@ -1391,12 +1398,34 @@ akvo_nursery_registration_photos.*
 
 FROM akvo_nursery_registration_photos
 JOIN akvo_nursery_registration
-ON akvo_nursery_registration_photos.identifier_akvo =  akvo_nursery_registration.identifier_akvo;'''
+ON akvo_nursery_registration_photos.identifier_akvo =  akvo_nursery_registration.identifier_akvo;
+
+ALTER TABLE superset_ecosia_nursery_registration_photos
+ADD lat_y REAL;
+
+ALTER TABLE superset_ecosia_nursery_registration_photos
+ADD lon_x REAL;
+
+UPDATE superset_ecosia_nursery_registration_photos
+SET
+lat_y = ST_Y(centroid_coord::geometry),
+lon_x = ST_X(centroid_coord::geometry)
+WHERE centroid_coord NOTNULL;
+
+ALTER TABLE superset_ecosia_nursery_registration_photos
+ADD photo_url_preset TEXT;
+
+UPDATE superset_ecosia_nursery_registration_photos
+SET photo_url_preset = CONCAT('<img src="', photo_url, '" alt="s3 image" height=300/>')
+WHERE photo_url NOTNULL;'''
 
 conn.commit()
 
-create_a39 = '''CREATE TABLE superset_ecosia_nursery_monitoring_pictures
+create_a39 = '''CREATE TABLE superset_ecosia_nursery_monitoring_photos
 AS SELECT
+--akvo_nursery_registration.identifier_akvo,
+--akvo_nursery_registration.instance,
+akvo_nursery_registration.display_name,
 akvo_nursery_registration.country,
 LOWER(akvo_nursery_registration.organisation) AS organisation,
 akvo_nursery_registration.nursery_name,
@@ -1407,12 +1436,34 @@ FROM akvo_nursery_monitoring_photos
 JOIN akvo_nursery_monitoring
 ON akvo_nursery_monitoring.instance = akvo_nursery_monitoring_photos.instance
 JOIN akvo_nursery_registration
-ON akvo_nursery_monitoring_photos.identifier_akvo =  akvo_nursery_registration.identifier_akvo;'''
+ON akvo_nursery_monitoring_photos.identifier_akvo =  akvo_nursery_registration.identifier_akvo;
+
+ALTER TABLE superset_ecosia_nursery_monitoring_photos
+ADD lat_y REAL;
+
+ALTER TABLE superset_ecosia_nursery_monitoring_photos
+ADD lon_x REAL;
+
+UPDATE superset_ecosia_nursery_monitoring_photos
+SET
+lat_y = ST_Y(centroid_coord::geometry),
+lon_x = ST_X(centroid_coord::geometry)
+WHERE centroid_coord NOTNULL;
+
+ALTER TABLE superset_ecosia_nursery_monitoring_photos
+ADD photo_url_preset TEXT;
+
+UPDATE superset_ecosia_nursery_monitoring_photos
+SET photo_url_preset = CONCAT('<img src="', photo_url, '" alt="s3 image" height=300/>')
+WHERE photo_url NOTNULL;'''
 
 conn.commit()
 
-create_a40 = '''CREATE TABLE superset_ecosia_tree_registration_pictures
+create_a40 = '''CREATE TABLE superset_ecosia_tree_registration_photos
 AS SELECT
+--akvo_tree_registration_areas.identifier_akvo,
+--akvo_tree_registration_areas.instance,
+akvo_tree_registration_areas.display_name,
 akvo_tree_registration_areas.country,
 LOWER(akvo_tree_registration_areas.organisation) AS organisation,
 akvo_tree_registration_areas.contract_number,
@@ -1423,12 +1474,39 @@ akvo_tree_registration_photos.*
 FROM
 akvo_tree_registration_photos
 JOIN akvo_tree_registration_areas
-ON akvo_tree_registration_areas.identifier_akvo = akvo_tree_registration_photos.identifier_akvo;'''
+ON akvo_tree_registration_areas.identifier_akvo = akvo_tree_registration_photos.identifier_akvo;
+
+ALTER TABLE superset_ecosia_tree_registration_photos
+ADD lat_y REAL;
+
+ALTER TABLE superset_ecosia_tree_registration_photos
+ADD lon_x REAL;
+
+UPDATE superset_ecosia_tree_registration_photos
+SET
+lat_y = ST_Y(photo_gps_location::geometry),
+lon_x = ST_X(photo_gps_location::geometry)
+WHERE photo_gps_location NOTNULL;
+
+UPDATE superset_ecosia_tree_registration_photos
+SET
+lat_y = ST_Y(photo_geotag_location::geometry),
+lon_x = ST_X(photo_geotag_location::geometry)
+WHERE photo_geotag_location NOTNULL;
+
+ALTER TABLE superset_ecosia_tree_registration_photos
+ADD photo_url_preset TEXT;
+
+UPDATE superset_ecosia_tree_registration_photos
+SET photo_url_preset = CONCAT('<img src="', photo_url, '" alt="s3 image" height=300/>')
+WHERE photo_url NOTNULL;'''
 
 conn.commit()
 
 create_a41 = '''CREATE TABLE superset_ecosia_tree_registration_species
 AS SELECT
+--akvo_tree_registration_areas.display_name,
+--akvo_tree_registration_areas.instance,
 akvo_tree_registration_areas.country,
 LOWER(akvo_tree_registration_areas.organisation) AS organisation,
 akvo_tree_registration_areas.contract_number,
@@ -1444,7 +1522,6 @@ conn.commit()
 
 create_a42 = '''CREATE TABLE superset_ecosia_s4g_fires
 AS SELECT
-
 s4g_ecosia_fires.*,
 akvo_tree_registration_areas.lat_y,
 akvo_tree_registration_areas.lon_x
