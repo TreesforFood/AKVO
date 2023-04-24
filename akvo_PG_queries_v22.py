@@ -54,6 +54,7 @@ DROP TABLE IF EXISTS superset_ecosia_nursery_monitoring_species;
 DROP TABLE IF EXISTS superset_ecosia_tree_registration_polygon;
 DROP TABLE IF EXISTS superset_ecosia_nursery_monitoring;
 DROP TABLE IF EXISTS superset_ecosia_nursery_registration_pictures;
+DROP TABLE IF EXISTS superset_ecosia_nursery_registration_photos;
 DROP TABLE IF EXISTS superset_ecosia_nursery_monitoring_pictures;
 DROP TABLE IF EXISTS superset_ecosia_tree_registration_pictures;
 DROP TABLE IF EXISTS superset_ecosia_tree_registration_species;
@@ -1387,8 +1388,6 @@ conn.commit()
 
 create_a38 = '''CREATE TABLE superset_ecosia_nursery_registration_photos
 AS SELECT
---akvo_nursery_registration.identifier_akvo,
---akvo_nursery_registration.instance,
 akvo_nursery_registration.display_name,
 akvo_nursery_registration.country,
 LOWER(akvo_nursery_registration.organisation) AS organisation,
@@ -1449,6 +1448,12 @@ SET
 lat_y = ST_Y(centroid_coord::geometry),
 lon_x = ST_X(centroid_coord::geometry)
 WHERE centroid_coord NOTNULL;
+
+UPDATE superset_ecosia_nursery_monitoring_photos
+SET photo_url = RIGHT(photo_url, strpos(reverse(photo_url),'/'));
+
+UPDATE superset_ecosia_nursery_monitoring_photos
+SET photo_url = CONCAT('https://akvoflow-201.s3.amazonaws.com/images',photo_url);
 
 ALTER TABLE superset_ecosia_nursery_monitoring_photos
 ADD photo_url_preset TEXT;
