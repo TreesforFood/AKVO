@@ -1268,7 +1268,17 @@ CALC_TAB_Error_partner_report_on_nursery_registration."Check nr of photos taken 
 
 FROM akvo_nursery_registration
 JOIN CALC_TAB_Error_partner_report_on_nursery_registration
-ON CALC_TAB_Error_partner_report_on_nursery_registration.identifier_akvo = akvo_nursery_registration.identifier_akvo;'''
+ON CALC_TAB_Error_partner_report_on_nursery_registration.identifier_akvo = akvo_nursery_registration.identifier_akvo;
+
+UPDATE superset_ecosia_nursery_registration
+SET test = 'yes'
+WHERE test = 'This is a test, this record can be deleted.'
+OR test = 'xxxxx';
+
+UPDATE superset_ecosia_nursery_registration
+SET test = 'no'
+WHERE test = 'This is real, valid data'
+OR test = ' ';'''
 
 conn.commit()
 
@@ -1306,7 +1316,16 @@ ON t.identifier_akvo = s4g_ecosia_data_quality.identifier_akvo
 LEFT JOIN S4G_API_health_indicators
 ON t.identifier_akvo = S4G_API_health_indicators.identifier_akvo;
 --where t.polygon NOTNULL;
-'''
+
+UPDATE superset_ecosia_tree_registration
+SET test = 'yes'
+WHERE test = 'This is a test, this record can be deleted.'
+OR test = 'xxxxx';
+
+UPDATE superset_ecosia_tree_registration
+SET test = 'no'
+WHERE test = 'This is real, valid data'
+OR test = ' ';'''
 
 conn.commit()
 
@@ -1319,7 +1338,17 @@ akvo_tree_registration_areas_updated.lat_y,
 akvo_tree_registration_areas_updated.lon_x
 FROM akvo_tree_monitoring_areas
 LEFT JOIN akvo_tree_registration_areas_updated
-ON akvo_tree_monitoring_areas.identifier_akvo = akvo_tree_registration_areas_updated.identifier_akvo;'''
+ON akvo_tree_monitoring_areas.identifier_akvo = akvo_tree_registration_areas_updated.identifier_akvo;
+
+UPDATE superset_ecosia_tree_monitoring
+SET test = 'yes'
+WHERE test = 'This is a test, this record can be deleted.'
+OR test = 'xxxxx';
+
+UPDATE superset_ecosia_tree_monitoring
+SET test = 'no'
+WHERE test = 'This is real, valid data'
+OR test = ' ';'''
 
 conn.commit()
 
@@ -1376,7 +1405,17 @@ akvo_nursery_registration.lon_x
 
 FROM akvo_nursery_monitoring
 JOIN akvo_nursery_registration
-ON akvo_nursery_registration.identifier_akvo = akvo_nursery_monitoring.identifier_akvo;'''
+ON akvo_nursery_registration.identifier_akvo = akvo_nursery_monitoring.identifier_akvo;
+
+UPDATE superset_ecosia_nursery_monitoring
+SET test = 'yes'
+WHERE test = 'This is a test, this record can be deleted.'
+OR test = 'xxxxx';
+
+UPDATE superset_ecosia_nursery_monitoring
+SET test = 'no'
+WHERE test = 'This is real, valid data'
+OR test = ' ';'''
 
 conn.commit()
 
@@ -1479,8 +1518,6 @@ conn.commit()
 
 create_a40 = '''CREATE TABLE superset_ecosia_tree_registration_photos
 AS SELECT
---akvo_tree_registration_areas.identifier_akvo,
---akvo_tree_registration_areas.instance,
 akvo_tree_registration_areas.display_name,
 akvo_tree_registration_areas.country,
 LOWER(akvo_tree_registration_areas.organisation) AS organisation,
