@@ -1523,7 +1523,7 @@ conn.commit()
 
 create_a41 = '''CREATE TABLE superset_ecosia_tree_registration_species
 AS SELECT
---akvo_tree_registration_areas.display_name,
+akvo_tree_registration_areas.display_name,
 --akvo_tree_registration_areas.instance,
 akvo_tree_registration_areas.country,
 LOWER(akvo_tree_registration_areas.organisation) AS organisation,
