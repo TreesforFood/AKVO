@@ -59,8 +59,10 @@ DROP TABLE IF EXISTS superset_ecosia_nursery_monitoring_pictures;
 DROP TABLE IF EXISTS superset_ecosia_nursery_monitoring_photos;
 DROP TABLE IF EXISTS superset_ecosia_tree_registration_pictures;
 DROP TABLE IF EXISTS superset_ecosia_tree_registration_species;
+DROP TABLE IF EXISTS superset_ecosia_tree_registration_photos;
 DROP TABLE IF EXISTS superset_ecosia_tree_monitoring_species;
 DROP TABLE IF EXISTS superset_ecosia_tree_monitoring_pictures;
+DROP TABLE IF EXISTS superset_ecosia_tree_monitoring_photos;
 DROP TABLE IF EXISTS superset_ecosia_s4g_fires;
 DROP TABLE IF EXISTS superset_ecosia_s4g_deforestation;
 DROP TABLE IF EXISTS superset_ecosia_tree_registration;'''
