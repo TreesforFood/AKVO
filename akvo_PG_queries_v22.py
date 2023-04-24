@@ -1278,7 +1278,7 @@ OR test = 'xxxxx';
 UPDATE superset_ecosia_nursery_registration
 SET test = 'no'
 WHERE test = 'This is real, valid data'
-OR test ISNULL;'''
+OR test = '';'''
 
 conn.commit()
 
@@ -1325,7 +1325,7 @@ OR test = 'xxxxx';
 UPDATE superset_ecosia_tree_registration
 SET test = 'no'
 WHERE test = 'This is real, valid data'
-OR test ISNULL;'''
+OR test = '';'''
 
 conn.commit()
 
@@ -1348,7 +1348,7 @@ OR test = 'xxxxx';
 UPDATE superset_ecosia_tree_monitoring
 SET test = 'no'
 WHERE test = 'This is real, valid data'
-OR test ISNULL;'''
+OR test = '';'''
 
 conn.commit()
 
@@ -1415,7 +1415,7 @@ OR test = 'xxxxx';
 UPDATE superset_ecosia_nursery_monitoring
 SET test = 'no'
 WHERE test = 'This is real, valid data'
-OR test ISNULL;'''
+OR test = '';'''
 
 conn.commit()
 
