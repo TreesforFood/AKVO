@@ -1180,7 +1180,9 @@ ON akvo_tree_registration_areas.identifier_akvo = S4G_API_fires.identifier_akvo'
 conn.commit()
 
 create_a28 = ''' CREATE TABLE s4g_ecosia_deforestation
-AS SELECT akvo_tree_registration_areas.identifier_akvo,
+AS SELECT
+akvo_tree_registration_areas.identifier_akvo,
+akvo_tree_registration_areas.display_name,
 akvo_tree_registration_areas.organisation,
 akvo_tree_registration_areas.contract_number,
 akvo_tree_registration_areas.id_planting_site,
@@ -1196,7 +1198,9 @@ ON akvo_tree_registration_areas.identifier_akvo = S4G_API_deforestation.identifi
 conn.commit()
 
 create_a29 = ''' CREATE TABLE s4g_ecosia_landuse_cover
-AS SELECT akvo_tree_registration_areas.identifier_akvo,
+AS SELECT
+akvo_tree_registration_areas.identifier_akvo,
+akvo_tree_registration_areas.display_name,
 akvo_tree_registration_areas.organisation,
 akvo_tree_registration_areas.contract_number,
 akvo_tree_registration_areas.id_planting_site,
@@ -1220,7 +1224,9 @@ ON akvo_tree_registration_areas.identifier_akvo = s4g_API_landcover_change.ident
 conn.commit()
 
 create_a30 = ''' CREATE TABLE s4g_ecosia_data_quality
-AS SELECT akvo_tree_registration_areas.identifier_akvo,
+AS SELECT
+akvo_tree_registration_areas.identifier_akvo,
+akvo_tree_registration_areas.display_name,
 akvo_tree_registration_areas.organisation,
 S4G_API_data_quality.partner_site_id,
 S4G_API_data_quality.contract_number,
