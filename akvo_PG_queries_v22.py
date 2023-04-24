@@ -1145,7 +1145,9 @@ ON AKVO_tree_registration_photos.identifier_akvo = akvo_tree_registration_areas_
 conn.commit()
 
 create_a26 = ''' CREATE TABLE s4g_ecosia_site_health
-AS SELECT akvo_tree_registration_areas.identifier_akvo,
+AS SELECT
+akvo_tree_registration_areas.identifier_akvo,
+akvo_tree_registration_areas.display_name,
 akvo_tree_registration_areas.organisation,
 akvo_tree_registration_areas.id_planting_site,
 akvo_tree_registration_areas.contract_number,
@@ -1164,7 +1166,9 @@ ON akvo_tree_registration_areas.identifier_akvo = S4G_API_health_indicators.iden
 conn.commit()
 
 create_a27 = ''' CREATE TABLE s4g_ecosia_fires
-AS SELECT akvo_tree_registration_areas.identifier_akvo,
+AS SELECT
+akvo_tree_registration_areas.identifier_akvo,
+akvo_tree_registration_areas.display_name,
 akvo_tree_registration_areas.organisation,
 akvo_tree_registration_areas.contract_number,
 akvo_tree_registration_areas.id_planting_site,
