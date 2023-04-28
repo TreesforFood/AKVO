@@ -2239,8 +2239,8 @@ cur.execute(create_a42)
 cur.execute(create_a43)
 
 
-cur.execute(create_a17_mkec)
-cur.execute(create_a18_fdia)
+#cur.execute(create_a17_mkec)
+#cur.execute(create_a18_fdia)
 cur.execute(create_a20_ecosia_superset)
 
 conn.commit()
