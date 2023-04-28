@@ -49,10 +49,12 @@ cur = conn.cursor()
 cur.execute('''
 DROP TABLE IF EXISTS AKVO_Tree_external_audits_areas;
 DROP TABLE IF EXISTS AKVO_Tree_external_audits_photos;
+DROP TABLE IF EXISTS AKVO_Tree_external_audits_counts;
 DROP TABLE IF EXISTS AKVO_Tree_external_audits_pcq;
 
-CREATE TABLE AKVO_Tree_external_audits_areas (identifier_akvo TEXT, instance INTEGER, submitter TEXT, submissiondate DATE, test TEXT, farmer_reported_tree_nr NUMERIC, farmer_reported_nr_tree_species NUMERIC, farmer_reported_died_trees NUMERIC, audit_reported_trees NUMERIC, option_tree_count TEXT, manual_tree_count NUMERIC, display_name TEXT, impression_site TEXT, lat_y REAL, lon_x REAL, calc_area NUMERIC(20,2), location_external_audit geography(POINT, 4326), polygon geography(POLYGON, 4326));
+CREATE TABLE AKVO_Tree_external_audits_areas (identifier_akvo TEXT, instance INTEGER, display_name TEXT, submitter TEXT, submission DATE, test TEXT, farmer_reported_tree_nr NUMERIC, farmer_reported_nr_tree_species NUMERIC, farmer_reported_died_trees NUMERIC, audit_reported_trees NUMERIC, audit_reported_tree_height NUMERIC, option_tree_count TEXT, impression_site TEXT, lat_y REAL, lon_x REAL, calc_area NUMERIC(20,2), location_external_audit geography(POINT, 4326), polygon geography(POLYGON, 4326));
 CREATE TABLE AKVO_Tree_external_audits_photos (identifier_akvo TEXT, instance INTEGER, lat_photo REAL, lon_photo REAL, url_photo TEXT, location_photo geography(POINT, 4326));
+CREATE TABLE AKVO_Tree_external_audits_counts (identifier_akvo TEXT, instance INTEGER, name_species TEXT, loc_name_spec TEXT, name_not_in_list TEXT, number_species NUMERIC);
 CREATE TABLE AKVO_Tree_external_audits_pcq (identifier_akvo TEXT, instance INTEGER, lat_pcq_sample REAL, lon_pcq_sample REAL, pcq_location geography(POINT, 4326), height_pcq_sample NUMERIC(20,2), Q1_dist NUMERIC(20,2), Q1_hgt NUMERIC(20,2), Q1_spec TEXT, Q2_dist NUMERIC(20,2), Q2_hgt NUMERIC(20,2), Q2_spec TEXT, Q3_dist NUMERIC(20,2), Q3_hgt NUMERIC(20,2), Q3_spec TEXT, Q4_dist NUMERIC(20,2), Q4_hgt NUMERIC(20,2), Q4_spec TEXT);
 
 ''')
@@ -62,7 +64,7 @@ for all_data in url_list:
     load_page = requests.get(all_data, headers=headers).content
     page_decode = load_page.decode()
     json_dict = json.loads(page_decode)
-    #print(json_dict)
+    #print('XXXXXXX: ',json_dict)
 
     # Get all the tree registration data
     for level1_exaudits in json_dict['formInstances']:
@@ -107,6 +109,12 @@ for all_data in url_list:
             audit_reported_trees = None
 
         try:
+            audit_reported_tree_height = level1_exaudits['207590361'][0]['229620295']
+            audit_reported_tree_height = int(audit_reported_tree_height)
+        except (KeyError, IndexError):
+            audit_reported_tree_height = None
+
+        try:
             option_tree_count = level1_exaudits['responses']['145310001'][0]['217360308'][0]['text']
         except (KeyError, IndexError):
             option_tree_count = ''
@@ -124,13 +132,6 @@ for all_data in url_list:
             location_external_audit = 'POINT('+ location_external_audit_lon_str + ' ' + location_external_audit_lat_str + ')'
         else:
             location_external_audit = None
-
-        try:
-            manual_tree_count = level1_exaudits['responses']['207590361'][0]['229630303']
-            manual_tree_count = int(manual_tree_count)
-        except (KeyError, IndexError):
-            manual_tree_count = None
-
 
 
         #living trees_found = level1_exaudits['identifier']229630303
@@ -167,30 +168,23 @@ for all_data in url_list:
             get_geom_type = None
 
 
-        # Populate the tree registration table
-        #cur.execute('''INSERT INTO Tree_external_audits_areas (identifier_akvo, instance, submitter, test, farmer_reported_tree_nr, farmer_reported_nr_tree_species, farmer_reported_died_trees, audit_reported_trees, option_tree_count, manual_tree_count, display_name, impression_site, calc_area, polygon)
-        #VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)''', (identifier, instance, submitter, test, farmer_reported_tree_nr, farmer_reported_tree_species, farmer_reported_died_trees, audit_reported_trees, option_tree_count, manual_tree_count, display_name, impression_site, area_ha, polygon))
-
-
-        #cur.execute('''INSERT INTO Tree_external_audits_areas(polygon) VALUES (ST_GeomFromText(%s))''', (polygon,))
-
-        cur.execute('''INSERT INTO AKVO_Tree_external_audits_areas (identifier_akvo, instance, submitter, submissiondate, test, farmer_reported_tree_nr, farmer_reported_nr_tree_species, farmer_reported_died_trees, audit_reported_trees, option_tree_count, manual_tree_count, display_name, impression_site, lat_y, lon_x, calc_area, location_external_audit, polygon)
-        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);''', (identifier, instance, submitter, submissiondate, test, farmer_reported_tree_nr, farmer_reported_tree_species, farmer_reported_died_trees, audit_reported_trees, option_tree_count, manual_tree_count, display_name, impression_site, location_external_audit_lat, location_external_audit_lon, area_ha, location_external_audit, polygon))
+        cur.execute('''INSERT INTO AKVO_Tree_external_audits_areas (identifier_akvo, instance, display_name, submitter, submission, test, farmer_reported_tree_nr, farmer_reported_nr_tree_species, farmer_reported_died_trees, audit_reported_trees, audit_reported_tree_height, option_tree_count, impression_site, lat_y, lon_x, calc_area, location_external_audit, polygon)
+        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);''', (identifier, instance, display_name, submitter, submissiondate, test, farmer_reported_tree_nr, farmer_reported_tree_species, farmer_reported_died_trees, audit_reported_trees, audit_reported_tree_height, option_tree_count, impression_site, location_external_audit_lat, location_external_audit_lon, area_ha, location_external_audit, polygon))
 
         conn.commit()
 
-                # Get the photos from external verification
+        # Get the photos from external verification for North/South/East/West direction
         try:
             x = level1_exaudits['responses']['154700035']
-            print('list: ', x)
-        except KeyError:
+            #print('list: ', x)
+        except (IndexError, KeyError):
             url_photo = None
             location_photo = None
+            photo_lat = None
+            photo_lon = None
         else:
             photos = level1_exaudits['responses']['154700035'][0]
-            print('zo: ', photos)
             photos.pop('137520089', None)
-            #photo = photos.values()
             for urls in photos.values():
                 url_photo = urls['filename']
                 loc_photo = urls['location']
@@ -205,12 +199,96 @@ for all_data in url_list:
                     photo_lon = None
                     location_photo = None
 
+                cur.execute('''INSERT INTO AKVO_Tree_external_audits_photos (identifier_akvo, instance, lat_photo, lon_photo, url_photo, location_photo)
+                VALUES (%s,%s,%s,%s,%s,%s);''',
+                (identifier, instance, photo_lat, photo_lon, url_photo, location_photo))
 
-            cur.execute('''INSERT INTO AKVO_Tree_external_audits_photos (identifier_akvo, instance, lat_photo, lon_photo, url_photo, location_photo)
-            VALUES (%s,%s,%s,%s,%s,%s);''',
-            (identifier, instance, photo_lat, photo_lon, url_photo, location_photo))
+                conn.commit()
 
-            conn.commit()
+        # Get the additional photos from external verification (see question "More photos needed?")
+        try:
+            photos_additional = level1_exaudits['responses']['158130003'][0]
+            print('YYYYYY: ', identifier, photos_additional)
+            #print('list: ', x)
+        except (IndexError, KeyError):
+            url_photo_additional = None
+            location_photo_add = None
+            photo_add_lat = None
+            photo_add_lon = None
+        else:
+            for k,v in photos_additional.items():
+                if isinstance(v, dict):
+                    url_photo_additional = v['filename']
+                    print(url_photo_additional)
+                    try:
+                        v['location']
+                    except (IndexError, KeyError):
+                        location_photo_add = None
+                        photo_add_lat = None
+                        photo_add_lon = None
+                        url_photo_additional = v['filename']
+                    else:
+                        if v['location'] is None:
+                            location_photo_add = None
+                            photo_add_lat = None
+                            photo_add_lon = None
+                            url_photo_additional = v['filename']
+                        else:
+                            location_photo_add_lat = v['location']['latitude']
+                            location_photo_add_lon = v['location']['longitude']
+                            photo_add_lat = str(location_photo_add_lat)
+                            photo_add_lon = str(location_photo_add_lon)
+                            location_photo_add = 'POINT('+ photo_add_lon + ' ' + photo_add_lat + ')'
+                            url_photo_additional = v['filename']
+                else:
+                    photo_add_lat = None # REAL datatype does not accept None values
+                    photo_add_lon = None
+                    location_photo_add = None
+                    url_photo_additional = None
+
+                print('XXXXXX: ',identifier, url_photo_additional)
+
+                cur.execute('''INSERT INTO AKVO_Tree_external_audits_photos (identifier_akvo, instance, lat_photo, lon_photo, url_photo, location_photo)
+                VALUES (%s,%s,%s,%s,%s,%s);''',
+                (identifier, instance, photo_add_lat, photo_add_lon, url_photo_additional, location_photo_add))
+
+                conn.commit()
+
+
+        try:
+            level1_exaudits['responses']['133480001']
+
+        except (IndexError, KeyError):
+            number_species = None
+            name_species = None
+            loc_name_spec = None
+            name_not_in_list = None
+
+        else:
+            for audit_tree_count in level1_exaudits['responses']['133480001']:
+                number_species = audit_tree_count.get('150790031')
+                try:
+                    name_species = audit_tree_count['160050001'][1].get('code')
+                except (IndexError, KeyError):
+                    name_species = None
+                else:
+                    name_species = audit_tree_count['160050001'][1].get('code')
+
+                try:
+                    loc_name_spec = audit_tree_count['160050001'][1].get('name')
+                except (IndexError, KeyError):
+                    loc_name_spec = None
+                else:
+                    loc_name_spec = audit_tree_count['160050001'][1].get('name')
+
+                name_not_in_list = audit_tree_count.get('334970350')
+
+                cur.execute('''INSERT INTO AKVO_Tree_external_audits_counts (identifier_akvo, instance, name_species, loc_name_spec, name_not_in_list, number_species)
+                VALUES (%s,%s,%s,%s,%s,%s);''',
+                (identifier, instance, name_species, loc_name_spec, name_not_in_list, number_species))
+
+                conn.commit()
+
 
         # Part of the Group 2 sheet questions: PCQ method
         try:
