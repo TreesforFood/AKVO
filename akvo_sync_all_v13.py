@@ -212,6 +212,9 @@ for open_syncurl in url_list:
 
                     cur.execute('''DELETE FROM AKVO_Tree_external_audits_pcq WHERE instance = (%s);''', (level1_delete,))
 
+
+                    cur.execute('''DELETE FROM AKVO_Tree_external_audits_counts WHERE instance = (%s);''', (level1_delete,))
+
                     conn.commit()
 
                 else:
@@ -367,6 +370,15 @@ for level1_change in changes_form_141500001_lst:
     try:
         instance_to_delete = level1_change['id']
         cur.execute('''DELETE FROM AKVO_Tree_external_audits_pcq WHERE instance = (%s);''', (instance_to_delete,))
+        conn.commit()
+        #print("DELETED CHANGES AUDITS: ", instance_to_delete)
+    except KeyError:
+        break
+
+for level1_change in changes_form_141500001_lst:
+    try:
+        instance_to_delete = level1_change['id']
+        cur.execute('''DELETE FROM AKVO_Tree_external_audits_counts WHERE instance = (%s);''', (instance_to_delete,))
         conn.commit()
         #print("DELETED CHANGES AUDITS: ", instance_to_delete)
     except KeyError:
