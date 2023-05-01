@@ -65,7 +65,8 @@ DROP TABLE IF EXISTS superset_ecosia_tree_monitoring_pictures;
 DROP TABLE IF EXISTS superset_ecosia_tree_monitoring_photos;
 DROP TABLE IF EXISTS superset_ecosia_s4g_fires;
 DROP TABLE IF EXISTS superset_ecosia_s4g_deforestation;
-DROP TABLE IF EXISTS superset_ecosia_tree_registration;'''
+DROP TABLE IF EXISTS superset_ecosia_tree_registration;
+DROP TABLE IF EXISTS superset_ecosia_geolocations;'''
 
 conn.commit()
 
@@ -1923,26 +1924,77 @@ FROM s4g_ecosia_deforestation
 JOIN akvo_tree_registration_areas
 ON akvo_tree_registration_areas.identifier_akvo = s4g_ecosia_deforestation.identifier_akvo;'''
 
+conn.commit()
+
+
 create_a44 = '''CREATE TABLE superset_ecosia_geolocations
-AS SELECT
-akvo_tree_registration_areas.identifier_akvo,
-akvo_tree_registration_areas.instance,
-akvo_tree_registration_areas.polygon
+AS WITH
+-- Here we convert the polygon areas from WKT format to geojson string format that can be read by superset
+wkt_polygons_to_geojson AS (
+SELECT t.identifier_akvo,
 
--- Convert polygon to geojson
-ALTER TABLE superset_ecosia_geolocations
-ADD geojson_superset;
+'locations_more_200_trees' AS geolocation_type,
 
-json_build_object(
-'type', 'Polygon',
-'geometry', ST_AsGeoJSON(t.polygon)::json)::text as geojson
+jsonb_build_object(
+    'type',       'FeatureCollection',
+    'features',   json_agg(json_build_object(
+        'type',       'Feature',
+		'properties', 'locations_more_200_trees',
+        'geometry',   ST_AsGeoJSON(t.polygon)::json
 
--- Convert point to geojson
---akvo_tree_registration_areas.centroid_coord,
+    ))) AS superset_geojson
+FROM akvo_tree_registration_areas_updated AS t
+where t.polygon NOTNULL
+GROUP BY t.identifier_akvo),
 
+-- Here we convert the centroid-point locations from WKT format to geojson string format that can be read by superset
+buffer_around_200_trees_centroids AS (SELECT
+identifier_akvo,
+ST_Buffer(t.centroid_coord,25) as buffer
+FROM akvo_tree_registration_areas_updated AS t
+WHERE t.polygon ISNULL),
 
-FROM akvo_tree_registration_areas
-where polygon NOTNULL;'''
+-- Here we convert the buffer polygon areas (WKT format) to geojson string format that can be read by superset
+wkt_buffer_200_trees_areas_to_geojson AS (
+SELECT t.identifier_akvo,
+
+'locations_less_200_trees' AS geolocation_type,
+
+jsonb_build_object(
+    'type',       'FeatureCollection',
+    'features',   json_agg(json_build_object(
+        'type',       'Feature',
+		'properties', 'locations_less_200_trees',
+        'geometry',   ST_AsGeoJSON(t.buffer)::json
+
+    ))) AS superset_geojson
+FROM buffer_around_200_trees_centroids AS t
+group by identifier_akvo),
+
+-- Here we convert the PCQ sample point locations from WKT format to geojson string format that can be read by superset
+wkt_pcq_samples_monitoring_to_geojson AS
+(SELECT
+pcq_samples_monitorings.identifier_akvo,
+
+'PCQ sample locations monitoring' AS geolocation_type,
+
+jsonb_build_object(
+    'type',       'FeatureCollection',
+    'features',   json_agg(json_build_object(
+        'type',       'Feature',
+		'properties', 'PCQ sample locations monitoring',
+        'geometry',   ST_AsGeoJSON(pcq_samples_monitorings.pcq_location)::json
+
+    ))) AS superset_geojson
+FROM akvo_tree_monitoring_pcq AS pcq_samples_monitorings
+GROUP BY pcq_samples_monitorings.identifier_akvo,
+pcq_samples_monitorings.pcq_location)
+
+SELECT * FROM wkt_polygons_to_geojson
+UNION
+SELECT * FROM wkt_buffer_200_trees_areas_to_geojson
+UNION
+SELECT * FROM wkt_pcq_samples_monitoring_to_geojson;'''
 
 conn.commit()
 
@@ -2139,6 +2191,7 @@ GRANT SELECT ON TABLE superset_ecosia_tree_registration_photos TO ecosia_superse
 GRANT SELECT ON TABLE superset_ecosia_tree_registration_species TO ecosia_superset;
 GRANT SELECT ON TABLE superset_ecosia_s4g_fires TO ecosia_superset;
 GRANT SELECT ON TABLE superset_ecosia_s4g_deforestation TO ecosia_superset;
+GRANT SELECT ON TABLE superset_ecosia_geolocations;
 
 
 DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_nursery_registration;
@@ -2154,6 +2207,7 @@ DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_tree_registratio
 DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_tree_registration_species;
 DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_s4g_fires;
 DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_s4g_deforestation;
+DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_geolocations;
 
 
 ALTER TABLE superset_ecosia_nursery_registration enable ROW LEVEL SECURITY;
@@ -2169,6 +2223,7 @@ ALTER TABLE superset_ecosia_tree_registration_photos enable ROW LEVEL SECURITY;
 ALTER TABLE superset_ecosia_tree_registration_species enable ROW LEVEL SECURITY;
 ALTER TABLE superset_ecosia_s4g_fires enable ROW LEVEL SECURITY;
 ALTER TABLE superset_ecosia_s4g_deforestation enable ROW LEVEL SECURITY;
+ALTER TABLE superset_ecosia_geolocations enable ROW LEVEL SECURITY;
 
 
 CREATE POLICY ecosia_superset_policy ON superset_ecosia_nursery_registration TO ecosia_superset USING (true);
@@ -2183,7 +2238,8 @@ CREATE POLICY ecosia_superset_policy ON superset_ecosia_nursery_monitoring_photo
 CREATE POLICY ecosia_superset_policy ON superset_ecosia_tree_registration_photos TO ecosia_superset USING (true);
 CREATE POLICY ecosia_superset_policy ON superset_ecosia_tree_registration_species TO ecosia_superset USING (true);
 CREATE POLICY ecosia_superset_policy ON superset_ecosia_s4g_fires TO ecosia_superset USING (true);
-CREATE POLICY ecosia_superset_policy ON superset_ecosia_s4g_deforestation TO ecosia_superset USING (true);'''
+CREATE POLICY ecosia_superset_policy ON superset_ecosia_s4g_deforestation TO ecosia_superset USING (true);
+CREATE POLICY ecosia_superset_policy ON superset_ecosia_geolocations TO ecosia_superset USING (true);'''
 
 
 conn.commit()
@@ -2237,7 +2293,7 @@ cur.execute(create_a40)
 cur.execute(create_a41)
 cur.execute(create_a42)
 cur.execute(create_a43)
-
+cur.execute(create_a44)
 
 cur.execute(create_a17_mkec)
 cur.execute(create_a18_fdia)
