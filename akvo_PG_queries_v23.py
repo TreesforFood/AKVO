@@ -2191,7 +2191,7 @@ GRANT SELECT ON TABLE superset_ecosia_tree_registration_photos TO ecosia_superse
 GRANT SELECT ON TABLE superset_ecosia_tree_registration_species TO ecosia_superset;
 GRANT SELECT ON TABLE superset_ecosia_s4g_fires TO ecosia_superset;
 GRANT SELECT ON TABLE superset_ecosia_s4g_deforestation TO ecosia_superset;
-GRANT SELECT ON TABLE superset_ecosia_geolocations;
+GRANT SELECT ON TABLE superset_ecosia_geolocations TO ecosia_superset;
 
 
 DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_nursery_registration;
