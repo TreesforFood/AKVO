@@ -1932,8 +1932,11 @@ create_a44 = '''CREATE TABLE superset_ecosia_geolocations
 AS WITH
 -- Here we convert the polygon areas from WKT format to geojson string format that can be read by superset
 wkt_polygons_to_geojson AS (
-SELECT t.identifier_akvo,
-
+SELECT
+t.identifier_akvo,
+t.organisation,
+t.contract_number,
+t.display_name,
 'locations_more_200_trees' AS geolocation_type,
 
 jsonb_build_object(
@@ -1946,19 +1949,25 @@ jsonb_build_object(
     ))::text AS superset_geojson
 FROM akvo_tree_registration_areas_updated AS t
 where t.polygon NOTNULL
-GROUP BY t.identifier_akvo),
+GROUP BY t.identifier_akvo, t.organisation, t.contract_number, t.display_name),
 
 -- Here we convert the centroid-point locations from WKT format to geojson string format that can be read by superset
 buffer_around_200_trees_centroids AS (SELECT
 identifier_akvo,
+t.organisation,
+t.contract_number,
+t.display_name,
 ST_Buffer(t.centroid_coord,25) as buffer
 FROM akvo_tree_registration_areas_updated AS t
 WHERE t.polygon ISNULL),
 
 -- Here we convert the buffer polygon areas (WKT format) to geojson string format that can be read by superset
 wkt_buffer_200_trees_areas_to_geojson AS (
-SELECT t.identifier_akvo,
-
+SELECT
+t.identifier_akvo,
+t.organisation,
+t.contract_number,
+t.display_name,
 'locations_less_200_trees' AS geolocation_type,
 
 jsonb_build_object(
@@ -1970,12 +1979,15 @@ jsonb_build_object(
 
     ))::text AS superset_geojson
 FROM buffer_around_200_trees_centroids AS t
-group by identifier_akvo),
+group by t.identifier_akvo, t.organisation, t.contract_number, t.display_name),
 
 -- Here we convert the PCQ sample point locations from WKT format to geojson string format that can be read by superset
 wkt_pcq_samples_monitoring_to_geojson AS
 (SELECT
 pcq_samples_monitorings.identifier_akvo,
+akvo_tree_registration_areas.organisation,
+akvo_tree_registration_areas.contract_number,
+akvo_tree_registration_areas.display_name,
 
 'PCQ sample locations monitoring' AS geolocation_type,
 
@@ -1988,8 +2000,11 @@ jsonb_build_object(
 
     ))::text AS superset_geojson
 FROM akvo_tree_monitoring_pcq AS pcq_samples_monitorings
+JOIN akvo_tree_registration_areas
+ON pcq_samples_monitorings.identifier_akvo = akvo_tree_registration_areas.identifier_akvo
 GROUP BY pcq_samples_monitorings.identifier_akvo,
-pcq_samples_monitorings.pcq_location)
+akvo_tree_registration_areas.organisation, akvo_tree_registration_areas.contract_number,
+akvo_tree_registration_areas.display_name)
 
 
 SELECT * FROM wkt_polygons_to_geojson
