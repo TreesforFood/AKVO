@@ -1937,6 +1937,7 @@ t.identifier_akvo,
 t.organisation,
 t.contract_number,
 t.display_name,
+'tree registration' AS procedure,
 'locations_more_200_trees' AS geolocation_type,
 
 jsonb_build_object(
@@ -1957,6 +1958,7 @@ identifier_akvo,
 t.organisation,
 t.contract_number,
 t.display_name,
+'tree registration' AS procedure,
 ST_Buffer(t.centroid_coord,25) as buffer
 FROM akvo_tree_registration_areas_updated AS t
 WHERE t.polygon ISNULL),
@@ -1968,6 +1970,7 @@ t.identifier_akvo,
 t.organisation,
 t.contract_number,
 t.display_name,
+'tree registration' AS procedure,
 'locations_less_200_trees' AS geolocation_type,
 
 jsonb_build_object(
@@ -1988,8 +1991,9 @@ pcq_samples_monitorings.identifier_akvo,
 akvo_tree_registration_areas.organisation,
 akvo_tree_registration_areas.contract_number,
 akvo_tree_registration_areas.display_name,
+'PCQ sample location monitoring' AS procedure,
 
-'PCQ sample locations monitoring' AS geolocation_type,
+'PCQ sample location' AS geolocation_type,
 
 jsonb_build_object(
     'type',       'FeatureCollection',
