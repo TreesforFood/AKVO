@@ -1935,11 +1935,11 @@ SELECT t.identifier_akvo,
 
 'locations_more_200_trees' AS geolocation_type,
 
-json_build_object(
+jsonb_build_object(
     'type',       'FeatureCollection',
     'features',   json_agg(json_build_object(
         'type',       'Feature',
-		'properties', 'locations_more_200_trees',
+		--'properties', 'locations_more_200_trees',
         'geometry',   ST_AsGeoJSON(t.polygon)::json
 
     ))) AS superset_geojson
@@ -1960,11 +1960,11 @@ SELECT t.identifier_akvo,
 
 'locations_less_200_trees' AS geolocation_type,
 
-json_build_object(
+jsonb_build_object(
     'type',       'FeatureCollection',
     'features',   json_agg(json_build_object(
         'type',       'Feature',
-		'properties', 'locations_less_200_trees',
+		--'properties', 'locations_less_200_trees',
         'geometry',   ST_AsGeoJSON(t.buffer)::json
 
     ))) AS superset_geojson
@@ -1978,11 +1978,11 @@ pcq_samples_monitorings.identifier_akvo,
 
 'PCQ sample locations monitoring' AS geolocation_type,
 
-json_build_object(
+jsonb_build_object(
     'type',       'FeatureCollection',
     'features',   json_agg(json_build_object(
         'type',       'Feature',
-		'properties', 'PCQ sample locations monitoring',
+		--'properties', 'PCQ sample locations monitoring',
         'geometry',   ST_AsGeoJSON(pcq_samples_monitorings.pcq_location)::json
 
     ))) AS superset_geojson
@@ -1991,9 +1991,9 @@ GROUP BY pcq_samples_monitorings.identifier_akvo,
 pcq_samples_monitorings.pcq_location)
 
 SELECT * FROM wkt_polygons_to_geojson
-UNION ALL -- UNION ALL is needed here since SQL gives an error on the json error (cannot be compared). The ALL avoids this.
+UNION -- UNION ALL is needed here since SQL gives an error on the json error (cannot be compared). The ALL avoids this.
 SELECT * FROM wkt_buffer_200_trees_areas_to_geojson
-UNION ALL -- UNION ALL is needed here since SQL gives an error on the json error (cannot be compared). The ALL avoids this.
+UNION -- UNION ALL is needed here since SQL gives an error on the json error (cannot be compared). The ALL avoids this.
 SELECT * FROM wkt_pcq_samples_monitoring_to_geojson;'''
 
 conn.commit()
