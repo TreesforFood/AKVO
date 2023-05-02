@@ -1940,7 +1940,7 @@ jsonb_build_object(
     'type',       'FeatureCollection',
     'features',   json_agg(json_build_object(
         'type',       'Feature',
-		--'properties', 'locations_more_200_trees',
+		'properties', 'locations_more_200_trees',
         'geometry',   ST_AsGeoJSON(t.polygon)::json)
 
     ))::text AS superset_geojson
@@ -1965,7 +1965,7 @@ jsonb_build_object(
     'type',       'FeatureCollection',
     'features',   json_agg(json_build_object(
         'type',       'Feature',
-		--'properties', 'locations_less_200_trees',
+		'properties', 'locations_less_200_trees',
         'geometry',   ST_AsGeoJSON(t.buffer)::json)
 
     ))::text AS superset_geojson
@@ -1983,7 +1983,7 @@ jsonb_build_object(
     'type',       'FeatureCollection',
     'features',   json_agg(json_build_object(
         'type',       'Feature',
-		--'properties', 'PCQ sample locations monitoring',
+		'properties', 'PCQ sample locations monitoring',
         'geometry',   ST_AsGeoJSON(pcq_samples_monitorings.pcq_location)::json)
 
     ))::text AS superset_geojson
@@ -1995,7 +1995,7 @@ pcq_samples_monitorings.pcq_location)
 SELECT * FROM wkt_polygons_to_geojson
 UNION
 SELECT * FROM wkt_buffer_200_trees_areas_to_geojson
-UNION 
+UNION
 SELECT * FROM wkt_pcq_samples_monitoring_to_geojson;'''
 
 conn.commit()
