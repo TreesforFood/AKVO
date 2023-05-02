@@ -1928,6 +1928,7 @@ conn.commit()
 
 
 create_a44 = '''CREATE TABLE superset_ecosia_geolocations
+
 AS WITH
 -- Here we convert the polygon areas from WKT format to geojson string format that can be read by superset
 wkt_polygons_to_geojson AS (
@@ -1940,9 +1941,9 @@ jsonb_build_object(
     'features',   json_agg(json_build_object(
         'type',       'Feature',
 		--'properties', 'locations_more_200_trees',
-        'geometry',   ST_AsGeoJSON(t.polygon)::json
+        'geometry',   ST_AsGeoJSON(t.polygon)::json)
 
-    ))) AS superset_geojson
+    ))::text AS superset_geojson
 FROM akvo_tree_registration_areas_updated AS t
 where t.polygon NOTNULL
 GROUP BY t.identifier_akvo),
@@ -1965,9 +1966,9 @@ jsonb_build_object(
     'features',   json_agg(json_build_object(
         'type',       'Feature',
 		--'properties', 'locations_less_200_trees',
-        'geometry',   ST_AsGeoJSON(t.buffer)::json
+        'geometry',   ST_AsGeoJSON(t.buffer)::json)
 
-    ))) AS superset_geojson
+    ))::text AS superset_geojson
 FROM buffer_around_200_trees_centroids AS t
 group by identifier_akvo),
 
@@ -1983,17 +1984,18 @@ jsonb_build_object(
     'features',   json_agg(json_build_object(
         'type',       'Feature',
 		--'properties', 'PCQ sample locations monitoring',
-        'geometry',   ST_AsGeoJSON(pcq_samples_monitorings.pcq_location)::json
+        'geometry',   ST_AsGeoJSON(pcq_samples_monitorings.pcq_location)::json)
 
-    ))) AS superset_geojson
+    ))::text AS superset_geojson
 FROM akvo_tree_monitoring_pcq AS pcq_samples_monitorings
 GROUP BY pcq_samples_monitorings.identifier_akvo,
 pcq_samples_monitorings.pcq_location)
 
+
 SELECT * FROM wkt_polygons_to_geojson
-UNION -- UNION ALL is needed here since SQL gives an error on the json error (cannot be compared). The ALL avoids this.
+UNION
 SELECT * FROM wkt_buffer_200_trees_areas_to_geojson
-UNION -- UNION ALL is needed here since SQL gives an error on the json error (cannot be compared). The ALL avoids this.
+UNION 
 SELECT * FROM wkt_pcq_samples_monitoring_to_geojson;'''
 
 conn.commit()
