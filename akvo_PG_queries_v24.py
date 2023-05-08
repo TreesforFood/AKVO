@@ -1169,7 +1169,7 @@ create_a15 = '''CREATE TABLE CALC_TAB_tree_submissions_per_contract
 AS WITH CTE_total_tree_registrations AS (
 select
 lower(akvo_tree_registration_areas.country) as name_country,
-lower(akvo_tree_registration_areas.organisation) as name_organisation,
+lower(akvo_tree_registration_areas.organisation) as organisation,
 akvo_tree_registration_areas.contract_number,
 SUM(akvo_tree_registration_areas.tree_number) AS "Registered tree number",
 MAX(akvo_tree_registration_areas.submission) AS "Latest submitted registration",
