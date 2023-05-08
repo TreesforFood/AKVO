@@ -1344,8 +1344,8 @@ conn.commit()
 create_a18 = '''CREATE TABLE akvo_ecosia_tree_area_monitoring AS
 SELECT
 akvo_tree_monitoring_areas.identifier_akvo,
-LOWER(akvo_tree_registration_areas.country),
-akvo_tree_registration_areas.organisation,
+LOWER(akvo_tree_registration_areas.country) as country,
+LOWER(akvo_tree_registration_areas.organisation) as organisation,
 akvo_tree_registration_areas.contract_number,
 akvo_tree_registration_areas.id_planting_site,
 akvo_tree_monitoring_areas.display_name,
