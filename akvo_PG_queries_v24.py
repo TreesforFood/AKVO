@@ -1311,7 +1311,7 @@ create_a17 = ''' CREATE TABLE CALC_TAB_Error_partner_report_on_nursery_registrat
 AS SELECT
 identifier_akvo,
 nursery_name,
---organisation,
+organisation,
 "maximum/full tree capacity of nursery",
 number_trees_produced_currently,
 month_planting_stock,
