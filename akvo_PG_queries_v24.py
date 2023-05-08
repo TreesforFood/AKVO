@@ -1180,7 +1180,7 @@ WHERE (akvo_tree_registration_areas.test = '' OR akvo_tree_registration_areas.te
 AND NOT akvo_tree_registration_areas.id_planting_site = 'placeholder' AND NOT country = '' AND NOT organisation = ''
 GROUP BY akvo_tree_registration_areas.contract_number,
 name_country,
-name_organisation),
+organisation),
 
 CTE_tree_monitoring AS (select
 akvo_tree_registration_areas.contract_number,
