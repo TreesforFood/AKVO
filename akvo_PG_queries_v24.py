@@ -1257,7 +1257,7 @@ conn.commit()
 create_a16 = '''CREATE TABLE CALC_TAB_Error_check_on_nursery_registration AS select
 akvo_nursery_registration.identifier_akvo,
 akvo_nursery_registration.nursery_name,
-LOWER(akvo_nursery_registration.organisation),
+LOWER(akvo_nursery_registration.organisation) as organisation,
 akvo_nursery_registration.full_tree_capacity as "maximum/full tree capacity of nursery",
 akvo_nursery_monitoring.number_trees_produced_currently,
 akvo_nursery_monitoring.month_planting_stock,
