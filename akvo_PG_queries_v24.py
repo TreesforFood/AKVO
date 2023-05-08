@@ -1225,7 +1225,7 @@ GROUP BY table_y.contract_number)
 
 	SELECT
 	CTE_total_tree_registrations.name_country,
-	CTE_total_tree_registrations.name_organisation,
+	CTE_total_tree_registrations.organisation,
 	CTE_total_tree_registrations.contract_number AS "Contract number",
 	CTE_total_tree_registrations."Nr of sites registered" AS "Total number of sites registered",
 	CTE_total_tree_registrations."Registered tree number" AS "Total number of trees registered",
