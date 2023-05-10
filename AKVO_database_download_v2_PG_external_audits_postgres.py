@@ -103,13 +103,13 @@ for all_data in url_list:
             farmer_reported_died_trees = None
 
         try:
-            audit_reported_trees = level1_exaudits['207590361'][0]['229630303']
+            audit_reported_trees = level1_exaudits['responses']['207590361'][0]['229630303']
             audit_reported_trees = int(audit_reported_trees)
         except (KeyError, IndexError):
             audit_reported_trees = None
 
         try:
-            audit_reported_tree_height = level1_exaudits['207590361'][0]['229620295']
+            audit_reported_tree_height = level1_exaudits['responses']['207590361'][0]['229620295']
             audit_reported_tree_height = int(audit_reported_tree_height)
         except (KeyError, IndexError):
             audit_reported_tree_height = None
