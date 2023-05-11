@@ -1892,8 +1892,6 @@ JOIN akvo_tree_registration_areas
 ON akvo_tree_registration_areas.identifier_akvo = s4g_ecosia_deforestation.identifier_akvo;'''
 
 
-
-
 create_a44 = '''CREATE TABLE superset_ecosia_geolocations
 
 AS WITH
@@ -2028,18 +2026,18 @@ ALTER TABLE error_partner_report_on_nursery_registration enable ROW LEVEL SECURI
 ALTER TABLE akvo_ecosia_contract_overview enable ROW LEVEL SECURITY;
 ALTER TABLE akvo_ecosia_tree_photo_registration enable ROW LEVEL SECURITY;
 
-CREATE POLICY mkec_policy ON akvo_ecosia_tree_area_registration TO kenya_mkec USING (organisation = 'Mount Kenya Environmental Conservation');
+CREATE POLICY mkec_policy ON akvo_ecosia_tree_area_registration TO kenya_mkec USING (organisation = 'mount kenya environmental conservation');
 CREATE POLICY mkec_policy ON akvo_ecosia_tree_area_monitoring TO kenya_mkec USING (EXISTS (SELECT * FROM akvo_ecosia_tree_area_registration
-WHERE akvo_ecosia_tree_area_registration.organisation = 'Mount Kenya Environmental Conservation'
+WHERE akvo_ecosia_tree_area_registration.organisation = 'mount kenya environmental conservation'
 AND akvo_ecosia_tree_area_monitoring.identifier_akvo = akvo_ecosia_tree_area_registration.identifier_akvo));
-CREATE POLICY mkec_policy ON akvo_ecosia_nursery_registration TO kenya_mkec USING (organisation = 'Mount Kenya Environmental Conservation');
+CREATE POLICY mkec_policy ON akvo_ecosia_nursery_registration TO kenya_mkec USING (organisation = 'mount kenya environmental conservation');
 CREATE POLICY mkec_policy ON akvo_ecosia_nursery_monitoring TO kenya_mkec USING (EXISTS (SELECT * FROM akvo_ecosia_nursery_registration
-WHERE akvo_ecosia_nursery_registration.organisation = 'Mount Kenya Environmental Conservation'
+WHERE akvo_ecosia_nursery_registration.organisation = 'mount kenya environmental conservation'
 AND akvo_ecosia_nursery_monitoring.identifier_akvo = akvo_ecosia_nursery_registration.identifier_akvo));
-CREATE POLICY mkec_policy ON error_partner_report_on_site_registration TO kenya_mkec USING (error_partner_report_on_site_registration.organisation = 'Mount Kenya Environmental Conservation');
-CREATE POLICY mkec_policy ON error_partner_report_on_nursery_registration TO kenya_mkec USING (error_partner_report_on_nursery_registration.organisation = 'Mount Kenya Environmental Conservation');
+CREATE POLICY mkec_policy ON error_partner_report_on_site_registration TO kenya_mkec USING (error_partner_report_on_site_registration.organisation = 'mount kenya environmental conservation');
+CREATE POLICY mkec_policy ON error_partner_report_on_nursery_registration TO kenya_mkec USING (error_partner_report_on_nursery_registration.organisation = 'mount kenya environmental conservation');
 CREATE POLICY mkec_policy ON akvo_ecosia_contract_overview TO kenya_mkec USING (akvo_ecosia_contract_overview.organisation = 'mount kenya environmental conservation');
-CREATE POLICY mkec_policy ON akvo_ecosia_tree_photo_registration TO kenya_mkec USING (akvo_ecosia_tree_photo_registration.organisation = 'Mount Kenya Environmental Conservation');'''
+CREATE POLICY mkec_policy ON akvo_ecosia_tree_photo_registration TO kenya_mkec USING (akvo_ecosia_tree_photo_registration.organisation = 'mount kenya environmental conservation');'''
 
 
 conn.commit()
@@ -2088,18 +2086,18 @@ ALTER TABLE error_partner_report_on_nursery_registration enable ROW LEVEL SECURI
 ALTER TABLE akvo_ecosia_contract_overview enable ROW LEVEL SECURITY;
 ALTER TABLE akvo_ecosia_tree_photo_registration enable ROW LEVEL SECURITY;
 
-CREATE POLICY fdia_policy ON akvo_ecosia_tree_area_registration TO nicaragua_fdia USING (organisation = 'Fundacion DIA');
+CREATE POLICY fdia_policy ON akvo_ecosia_tree_area_registration TO nicaragua_fdia USING (organisation = 'fundacion dia');
 CREATE POLICY fdia_policy ON akvo_ecosia_tree_area_monitoring TO nicaragua_fdia USING (EXISTS (SELECT * FROM akvo_ecosia_tree_area_registration
-WHERE akvo_ecosia_tree_area_registration.organisation = 'Fundacion DIA'
+WHERE akvo_ecosia_tree_area_registration.organisation = 'fundacion dia'
 AND akvo_ecosia_tree_area_monitoring.identifier_akvo = akvo_ecosia_tree_area_registration.identifier_akvo));
-CREATE POLICY fdia_policy ON akvo_ecosia_nursery_registration TO nicaragua_fdia USING (organisation = 'Fundacion DIA');
+CREATE POLICY fdia_policy ON akvo_ecosia_nursery_registration TO nicaragua_fdia USING (organisation = 'fundacion dia');
 CREATE POLICY fdia_policy ON akvo_ecosia_nursery_monitoring TO nicaragua_fdia USING (EXISTS (SELECT * FROM akvo_ecosia_nursery_registration
-WHERE akvo_ecosia_nursery_registration.organisation = 'Fundacion DIA'
+WHERE akvo_ecosia_nursery_registration.organisation = 'fundacion dia'
 AND akvo_ecosia_nursery_monitoring.identifier_akvo = akvo_ecosia_nursery_registration.identifier_akvo));
-CREATE POLICY fdia_policy ON error_partner_report_on_site_registration TO nicaragua_fdia USING (error_partner_report_on_site_registration.organisation = 'Fundacion DIA');
-CREATE POLICY fdia_policy ON error_partner_report_on_nursery_registration TO nicaragua_fdia USING (error_partner_report_on_nursery_registration.organisation = 'Fundacion DIA');
+CREATE POLICY fdia_policy ON error_partner_report_on_site_registration TO nicaragua_fdia USING (error_partner_report_on_site_registration.organisation = 'fundacion dia');
+CREATE POLICY fdia_policy ON error_partner_report_on_nursery_registration TO nicaragua_fdia USING (error_partner_report_on_nursery_registration.organisation = 'fundacion dia');
 CREATE POLICY fdia_policy ON akvo_ecosia_contract_overview TO nicaragua_fdia USING (akvo_ecosia_contract_overview.organisation = 'fundacion dia');
-CREATE POLICY fdia_policy ON akvo_ecosia_tree_photo_registration TO nicaragua_fdia USING (akvo_ecosia_tree_photo_registration.organisation = 'Fundacion DIA');'''
+CREATE POLICY fdia_policy ON akvo_ecosia_tree_photo_registration TO nicaragua_fdia USING (akvo_ecosia_tree_photo_registration.organisation = 'fundacion dia');'''
 
 conn.commit()
 
@@ -2145,18 +2143,18 @@ ALTER TABLE error_partner_report_on_nursery_registration enable ROW LEVEL SECURI
 ALTER TABLE akvo_ecosia_contract_overview enable ROW LEVEL SECURITY;
 ALTER TABLE akvo_ecosia_tree_photo_registration enable ROW LEVEL SECURITY;
 
-CREATE POLICY haf_policy ON akvo_ecosia_tree_area_registration TO morocco_haf USING (organisation = 'High Atlas Foundation');
+CREATE POLICY haf_policy ON akvo_ecosia_tree_area_registration TO morocco_haf USING (organisation = 'high atlas foundation');
 CREATE POLICY haf_policy ON akvo_ecosia_tree_area_monitoring TO morocco_haf USING (EXISTS (SELECT * FROM akvo_ecosia_tree_area_registration
-WHERE akvo_ecosia_tree_area_registration.organisation = 'High Atlas Foundation'
+WHERE akvo_ecosia_tree_area_registration.organisation = 'high atlas foundation'
 AND akvo_ecosia_tree_area_monitoring.identifier_akvo = akvo_ecosia_tree_area_registration.identifier_akvo));
-CREATE POLICY haf_policy ON akvo_ecosia_nursery_registration TO morocco_haf USING (organisation = 'High Atlas Foundation');
+CREATE POLICY haf_policy ON akvo_ecosia_nursery_registration TO morocco_haf USING (organisation = 'high atlas foundation');
 CREATE POLICY haf_policy ON akvo_ecosia_nursery_monitoring TO morocco_haf USING (EXISTS (SELECT * FROM akvo_ecosia_nursery_registration
-WHERE akvo_ecosia_nursery_registration.organisation = 'High Atlas Foundation'
+WHERE akvo_ecosia_nursery_registration.organisation = 'high atlas foundation'
 AND akvo_ecosia_nursery_monitoring.identifier_akvo = akvo_ecosia_nursery_registration.identifier_akvo));
-CREATE POLICY haf_policy ON error_partner_report_on_site_registration TO morocco_haf USING (error_partner_report_on_site_registration.organisation = 'High Atlas Foundation');
-CREATE POLICY haf_policy ON error_partner_report_on_nursery_registration TO morocco_haf USING (error_partner_report_on_nursery_registration.organisation = 'High Atlas Foundation');
+CREATE POLICY haf_policy ON error_partner_report_on_site_registration TO morocco_haf USING (error_partner_report_on_site_registration.organisation = 'high atlas foundation');
+CREATE POLICY haf_policy ON error_partner_report_on_nursery_registration TO morocco_haf USING (error_partner_report_on_nursery_registration.organisation = 'high atlas foundation');
 CREATE POLICY haf_policy ON akvo_ecosia_contract_overview TO morocco_haf USING (akvo_ecosia_contract_overview.organisation = 'high atlas foundation');
-CREATE POLICY haf_policy ON akvo_ecosia_tree_photo_registration TO morocco_haf USING (akvo_ecosia_tree_photo_registration.organisation = 'High Atlas Foundation');'''
+CREATE POLICY haf_policy ON akvo_ecosia_tree_photo_registration TO morocco_haf USING (akvo_ecosia_tree_photo_registration.organisation = 'high atlas foundation');'''
 
 conn.commit()
 
