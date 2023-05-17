@@ -104,20 +104,20 @@ conn.commit()
 # Works well
 create_a2 = '''CREATE TABLE CALC_TAB_monitoring_calculations_per_site AS
 
--- Plot dates of all monitorings (COUNTS AND PCQ's)
+--- Plot dates of all MAIN TAB monitorings (COUNTS AND PCQ's)
 WITH plot_dates_monitorings AS (SELECT
-akvo_tree_registration_areas.identifier_akvo,
-akvo_tree_registration_areas.instance,
+akvo_tree_monitoring_areas.identifier_akvo,
+akvo_tree_monitoring_areas.instance,
 akvo_tree_registration_areas.id_planting_site,
 akvo_tree_monitoring_areas.submission AS monitoring_submission,
 akvo_tree_monitoring_areas.method_selection,
 'monitoring_data' AS procedure,
 TO_DATE(akvo_tree_registration_areas.planting_date, 'YYYY-MM-DD') AS planting_date
 FROM akvo_tree_monitoring_areas
-JOIN akvo_tree_registration_areas
+LEFT JOIN akvo_tree_registration_areas
 ON akvo_tree_monitoring_areas.identifier_akvo = akvo_tree_registration_areas.identifier_akvo),
 
--- Plot dates of all audits (COUNTS AND PCQ's)
+-- Plot dates of all MAIN TAB audits (COUNTS AND PCQ's)
 plot_dates_audits AS (SELECT
 akvo_tree_external_audits_areas.identifier_akvo,
 akvo_tree_external_audits_areas.instance,
@@ -127,13 +127,13 @@ akvo_tree_external_audits_areas.option_tree_count,
 'audit_data' AS procedure,
 TO_DATE(akvo_tree_registration_areas.planting_date, 'YYYY-MM-DD') AS planting_date
 FROM akvo_tree_external_audits_areas
-JOIN akvo_tree_registration_areas
+LEFT JOIN akvo_tree_registration_areas
 ON akvo_tree_external_audits_areas.identifier_akvo = akvo_tree_registration_areas.identifier_akvo),
 
 -- Combine date results from audits and monitorings (COUNTS AND PCQ's)
 combine_monitorings_audits AS (
 SELECT * FROM plot_dates_monitorings
-UNION
+UNION ALL
 SELECT * FROM plot_dates_audits),
 
 -- Calculate time differences between planting date and audits/monitorings and give them a label strata (instance level)
@@ -147,11 +147,28 @@ combine_monitorings_audits.monitoring_submission AS submission,
 combine_monitorings_audits.monitoring_submission - planting_date AS difference_days_reg_monitoring,
 CAST((combine_monitorings_audits.monitoring_submission - planting_date)*1.0/365 * 1.0 AS DECIMAL(7,1)) AS difference_years_reg_monitoring,
 CEILING((combine_monitorings_audits.monitoring_submission - planting_date)*1.0/180)*180 AS label_strata
-FROM combine_monitorings_audits),
+FROM combine_monitorings_audits
+order by identifier_akvo),
 
+-- List number of PCQ samples of audits and monitorings
+list_pcq_samples AS (SELECT
+identifier_akvo, instance
+FROM akvo_tree_monitoring_pcq
+UNION ALL
+SELECT identifier_akvo, instance
+FROM akvo_tree_external_audits_pcq),
 
----------------
-
+-- Calculate number of PCQ samples of audits and monitorings
+count_pcq_samples AS (SELECT
+list_pcq_samples.identifier_akvo, list_pcq_samples.instance,
+COUNT(list_pcq_samples.instance) AS number_pcq_samples
+FROM list_pcq_samples
+LEFT JOIN table_label_strata
+ON table_label_strata.instance = list_pcq_samples.instance
+GROUP BY
+list_pcq_samples.identifier_akvo,
+table_label_strata.label_strata,
+list_pcq_samples.instance),
 
 -- Get all PCQ MONITORIG distance values into 1 column in order to calculate the average
 merge_pcq_monitoring_dist AS (select
@@ -172,44 +189,33 @@ Q4_dist AS pcq_results_merged_monitoring
 FROM AKVO_Tree_monitoring_pcq),
 
 -- Remove MONITORING outliers from values (zero's and > 1000)
-skipped_pcq_outliers_monitoring AS (Select
+skipped_pcq_outliers_monitoring_dist AS (Select
 * FROM merge_pcq_monitoring_dist
 where merge_pcq_monitoring_dist.pcq_results_merged_monitoring > 0 AND merge_pcq_monitoring_dist.pcq_results_merged_monitoring < 1000),
 
--- SELECT 'CLEANED FROM OUTLIERS' PCQ MONITORING VALUES
-average_monitored_tree_distance AS (SELECT skipped_pcq_outliers_monitoring.identifier_akvo, skipped_pcq_outliers_monitoring.instance,
-AVG(skipped_pcq_outliers_monitoring.pcq_results_merged_monitoring) AS avg_monitored_tree_distance
-FROM skipped_pcq_outliers_monitoring
-GROUP BY skipped_pcq_outliers_monitoring.identifier_akvo, skipped_pcq_outliers_monitoring.instance),
 
 -- Get all PCQ MONITORING tree height values into 1 column in order to calculate the average
-merge_pcq_monitoring_height AS (select
+merge_pcq_monitoring_hgt AS (select
 identifier_akvo, instance,
 Q1_hgt AS pcq_results_merged_monitoring_hgt
 FROM AKVO_Tree_monitoring_pcq
-UNION ALL
+UNION
 Select identifier_akvo, instance,
 Q2_hgt AS pcq_results_merged_monitoring_hgt
 FROM AKVO_Tree_monitoring_pcq
-UNION ALL
+UNION
 Select identifier_akvo, instance,
 Q3_hgt AS pcq_results_merged_monitoring_hgt
 FROM AKVO_Tree_monitoring_pcq
-UNION ALL
+UNION
 Select identifier_akvo, instance,
 Q4_hgt AS pcq_results_merged_monitoring_hgt
 FROM AKVO_Tree_monitoring_pcq),
 
 -- Remove tree MONITORING HEIGHT outliers from values (zero's and larger than 100)
-skipped_pcq_outliers_monitoring_hgt AS (Select * FROM merge_pcq_monitoring_height
-WHERE merge_pcq_monitoring_height.pcq_results_merged_monitoring_hgt > 0
-AND merge_pcq_monitoring_height.pcq_results_merged_monitoring_hgt < 100),
-
--- Select 'CLEANED from outliers' MONITORING HEIGHT values
-average_monitored_tree_height AS (SELECT skipped_pcq_outliers_monitoring_hgt.identifier_akvo, skipped_pcq_outliers_monitoring_hgt.instance,
-AVG(skipped_pcq_outliers_monitoring_hgt.pcq_results_merged_monitoring_hgt) AS avg_monitored_tree_height
-FROM skipped_pcq_outliers_monitoring_hgt
-GROUP BY skipped_pcq_outliers_monitoring_hgt.identifier_akvo, skipped_pcq_outliers_monitoring_hgt.instance),
+skipped_pcq_outliers_monitoring_hgt AS (Select * FROM merge_pcq_monitoring_hgt
+WHERE merge_pcq_monitoring_hgt.pcq_results_merged_monitoring_hgt > 0
+AND merge_pcq_monitoring_hgt.pcq_results_merged_monitoring_hgt < 100),
 
 -- Get all PCQ AUDIT distance values into 1 column in order to calculate the average
 merge_pcq_audit_dist AS (select
@@ -230,30 +236,25 @@ q4_dist AS pcq_results_merged_audit
 FROM AKVO_Tree_external_audits_pcq),
 
 -- Remove AUDIT outliers from values (zero's and > 1000)
-skipped_pcq_outliers_audit AS (Select
+skipped_pcq_outliers_audit_dist AS (Select
 * FROM merge_pcq_audit_dist
 where merge_pcq_audit_dist.pcq_results_merged_audit > 0 AND merge_pcq_audit_dist.pcq_results_merged_audit < 1000),
 
--- SELECT 'CLEANED FROM OUTLIERS' PCQ AUDIT VALUES
-average_audit_tree_distance AS (SELECT skipped_pcq_outliers_audit.identifier_akvo, skipped_pcq_outliers_audit.instance,
-AVG(skipped_pcq_outliers_audit.pcq_results_merged_audit) AS avg_audit_tree_distance
-FROM skipped_pcq_outliers_audit
-GROUP BY skipped_pcq_outliers_audit.identifier_akvo, skipped_pcq_outliers_audit.instance),
 
 -- Get all PCQ AUDIT tree height values into 1 column in order to calculate the average
 merge_pcq_audit_height AS (select
 identifier_akvo, instance,
 q1_hgt AS pcq_results_merged_audit_hgt
 FROM AKVO_Tree_external_audits_pcq
-UNION ALL
+UNION
 Select identifier_akvo, instance,
 q2_hgt AS pcq_results_merged_audit_hgt
 FROM AKVO_Tree_external_audits_pcq
-UNION ALL
+UNION
 Select identifier_akvo, instance,
 q3_hgt AS pcq_results_merged_audit_hgt
 FROM AKVO_Tree_external_audits_pcq
-UNION ALL
+UNION
 Select identifier_akvo, instance,
 q4_hgt AS pcq_results_merged_audit_hgt
 FROM AKVO_Tree_external_audits_pcq),
@@ -264,44 +265,44 @@ skipped_pcq_outliers_audit_hgt AS (Select
 where merge_pcq_audit_height.pcq_results_merged_audit_hgt > 0 AND merge_pcq_audit_height.pcq_results_merged_audit_hgt < 100),
 
 
--- Select 'CLEANED from outliers' AUDIT HEIGHT values
-average_audit_tree_height AS (SELECT skipped_pcq_outliers_audit_hgt.identifier_akvo, skipped_pcq_outliers_audit_hgt.instance,
-AVG(skipped_pcq_outliers_audit_hgt.pcq_results_merged_audit_hgt) AS avg_audit_tree_height
-FROM skipped_pcq_outliers_audit_hgt
-GROUP BY skipped_pcq_outliers_audit_hgt.identifier_akvo, skipped_pcq_outliers_audit_hgt.instance),
-
---------------------
-
 -- Sub CTE table to calculate PCQ MONITORING results with CASE more easy and transparent. If we would do this in a subquery it results in
 -- a complex issues of multiple rows combined with grouping problems. This is why this intermediary table is more easy.
-calc_interm_results_tree_numbers_pcq AS (
+calc_interm_results_tree_numbers_pcq_monitoring AS (
 SELECT
-AKVO_Tree_monitoring_pcq.identifier_akvo,
+AKVO_Tree_monitoring_areas.identifier_akvo,
+LOWER(akvo_tree_registration_areas.country) AS country,
+LOWER(akvo_tree_registration_areas.organisation) AS organisation,
+akvo_tree_registration_areas.contract_number,
+akvo_tree_registration_areas.id_planting_site,
 AKVO_Tree_registration_areas.calc_area,
-akvo_tree_registration_areas.tree_number,
+akvo_tree_registration_areas.tree_number AS registered_tree_number,
+'Monitoring' AS procedure,
+'PCQ' AS data_collection_method,
 
-ROUND(average_monitored_tree_distance.avg_monitored_tree_distance,2) AS avg_tree_distance,
+ROUND(AVG(skipped_pcq_outliers_monitoring_dist.pcq_results_merged_monitoring),2) AS avg_tree_distance_m,
 
-ROUND((1/(NULLIF(POWER(average_monitored_tree_distance.avg_monitored_tree_distance,2),0))*10000),0) AS avg_tree_density,
+ROUND((1/(NULLIF(POWER(AVG(skipped_pcq_outliers_monitoring_dist.pcq_results_merged_monitoring),2),0))*10000),0) AS avg_tree_density,
 
-ROUND((1/(NULLIF(POWER(average_monitored_tree_distance.avg_monitored_tree_distance,2),0))*10000) * AKVO_Tree_registration_areas.calc_area,0) as nr_trees_pcq_monitored,
+ROUND((1/(NULLIF(POWER(AVG(skipped_pcq_outliers_monitoring_dist.pcq_results_merged_monitoring),2),0))*10000) * AKVO_Tree_registration_areas.calc_area,0) as nr_trees_monitored,
 
-count(akvo_tree_monitoring_pcq.instance) AS nr_samples_pcq,
-table_label_strata.submission AS latest_submission,
-table_label_strata.difference_days_reg_monitoring,
-table_label_strata.difference_years_reg_monitoring,
+count_pcq_samples.number_pcq_samples,
+
+AKVO_Tree_registration_areas.planting_date AS planting_date,
+MAX(table_label_strata.submission) AS latest_monitoring_submission,
+MAX(table_label_strata.difference_days_reg_monitoring) AS nr_days_registration_monitoring,
+MAX(table_label_strata.difference_years_reg_monitoring) AS nr_years_registration_monitoring,
 table_label_strata.label_strata,
 
 CASE
 WHEN AKVO_Tree_monitoring_areas.method_selection = 'Number of living trees is unknown. Go to PCQ method.'
-THEN ROUND((ROUND(((1/(NULLIF(POWER(average_monitored_tree_distance.avg_monitored_tree_distance,2),0))*10000)*AKVO_Tree_registration_areas.calc_area)/NULLIF(akvo_tree_registration_areas.tree_number,0),2)*100),0)
+THEN ROUND((ROUND(((1/(NULLIF(POWER(AVG(skipped_pcq_outliers_monitoring_dist.pcq_results_merged_monitoring),2),0))*10000)*AKVO_Tree_registration_areas.calc_area)/NULLIF(akvo_tree_registration_areas.tree_number,0),2)*100),0)
 ELSE ROUND(((SUM(AKVO_Tree_monitoring_areas.number_living_trees)/NULLIF(akvo_tree_registration_areas.tree_number,0))*100),2)
 END AS perc_trees_survived,
 
 CASE
 WHEN AKVO_Tree_monitoring_areas.method_selection = 'Number of living trees is unknown. Go to PCQ method.'
-THEN ROUND(average_monitored_tree_height.avg_monitored_tree_height,2)
-ELSE akvo_tree_monitoring_areas.avg_tree_height
+THEN ROUND(AVG(skipped_pcq_outliers_monitoring_hgt.pcq_results_merged_monitoring_hgt),2)
+ElSE AVG(akvo_tree_monitoring_areas.avg_tree_height)
 END AS avg_tree_height
 
 FROM AKVO_Tree_monitoring_areas
@@ -311,122 +312,143 @@ LEFT JOIN AKVO_Tree_registration_areas
 ON AKVO_Tree_monitoring_areas.identifier_akvo = AKVO_Tree_registration_areas.identifier_akvo
 LEFT JOIN table_label_strata
 ON AKVO_Tree_monitoring_areas.instance = table_label_strata.instance
-LEFT JOIN average_monitored_tree_distance
-ON AKVO_Tree_monitoring_areas.instance = average_monitored_tree_distance.instance
-LEFT JOIN average_monitored_tree_height
-ON AKVO_Tree_monitoring_areas.instance = average_monitored_tree_height.instance
+LEFT JOIN skipped_pcq_outliers_monitoring_dist
+ON AKVO_Tree_monitoring_areas.instance = skipped_pcq_outliers_monitoring_dist.instance
+LEFT JOIN skipped_pcq_outliers_monitoring_hgt
+ON AKVO_Tree_monitoring_areas.instance = skipped_pcq_outliers_monitoring_hgt.instance
+LEFT JOIN count_pcq_samples
+ON count_pcq_samples.instance = AKVO_Tree_monitoring_areas.instance
+
+where AKVO_Tree_monitoring_areas.method_selection = 'Number of living trees is unknown. Go to PCQ method.'
 
 GROUP BY
 table_label_strata.label_strata,
 AKVO_Tree_monitoring_areas.identifier_akvo,
-AKVO_Tree_monitoring_pcq.identifier_akvo,
+akvo_tree_registration_areas.organisation,
+akvo_tree_registration_areas.contract_number,
 AKVO_Tree_registration_areas.calc_area,
 akvo_tree_registration_areas.tree_number,
+count_pcq_samples.number_pcq_samples,
 akvo_tree_monitoring_areas.avg_tree_height,
-table_label_strata.submission,
+AKVO_Tree_registration_areas.planting_date,
 AKVO_Tree_monitoring_areas.method_selection,
-average_monitored_tree_distance.avg_monitored_tree_distance,
-average_monitored_tree_height.avg_monitored_tree_height,
-table_label_strata.difference_days_reg_monitoring,
-table_label_strata.difference_years_reg_monitoring),
-
+akvo_tree_registration_areas.organisation,
+akvo_tree_registration_areas.contract_number,
+akvo_tree_registration_areas.id_planting_site,
+akvo_tree_registration_areas.country),
 
 -- Sub CTE table to calculate PCQ AUDIT results with CASE more easy and transparent. If we would do this in a subquery it results in
 -- a complex issue of multiple rows combined with grouping problems. This is why this intermediary table is more easy.
 calc_interm_results_tree_numbers_pcq_audit AS (SELECT
-AKVO_Tree_external_audits_pcq.identifier_akvo,
+AKVO_Tree_external_audits_areas.identifier_akvo,
+LOWER(akvo_tree_registration_areas.country) AS country,
+LOWER(akvo_tree_registration_areas.organisation) AS organisation,
+akvo_tree_registration_areas.contract_number,
+akvo_tree_registration_areas.id_planting_site,
 AKVO_Tree_external_audits_areas.calc_area,
-akvo_tree_registration_areas.tree_number,
+akvo_tree_registration_areas.tree_number AS registered_tree_number,
+'Audit' AS procedure,
+'PCQ' AS data_collection_method,
 
-ROUND(average_audit_tree_distance.avg_audit_tree_distance,2) AS avg_audit_tree_distance,
+ROUND(AVG(skipped_pcq_outliers_audit_dist.pcq_results_merged_audit),2) AS avg_tree_distance_m,
 
-ROUND((1/(NULLIF(POWER(average_audit_tree_distance.avg_audit_tree_distance,2),0))*10000),0) AS avg_audit_tree_density,
+ROUND((1/(NULLIF(POWER(AVG(skipped_pcq_outliers_audit_dist.pcq_results_merged_audit),2),0))*10000),0) AS avg_audit_tree_density,
 
-ROUND((1/(NULLIF(POWER(average_audit_tree_distance.avg_audit_tree_distance,2),0))*10000) * AKVO_Tree_registration_areas.calc_area,0) as nr_trees_pcq_audit,
+ROUND((1/(NULLIF(POWER(AVG(skipped_pcq_outliers_audit_dist.pcq_results_merged_audit),2),0))*10000) * AKVO_Tree_registration_areas.calc_area,0) as nr_trees_audited,
 
-count(akvo_tree_external_audits_pcq.instance) AS nr_samples_pcq_audit,
-table_label_strata.submission AS latest_submission,
-table_label_strata.difference_days_reg_monitoring,
-table_label_strata.difference_years_reg_monitoring,
+count_pcq_samples.number_pcq_samples,
+
+AKVO_Tree_registration_areas.planting_date AS planting_date,
+MAX(table_label_strata.submission) AS latest_audit_submission,
+MAX(table_label_strata.difference_days_reg_monitoring) AS nr_days_registration_audit,
+MAX(table_label_strata.difference_years_reg_monitoring) AS nr_years_registration_audit,
 table_label_strata.label_strata,
 
 CASE
 WHEN AKVO_Tree_external_audits_areas.option_tree_count = 'More than 200 trees planted. Determine tree number with PCQ method'
 OR AKVO_Tree_external_audits_areas.option_tree_count = 'I want to use the PCQ method anyway'
-THEN ROUND((ROUND(((1/(NULLIF(POWER(average_audit_tree_distance.avg_audit_tree_distance,2),0))*10000)*AKVO_Tree_registration_areas.calc_area)/NULLIF(akvo_tree_registration_areas.tree_number,0),2)*100),0)
--- Below code is arranged in the COUNT AUDIT table(?)
---WHEN AKVO_Tree_external_audits_areas.option_tree_count = 'I want to count trees anyway'
---OR AKVO_Tree_external_audits_areas.option_tree_count = 'Less than 200 trees planted. Determine tree number with counting'
---THEN ROUND((AKVO_Tree_external_audits_areas.audit_reported_trees/akvo_tree_registration_areas.tree_number),0)
+THEN ROUND((ROUND(((1/(NULLIF(POWER(AVG(skipped_pcq_outliers_audit_dist.pcq_results_merged_audit),2),0))*10000)*AKVO_Tree_registration_areas.calc_area)/NULLIF(akvo_tree_registration_areas.tree_number,0),2)*100),0)
 ELSE 0
 END AS perc_trees_survived,
 
 CASE
 WHEN AKVO_Tree_external_audits_areas.option_tree_count = 'More than 200 trees planted. Determine tree number with PCQ method'
 OR AKVO_Tree_external_audits_areas.option_tree_count = 'I want to use the PCQ method anyway'
-THEN ROUND(average_audit_tree_height.avg_audit_tree_height,2)
--- Below code is arranged in the COUNT AUDIT table(?)
---WHEN AKVO_Tree_external_audits_areas.option_tree_count = 'I want to count trees anyway'
---OR AKVO_Tree_audits_areas.option_tree_count = 'Less than 200 trees planted. Determine tree number with counting'
---THEN ROUND(AVG(AKVO_Tree_external_audits_areas.audit_reported_tree_height),2)
+THEN ROUND(AVG(skipped_pcq_outliers_audit_hgt.pcq_results_merged_audit_hgt),2)
 ELSE 0
 END AS avg_tree_height
 
-
 FROM AKVO_Tree_external_audits_areas
 LEFT JOIN AKVO_Tree_external_audits_pcq
-ON AKVO_Tree_external_audits_areas.instance = AKVO_Tree_external_audits_pcq.instance
+ON AKVO_Tree_external_audits_areas.identifier_akvo = AKVO_Tree_external_audits_pcq.identifier_akvo
 LEFT JOIN AKVO_Tree_registration_areas
 ON AKVO_Tree_external_audits_areas.identifier_akvo = AKVO_Tree_registration_areas.identifier_akvo
 LEFT JOIN table_label_strata
 ON AKVO_Tree_external_audits_areas.instance = table_label_strata.instance
-LEFT JOIN average_audit_tree_distance
-ON AKVO_Tree_external_audits_areas.instance = average_audit_tree_distance.instance
-LEFT JOIN average_audit_tree_height
-ON AKVO_Tree_external_audits_areas.instance = average_audit_tree_height.instance
+LEFT JOIN skipped_pcq_outliers_audit_dist
+ON AKVO_Tree_external_audits_areas.instance = skipped_pcq_outliers_audit_dist.instance
+LEFT JOIN skipped_pcq_outliers_audit_hgt
+ON AKVO_Tree_external_audits_areas.instance = skipped_pcq_outliers_audit_hgt.instance
+LEFT JOIN count_pcq_samples
+ON count_pcq_samples.instance = AKVO_Tree_external_audits_areas.instance
+
+
+WHERE AKVO_Tree_external_audits_areas.option_tree_count = 'More than 200 trees planted. Determine tree number with PCQ method'
+OR AKVO_Tree_external_audits_areas.option_tree_count = 'I want to use the PCQ method anyway'
 
 GROUP BY
 table_label_strata.label_strata,
 AKVO_Tree_external_audits_areas.identifier_akvo,
-AKVO_Tree_external_audits_pcq.identifier_akvo,
 AKVO_Tree_external_audits_areas.calc_area,
 akvo_tree_registration_areas.calc_area,
 akvo_tree_registration_areas.tree_number,
+count_pcq_samples.number_pcq_samples,
+AKVO_Tree_registration_areas.planting_date,
 AKVO_Tree_external_audits_areas.audit_reported_tree_height,
-table_label_strata.submission,
 AKVO_Tree_external_audits_areas.option_tree_count,
-average_audit_tree_distance.avg_audit_tree_distance,
-average_audit_tree_height.avg_audit_tree_height,
-table_label_strata.difference_days_reg_monitoring,
-table_label_strata.difference_years_reg_monitoring),
-
+akvo_tree_registration_areas.organisation,
+akvo_tree_registration_areas.contract_number,
+akvo_tree_registration_areas.id_planting_site,
+akvo_tree_registration_areas.country),
 
 -- Sub CTE table to calculate COUNTS of MONITORING results with CASE more easy and transparent. If we would do this in a subquery it results in
 -- a complex issues of multiple rows combined with grouping problems. This is why this intermediary table is more easy.
-calc_interm_results_tree_numbers_count AS (SELECT
-AKVO_Tree_monitoring_counts.identifier_akvo,
+calc_interm_results_tree_numbers_count_monitoring AS (SELECT
+AKVO_Tree_monitoring_areas.identifier_akvo,
+LOWER(akvo_tree_registration_areas.country) AS country,
+LOWER(akvo_tree_registration_areas.organisation) AS organisation,
+akvo_tree_registration_areas.contract_number,
+akvo_tree_registration_areas.id_planting_site,
 AKVO_Tree_registration_areas.calc_area,
-akvo_tree_registration_areas.tree_number as registered_tree_number,
-table_label_strata.label_strata,
-table_label_strata.difference_days_reg_monitoring,
-table_label_strata.difference_years_reg_monitoring,
-table_label_strata.submission AS latest_submission,
+akvo_tree_registration_areas.tree_number AS registered_tree_number,
+'Monitoring' AS procedure,
+'Tree count' AS data_collection_method,
+
+0 AS avg_monitored_tree_distance,
+0 AS avg_audit_tree_density,
 
 CASE
---WHEN AKVO_Tree_monitoring_areas.identifier_akvo = AKVO_Tree_monitoring_counts.identifier_akvo
 WHEN AKVO_Tree_monitoring_areas.method_selection = 'The trees were counted'
+AND SUM(AKVO_Tree_monitoring_counts.number_species) NOTNULL
 THEN SUM(AKVO_Tree_monitoring_counts.number_species)
 ELSE SUM(AKVO_Tree_monitoring_areas.number_living_trees)
-END AS monitored_tree_number,
+END AS nr_trees_monitored,
+
+0 AS nr_samples_pcq_monitoring,
+AKVO_Tree_registration_areas.planting_date AS planting_date,
+MAX(table_label_strata.submission) AS latest_monitoring_submission,
+MAX(table_label_strata.difference_days_reg_monitoring) AS nr_days_registration_monitoring,
+MAX(table_label_strata.difference_years_reg_monitoring) AS nr_years_registration_monitoring,
+table_label_strata.label_strata,
 
 CASE
---WHEN AKVO_Tree_monitoring_areas.identifier_akvo = AKVO_Tree_monitoring_counts.identifier_akvo
 WHEN AKVO_Tree_monitoring_areas.method_selection = 'The trees were counted'
+AND SUM(AKVO_Tree_monitoring_counts.number_species) NOTNULL
 THEN CAST(SUM(AKVO_Tree_monitoring_counts.number_species*1.0)/NULLIF(akvo_tree_registration_areas.tree_number*1.0,0)*100 AS NUMERIC)
 ELSE SUM(AKVO_Tree_monitoring_areas.number_living_trees)/NULLIF(akvo_tree_registration_areas.tree_number,0)*100
 END AS perc_trees_survived,
 
-akvo_tree_monitoring_areas.avg_tree_height AS avg_tree_height
+ROUND(AVG(akvo_tree_monitoring_areas.avg_tree_height)::numeric,2) AS avg_tree_height
 
 FROM AKVO_Tree_monitoring_areas
 LEFT JOIN AKVO_Tree_monitoring_counts
@@ -436,45 +458,61 @@ ON AKVO_Tree_monitoring_areas.identifier_akvo = AKVO_Tree_registration_areas.ide
 LEFT JOIN table_label_strata
 ON AKVO_Tree_monitoring_areas.instance = table_label_strata.instance
 
+WHERE AKVO_Tree_monitoring_areas.method_selection = 'The trees were counted'
+--and AKVO_Tree_monitoring_areas.identifier_akvo = 'a74c-6qph-7r0a'
+
 GROUP BY
 table_label_strata.label_strata,
 AKVO_Tree_monitoring_areas.identifier_akvo,
-AKVO_Tree_monitoring_counts.identifier_akvo,
 AKVO_Tree_registration_areas.calc_area,
 akvo_tree_registration_areas.tree_number,
-akvo_tree_monitoring_areas.avg_tree_height,
-table_label_strata.submission,
+AKVO_Tree_registration_areas.planting_date,
 AKVO_Tree_monitoring_areas.method_selection,
-table_label_strata.difference_days_reg_monitoring,
-table_label_strata.difference_years_reg_monitoring),
-
+akvo_tree_registration_areas.organisation,
+akvo_tree_registration_areas.contract_number,
+akvo_tree_registration_areas.id_planting_site,
+akvo_tree_registration_areas.country),
 
 -- Sub CTE table to calculate COUNTS of AUDIT results with CASE more easy and transparent. If we would do this in a subquery it results in
 -- a complex issues of multiple rows combined with grouping problems. This is why this intermediary table is more easy.
-calc_interm_results_tree_numbers_audits AS (SELECT
-AKVO_Tree_external_audits_counts.identifier_akvo,
+calc_interm_results_tree_numbers_audit AS (SELECT
+AKVO_Tree_external_audits_areas.identifier_akvo,
+LOWER(akvo_tree_registration_areas.country) AS country,
+LOWER(akvo_tree_registration_areas.organisation) AS organisation,
+akvo_tree_registration_areas.contract_number,
+akvo_tree_registration_areas.id_planting_site,
 AKVO_Tree_registration_areas.calc_area,
-akvo_tree_registration_areas.tree_number as registered_tree_number,
-table_label_strata.label_strata,
-table_label_strata.difference_days_reg_monitoring,
-table_label_strata.difference_years_reg_monitoring,
-table_label_strata.submission AS latest_submission,
+akvo_tree_registration_areas.tree_number AS registered_tree_number,
+'Audit' AS procedure,
+'Tree count' AS data_collection_method,
+
+0 AS avg_audit_tree_distance,
+0 AS avg_audit_tree_density,
 
 CASE
 WHEN AKVO_Tree_external_audits_areas.option_tree_count = 'I want to count trees anyway'
 OR AKVO_Tree_external_audits_areas.option_tree_count = 'Less than 200 trees planted. Determine tree number with counting'
+AND SUM(AKVO_Tree_external_audits_counts.number_species) NOTNULL
 THEN SUM(AKVO_Tree_external_audits_counts.number_species)
 ELSE SUM(AKVO_Tree_external_audits_areas.audit_reported_trees)
-END AS audited_tree_number,
+END AS nr_trees_audited,
+
+0 AS nr_samples_pcq_audit,
+AKVO_Tree_registration_areas.planting_date AS planting_date,
+MAX(table_label_strata.submission) AS latest_audit_submission,
+MAX(table_label_strata.difference_days_reg_monitoring) AS nr_days_registration_audit,
+MAX(table_label_strata.difference_years_reg_monitoring) AS nr_years_registration_audit,
+table_label_strata.label_strata,
 
 CASE
 WHEN AKVO_Tree_external_audits_areas.option_tree_count = 'I want to count trees anyway'
 OR AKVO_Tree_external_audits_areas.option_tree_count = 'Less than 200 trees planted. Determine tree number with counting'
+OR SUM(AKVO_Tree_external_audits_counts.number_species) NOTNULL
 THEN CAST(SUM(AKVO_Tree_external_audits_counts.number_species*1.0)/NULLIF(akvo_tree_registration_areas.tree_number*1.0,0)*100 AS NUMERIC)
 ELSE SUM(AKVO_Tree_external_audits_areas.audit_reported_trees)/NULLIF(akvo_tree_registration_areas.tree_number,0)*100
 END AS perc_trees_survived,
 
-akvo_tree_external_audits_areas.audit_reported_tree_height AS avg_tree_height
+ROUND(AVG(akvo_tree_external_audits_areas.audit_reported_tree_height),2) AS avg_tree_height_m
 
 FROM akvo_tree_external_audits_areas
 LEFT JOIN AKVO_Tree_external_audits_counts
@@ -484,219 +522,99 @@ ON akvo_tree_external_audits_areas.identifier_akvo = AKVO_Tree_registration_area
 LEFT JOIN table_label_strata
 ON akvo_tree_external_audits_areas.instance = table_label_strata.instance
 
+WHERE AKVO_Tree_external_audits_areas.option_tree_count = 'I want to count trees anyway'
+OR AKVO_Tree_external_audits_areas.option_tree_count = 'Less than 200 trees planted. Determine tree number with counting'
+
+
 GROUP BY
 table_label_strata.label_strata,
 akvo_tree_external_audits_areas.identifier_akvo,
-akvo_tree_external_audits_counts.identifier_akvo,
 AKVO_Tree_registration_areas.calc_area,
 akvo_tree_registration_areas.tree_number,
-akvo_tree_external_audits_areas.audit_reported_tree_height,
-table_label_strata.submission,
+AKVO_Tree_registration_areas.planting_date,
 akvo_tree_external_audits_areas.option_tree_count,
-table_label_strata.difference_days_reg_monitoring,
-table_label_strata.difference_years_reg_monitoring),
-
-
--- Calculate the MONITORING results from the PCQ's per label strata (and instance)
-monitoring_tree_numbers_pcq AS
-(SELECT calc_interm_results_tree_numbers_pcq.identifier_akvo,
-calc_interm_results_tree_numbers_pcq.label_strata,
-calc_interm_results_tree_numbers_pcq.difference_days_reg_monitoring,
-calc_interm_results_tree_numbers_pcq.difference_years_reg_monitoring,
-'Monitoring' AS procedure,
-'PCQ' AS method,
-SUM(calc_interm_results_tree_numbers_pcq.nr_samples_pcq) as nr_samples_pcq,
-SUM(calc_interm_results_tree_numbers_pcq.nr_trees_pcq_monitored) AS monitored_tree_number,
-ROUND(AVG(calc_interm_results_tree_numbers_pcq.avg_tree_distance),2) as avg_tree_distance,
-ROUND(AVG(calc_interm_results_tree_numbers_pcq.avg_tree_density),2) as avg_tree_density,
-ROUND(CAST(AVG(calc_interm_results_tree_numbers_pcq.avg_tree_height) AS NUMERIC),2) as average_tree_height,
-
-ROUND(AVG(calc_interm_results_tree_numbers_pcq.perc_trees_survived),0) as avg_perc_survived_trees,
-
-MAX(calc_interm_results_tree_numbers_pcq.latest_submission) AS submission
-
-FROM calc_interm_results_tree_numbers_pcq
-
-GROUP BY calc_interm_results_tree_numbers_pcq.identifier_akvo,
-calc_interm_results_tree_numbers_pcq.label_strata,
-calc_interm_results_tree_numbers_pcq.tree_number,
-calc_interm_results_tree_numbers_pcq.difference_days_reg_monitoring,
-calc_interm_results_tree_numbers_pcq.difference_years_reg_monitoring),
-
-
--- Calculate the AUDIT results from the PCQ's per label strata (and instance)
-audit_tree_numbers_pcq AS
-(SELECT calc_interm_results_tree_numbers_pcq_audit.identifier_akvo,
-calc_interm_results_tree_numbers_pcq_audit.label_strata,
-calc_interm_results_tree_numbers_pcq_audit.difference_days_reg_monitoring,
-calc_interm_results_tree_numbers_pcq_audit.difference_years_reg_monitoring,
-'Audit' AS procedure,
-'PCQ' AS method,
-SUM(calc_interm_results_tree_numbers_pcq_audit.nr_samples_pcq_audit) AS nr_samples_pcq_audit,
-SUM(calc_interm_results_tree_numbers_pcq_audit.nr_trees_pcq_audit) AS audited_tree_number,
-ROUND(AVG(calc_interm_results_tree_numbers_pcq_audit.avg_audit_tree_distance),2) AS avg_tree_distance,
-ROUND(AVG(calc_interm_results_tree_numbers_pcq_audit.avg_audit_tree_density),2) AS avg_tree_density,
-ROUND(CAST(AVG(calc_interm_results_tree_numbers_pcq_audit.avg_tree_height) AS NUMERIC),2) AS average_tree_height,
-
-ROUND(AVG(calc_interm_results_tree_numbers_pcq_audit.perc_trees_survived),0) as avg_perc_survived_trees,
-
-MAX(calc_interm_results_tree_numbers_pcq_audit.latest_submission) AS submission
-
-FROM calc_interm_results_tree_numbers_pcq_audit
-
-GROUP BY calc_interm_results_tree_numbers_pcq_audit.identifier_akvo,
-calc_interm_results_tree_numbers_pcq_audit.label_strata,
-calc_interm_results_tree_numbers_pcq_audit.nr_trees_pcq_audit,
-calc_interm_results_tree_numbers_pcq_audit.difference_days_reg_monitoring,
-calc_interm_results_tree_numbers_pcq_audit.difference_years_reg_monitoring),
-
-
--- Calculate the MONITORING results from the COUNTS per label strata
-monitoring_tree_numbers_counts AS (SELECT
-calc_interm_results_tree_numbers_count.identifier_akvo,
-calc_interm_results_tree_numbers_count.label_strata,
-calc_interm_results_tree_numbers_count.difference_days_reg_monitoring,
-calc_interm_results_tree_numbers_count.difference_years_reg_monitoring,
-'Monitoring' AS procedure,
-'tree count' as method,
-0 AS nr_samples_pcq,
-ROUND(AVG(calc_interm_results_tree_numbers_count.monitored_tree_number),0) as monitored_tree_number,
---calc_interm_results_tree_numbers_count.monitored_tree_number as monitored_tree_number,
-0 AS avg_tree_distance,
-0 AS avg_tree_density,
-SUM(calc_interm_results_tree_numbers_count.avg_tree_height) AS average_tree_height,
-ROUND(AVG(calc_interm_results_tree_numbers_count.perc_trees_survived),0) as avg_perc_survived_trees,
-MAX(calc_interm_results_tree_numbers_count.latest_submission) AS submission
-
-FROM calc_interm_results_tree_numbers_count
-
-GROUP BY calc_interm_results_tree_numbers_count.identifier_akvo,
-calc_interm_results_tree_numbers_count.label_strata,
-calc_interm_results_tree_numbers_count.registered_tree_number,
-calc_interm_results_tree_numbers_count.difference_days_reg_monitoring,
-calc_interm_results_tree_numbers_count.difference_years_reg_monitoring),
-
-
--- Calculate the AUDIT results from the COUNTS per label strata
-audit_tree_numbers_counts AS (SELECT
-calc_interm_results_tree_numbers_audits.identifier_akvo,
-calc_interm_results_tree_numbers_audits.label_strata,
-calc_interm_results_tree_numbers_audits.difference_days_reg_monitoring,
-calc_interm_results_tree_numbers_audits.difference_years_reg_monitoring,
-
-'Audit' AS procedure,
-'tree count' as method,
-0 AS nr_samples_pcq,
-ROUND(AVG(calc_interm_results_tree_numbers_audits.audited_tree_number),0) as audited_tree_number,
-0 AS avg_tree_distance,
-0 AS avg_tree_density,
-SUM(calc_interm_results_tree_numbers_audits.avg_tree_height) AS average_tree_height,
-ROUND(AVG(calc_interm_results_tree_numbers_audits.perc_trees_survived),0) as avg_perc_survived_trees,
-MAX(calc_interm_results_tree_numbers_audits.latest_submission) AS submission
-
-FROM calc_interm_results_tree_numbers_audits
-
-GROUP BY calc_interm_results_tree_numbers_audits.identifier_akvo,
-calc_interm_results_tree_numbers_audits.label_strata,
-calc_interm_results_tree_numbers_audits.registered_tree_number,
-calc_interm_results_tree_numbers_audits.difference_days_reg_monitoring,
-calc_interm_results_tree_numbers_audits.difference_years_reg_monitoring),
-
-
---UNION of the four tables (PCQ and COUNTS) FROM MONITORING and AUDITS
-monitoring_tree_numbers AS
-(SELECT * FROM monitoring_tree_numbers_pcq
-UNION
-SELECT * FROM monitoring_tree_numbers_counts
-UNION
-SELECT * FROM audit_tree_numbers_pcq
-UNION
-SELECT * FROM audit_tree_numbers_counts)
-
-
--- Here is the creation of the table and that combines all data
--- First query unifies all results from the monitorings (both PCQ and COUNTS)
-SELECT
-monitoring_tree_numbers.identifier_akvo,
-monitoring_tree_numbers.label_strata,
-monitoring_tree_numbers.procedure,
-monitoring_tree_numbers.method AS method_data_collection,
-monitoring_tree_numbers.submission,
-monitoring_tree_numbers.difference_days_reg_monitoring,
-monitoring_tree_numbers.difference_years_reg_monitoring,
-akvo_tree_registration_areas.id_planting_site,
+akvo_tree_registration_areas.organisation,
 akvo_tree_registration_areas.contract_number,
-LOWER(akvo_tree_registration_areas.organisation) as organisation,
-akvo_tree_registration_areas.tree_number AS "nr trees initially registered",
-monitoring_tree_numbers.nr_samples_pcq AS number_of_PCQ_samples,
-akvo_tree_registration_areas.calc_area AS "calcul/estim Area (ha)",
-monitoring_tree_numbers.avg_tree_distance AS "Average tree distance (m)",
-monitoring_tree_numbers.average_tree_height AS "Average tree height (m)",
-monitoring_tree_numbers.avg_tree_density AS "Tree density (trees/ha)",
-monitoring_tree_numbers.monitored_tree_number AS "Total nr trees on site (registered/monitored)",
-monitoring_tree_numbers.avg_perc_survived_trees AS "Percentage of survived trees"
-
-FROM monitoring_tree_numbers
-JOIN akvo_tree_registration_areas
-ON monitoring_tree_numbers.identifier_akvo = akvo_tree_registration_areas.identifier_akvo
-
-UNION
+akvo_tree_registration_areas.id_planting_site,
+akvo_tree_registration_areas.country),
 
 -- Add the POLYGON results from registrations to the upper table so that the initial registered tree numbers are integrated
 -- including a '0' value for strata '0' (initial tree number). Only for polygons
-SELECT
+registration_results_polygon AS (SELECT
 akvo_tree_registration_areas.identifier_akvo,
-0 AS monitoring_strata,
-'Registration' AS procedure,
-'tree registration' AS method_data_collection,
-akvo_tree_registration_areas.submission,
-0 AS difference_days_reg_monitoring,
-0 AS difference_years_reg_monitoring,
-akvo_tree_registration_areas.id_planting_site,
+LOWER(akvo_tree_registration_areas.country) AS country,
+LOWER(akvo_tree_registration_areas.organisation) AS organisation,
 akvo_tree_registration_areas.contract_number,
-LOWER(akvo_tree_registration_areas.organisation) as organisation,
-akvo_tree_registration_areas.tree_number AS "nr trees initially registered",
-0 as number_of_PCQ_samples,
-akvo_tree_registration_areas.calc_area as "calcul/estim Area (ha)",
+akvo_tree_registration_areas.id_planting_site,
+akvo_tree_registration_areas.calc_area,
+akvo_tree_registration_areas.tree_number AS registered_tree_number,
+'Registration' AS procedure,
+'tree registration' AS data_collection_method,
 ROUND(100/NULLIF(SQRT(akvo_tree_registration_areas.tree_number/NULLIF(akvo_tree_registration_areas.calc_area,0)),0),2)
-AS "Average tree distance (m)",
-0 AS "Average tree height (m)",
+AS avg_registered_tree_distance_m,
 ROUND((akvo_tree_registration_areas.tree_number/NULLIF(akvo_tree_registration_areas.calc_area,0)),0)
-AS "Tree density (trees/ha)",
-akvo_tree_registration_areas.tree_number AS "Total nr trees on site (registered/monitored)",
-100 AS "Percentage of trees survived"
+AS avg_registered_tree_density,
+akvo_tree_registration_areas.tree_number AS nr_trees_registered,
+0 as nr_samples_pcq_registration,
+akvo_tree_registration_areas.planting_date,
+akvo_tree_registration_areas.submission AS latest_registration_submission,
+0 AS nr_days_planting_date_registration,
+0 AS nr_years_planting_date_registration,
+0 AS label_strata,
+100 AS "Percentage of trees survived",
+0 AS "Average tree height (m)"
 
 FROM akvo_tree_registration_areas
-WHERE polygon NOTNULL
+WHERE polygon NOTNULL),
 
-UNION
 
 -- Add the NON-polygon results from registrations to the upper table so that the initial registered tree numbers are integrated
 -- including a '0' value for strata '0' (initial tree number). Only for NON-polygons
-SELECT
+registration_results_non_polygon AS (SELECT
 akvo_tree_registration_areas.identifier_akvo,
-0 AS monitoring_strata,
-'Registration' AS procedure,
-'tree registration' as method_data_collection,
-akvo_tree_registration_areas.submission,
-0 AS difference_days_reg_monitoring,
-0 AS difference_years_reg_monitoring,
-akvo_tree_registration_areas.id_planting_site,
+LOWER(akvo_tree_registration_areas.country) AS country,
+LOWER(akvo_tree_registration_areas.organisation) AS organisation,
 akvo_tree_registration_areas.contract_number,
-LOWER(akvo_tree_registration_areas.organisation) as organisation,
-akvo_tree_registration_areas.tree_number AS "nr trees initially registered",
-0 as number_of_PCQ_samples,
-akvo_tree_registration_areas.estimated_area as "calcul/estim Area (ha)",
-0 AS "Average tree distance (m)",
-0 AS "Average tree height (m)",
-0 AS "Tree density (trees/ha)",
-akvo_tree_registration_areas.tree_number AS "Total nr trees on site (registered/monitored)",
-100 AS "Percentage of trees survived"
+akvo_tree_registration_areas.id_planting_site,
+akvo_tree_registration_areas.calc_area,
+akvo_tree_registration_areas.tree_number,
+'Registration' AS procedure,
+'tree registration' AS data_collection_method,
+ROUND(100/NULLIF(SQRT(akvo_tree_registration_areas.tree_number/NULLIF(akvo_tree_registration_areas.calc_area,0)),0),2)
+AS avg_registered_tree_distance,
+ROUND((akvo_tree_registration_areas.tree_number/NULLIF(akvo_tree_registration_areas.calc_area,0)),0)
+AS avg_registered_tree_density,
+akvo_tree_registration_areas.tree_number AS nr_trees_registered,
+0 as nr_samples_pcq_registration,
+akvo_tree_registration_areas.planting_date,
+akvo_tree_registration_areas.submission AS latest_registration_submission,
+0 AS nr_days_planting_date_registration,
+0 AS nr_years_planting_date_registration,
+0 AS label_strata,
+100 AS "Percentage of trees survived",
+0 AS "Average tree height (m)"
+
 FROM akvo_tree_registration_areas
-WHERE polygon ISNULL
-ORDER BY contract_number, id_planting_site, label_strata;'''
+WHERE polygon ISNULL),
+
+--UNION of the six tables (PCQ and COUNTS) FROM MONITORING and AUDITS and registration data (polygon and non-polygon)
+monitoring_tree_numbers AS
+(SELECT * FROM calc_interm_results_tree_numbers_pcq_monitoring
+UNION ALL
+SELECT * FROM calc_interm_results_tree_numbers_pcq_audit
+UNION ALL
+SELECT * FROM calc_interm_results_tree_numbers_count_monitoring
+UNION ALL
+SELECT * FROM calc_interm_results_tree_numbers_audit
+UNION ALL
+SELECT * FROM registration_results_polygon
+UNION ALL
+SELECT * FROM registration_results_non_polygon)
+
+SELECT * FROM monitoring_tree_numbers;'''
 
 conn.commit()
+
 
 create_a3 = '''UPDATE akvo_tree_registration_photos
 SET photo_url = RIGHT(photo_url, strpos(reverse(photo_url),'/'));
