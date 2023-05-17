@@ -1133,11 +1133,11 @@ cte_monitored_tree_number_monitored_sites AS (select table_y.contract_number,
 SUM(table_y.monitored_tree_number) as monitored_tree_number
 from (SELECT MAX(CALC_TAB_monitoring_calculations_per_site.label_strata),
 CALC_TAB_monitoring_calculations_per_site.contract_number,
-CALC_TAB_monitoring_calculations_per_site."Total nr trees on site (registered/monitored)" as monitored_tree_number
+CALC_TAB_monitoring_calculations_per_site.nr_trees_monitored AS monitored_tree_number
 FROM CALC_TAB_monitoring_calculations_per_site
 WHERE CALC_TAB_monitoring_calculations_per_site.label_strata > 0
 GROUP BY CALC_TAB_monitoring_calculations_per_site.contract_number,
-CALC_TAB_monitoring_calculations_per_site."Total nr trees on site (registered/monitored)"
+CALC_TAB_monitoring_calculations_per_site.nr_trees_monitored
 order by CALC_TAB_monitoring_calculations_per_site.contract_number) table_y
 GROUP BY table_y.contract_number)
 
@@ -1283,9 +1283,9 @@ LEFT JOIN akvo_tree_registration_areas
 ON akvo_tree_monitoring_areas.identifier_akvo = akvo_tree_registration_areas.identifier_akvo
 LEFT JOIN (SELECT CALC_TAB_monitoring_calculations_per_site.identifier_akvo,
 		   COUNT(CALC_TAB_monitoring_calculations_per_site.label_strata),
-		   MAX(CALC_TAB_monitoring_calculations_per_site."Total nr trees on site (registered/monitored)") AS "Latest monitored nr trees on site",
-MAX(CALC_TAB_monitoring_calculations_per_site."Percentage of survived trees") AS "Latest monitored percentage of survived trees",
-MAX(CALC_TAB_monitoring_calculations_per_site.submission) AS "Latest monitoring submission date"
+		   MAX(CALC_TAB_monitoring_calculations_per_site.nr_trees_monitored AS "Latest monitored nr trees on site",
+MAX(CALC_TAB_monitoring_calculations_per_site.perc_trees_survived) AS "Latest monitored percentage of survived trees",
+MAX(CALC_TAB_monitoring_calculations_per_site.latest_monitoring_submission) AS "Latest monitoring submission date"
 FROM CALC_TAB_monitoring_calculations_per_site
 GROUP BY CALC_TAB_monitoring_calculations_per_site.identifier_akvo) monitoring_results
 ON akvo_tree_monitoring_areas.identifier_akvo = monitoring_results.identifier_akvo
@@ -2159,8 +2159,8 @@ cur.execute(create_a2)
 cur.execute(create_a3)
 cur.execute(create_a4)
 cur.execute(create_a5)
-cur.execute(create_a6)
-cur.execute(create_a7)
+#cur.execute(create_a6)
+#cur.execute(create_a7)
 cur.execute(create_a8)
 cur.execute(create_a9)
 cur.execute(create_a10)
