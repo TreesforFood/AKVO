@@ -1283,7 +1283,7 @@ LEFT JOIN akvo_tree_registration_areas
 ON akvo_tree_monitoring_areas.identifier_akvo = akvo_tree_registration_areas.identifier_akvo
 LEFT JOIN (SELECT CALC_TAB_monitoring_calculations_per_site.identifier_akvo,
 		   COUNT(CALC_TAB_monitoring_calculations_per_site.label_strata),
-		   MAX(CALC_TAB_monitoring_calculations_per_site.nr_trees_monitored AS "Latest monitored nr trees on site",
+		   MAX(CALC_TAB_monitoring_calculations_per_site.nr_trees_monitored) AS "Latest monitored nr trees on site",
 MAX(CALC_TAB_monitoring_calculations_per_site.perc_trees_survived) AS "Latest monitored percentage of survived trees",
 MAX(CALC_TAB_monitoring_calculations_per_site.latest_monitoring_submission) AS "Latest monitoring submission date"
 FROM CALC_TAB_monitoring_calculations_per_site
@@ -2155,7 +2155,7 @@ conn.commit()
 
 # Execute create tables
 cur.execute(create_a1)
-#cur.execute(create_a2)
+cur.execute(create_a2)
 cur.execute(create_a3)
 cur.execute(create_a4)
 cur.execute(create_a5)
@@ -2168,16 +2168,16 @@ cur.execute(create_a11)
 cur.execute(create_a12)
 cur.execute(create_a13)
 cur.execute(create_a14)
-#cur.execute(create_a15)
+cur.execute(create_a15)
 cur.execute(create_a16)
 cur.execute(create_a17)
-#cur.execute(create_a18)
+cur.execute(create_a18)
 cur.execute(create_a19)
 cur.execute(create_a20)
 cur.execute(create_a21)
 cur.execute(create_a22)
 cur.execute(create_a23)
-#cur.execute(create_a24)
+cur.execute(create_a24)
 cur.execute(create_a25)
 cur.execute(create_a26)
 cur.execute(create_a27)
