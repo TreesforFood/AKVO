@@ -591,7 +591,7 @@ calc_interm_results_tree_numbers_pcq_audit.monitoring_strata,
 'Audit' AS procedure,
 'PCQ' AS method,
 SUM(calc_interm_results_tree_numbers_pcq_audit.nr_samples_pcq_audit) AS nr_samples_pcq_audit,
-SUM(calc_interm_results_tree_numbers_pcq_audit.nr_trees_pcq_audit) AS audited_tree_number,
+SUM(calc_interm_results_tree_numbers_pcq_audit.nr_trees_pcq_audit) AS monitored_tree_number,
 ROUND(AVG(calc_interm_results_tree_numbers_pcq_audit.avg_audit_tree_distance),2) AS avg_tree_distance,
 ROUND(AVG(calc_interm_results_tree_numbers_pcq_audit.avg_audit_tree_density),2) AS avg_tree_density,
 ROUND(CAST(AVG(calc_interm_results_tree_numbers_pcq_audit.avg_tree_height) AS NUMERIC),2) AS average_tree_height,
@@ -636,7 +636,7 @@ calc_interm_results_tree_numbers_audits.monitoring_strata,
 'Audit' AS procedure,
 'tree count' as method,
 0 AS nr_samples_pcq,
-ROUND(AVG(calc_interm_results_tree_numbers_audits.audited_tree_number),0) as audited_tree_number,
+ROUND(AVG(calc_interm_results_tree_numbers_audits.audited_tree_number),0) as monitored_tree_number,
 0 AS avg_tree_distance,
 0 AS avg_tree_density,
 SUM(calc_interm_results_tree_numbers_audits.avg_tree_height) AS average_tree_height,
@@ -665,10 +665,10 @@ SELECT * FROM audit_tree_numbers_counts)
 -- First query unifies all results from the monitorings (both PCQ and COUNTS)
 SELECT
 monitoring_tree_numbers.identifier_akvo,
-monitoring_tree_numbers.monitoring_strata,
+monitoring_tree_numbers.monitoring_strata AS label_strata,
 monitoring_tree_numbers.procedure,
 monitoring_tree_numbers.method AS method_data_collection,
-monitoring_tree_numbers.submission,
+monitoring_tree_numbers.submission AS latest_monitoring_submission,
 akvo_tree_registration_areas.id_planting_site,
 akvo_tree_registration_areas.contract_number,
 akvo_tree_registration_areas.organisation,
@@ -678,8 +678,8 @@ akvo_tree_registration_areas.calc_area AS "calcul/estim Area (ha)",
 monitoring_tree_numbers.avg_tree_distance AS "Average tree distance (m)",
 monitoring_tree_numbers.average_tree_height AS "Average tree height (m)",
 monitoring_tree_numbers.avg_tree_density AS "Tree density (trees/ha)",
-monitoring_tree_numbers.monitored_tree_number AS "Total nr trees on site (registered/monitored)",
-monitoring_tree_numbers.avg_perc_survived_trees AS "Percentage of survived trees"
+monitoring_tree_numbers.monitored_tree_number AS nr_trees_monitored,
+monitoring_tree_numbers.avg_perc_survived_trees AS perc_trees_survived
 
 FROM monitoring_tree_numbers
 JOIN akvo_tree_registration_areas
@@ -691,10 +691,10 @@ UNION
 -- including a '0' value for strata '0' (initial tree number). Only for polygons
 SELECT
 akvo_tree_registration_areas.identifier_akvo,
-0 AS monitoring_strata,
+0 AS label_strata,
 'Registration' AS procedure,
 'tree registration' AS method_data_collection,
-akvo_tree_registration_areas.submission,
+akvo_tree_registration_areas.submission AS latest_monitoring_submission,
 akvo_tree_registration_areas.id_planting_site,
 akvo_tree_registration_areas.contract_number,
 akvo_tree_registration_areas.organisation,
@@ -706,8 +706,8 @@ AS "Average tree distance (m)",
 0 AS "Average tree height (m)",
 ROUND((akvo_tree_registration_areas.tree_number/NULLIF(akvo_tree_registration_areas.calc_area,0)),0)
 AS "Tree density (trees/ha)",
-akvo_tree_registration_areas.tree_number AS "Total nr trees on site (registered/monitored)",
-100 AS "Percentage of trees survived"
+akvo_tree_registration_areas.tree_number AS nr_trees_monitored,
+100 AS perc_trees_survived
 
 FROM akvo_tree_registration_areas
 WHERE polygon NOTNULL
@@ -718,10 +718,10 @@ UNION
 -- including a '0' value for strata '0' (initial tree number). Only for NON-polygons
 SELECT
 akvo_tree_registration_areas.identifier_akvo,
-0 AS monitoring_strata,
+0 AS label_strata,
 'Registration' AS procedure,
 'tree registration' as method_data_collection,
-akvo_tree_registration_areas.submission,
+akvo_tree_registration_areas.submission AS latest_monitoring_submission,
 akvo_tree_registration_areas.id_planting_site,
 akvo_tree_registration_areas.contract_number,
 akvo_tree_registration_areas.organisation,
@@ -731,13 +731,14 @@ akvo_tree_registration_areas.estimated_area as "calcul/estim Area (ha)",
 0 AS "Average tree distance (m)",
 0 AS "Average tree height (m)",
 0 AS "Tree density (trees/ha)",
-akvo_tree_registration_areas.tree_number AS "Total nr trees on site (registered/monitored)",
-100 AS "Percentage of trees survived"
+akvo_tree_registration_areas.tree_number AS nr_trees_monitored,
+100 AS perc_trees_survived
 FROM akvo_tree_registration_areas
 WHERE polygon ISNULL
-ORDER BY contract_number, id_planting_site, monitoring_strata;'''
+ORDER BY contract_number, id_planting_site, label_strata;'''
 
 conn.commit()
+
 
 create_a3 = '''UPDATE akvo_tree_registration_photos
 SET photo_url = RIGHT(photo_url, strpos(reverse(photo_url),'/'));
@@ -779,8 +780,7 @@ AKVO_Tree_registration_areas.instance,
 AKVO_Tree_registration_areas.submitter AS "Submitter of registration",
 AKVO_Tree_registration_areas.akvo_form_version AS "Form version used for registration",
 AKVO_Tree_registration_areas.submission AS "Submission Date",
-AKVO_Tree_registration_areas.organisation,
---As name_organisation,
+LOWER(AKVO_Tree_registration_areas.organisation) as organisation,
 AKVO_Tree_registration_areas.country AS "Country",
 AKVO_Tree_registration_areas.id_planting_site AS "ID planting site",
 AKVO_Tree_registration_areas.contract_number AS "Contract number",
@@ -918,12 +918,12 @@ latest_monitoring_results AS (SELECT
 CALC_TAB_monitoring_calculations_per_site.identifier_akvo,
 
 MAX(CASE
-WHEN CALC_TAB_monitoring_calculations_per_site.monitoring_strata >= 180
+WHEN CALC_TAB_monitoring_calculations_per_site.label_strata >= 180
 THEN CALC_TAB_monitoring_calculations_per_site."Tree density (trees/ha)"
 END) as "Latest monitored tree density (trees/ha)",
 
 MAX(CASE
-WHEN CALC_TAB_monitoring_calculations_per_site.monitoring_strata >= 180
+WHEN CALC_TAB_monitoring_calculations_per_site.label_strata >= 180
 THEN CALC_TAB_monitoring_calculations_per_site."Percentage of survived trees"
 END) AS "Latest monitored survival percentage"
 
@@ -964,9 +964,8 @@ GROUP BY identifier_akvo)
 SELECT
 AKVO_Tree_registration_areas.centroid_coord,
 AKVO_Tree_registration_areas.identifier_akvo AS "Identifier AKVO",
-AKVO_Tree_registration_areas.organisation AS "Name organisation",
+LOWER(AKVO_Tree_registration_areas.organisation) AS "Name organisation",
 AKVO_Tree_registration_areas.submitter AS "Submitter of registration data",
---AKVO_Tree_external_audits_pcq.instance AS "Audit instance",
 auditors."Name auditor(s)",
 MAX(AKVO_Tree_external_audits_areas.submission) AS "Latest submission date audit",
 AKVO_Tree_registration_areas.id_planting_site AS "ID planting site",
@@ -1048,7 +1047,7 @@ conn.commit()
 create_a7 = '''CREATE TABLE CALC_GEOM_Trees_counted_per_site_by_external_audit
 AS SELECT AKVO_Tree_registration_areas.centroid_coord,
 AKVO_Tree_registration_areas.identifier_akvo,
-AKVO_Tree_registration_areas.organisation AS "Name organisation",
+LOWER(AKVO_Tree_registration_areas.organisation) AS "Name organisation",
 AKVO_Tree_registration_areas.submitter AS "Name submitter registration data",
 AKVO_Tree_external_audits_areas.submitter AS "Name auditor",
 AKVO_Tree_registration_areas.id_planting_site AS "ID planting site",
@@ -1212,7 +1211,7 @@ create_a15 = '''CREATE TABLE CALC_TAB_tree_submissions_per_contract
 AS WITH CTE_total_tree_registrations AS (
 select
 lower(akvo_tree_registration_areas.country) as name_country,
-lower(akvo_tree_registration_areas.organisation) as name_organisation,
+lower(akvo_tree_registration_areas.organisation) as organisation,
 akvo_tree_registration_areas.contract_number,
 SUM(akvo_tree_registration_areas.tree_number) AS "Registered tree number",
 MAX(akvo_tree_registration_areas.submission) AS "Latest submitted registration",
@@ -1223,7 +1222,7 @@ WHERE (akvo_tree_registration_areas.test = '' OR akvo_tree_registration_areas.te
 AND NOT akvo_tree_registration_areas.id_planting_site = 'placeholder' AND NOT country = '' AND NOT organisation = ''
 GROUP BY akvo_tree_registration_areas.contract_number,
 name_country,
-name_organisation),
+organisation),
 
 CTE_tree_monitoring AS (select
 akvo_tree_registration_areas.contract_number,
@@ -1256,19 +1255,19 @@ group by akvo_tree_registration_areas.contract_number),
 
 cte_monitored_tree_number_monitored_sites AS (select table_y.contract_number,
 SUM(table_y.monitored_tree_number) as monitored_tree_number
-from (SELECT MAX(CALC_TAB_monitoring_calculations_per_site.monitoring_strata),
+from (SELECT MAX(CALC_TAB_monitoring_calculations_per_site.label_strata),
 CALC_TAB_monitoring_calculations_per_site.contract_number,
-CALC_TAB_monitoring_calculations_per_site."Total nr trees on site (registered/monitored)" as monitored_tree_number
+CALC_TAB_monitoring_calculations_per_site.nr_trees_monitored AS monitored_tree_number
 FROM CALC_TAB_monitoring_calculations_per_site
-WHERE CALC_TAB_monitoring_calculations_per_site.monitoring_strata > 0
+WHERE CALC_TAB_monitoring_calculations_per_site.label_strata > 0
 GROUP BY CALC_TAB_monitoring_calculations_per_site.contract_number,
-CALC_TAB_monitoring_calculations_per_site."Total nr trees on site (registered/monitored)"
+CALC_TAB_monitoring_calculations_per_site.nr_trees_monitored
 order by CALC_TAB_monitoring_calculations_per_site.contract_number) table_y
 GROUP BY table_y.contract_number)
 
 	SELECT
 	CTE_total_tree_registrations.name_country,
-	CTE_total_tree_registrations.name_organisation,
+	CTE_total_tree_registrations.organisation,
 	CTE_total_tree_registrations.contract_number AS "Contract number",
 	CTE_total_tree_registrations."Nr of sites registered" AS "Total number of sites registered",
 	CTE_total_tree_registrations."Registered tree number" AS "Total number of trees registered",
@@ -1300,7 +1299,7 @@ conn.commit()
 create_a16 = '''CREATE TABLE CALC_TAB_Error_check_on_nursery_registration AS select
 akvo_nursery_registration.identifier_akvo,
 akvo_nursery_registration.nursery_name,
-akvo_nursery_registration.organisation,
+LOWER(akvo_nursery_registration.organisation) as organisation,
 akvo_nursery_registration.full_tree_capacity as "maximum/full tree capacity of nursery",
 akvo_nursery_monitoring.number_trees_produced_currently,
 akvo_nursery_monitoring.month_planting_stock,
@@ -1380,15 +1379,15 @@ END AS "Check nr of photos taken during monitoring of the nursery",
 
 centroid_coord
 
-FROM CALC_TAB_Error_check_on_nursery_registration'''
+FROM CALC_TAB_Error_check_on_nursery_registration;'''
 
 conn.commit()
 
 create_a18 = '''CREATE TABLE akvo_ecosia_tree_area_monitoring AS
 SELECT
 akvo_tree_monitoring_areas.identifier_akvo,
-akvo_tree_registration_areas.country,
-akvo_tree_registration_areas.organisation,
+LOWER(akvo_tree_registration_areas.country) as country,
+LOWER(akvo_tree_registration_areas.organisation) as organisation,
 akvo_tree_registration_areas.contract_number,
 akvo_tree_registration_areas.id_planting_site,
 akvo_tree_monitoring_areas.display_name,
@@ -1407,10 +1406,10 @@ FROM akvo_tree_monitoring_areas
 LEFT JOIN akvo_tree_registration_areas
 ON akvo_tree_monitoring_areas.identifier_akvo = akvo_tree_registration_areas.identifier_akvo
 LEFT JOIN (SELECT CALC_TAB_monitoring_calculations_per_site.identifier_akvo,
-		   COUNT(CALC_TAB_monitoring_calculations_per_site.monitoring_strata),
-		   MAX(CALC_TAB_monitoring_calculations_per_site."Total nr trees on site (registered/monitored)") AS "Latest monitored nr trees on site",
-MAX(CALC_TAB_monitoring_calculations_per_site."Percentage of survived trees") AS "Latest monitored percentage of survived trees",
-MAX(CALC_TAB_monitoring_calculations_per_site.submission) AS "Latest monitoring submission date"
+		   COUNT(CALC_TAB_monitoring_calculations_per_site.label_strata),
+		   MAX(CALC_TAB_monitoring_calculations_per_site.nr_trees_monitored) AS "Latest monitored nr trees on site",
+MAX(CALC_TAB_monitoring_calculations_per_site.perc_trees_survived) AS "Latest monitored percentage of survived trees",
+MAX(CALC_TAB_monitoring_calculations_per_site.latest_monitoring_submission) AS "Latest monitoring submission date"
 FROM CALC_TAB_monitoring_calculations_per_site
 GROUP BY CALC_TAB_monitoring_calculations_per_site.identifier_akvo) monitoring_results
 ON akvo_tree_monitoring_areas.identifier_akvo = monitoring_results.identifier_akvo
@@ -1474,7 +1473,8 @@ AS SELECT * FROM calc_tab_tree_submissions_per_contract;'''
 conn.commit()
 
 create_a25 = ''' CREATE TABLE akvo_ecosia_tree_photo_registration
-AS SELECT akvo_tree_registration_areas_updated.country,
+AS SELECT
+LOWER(akvo_tree_registration_areas_updated.country) as country,
 akvo_tree_registration_areas_updated.organisation,
 akvo_tree_registration_areas_updated.contract_number,
 akvo_tree_registration_areas_updated.id_planting_site,
@@ -1488,10 +1488,10 @@ create_a26 = ''' CREATE TABLE s4g_ecosia_site_health
 AS SELECT
 akvo_tree_registration_areas.identifier_akvo,
 akvo_tree_registration_areas.display_name,
-akvo_tree_registration_areas.organisation,
+LOWER(akvo_tree_registration_areas.organisation) as organisation,
 akvo_tree_registration_areas.id_planting_site,
 akvo_tree_registration_areas.contract_number,
-akvo_tree_registration_areas.country,
+LOWER(akvo_tree_registration_areas.country) AS country,
 akvo_tree_registration_areas.tree_number AS number_trees_registered,
 S4G_API_health_indicators.health_index,
 S4G_API_health_indicators.health_index_normalized,
@@ -1509,7 +1509,7 @@ create_a27 = ''' CREATE TABLE s4g_ecosia_fires
 AS SELECT
 akvo_tree_registration_areas.identifier_akvo,
 akvo_tree_registration_areas.display_name,
-akvo_tree_registration_areas.country,
+LOWER(akvo_tree_registration_areas.country) as country,
 LOWER(akvo_tree_registration_areas.organisation) AS organisation,
 akvo_tree_registration_areas.contract_number,
 akvo_tree_registration_areas.id_planting_site,
@@ -1528,7 +1528,7 @@ create_a28 = ''' CREATE TABLE s4g_ecosia_deforestation
 AS SELECT
 akvo_tree_registration_areas.identifier_akvo,
 akvo_tree_registration_areas.display_name,
-akvo_tree_registration_areas.country,
+LOWER(akvo_tree_registration_areas.country) as country,
 LOWER(akvo_tree_registration_areas.organisation) AS organisation,
 akvo_tree_registration_areas.contract_number,
 akvo_tree_registration_areas.id_planting_site,
@@ -1547,7 +1547,7 @@ create_a29 = ''' CREATE TABLE s4g_ecosia_landuse_cover
 AS SELECT
 akvo_tree_registration_areas.identifier_akvo,
 akvo_tree_registration_areas.display_name,
-akvo_tree_registration_areas.organisation,
+LOWER(akvo_tree_registration_areas.organisation) as organisation,
 akvo_tree_registration_areas.contract_number,
 akvo_tree_registration_areas.id_planting_site,
 s4g_API_landcover_change.year AS year_lc_change,
@@ -1573,10 +1573,10 @@ create_a30 = ''' CREATE TABLE s4g_ecosia_data_quality
 AS SELECT
 akvo_tree_registration_areas.identifier_akvo,
 akvo_tree_registration_areas.display_name,
-akvo_tree_registration_areas.organisation,
+LOWER(akvo_tree_registration_areas.organisation) as organisation,
 S4G_API_data_quality.partner_site_id,
 S4G_API_data_quality.contract_number,
-S4G_API_data_quality.country,
+LOWER(S4G_API_data_quality.country),
 S4G_API_data_quality.trees_planted AS number_trees_registered,
 S4G_API_data_quality.nr_photos_taken,
 S4G_API_data_quality.issues AS geometric_sum_errors_detected,
@@ -1622,7 +1622,10 @@ UPDATE superset_ecosia_nursery_registration
 SET test = 'no'
 WHERE test = 'This is real, valid data'
 OR test = ''
-OR test = 'This is no test data';'''
+OR test = 'This is no test data';
+
+UPDATE superset_ecosia_nursery_registration
+SET organisation = LOWER(organisation);'''
 
 conn.commit()
 
@@ -1670,7 +1673,13 @@ UPDATE superset_ecosia_tree_registration
 SET test = 'no'
 WHERE test = 'This is real, valid data'
 OR test = ''
-OR test = 'This is no test data';'''
+OR test = 'This is no test data';
+
+UPDATE superset_ecosia_tree_registration
+SET organisation = LOWER(organisation);
+
+UPDATE superset_ecosia_tree_registration
+SET country = LOWER(country);'''
 
 conn.commit()
 
@@ -1709,7 +1718,7 @@ s4g_ecosia_data_quality.geometric_error_boundary_too_large AS "boundary of mappe
 s4g_ecosia_data_quality.geometric_error_site_not_in_country AS "mapped site not located in country of project",
 s4g_ecosia_data_quality.geometric_error_water_body_located_in_site AS "mapped site contains water area",
 s4g_ecosia_data_quality.geometric_error_urban_body_located_in_site AS "mapped site contains urban area",
-s4g_ecosia_data_quality.buffer_area_around_point_location AS "artificial 50m buffer placed around mapped site (points)",
+s4g_ecosia_data_quality.buffer_area_around_point_location AS "artificial 50m buffer placed around mapped site (points)"
 
 FROM
 akvo_tree_registration_areas_updated
@@ -1722,7 +1731,7 @@ conn.commit()
 create_a36 = '''CREATE TABLE superset_ecosia_nursery_monitoring
 AS SELECT
 akvo_nursery_registration.display_name,
-akvo_nursery_registration.country,
+LOWER(akvo_nursery_registration.country),
 LOWER(akvo_nursery_registration.organisation) AS organisation,
 akvo_nursery_registration.nursery_name,
 akvo_nursery_monitoring.*,
@@ -1751,7 +1760,7 @@ AS SELECT
 --akvo_nursery_registration.identifier_akvo,
 --akvo_nursery_registration.instance,
 akvo_nursery_registration.display_name,
-akvo_nursery_registration.country,
+LOWER(akvo_nursery_registration.country),
 LOWER(akvo_nursery_registration.organisation) AS organisation,
 akvo_nursery_registration.nursery_name,
 akvo_nursery_monitoring.submission_date,
@@ -1770,7 +1779,7 @@ AS SELECT
 --akvo_nursery_registration.identifier_akvo,
 --akvo_nursery_registration.instance,
 akvo_nursery_registration.display_name,
-akvo_nursery_registration.country,
+LOWER(akvo_nursery_registration.country),
 LOWER(akvo_nursery_registration.organisation) AS organisation,
 akvo_nursery_registration.nursery_name,
 akvo_nursery_registration.submission AS submission_date,
@@ -1804,7 +1813,7 @@ conn.commit()
 create_a39 = '''CREATE TABLE superset_ecosia_nursery_monitoring_photos
 AS SELECT
 akvo_nursery_registration.display_name,
-akvo_nursery_registration.country,
+LOWER(akvo_nursery_registration.country),
 LOWER(akvo_nursery_registration.organisation) AS organisation,
 akvo_nursery_registration.nursery_name,
 akvo_nursery_monitoring.submission_date,
@@ -1846,7 +1855,7 @@ conn.commit()
 create_a40 = '''CREATE TABLE superset_ecosia_tree_registration_photos
 AS SELECT
 akvo_tree_registration_areas.display_name,
-akvo_tree_registration_areas.country,
+LOWER(akvo_tree_registration_areas.country),
 LOWER(akvo_tree_registration_areas.organisation) AS organisation,
 akvo_tree_registration_areas.contract_number,
 akvo_tree_registration_areas.id_planting_site,
@@ -1889,7 +1898,7 @@ create_a41 = '''CREATE TABLE superset_ecosia_tree_registration_species
 AS SELECT
 akvo_tree_registration_areas.display_name,
 --akvo_tree_registration_areas.instance,
-akvo_tree_registration_areas.country,
+LOWER(akvo_tree_registration_areas.country),
 LOWER(akvo_tree_registration_areas.organisation) AS organisation,
 akvo_tree_registration_areas.contract_number,
 akvo_tree_registration_areas.id_planting_site,
@@ -1924,8 +1933,6 @@ FROM s4g_ecosia_deforestation
 JOIN akvo_tree_registration_areas
 ON akvo_tree_registration_areas.identifier_akvo = s4g_ecosia_deforestation.identifier_akvo;'''
 
-conn.commit()
-
 
 create_a44 = '''CREATE TABLE superset_ecosia_geolocations
 
@@ -1934,7 +1941,7 @@ AS WITH
 wkt_polygons_to_geojson AS (
 SELECT
 t.identifier_akvo,
-t.organisation,
+LOWER(t.organisation) as organisation,
 t.contract_number,
 t.display_name,
 'tree registration' AS procedure,
@@ -1955,7 +1962,7 @@ GROUP BY t.identifier_akvo, t.organisation, t.contract_number, t.display_name),
 -- Here we convert the centroid-point locations from WKT format to geojson string format that can be read by superset
 buffer_around_200_trees_centroids AS (SELECT
 identifier_akvo,
-t.organisation,
+LOWER(t.organisation) AS organisation,
 t.contract_number,
 t.display_name,
 'tree registration' AS procedure,
