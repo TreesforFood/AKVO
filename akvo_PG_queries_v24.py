@@ -1468,7 +1468,17 @@ conn.commit()
 
 create_a31 = '''CREATE TABLE superset_ecosia_nursery_registration
 AS SELECT
-akvo_nursery_registration.*,
+akvo_nursery_registration.identifier_akvo,
+akvo_nursery_registration.display_name,
+akvo_nursery_registration.instance,
+akvo_nursery_registration.submission,
+LOWER(akvo_nursery_registration.country) AS country,
+akvo_nursery_registration.test,
+LOWER(akvo_nursery_registration.organisation) AS organisation,
+akvo_nursery_registration.nursery_type,
+akvo_nursery_registration.nursery_name,
+akvo_nursery_registration.newly_established,
+akvo_nursery_registration.full_tree_capacity,
 CALC_TAB_Error_partner_report_on_nursery_registration."species currently produced in nursery",
 CALC_TAB_Error_partner_report_on_nursery_registration."nr of photos taken during registration",
 CALC_TAB_Error_partner_report_on_nursery_registration."Check nr of photos taken during registration of the nursery"
