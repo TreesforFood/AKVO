@@ -414,8 +414,8 @@ akvo_tree_registration_areas.tree_number AS registered_tree_number,
 CASE
 WHEN AKVO_Tree_monitoring_areas.method_selection = 'The trees were counted'
 AND SUM(AKVO_Tree_monitoring_counts.number_species) NOTNULL
-THEN SUM(AKVO_Tree_monitoring_counts.number_species)
-ELSE SUM(AKVO_Tree_monitoring_areas.number_living_trees)
+THEN ROUND(SUM(AKVO_Tree_monitoring_counts.number_species),0)
+ELSE ROUND(SUM(AKVO_Tree_monitoring_areas.number_living_trees),0)
 END AS nr_trees_monitored,
 
 0 AS nr_samples_pcq_monitoring,
@@ -479,8 +479,8 @@ CASE
 WHEN AKVO_Tree_external_audits_areas.option_tree_count = 'I want to count trees anyway'
 OR AKVO_Tree_external_audits_areas.option_tree_count = 'Less than 200 trees planted. Determine tree number with counting'
 AND SUM(AKVO_Tree_external_audits_counts.number_species) NOTNULL
-THEN SUM(AKVO_Tree_external_audits_counts.number_species)
-ELSE SUM(AKVO_Tree_external_audits_areas.audit_reported_trees)
+THEN ROUND(SUM(AKVO_Tree_external_audits_counts.number_species),0)
+ELSE ROUND(SUM(AKVO_Tree_external_audits_areas.audit_reported_trees),0)
 END AS nr_trees_audited,
 
 0 AS nr_samples_pcq_audit,
@@ -602,7 +602,6 @@ SELECT * FROM registration_results_non_polygon)
 SELECT * FROM monitoring_tree_numbers;'''
 
 conn.commit()
-
 
 create_a3 = '''UPDATE akvo_tree_registration_photos
 SET photo_url = RIGHT(photo_url, strpos(reverse(photo_url),'/'));
