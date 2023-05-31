@@ -2188,6 +2188,8 @@ ON akvo_tree_monitoring_photos.identifier_akvo = akvo_tree_registration_areas_up
 
 conn.commit()
 
+print('all queries are processed')
+
 create_a17_mkec = '''
 REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA public FROM kenya_mkec;
 
