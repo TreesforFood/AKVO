@@ -2188,7 +2188,7 @@ ON akvo_tree_monitoring_photos.identifier_akvo = akvo_tree_registration_areas_up
 
 conn.commit()
 
-print('all queries are processed')
+
 
 create_a17_mkec = '''
 REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA public FROM kenya_mkec;
@@ -2486,6 +2486,7 @@ cur.execute(create_a41)
 cur.execute(create_a42)
 cur.execute(create_a43)
 cur.execute(create_a44)
+cur.execute(create_a45)
 
 cur.execute(create_a17_mkec)
 cur.execute(create_a18_fdia)
@@ -2511,3 +2512,5 @@ for row in rows:
     conn.commit()
 
 cur.close()
+
+print('all queries are processed')
