@@ -1506,6 +1506,8 @@ akvo_nursery_registration.nursery_type,
 akvo_nursery_registration.nursery_name,
 akvo_nursery_registration.newly_established,
 akvo_nursery_registration.full_tree_capacity,
+akvo_nursery_registration.lat_y,
+akvo_nursery_registration.lon_x,
 CALC_TAB_Error_partner_report_on_nursery_registration."species currently produced in nursery",
 CALC_TAB_Error_partner_report_on_nursery_registration."nr of photos taken during registration",
 CALC_TAB_Error_partner_report_on_nursery_registration."Check nr of photos taken during registration of the nursery"
@@ -1536,6 +1538,7 @@ AS SELECT
 t.identifier_akvo,
 t.display_name,
 t.instance,
+t.device_id,
 t.submission,
 t.submission_year,
 t.submitter,
@@ -1584,6 +1587,7 @@ t.calc_area,
 t.lat_y,
 t.lon_x,
 
+t.number_coord_polygon AS nr_points_in_polygon,
 s4g_ecosia_data_quality.nr_photos_taken AS "number of tree photos taken",
 s4g_ecosia_data_quality.geometric_sum_errors_detected AS "total nr of mapping errors detected",
 s4g_ecosia_data_quality.geometric_error_polygon AS "site was mapped with too few points (less than 3)",
@@ -2162,6 +2166,25 @@ UNION
 SELECT * FROM wkt_photo_registration_geotag_to_geojson
 UNION
 SELECT * FROM wkt_photo_registration_gps_to_geojson;'''
+
+#wkt_pcq_samples_audit_to_geojson
+#wkt_count_samples_audit_to_geojson
+#wkt_count_samples_monitoring_to_geojson
+#wkt_pcq_photo_monitoring_to_geojson
+#wkt_pcq_photo_audit_to_geojson
+
+conn.commit()
+
+create_a45 = '''CREATE TABLE superset_ecosia_tree_monitoring_photos
+AS SELECT
+akvo_tree_registration_areas_updated.display_name,
+LOWER(akvo_tree_registration_areas_updated.country) AS country,
+LOWER(akvo_tree_registration_areas_updated.organisation) AS organisation,
+akvo_tree_registration_areas_updated.contract_number,
+akvo_tree_monitoring_photos.*
+FROM akvo_tree_monitoring_photos
+JOIN akvo_tree_registration_areas_updated
+ON akvo_tree_monitoring_photos.identifier_akvo = akvo_tree_registration_areas_updated.identifier_akvo;'''
 
 conn.commit()
 
