@@ -80,18 +80,9 @@ def mid(var,begin,end):
 count_pages_registration_data = 0
 
 for all_data in url_list:
-    start = time.time()
     load_page = requests.get(all_data, headers=headers).content
     page_decode = load_page.decode()
     json_dict = json.loads(page_decode)
-    count_page = count_pages_registration_data + 1
-    print("Nr. processed pages registration data: ", count_page)
-    end = time.time()
-    if (end - start) > 60:
-        #message_load_registration_data = client.messages.create(body = "It seems that the script hangs too long",
-        #from_ = "+16614853992", to = "+310640569655")
-        #message_load_registration_data.sid
-        print("It seems that the script hangs too long")
 
 
     for registration_light in json_dict['formInstances']:
