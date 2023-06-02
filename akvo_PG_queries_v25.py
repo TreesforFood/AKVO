@@ -66,7 +66,8 @@ DROP TABLE IF EXISTS superset_ecosia_tree_monitoring_photos;
 DROP TABLE IF EXISTS superset_ecosia_s4g_fires;
 DROP TABLE IF EXISTS superset_ecosia_s4g_deforestation;
 DROP TABLE IF EXISTS superset_ecosia_tree_registration;
-DROP TABLE IF EXISTS superset_ecosia_geolocations;'''
+DROP TABLE IF EXISTS superset_ecosia_geolocations;
+DROP TABLE IF EXISTS superset_ecosia_tree_registration_light;'''
 
 conn.commit()
 
@@ -1480,26 +1481,24 @@ akvo_nursery_registration.submission,
 LOWER(akvo_nursery_registration.country) AS country,
 akvo_nursery_registration.test,
 
--- Create a unique code for filtering in superset, based on organisation (and sub-organisation) name
+-- Create a unique code for filtering in superset, based on main organisation name
+CAST(CONCAT(
+	POWER(ASCII(LEFT(LOWER(akvo_nursery_registration.organisation),1)),3),
+	POWER(ASCII(LEFT(LOWER(akvo_nursery_registration.organisation),2)),2),
+	SQRT(POWER(ASCII(LEFT(LOWER(akvo_nursery_registration.organisation),3)),4))) AS NUMERIC) AS partnercode_main,
+
+-- Create a unique code for filtering in superset, based on main sub-organisation name
 CASE
 WHEN POSITION('-' IN akvo_nursery_registration.organisation) > 0
-THEN CONCAT(LEFT(LOWER(akvo_nursery_registration.organisation),
-POSITION('-' IN akvo_nursery_registration.organisation)-2),
-ROUND(SQRT(POWER(LENGTH(akvo_nursery_registration.organisation),3))*9999),0, ' - ',
-RIGHT((akvo_nursery_registration.organisation),
-			LENGTH(akvo_nursery_registration.organisation) - POSITION('-' IN akvo_nursery_registration.organisation) - 1),
-
-			POWER(ASCII(RIGHT((akvo_nursery_registration.organisation),
+THEN CAST(CONCAT(POWER(ASCII(RIGHT((LOWER(akvo_nursery_registration.organisation)),
 			LENGTH(akvo_nursery_registration.organisation) - POSITION('-' IN akvo_nursery_registration.organisation) - 1)),3),
-		    POWER(ASCII(RIGHT((akvo_nursery_registration.organisation),
+		    POWER(ASCII(RIGHT((LOWER(akvo_nursery_registration.organisation)),
 			LENGTH(akvo_nursery_registration.organisation) - POSITION('-' IN akvo_nursery_registration.organisation) - 2)),2),
-		   	ASCII(RIGHT((akvo_nursery_registration.organisation),
-			LENGTH(akvo_nursery_registration.organisation) - POSITION('-' IN akvo_nursery_registration.organisation) - 3)))
+		   	POWER(ASCII(RIGHT((LOWER(akvo_nursery_registration.organisation)),
+			LENGTH(akvo_nursery_registration.organisation) - POSITION('-' IN akvo_nursery_registration.organisation) - 3)),2)) AS NUMERIC)
 ELSE
-CONCAT(LOWER(akvo_nursery_registration.organisation),
-	   ROUND(SQRT(POWER(LENGTH(akvo_nursery_registration.organisation),3))*9999),0)
-END AS partnercode,
-
+0
+END AS partnercode_sub,
 
 LOWER(akvo_nursery_registration.organisation) AS organisation,
 akvo_nursery_registration.nursery_type,
@@ -1546,25 +1545,24 @@ t.akvo_form_version,
 t.country,
 t.test,
 
--- Create a unique code for filtering in superset, based on organisation (and sub-organisation) name
+-- Create a unique code for filtering in superset, based on main organisation name
+CAST(CONCAT(
+	POWER(ASCII(LEFT(LOWER(t.organisation),1)),3),
+	POWER(ASCII(LEFT(LOWER(t.organisation),2)),2),
+	SQRT(POWER(ASCII(LEFT(LOWER(t.organisation),3)),4))) AS NUMERIC) AS partnercode_main,
+
+-- Create a unique code for filtering in superset, based on main sub-organisation name
 CASE
 WHEN POSITION('-' IN t.organisation) > 0
-THEN CONCAT(LEFT(LOWER(t.organisation),
-POSITION('-' IN t.organisation)-2),
-ROUND(SQRT(POWER(LENGTH(t.organisation),3))*9999),0, ' - ',
-RIGHT((t.organisation),
-			LENGTH(t.organisation) - POSITION('-' IN t.organisation) - 1),
-
-			POWER(ASCII(RIGHT((t.organisation),
+THEN CAST(CONCAT(POWER(ASCII(RIGHT((LOWER(t.organisation)),
 			LENGTH(t.organisation) - POSITION('-' IN t.organisation) - 1)),3),
-		    POWER(ASCII(RIGHT((t.organisation),
+		    POWER(ASCII(RIGHT((LOWER(t.organisation)),
 			LENGTH(t.organisation) - POSITION('-' IN t.organisation) - 2)),2),
-		   	ASCII(RIGHT((t.organisation),
-			LENGTH(t.organisation) - POSITION('-' IN t.organisation) - 3)))
+		   	POWER(ASCII(RIGHT((LOWER(t.organisation)),
+			LENGTH(t.organisation) - POSITION('-' IN t.organisation) - 3)),2)) AS NUMERIC)
 ELSE
-CONCAT(LOWER(t.organisation),
-	   ROUND(SQRT(POWER(LENGTH(t.organisation),3))*9999),0)
-END AS partnercode,
+0
+END AS partnercode_sub,
 
 t.organisation,
 t.contract_number,
@@ -1688,25 +1686,24 @@ AS SELECT
 akvo_nursery_registration.display_name,
 LOWER(akvo_nursery_registration.country) AS country,
 
--- Create a unique code for filtering in superset, based on organisation (and sub-organisation) name
+-- Create a unique code for filtering in superset, based on main organisation name
+CAST(CONCAT(
+	POWER(ASCII(LEFT(LOWER(akvo_nursery_registration.organisation),1)),3),
+	POWER(ASCII(LEFT(LOWER(akvo_nursery_registration.organisation),2)),2),
+	SQRT(POWER(ASCII(LEFT(LOWER(akvo_nursery_registration.organisation),3)),4))) AS NUMERIC) AS partnercode_main,
+
+-- Create a unique code for filtering in superset, based on main sub-organisation name
 CASE
 WHEN POSITION('-' IN akvo_nursery_registration.organisation) > 0
-THEN CONCAT(LEFT(LOWER(akvo_nursery_registration.organisation),
-POSITION('-' IN akvo_nursery_registration.organisation)-2),
-ROUND(SQRT(POWER(LENGTH(akvo_nursery_registration.organisation),3))*9999),0, ' - ',
-RIGHT((akvo_nursery_registration.organisation),
-			LENGTH(akvo_nursery_registration.organisation) - POSITION('-' IN akvo_nursery_registration.organisation) - 1),
-
-			POWER(ASCII(RIGHT((akvo_nursery_registration.organisation),
+THEN CAST(CONCAT(POWER(ASCII(RIGHT((LOWER(akvo_nursery_registration.organisation)),
 			LENGTH(akvo_nursery_registration.organisation) - POSITION('-' IN akvo_nursery_registration.organisation) - 1)),3),
-		    POWER(ASCII(RIGHT((akvo_nursery_registration.organisation),
+		    POWER(ASCII(RIGHT((LOWER(akvo_nursery_registration.organisation)),
 			LENGTH(akvo_nursery_registration.organisation) - POSITION('-' IN akvo_nursery_registration.organisation) - 2)),2),
-		   	ASCII(RIGHT((akvo_nursery_registration.organisation),
-			LENGTH(akvo_nursery_registration.organisation) - POSITION('-' IN akvo_nursery_registration.organisation) - 3)))
+		   	POWER(ASCII(RIGHT((LOWER(akvo_nursery_registration.organisation)),
+			LENGTH(akvo_nursery_registration.organisation) - POSITION('-' IN akvo_nursery_registration.organisation) - 3)),2)) AS NUMERIC)
 ELSE
-CONCAT(LOWER(akvo_nursery_registration.organisation),
-	   ROUND(SQRT(POWER(LENGTH(akvo_nursery_registration.organisation),3))*9999),0)
-END AS partnercode,
+0
+END AS partnercode_sub,
 
 
 LOWER(akvo_nursery_registration.organisation) AS organisation,
@@ -1739,25 +1736,24 @@ AS SELECT
 akvo_nursery_registration.display_name,
 LOWER(akvo_nursery_registration.country) AS country,
 
--- Create a unique code for filtering in superset, based on organisation (and sub-organisation) name
+-- Create a unique code for filtering in superset, based on main organisation name
+CAST(CONCAT(
+	POWER(ASCII(LEFT(LOWER(akvo_nursery_registration.organisation),1)),3),
+	POWER(ASCII(LEFT(LOWER(akvo_nursery_registration.organisation),2)),2),
+	SQRT(POWER(ASCII(LEFT(LOWER(akvo_nursery_registration.organisation),3)),4))) AS NUMERIC) AS partnercode_main,
+
+-- Create a unique code for filtering in superset, based on main sub-organisation name
 CASE
 WHEN POSITION('-' IN akvo_nursery_registration.organisation) > 0
-THEN CONCAT(LEFT(LOWER(akvo_nursery_registration.organisation),
-POSITION('-' IN akvo_nursery_registration.organisation)-2),
-ROUND(SQRT(POWER(LENGTH(akvo_nursery_registration.organisation),3))*9999),0, ' - ',
-RIGHT((akvo_nursery_registration.organisation),
-			LENGTH(akvo_nursery_registration.organisation) - POSITION('-' IN akvo_nursery_registration.organisation) - 1),
-
-			POWER(ASCII(RIGHT((akvo_nursery_registration.organisation),
+THEN CAST(CONCAT(POWER(ASCII(RIGHT((LOWER(akvo_nursery_registration.organisation)),
 			LENGTH(akvo_nursery_registration.organisation) - POSITION('-' IN akvo_nursery_registration.organisation) - 1)),3),
-		    POWER(ASCII(RIGHT((akvo_nursery_registration.organisation),
+		    POWER(ASCII(RIGHT((LOWER(akvo_nursery_registration.organisation)),
 			LENGTH(akvo_nursery_registration.organisation) - POSITION('-' IN akvo_nursery_registration.organisation) - 2)),2),
-		   	ASCII(RIGHT((akvo_nursery_registration.organisation),
-			LENGTH(akvo_nursery_registration.organisation) - POSITION('-' IN akvo_nursery_registration.organisation) - 3)))
+		   	POWER(ASCII(RIGHT((LOWER(akvo_nursery_registration.organisation)),
+			LENGTH(akvo_nursery_registration.organisation) - POSITION('-' IN akvo_nursery_registration.organisation) - 3)),2)) AS NUMERIC)
 ELSE
-CONCAT(LOWER(akvo_nursery_registration.organisation),
-	   ROUND(SQRT(POWER(LENGTH(akvo_nursery_registration.organisation),3))*9999),0)
-END AS partnercode,
+0
+END AS partnercode_sub,
 
 
 LOWER(akvo_nursery_registration.organisation) AS organisation,
@@ -1780,25 +1776,24 @@ AS SELECT
 akvo_nursery_registration.display_name,
 LOWER(akvo_nursery_registration.country) AS country,
 
--- Create a unique code for filtering in superset, based on organisation (and sub-organisation) name
+-- Create a unique code for filtering in superset, based on main organisation name
+CAST(CONCAT(
+	POWER(ASCII(LEFT(LOWER(akvo_nursery_registration.organisation),1)),3),
+	POWER(ASCII(LEFT(LOWER(akvo_nursery_registration.organisation),2)),2),
+	SQRT(POWER(ASCII(LEFT(LOWER(akvo_nursery_registration.organisation),3)),4))) AS NUMERIC) AS partnercode_main,
+
+-- Create a unique code for filtering in superset, based on main sub-organisation name
 CASE
 WHEN POSITION('-' IN akvo_nursery_registration.organisation) > 0
-THEN CONCAT(LEFT(LOWER(akvo_nursery_registration.organisation),
-POSITION('-' IN akvo_nursery_registration.organisation)-2),
-ROUND(SQRT(POWER(LENGTH(akvo_nursery_registration.organisation),3))*9999),0, ' - ',
-RIGHT((akvo_nursery_registration.organisation),
-			LENGTH(akvo_nursery_registration.organisation) - POSITION('-' IN akvo_nursery_registration.organisation) - 1),
-
-			POWER(ASCII(RIGHT((akvo_nursery_registration.organisation),
+THEN CAST(CONCAT(POWER(ASCII(RIGHT((LOWER(akvo_nursery_registration.organisation)),
 			LENGTH(akvo_nursery_registration.organisation) - POSITION('-' IN akvo_nursery_registration.organisation) - 1)),3),
-		    POWER(ASCII(RIGHT((akvo_nursery_registration.organisation),
+		    POWER(ASCII(RIGHT((LOWER(akvo_nursery_registration.organisation)),
 			LENGTH(akvo_nursery_registration.organisation) - POSITION('-' IN akvo_nursery_registration.organisation) - 2)),2),
-		   	ASCII(RIGHT((akvo_nursery_registration.organisation),
-			LENGTH(akvo_nursery_registration.organisation) - POSITION('-' IN akvo_nursery_registration.organisation) - 3)))
+		   	POWER(ASCII(RIGHT((LOWER(akvo_nursery_registration.organisation)),
+			LENGTH(akvo_nursery_registration.organisation) - POSITION('-' IN akvo_nursery_registration.organisation) - 3)),2)) AS NUMERIC)
 ELSE
-CONCAT(LOWER(akvo_nursery_registration.organisation),
-	   ROUND(SQRT(POWER(LENGTH(akvo_nursery_registration.organisation),3))*9999),0)
-END AS partnercode,
+0
+END AS partnercode_sub,
 
 
 LOWER(akvo_nursery_registration.organisation) AS organisation,
@@ -1836,26 +1831,24 @@ AS SELECT
 akvo_nursery_registration.display_name,
 LOWER(akvo_nursery_registration.country) AS country,
 
--- Create a unique code for filtering in superset, based on organisation (and sub-organisation) name
+-- Create a unique code for filtering in superset, based on main organisation name
+CAST(CONCAT(
+	POWER(ASCII(LEFT(LOWER(akvo_nursery_registration.organisation),1)),3),
+	POWER(ASCII(LEFT(LOWER(akvo_nursery_registration.organisation),2)),2),
+	SQRT(POWER(ASCII(LEFT(LOWER(akvo_nursery_registration.organisation),3)),4))) AS NUMERIC) AS partnercode_main,
+
+-- Create a unique code for filtering in superset, based on main sub-organisation name
 CASE
 WHEN POSITION('-' IN akvo_nursery_registration.organisation) > 0
-THEN CONCAT(LEFT(LOWER(akvo_nursery_registration.organisation),
-POSITION('-' IN akvo_nursery_registration.organisation)-2),
-ROUND(SQRT(POWER(LENGTH(akvo_nursery_registration.organisation),3))*9999),0, ' - ',
-RIGHT((akvo_nursery_registration.organisation),
-			LENGTH(akvo_nursery_registration.organisation) - POSITION('-' IN akvo_nursery_registration.organisation) - 1),
-
-			POWER(ASCII(RIGHT((akvo_nursery_registration.organisation),
+THEN CAST(CONCAT(POWER(ASCII(RIGHT((LOWER(akvo_nursery_registration.organisation)),
 			LENGTH(akvo_nursery_registration.organisation) - POSITION('-' IN akvo_nursery_registration.organisation) - 1)),3),
-		    POWER(ASCII(RIGHT((akvo_nursery_registration.organisation),
+		    POWER(ASCII(RIGHT((LOWER(akvo_nursery_registration.organisation)),
 			LENGTH(akvo_nursery_registration.organisation) - POSITION('-' IN akvo_nursery_registration.organisation) - 2)),2),
-		   	ASCII(RIGHT((akvo_nursery_registration.organisation),
-			LENGTH(akvo_nursery_registration.organisation) - POSITION('-' IN akvo_nursery_registration.organisation) - 3)))
+		   	POWER(ASCII(RIGHT((LOWER(akvo_nursery_registration.organisation)),
+			LENGTH(akvo_nursery_registration.organisation) - POSITION('-' IN akvo_nursery_registration.organisation) - 3)),2)) AS NUMERIC)
 ELSE
-CONCAT(LOWER(akvo_nursery_registration.organisation),
-	   ROUND(SQRT(POWER(LENGTH(akvo_nursery_registration.organisation),3))*9999),0)
-END AS partnercode,
-
+0
+END AS partnercode_sub,
 
 LOWER(akvo_nursery_registration.organisation) AS organisation,
 akvo_nursery_registration.nursery_name,
@@ -1900,25 +1893,24 @@ AS SELECT
 akvo_tree_registration_areas.display_name,
 LOWER(akvo_tree_registration_areas.country) AS country,
 
--- Create a unique code for filtering in superset, based on organisation (and sub-organisation) name
+-- Create a unique code for filtering in superset, based on main organisation name
+CAST(CONCAT(
+	POWER(ASCII(LEFT(LOWER(akvo_tree_registration_areas.organisation),1)),3),
+	POWER(ASCII(LEFT(LOWER(akvo_tree_registration_areas.organisation),2)),2),
+	SQRT(POWER(ASCII(LEFT(LOWER(akvo_tree_registration_areas.organisation),3)),4))) AS NUMERIC) AS partnercode_main,
+
+-- Create a unique code for filtering in superset, based on main sub-organisation name
 CASE
 WHEN POSITION('-' IN akvo_tree_registration_areas.organisation) > 0
-THEN CONCAT(LEFT(LOWER(akvo_tree_registration_areas.organisation),
-POSITION('-' IN akvo_tree_registration_areas.organisation)-2),
-ROUND(SQRT(POWER(LENGTH(akvo_tree_registration_areas.organisation),3))*9999),0, ' - ',
-RIGHT((akvo_tree_registration_areas.organisation),
-			LENGTH(akvo_tree_registration_areas.organisation) - POSITION('-' IN akvo_tree_registration_areas.organisation) - 1),
-
-			POWER(ASCII(RIGHT((akvo_tree_registration_areas.organisation),
+THEN CAST(CONCAT(POWER(ASCII(RIGHT((LOWER(akvo_tree_registration_areas.organisation)),
 			LENGTH(akvo_tree_registration_areas.organisation) - POSITION('-' IN akvo_tree_registration_areas.organisation) - 1)),3),
-		    POWER(ASCII(RIGHT((akvo_tree_registration_areas.organisation),
+		    POWER(ASCII(RIGHT((LOWER(akvo_tree_registration_areas.organisation)),
 			LENGTH(akvo_tree_registration_areas.organisation) - POSITION('-' IN akvo_tree_registration_areas.organisation) - 2)),2),
-		   	ASCII(RIGHT((akvo_tree_registration_areas.organisation),
-			LENGTH(akvo_tree_registration_areas.organisation) - POSITION('-' IN akvo_tree_registration_areas.organisation) - 3)))
+		   	POWER(ASCII(RIGHT((LOWER(akvo_tree_registration_areas.organisation)),
+			LENGTH(akvo_tree_registration_areas.organisation) - POSITION('-' IN akvo_tree_registration_areas.organisation) - 3)),2)) AS NUMERIC)
 ELSE
-CONCAT(LOWER(akvo_tree_registration_areas.organisation),
-	   ROUND(SQRT(POWER(LENGTH(akvo_tree_registration_areas.organisation),3))*9999),0)
-END AS partnercode,
+0
+END AS partnercode_sub,
 
 
 LOWER(akvo_tree_registration_areas.organisation) AS organisation,
@@ -1965,25 +1957,24 @@ akvo_tree_registration_areas.display_name,
 --akvo_tree_registration_areas.instance,
 LOWER(akvo_tree_registration_areas.country) AS country,
 
--- Create a unique code for filtering in superset, based on organisation (and sub-organisation) name
+-- Create a unique code for filtering in superset, based on main organisation name
+CAST(CONCAT(
+	POWER(ASCII(LEFT(LOWER(akvo_tree_registration_areas.organisation),1)),3),
+	POWER(ASCII(LEFT(LOWER(akvo_tree_registration_areas.organisation),2)),2),
+	SQRT(POWER(ASCII(LEFT(LOWER(akvo_tree_registration_areas.organisation),3)),4))) AS NUMERIC) AS partnercode_main,
+
+-- Create a unique code for filtering in superset, based on main sub-organisation name
 CASE
 WHEN POSITION('-' IN akvo_tree_registration_areas.organisation) > 0
-THEN CONCAT(LEFT(LOWER(akvo_tree_registration_areas.organisation),
-POSITION('-' IN akvo_tree_registration_areas.organisation)-2),
-ROUND(SQRT(POWER(LENGTH(akvo_tree_registration_areas.organisation),3))*9999),0, ' - ',
-RIGHT((akvo_tree_registration_areas.organisation),
-			LENGTH(akvo_tree_registration_areas.organisation) - POSITION('-' IN akvo_tree_registration_areas.organisation) - 1),
-
-			POWER(ASCII(RIGHT((akvo_tree_registration_areas.organisation),
+THEN CAST(CONCAT(POWER(ASCII(RIGHT((LOWER(akvo_tree_registration_areas.organisation)),
 			LENGTH(akvo_tree_registration_areas.organisation) - POSITION('-' IN akvo_tree_registration_areas.organisation) - 1)),3),
-		    POWER(ASCII(RIGHT((akvo_tree_registration_areas.organisation),
+		    POWER(ASCII(RIGHT((LOWER(akvo_tree_registration_areas.organisation)),
 			LENGTH(akvo_tree_registration_areas.organisation) - POSITION('-' IN akvo_tree_registration_areas.organisation) - 2)),2),
-		   	ASCII(RIGHT((akvo_tree_registration_areas.organisation),
-			LENGTH(akvo_tree_registration_areas.organisation) - POSITION('-' IN akvo_tree_registration_areas.organisation) - 3)))
+		   	POWER(ASCII(RIGHT((LOWER(akvo_tree_registration_areas.organisation)),
+			LENGTH(akvo_tree_registration_areas.organisation) - POSITION('-' IN akvo_tree_registration_areas.organisation) - 3)),2)) AS NUMERIC)
 ELSE
-CONCAT(LOWER(akvo_tree_registration_areas.organisation),
-	   ROUND(SQRT(POWER(LENGTH(akvo_tree_registration_areas.organisation),3))*9999),0)
-END AS partnercode,
+0
+END AS partnercode_sub,
 
 
 LOWER(akvo_tree_registration_areas.organisation) AS organisation,
@@ -2188,7 +2179,43 @@ ON akvo_tree_monitoring_photos.identifier_akvo = akvo_tree_registration_areas_up
 
 conn.commit()
 
+create_a46 = '''CREATE TABLE superset_ecosia_tree_registration_light
+AS SELECT
 
+akvo_tree_registration_locations_light_version.identifier_akvo,
+akvo_tree_registration_locations_light_version.display_name,
+akvo_tree_registration_locations_light_version.device_id,
+akvo_tree_registration_locations_light_version.instance,
+akvo_tree_registration_locations_light_version.submission,
+akvo_tree_registration_locations_light_version.akvo_form_version,
+LOWER(akvo_tree_registration_locations_light_version.country) AS country,
+akvo_tree_registration_locations_light_version.test,
+LOWER(akvo_tree_registration_locations_light_version.organisation) AS organisation,
+akvo_tree_registration_locations_light_version.contract_number,
+akvo_tree_registration_locations_light_version.id_planting_site,
+akvo_tree_registration_locations_light_version.name_village,
+akvo_tree_registration_locations_light_version.name_owner,
+akvo_tree_registration_locations_light_version.remark,
+akvo_tree_registration_locations_light_version.planting_date,
+akvo_tree_registration_locations_light_version.tree_number,
+akvo_tree_registration_locations_light_version.planting_distance,
+akvo_tree_registration_locations_light_version.only_location,
+akvo_tree_registration_locations_light_version.centroid_coord
+
+FROM akvo_tree_registration_locations_light_version;
+
+ALTER TABLE superset_ecosia_tree_registration_light
+ADD lat_y REAL;
+
+ALTER TABLE superset_ecosia_tree_registration_light
+ADD lon_x REAL;
+
+UPDATE superset_ecosia_tree_registration_light
+SET
+lat_y = ST_Y(centroid_coord::geometry),
+lon_x = ST_X(centroid_coord::geometry);'''
+
+conn.commit()
 
 create_a17_mkec = '''
 REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA public FROM kenya_mkec;
@@ -2384,6 +2411,7 @@ GRANT SELECT ON TABLE superset_ecosia_tree_registration_species TO ecosia_supers
 GRANT SELECT ON TABLE superset_ecosia_s4g_fires TO ecosia_superset;
 GRANT SELECT ON TABLE superset_ecosia_s4g_deforestation TO ecosia_superset;
 GRANT SELECT ON TABLE superset_ecosia_geolocations TO ecosia_superset;
+GRANT SELECT ON TABLE superset_ecosia_tree_registration_light TO ecosia_superset;
 
 
 DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_nursery_registration;
@@ -2400,7 +2428,7 @@ DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_tree_registratio
 DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_s4g_fires;
 DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_s4g_deforestation;
 DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_geolocations;
-
+DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_tree_registration_light;
 
 ALTER TABLE superset_ecosia_nursery_registration enable ROW LEVEL SECURITY;
 ALTER TABLE superset_ecosia_tree_registration enable ROW LEVEL SECURITY;
@@ -2416,7 +2444,7 @@ ALTER TABLE superset_ecosia_tree_registration_species enable ROW LEVEL SECURITY;
 ALTER TABLE superset_ecosia_s4g_fires enable ROW LEVEL SECURITY;
 ALTER TABLE superset_ecosia_s4g_deforestation enable ROW LEVEL SECURITY;
 ALTER TABLE superset_ecosia_geolocations enable ROW LEVEL SECURITY;
-
+ALTER TABLE superset_ecosia_tree_registration_light enable ROW LEVEL SECURITY;
 
 CREATE POLICY ecosia_superset_policy ON superset_ecosia_nursery_registration TO ecosia_superset USING (true);
 CREATE POLICY ecosia_superset_policy ON superset_ecosia_tree_registration TO ecosia_superset USING (true);
@@ -2431,11 +2459,10 @@ CREATE POLICY ecosia_superset_policy ON superset_ecosia_tree_registration_photos
 CREATE POLICY ecosia_superset_policy ON superset_ecosia_tree_registration_species TO ecosia_superset USING (true);
 CREATE POLICY ecosia_superset_policy ON superset_ecosia_s4g_fires TO ecosia_superset USING (true);
 CREATE POLICY ecosia_superset_policy ON superset_ecosia_s4g_deforestation TO ecosia_superset USING (true);
-CREATE POLICY ecosia_superset_policy ON superset_ecosia_geolocations TO ecosia_superset USING (true);'''
-
+CREATE POLICY ecosia_superset_policy ON superset_ecosia_geolocations TO ecosia_superset USING (true);
+CREATE POLICY ecosia_superset_policy ON superset_ecosia_tree_registration_light TO ecosia_superset USING (true);'''
 
 conn.commit()
-
 
 # Execute drop tables
 cur.execute(drop_tables)
@@ -2487,6 +2514,7 @@ cur.execute(create_a42)
 cur.execute(create_a43)
 cur.execute(create_a44)
 cur.execute(create_a45)
+cur.execute(create_a46)
 
 cur.execute(create_a17_mkec)
 cur.execute(create_a18_fdia)
