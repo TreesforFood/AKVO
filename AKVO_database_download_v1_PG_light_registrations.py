@@ -1,13 +1,10 @@
 import requests
 import json
-import sqlite3
+import psycopg2
 import re
 import geojson
-import psycopg2
 import geodaisy.converters as convert
 from area import area
-from hanging_threads import start_monitoring
-from dotenv import load_dotenv, find_dotenv
 import os
 from akvo_api_config import Config
 
