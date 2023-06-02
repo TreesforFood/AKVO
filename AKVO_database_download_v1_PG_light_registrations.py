@@ -6,9 +6,7 @@ import geojson
 import geodaisy.converters as convert
 from area import area
 import os
-from akvo_api_config import Config
 
-config = Config()
 
 #form_monitoring_tree = 'https://api-auth0.akvo.org/flow/orgs/ecosia/form_instances?survey_id=31840001&form_id=11980001'
 form_response_tree = 'https://api-auth0.akvo.org/flow/orgs/ecosia/form_instances?survey_id=211852238&form_id=242817396&page_size=200'
