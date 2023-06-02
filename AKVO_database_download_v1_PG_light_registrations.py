@@ -12,7 +12,7 @@ import os
 form_response_tree = 'https://api-auth0.akvo.org/flow/orgs/ecosia/form_instances?survey_id=211852238&form_id=242817396&page_size=200'
 
 # get the token from AKVO
-data = {"client_id": config.CONF["CLIENT_ID"], "username" : config.CONF["USERNAME"], "password": config.CONF["PASSWORD"], "grant_type": config.CONF["GRANT_TYPE"], "scope": config.CONF["SCOPE"]}
+data = {"client_id": os.environ["CLIENT_ID"], "username" : os.environ["USERNAME"], "password": os.environ["PASSWORD"], "grant_type": os.environ["GRANT_TYPE"], "scope": os.environ["SCOPE"]}
 response = requests.post("https://akvofoundation.eu.auth0.com/oauth/token", data=data)
 
 if response.status_code in [200]: # in case good response from AKVO server
