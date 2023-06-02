@@ -37,30 +37,17 @@ url_list.append(form_response_tree) # this one is needed to add the first url to
 counting_pages = 0
 
 # Add other next-URL's to the list of registration forms
+# Add other next-URL's to the list of registration forms
 for all_pages in url_list:
-    counting_pages = counting_pages + 1
-    start = time.time()
-    print("URL retrieved for listing: ", all_pages)
-    print('Total processed urls = ', counting_pages)
     load_page = requests.get(all_pages, headers=headers).content
     page_decode = load_page.decode()
-    try:
-        json_instance = json.loads(page_decode)
-        #print("OUTPUT JSON: ", json_instance)
-
-    except json.decoder.JSONDecodeError:
-        print('A json file seems to be empty')
-    #json_instance = json.loads(page_decode)
+    json_instance = json.loads(page_decode)
     if (json_instance.get('nextPageUrl') is None): #can also try this: if (json_dict['nextPageUrl'] is None ) : continue
         url_list.append(all_pages) # This is needed to add the last instances at the last url page
         break
     else:
         url_subseq_page = json_instance.get('nextPageUrl')
         url_list.append(url_subseq_page)
-        end = time.time()
-        #print("end time to collect urls: ", end)
-        if (end - start) > 60:
-            print("It seems that the script hangs too long")
 
 
 #connect to Postgresql database
