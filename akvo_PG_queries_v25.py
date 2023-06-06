@@ -1697,7 +1697,24 @@ conn.commit()
 
 
 create_a32 = '''CREATE TABLE superset_ecosia_tree_registration
-AS SELECT
+AS WITH COUNT_Total_number_of_photos_taken AS (
+
+SELECT identifier_akvo FROM AKVO_Tree_registration_photos
+UNION ALL
+SELECT identifier_akvo FROM AKVO_Tree_monitoring_photos
+UNION ALL
+SELECT identifier_akvo FROM AKVO_Tree_external_audits_photos),
+
+count_total_number_photos_per_site AS (SELECT identifier_akvo, COUNT(identifier_akvo) AS total_nr_photos
+FROM COUNT_Total_number_of_photos_taken
+GROUP BY identifier_akvo),
+
+count_number_tree_species_registered AS (SELECT identifier_akvo, COUNT(*) AS nr_species_registered
+FROM AKVO_Tree_registration_species
+GROUP BY AKVO_Tree_registration_species.identifier_akvo)
+
+
+SELECT
 t.identifier_akvo,
 t.display_name,
 t.instance,
@@ -1742,7 +1759,7 @@ t.planting_technique,
 t.planting_system,
 t.remark,
 t.nr_trees_option,
-t.planting_date,
+TO_DATE(t.planting_date, 'YYYY-MM-DD') AS planting_date,
 t.tree_number,
 t.estimated_area,
 t.calc_area,
@@ -1750,7 +1767,8 @@ t.lat_y,
 t.lon_x,
 
 t.number_coord_polygon AS nr_points_in_polygon,
-s4g_ecosia_data_quality.nr_photos_taken AS "number of tree photos taken",
+--s4g_ecosia_data_quality.nr_photos_taken AS "number of tree photos taken",
+count_total_number_photos_per_site.total_nr_photos AS "number of tree photos taken",
 s4g_ecosia_data_quality.geometric_sum_errors_detected AS "total nr of mapping errors detected",
 s4g_ecosia_data_quality.geometric_error_polygon AS "site was mapped with too few points (less than 3)",
 s4g_ecosia_data_quality.geometric_error_point AS "site was mapped wrongly",
@@ -1763,7 +1781,7 @@ s4g_ecosia_data_quality.geometric_error_site_not_in_country AS "mapped site not 
 s4g_ecosia_data_quality.geometric_error_water_body_located_in_site AS "mapped site contains water area",
 s4g_ecosia_data_quality.geometric_error_urban_body_located_in_site AS "mapped site contains urban area",
 s4g_ecosia_data_quality.buffer_area_around_point_location AS "artificial 50m buffer placed around mapped site (points)",
-
+count_number_tree_species_registered.nr_species_registered,
 S4G_API_health_indicators.health_index,
 S4G_API_health_indicators.health_index_normalized,
 S4G_API_health_indicators.health_trend,
@@ -1778,7 +1796,11 @@ akvo_tree_registration_areas_updated AS t
 LEFT JOIN s4g_ecosia_data_quality
 ON t.identifier_akvo = s4g_ecosia_data_quality.identifier_akvo
 LEFT JOIN S4G_API_health_indicators
-ON t.identifier_akvo = S4G_API_health_indicators.identifier_akvo;
+ON t.identifier_akvo = S4G_API_health_indicators.identifier_akvo
+LEFT JOIN count_total_number_photos_per_site
+ON count_total_number_photos_per_site.identifier_akvo = t.identifier_akvo
+LEFT JOIN count_number_tree_species_registered
+ON count_number_tree_species_registered.identifier_akvo = t.identifier_akvo;
 --where t.polygon NOTNULL;
 
 UPDATE superset_ecosia_tree_registration
@@ -2610,7 +2632,26 @@ akvo_tree_registration_areas_updated.contract_number,
 akvo_tree_monitoring_photos.*
 FROM akvo_tree_monitoring_photos
 JOIN akvo_tree_registration_areas_updated
-ON akvo_tree_monitoring_photos.identifier_akvo = akvo_tree_registration_areas_updated.identifier_akvo;'''
+ON akvo_tree_monitoring_photos.identifier_akvo = akvo_tree_registration_areas_updated.identifier_akvo;
+
+ALTER TABLE superset_ecosia_tree_monitoring_photos
+ADD lat_y REAL;
+
+ALTER TABLE superset_ecosia_tree_monitoring_photos
+ADD lon_x REAL;
+
+UPDATE superset_ecosia_tree_monitoring_photos
+SET
+lat_y = ST_Y(photo_location::geometry),
+lon_x = ST_X(photo_location::geometry)
+WHERE photo_location NOTNULL;
+
+ALTER TABLE superset_ecosia_tree_monitoring_photos
+ADD photo_url_preset TEXT;
+
+UPDATE superset_ecosia_tree_monitoring_photos
+SET photo_url_preset = CONCAT('<img src="', photo_url, '" alt="s3 image" height=200/>')
+WHERE photo_url NOTNULL;'''
 
 conn.commit()
 
@@ -2651,7 +2692,7 @@ akvo_tree_registration_locations_light_version.id_planting_site,
 akvo_tree_registration_locations_light_version.name_village,
 akvo_tree_registration_locations_light_version.name_owner,
 akvo_tree_registration_locations_light_version.remark,
-akvo_tree_registration_locations_light_version.planting_date,
+TO_DATE(akvo_tree_registration_locations_light_version.planting_date, 'YYYY-MM-DD') AS planting_date,
 akvo_tree_registration_locations_light_version.tree_number,
 akvo_tree_registration_locations_light_version.planting_distance,
 akvo_tree_registration_locations_light_version.only_location,
