@@ -97,7 +97,27 @@ polygon = akvo_tree_monitoring_remapped_areas.polygon_remapped
 FROM akvo_tree_monitoring_remapped_areas
 WHERE akvo_tree_registration_areas_updated.identifier_akvo
 = akvo_tree_monitoring_remapped_areas.identifier_akvo
-AND akvo_tree_monitoring_remapped_areas.polygon_remapped NOTNULL;'''
+AND akvo_tree_monitoring_remapped_areas.polygon_remapped NOTNULL;
+
+UPDATE akvo_tree_registration_areas_updated
+SET
+calc_area = akvo_tree_monitoring_remapped_areas.calc_area_remapped
+FROM akvo_tree_monitoring_remapped_areas
+WHERE akvo_tree_registration_areas_updated.identifier_akvo
+= akvo_tree_monitoring_remapped_areas.identifier_akvo
+AND akvo_tree_monitoring_remapped_areas.polygon_remapped NOTNULL;
+
+UPDATE akvo_tree_registration_areas_updated
+SET
+number_coord_polygon = akvo_tree_monitoring_remapped_areas.number_coord_polygon_remapped
+FROM akvo_tree_monitoring_remapped_areas
+WHERE akvo_tree_registration_areas_updated.identifier_akvo
+= akvo_tree_monitoring_remapped_areas.identifier_akvo
+AND akvo_tree_monitoring_remapped_areas.polygon_remapped NOTNULL;
+
+UPDATE akvo_tree_registration_areas_updated
+SET calc_area = 0.2
+WHERE polygon ISNULL;'''
 
 conn.commit()
 
