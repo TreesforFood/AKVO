@@ -1367,7 +1367,7 @@ for level1_m in changes_form_6070006_lst:
         name_nursery_manager = ''
 
     try:
-        test = level1_m['responses']['28020008'][0]['33540002']
+        test = level1_m['responses']['28140007'][0]['33540002'][0].get('text')
     except (KeyError, IndexError):
         test = ''
 
