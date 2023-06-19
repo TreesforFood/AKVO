@@ -1073,7 +1073,9 @@ ON AKVO_Tree_monitoring_areas.instance = AKVO_Tree_monitoring_counts.instance
 JOIN AKVO_Tree_registration_areas_updated
 ON AKVO_Tree_registration_areas_updated.identifier_akvo = AKVO_Tree_monitoring_areas.identifier_akvo
 and AKVO_Tree_monitoring_areas.method_selection = 'The trees were counted'
-group by AKVO_Tree_monitoring_counts.instance,
+
+GROUP BY
+AKVO_Tree_monitoring_counts.instance,
 AKVO_Tree_registration_areas_updated.contract_number,
 AKVO_Tree_registration_areas_updated.id_planting_site,
 AKVO_Tree_registration_areas_updated.centroid_coord,
