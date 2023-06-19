@@ -70,8 +70,8 @@ DROP TABLE IF EXISTS superset_ecosia_tree_registration;
 DROP TABLE IF EXISTS superset_ecosia_geolocations;
 DROP TABLE IF EXISTS superset_ecosia_tree_monitoring_photos;
 DROP TABLE IF EXISTS superset_ecosia_tree_registration_light;
-DROP TABLE IF EXISTS superset_ecosia_tree_distribution_unregistered_farmers;'''
-
+DROP TABLE IF EXISTS superset_ecosia_tree_distribution_unregistered_farmers;
+DROP TABLE IF EXISTS superset_ecosia_site_registration_unregistered_farmers;'''
 conn.commit()
 
 create_a1 = '''CREATE TABLE akvo_tree_registration_areas_updated
@@ -1752,7 +1752,6 @@ LEFT JOIN count_total_number_photos_per_site
 ON count_total_number_photos_per_site.identifier_akvo = t.identifier_akvo
 LEFT JOIN count_number_tree_species_registered
 ON count_number_tree_species_registered.identifier_akvo = t.identifier_akvo;
---where t.polygon NOTNULL;
 
 UPDATE superset_ecosia_tree_registration
 SET test = 'yes'
@@ -2124,14 +2123,20 @@ END AS partnercode_sub,
 
 LOWER(akvo_tree_registration_areas_updated.organisation) AS organisation,
 akvo_tree_registration_areas_updated.contract_number,
+'Tree registration' AS procedure,
 akvo_tree_registration_areas_updated.id_planting_site,
 akvo_tree_registration_areas_updated.submission AS submission_date,
-akvo_tree_registration_photos.*
+akvo_tree_registration_photos.identifier_akvo,
+akvo_tree_registration_photos.instance,
+akvo_tree_registration_photos.photo_url,
+akvo_tree_registration_photos.photo_geotag_location,
+akvo_tree_registration_photos.photo_gps_location
 
 FROM
 akvo_tree_registration_photos
 JOIN akvo_tree_registration_areas_updated
 ON akvo_tree_registration_areas_updated.identifier_akvo = akvo_tree_registration_photos.identifier_akvo;
+
 
 ALTER TABLE superset_ecosia_tree_registration_photos
 ADD lat_y REAL;
@@ -2775,7 +2780,6 @@ FROM AKVO_Tree_external_audits_photos
 JOIN akvo_tree_registration_areas_updated
 ON AKVO_Tree_external_audits_photos.identifier_akvo = akvo_tree_registration_areas_updated.identifier_akvo;
 
-
 ALTER TABLE superset_ecosia_tree_monitoring_photos
 ADD lat_y REAL;
 
@@ -2852,7 +2856,17 @@ ADD lon_x REAL;
 UPDATE superset_ecosia_tree_registration_light
 SET
 lat_y = ST_Y(centroid_coord::geometry),
-lon_x = ST_X(centroid_coord::geometry);'''
+lon_x = ST_X(centroid_coord::geometry);
+
+UPDATE superset_ecosia_tree_registration_light
+SET test = 'yes'
+WHERE test = 'This is a test, this record can be deleted.'
+OR test = 'xxxxx';
+
+UPDATE superset_ecosia_tree_registration_light
+SET test = 'no'
+WHERE test = 'This is real, valid data'
+OR test = '';'''
 
 conn.commit()
 
@@ -2902,7 +2916,90 @@ AKVO_tree_distribution_unregistered_farmers.confirm_planting_location,
 AKVO_tree_distribution_unregistered_farmers.total_number_trees_received,
 AKVO_tree_distribution_unregistered_farmers.url_signature_tree_receiver
 
-FROM AKVO_tree_distribution_unregistered_farmers;'''
+FROM AKVO_tree_distribution_unregistered_farmers;
+
+UPDATE superset_ecosia_tree_distribution_unregistered_farmers
+SET test = 'yes'
+WHERE test = 'This is a test, this record can be deleted.'
+OR test = 'xxxxx';
+
+UPDATE superset_ecosia_tree_distribution_unregistered_farmers
+SET test = 'no'
+WHERE test = 'This is real, valid data'
+OR test = '';'''
+
+conn.commit()
+
+
+create_a48 = '''CREATE TABLE superset_ecosia_site_registration_unregistered_farmers
+AS SELECT
+
+AKVO_site_registration_distributed_trees.identifier_akvo,
+AKVO_site_registration_distributed_trees.displayname,
+AKVO_site_registration_distributed_trees.device_id,
+AKVO_site_registration_distributed_trees.instance,
+AKVO_site_registration_distributed_trees.submitter,
+AKVO_site_registration_distributed_trees.submission_date,
+AKVO_site_registration_distributed_trees.form_version,
+LOWER(AKVO_tree_distribution_unregistered_farmers.country) AS country,
+AKVO_site_registration_distributed_trees.test,
+
+-- Create a unique code for filtering in superset, based on main organisation name
+CAST(CONCAT(
+	POWER(ASCII(LEFT(LOWER(AKVO_tree_distribution_unregistered_farmers.organisation),1)),3),
+	POWER(ASCII(LEFT(LOWER(AKVO_tree_distribution_unregistered_farmers.organisation),2)),2),
+	SQRT(POWER(ASCII(LEFT(LOWER(AKVO_tree_distribution_unregistered_farmers.organisation),3)),4))) AS NUMERIC) AS partnercode_main,
+
+-- Create a unique code for filtering in superset, based on main sub-organisation name
+CASE
+WHEN POSITION('-' IN AKVO_tree_distribution_unregistered_farmers.organisation) > 0
+THEN CAST(CONCAT(POWER(ASCII(RIGHT((LOWER(AKVO_tree_distribution_unregistered_farmers.organisation)),
+			LENGTH(AKVO_tree_distribution_unregistered_farmers.organisation) - POSITION('-' IN AKVO_tree_distribution_unregistered_farmers.organisation) - 1)),3),
+		    POWER(ASCII(RIGHT((LOWER(AKVO_tree_distribution_unregistered_farmers.organisation)),
+			LENGTH(AKVO_tree_distribution_unregistered_farmers.organisation) - POSITION('-' IN AKVO_tree_distribution_unregistered_farmers.organisation) - 2)),2),
+		   	POWER(ASCII(RIGHT((LOWER(AKVO_tree_distribution_unregistered_farmers.organisation)),
+			LENGTH(AKVO_tree_distribution_unregistered_farmers.organisation) - POSITION('-' IN AKVO_tree_distribution_unregistered_farmers.organisation) - 3)),2)) AS NUMERIC)
+ELSE
+0
+END AS partnercode_sub,
+
+LOWER(AKVO_tree_distribution_unregistered_farmers.organisation) AS organisation,
+AKVO_tree_distribution_unregistered_farmers.contract_number,
+AKVO_site_registration_distributed_trees.name_region_village_planting_site,
+AKVO_site_registration_distributed_trees.name_owner_planting_site,
+AKVO_site_registration_distributed_trees.gender_owner_planting_site,
+AKVO_site_registration_distributed_trees.photo_owner_planting_site,
+AKVO_site_registration_distributed_trees.nr_trees_received,
+AKVO_site_registration_distributed_trees.confirm_plant_location_own_land,
+AKVO_site_registration_distributed_trees.one_multiple_planting_sites,
+AKVO_site_registration_distributed_trees.nr_trees_given_away,
+AKVO_site_registration_distributed_trees.more_less_200_trees,
+AKVO_site_registration_distributed_trees.date_tree_planting,
+AKVO_site_registration_distributed_trees.centroid_coord,
+AKVO_site_registration_distributed_trees.polygon,
+AKVO_site_registration_distributed_trees.number_coord_pol,
+AKVO_site_registration_distributed_trees.area_ha,
+AKVO_site_registration_distributed_trees.avg_tree_distance,
+AKVO_site_registration_distributed_trees.estimated_area,
+AKVO_site_registration_distributed_trees.unit_estimated_area,
+AKVO_site_registration_distributed_trees.estimated_tree_number_planted,
+AKVO_site_registration_distributed_trees.confirm_additional_photos,
+AKVO_site_registration_distributed_trees.comment_enumerator
+
+FROM AKVO_site_registration_distributed_trees
+JOIN AKVO_tree_distribution_unregistered_farmers
+ON AKVO_tree_distribution_unregistered_farmers.identifier_akvo
+= AKVO_site_registration_distributed_trees.identifier_akvo;
+
+UPDATE superset_ecosia_site_registration_unregistered_farmers
+SET test = 'yes'
+WHERE test = 'This is a test, this record can be deleted.'
+OR test = 'xxxxx';
+
+UPDATE superset_ecosia_site_registration_unregistered_farmers
+SET test = 'no'
+WHERE test = 'This is real, valid data'
+OR test = '';'''
 
 conn.commit()
 
@@ -3103,6 +3200,8 @@ GRANT SELECT ON TABLE superset_ecosia_geolocations TO ecosia_superset;
 GRANT SELECT ON TABLE superset_ecosia_tree_registration_light TO ecosia_superset;
 GRANT SELECT ON TABLE superset_ecosia_tree_monitoring_photos TO ecosia_superset;
 GRANT SELECT ON TABLE superset_ecosia_tree_distribution_unregistered_farmers TO ecosia_superset;
+GRANT SELECT ON TABLE superset_ecosia_site_registration_unregistered_farmers TO ecosia_superset;
+
 
 DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_nursery_registration;
 DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_tree_registration;
@@ -3121,6 +3220,7 @@ DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_geolocations;
 DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_tree_registration_light;
 DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_tree_monitoring_photos;
 DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_tree_distribution_unregistered_farmers;
+DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_site_registration_unregistered_farmers;
 
 ALTER TABLE superset_ecosia_nursery_registration enable ROW LEVEL SECURITY;
 ALTER TABLE superset_ecosia_tree_registration enable ROW LEVEL SECURITY;
@@ -3139,6 +3239,7 @@ ALTER TABLE superset_ecosia_geolocations enable ROW LEVEL SECURITY;
 ALTER TABLE superset_ecosia_tree_registration_light enable ROW LEVEL SECURITY;
 ALTER TABLE superset_ecosia_tree_monitoring_photos enable ROW LEVEL SECURITY;
 ALTER TABLE superset_ecosia_tree_distribution_unregistered_farmers enable ROW LEVEL SECURITY;
+ALTER TABLE superset_ecosia_site_registration_unregistered_farmers enable ROW LEVEL SECURITY;
 
 CREATE POLICY ecosia_superset_policy ON superset_ecosia_nursery_registration TO ecosia_superset USING (true);
 CREATE POLICY ecosia_superset_policy ON superset_ecosia_tree_registration TO ecosia_superset USING (true);
@@ -3156,7 +3257,8 @@ CREATE POLICY ecosia_superset_policy ON superset_ecosia_s4g_deforestation TO eco
 CREATE POLICY ecosia_superset_policy ON superset_ecosia_geolocations TO ecosia_superset USING (true);
 CREATE POLICY ecosia_superset_policy ON superset_ecosia_tree_registration_light TO ecosia_superset USING (true);
 CREATE POLICY ecosia_superset_policy ON superset_ecosia_tree_monitoring_photos TO ecosia_superset USING (true);
-CREATE POLICY ecosia_superset_policy ON superset_ecosia_tree_distribution_unregistered_farmers TO ecosia_superset USING (true);'''
+CREATE POLICY ecosia_superset_policy ON superset_ecosia_tree_distribution_unregistered_farmers TO ecosia_superset USING (true);
+CREATE POLICY ecosia_superset_policy ON superset_ecosia_site_registration_unregistered_farmers TO ecosia_superset USING (true);'''
 
 conn.commit()
 
@@ -3232,6 +3334,7 @@ cur.execute(create_a44)
 cur.execute(create_a45)
 cur.execute(create_a46)
 cur.execute(create_a47)
+cur.execute(create_a48)
 
 cur.execute(create_a17_mkec)
 cur.execute(create_a18_fdia)
