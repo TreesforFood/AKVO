@@ -3231,6 +3231,7 @@ cur.execute(create_a43)
 cur.execute(create_a44)
 cur.execute(create_a45)
 cur.execute(create_a46)
+cur.execute(create_a47)
 
 cur.execute(create_a17_mkec)
 cur.execute(create_a18_fdia)
