@@ -506,8 +506,9 @@ akvo_tree_registration_areas_updated.tree_number AS registered_tree_number,
 0 AS avg_audit_tree_density,
 
 CASE
-WHEN AKVO_Tree_monitoring_areas.method_selection = 'The trees were counted'
-AND SUM(AKVO_Tree_monitoring_counts.number_species) NOTNULL
+WHEN
+--AKVO_Tree_monitoring_areas.method_selection = 'The trees were counted'
+SUM(AKVO_Tree_monitoring_counts.number_species) NOTNULL
 THEN ROUND(SUM(AKVO_Tree_monitoring_counts.number_species),0)
 ELSE ROUND(SUM(AKVO_Tree_monitoring_areas.number_living_trees),0)
 END AS nr_trees_monitored,
@@ -520,8 +521,9 @@ MAX(table_label_strata.difference_years_reg_monitoring) AS nr_years_registration
 table_label_strata.label_strata,
 
 CASE
-WHEN AKVO_Tree_monitoring_areas.method_selection = 'The trees were counted'
-AND SUM(AKVO_Tree_monitoring_counts.number_species) NOTNULL
+WHEN
+--AKVO_Tree_monitoring_areas.method_selection = 'The trees were counted'
+SUM(AKVO_Tree_monitoring_counts.number_species) NOTNULL
 THEN ROUND(SUM(AKVO_Tree_monitoring_counts.number_species*1.0)/NULLIF(akvo_tree_registration_areas_updated.tree_number*1.0,0)*100,0)
 ELSE SUM(AKVO_Tree_monitoring_areas.number_living_trees)/NULLIF(akvo_tree_registration_areas_updated.tree_number,0)*100
 END AS perc_trees_survived,
@@ -571,9 +573,10 @@ akvo_tree_registration_areas_updated.tree_number AS registered_tree_number,
 0 AS avg_audit_tree_density,
 
 CASE
-WHEN AKVO_Tree_external_audits_areas.option_tree_count = 'I want to count trees anyway'
-OR AKVO_Tree_external_audits_areas.option_tree_count = 'Less than 200 trees planted. Determine tree number with counting'
-AND SUM(AKVO_Tree_external_audits_counts.number_species) NOTNULL
+WHEN
+--AKVO_Tree_external_audits_areas.option_tree_count = 'I want to count trees anyway'
+--OR AKVO_Tree_external_audits_areas.option_tree_count = 'Less than 200 trees planted. Determine tree number with counting'
+SUM(AKVO_Tree_external_audits_counts.number_species) NOTNULL
 THEN ROUND(SUM(AKVO_Tree_external_audits_counts.number_species),0)
 ELSE ROUND(SUM(AKVO_Tree_external_audits_areas.audit_reported_trees),0)
 END AS nr_trees_monitored,
@@ -586,9 +589,10 @@ MAX(table_label_strata.difference_years_reg_monitoring) AS nr_years_registration
 table_label_strata.label_strata,
 
 CASE
-WHEN AKVO_Tree_external_audits_areas.option_tree_count = 'I want to count trees anyway'
-OR AKVO_Tree_external_audits_areas.option_tree_count = 'Less than 200 trees planted. Determine tree number with counting'
-OR SUM(AKVO_Tree_external_audits_counts.number_species) NOTNULL
+WHEN
+--AKVO_Tree_external_audits_areas.option_tree_count = 'I want to count trees anyway'
+--OR AKVO_Tree_external_audits_areas.option_tree_count = 'Less than 200 trees planted. Determine tree number with counting'
+SUM(AKVO_Tree_external_audits_counts.number_species) NOTNULL
 THEN ROUND(SUM(AKVO_Tree_external_audits_counts.number_species*1.0)/NULLIF(akvo_tree_registration_areas_updated.tree_number*1.0,0)*100,0)
 ELSE SUM(AKVO_Tree_external_audits_areas.audit_reported_trees)/NULLIF(akvo_tree_registration_areas_updated.tree_number,0)*100
 END AS perc_trees_survived,
