@@ -1288,24 +1288,24 @@ nr_photos_monitoring.counted_photos_monitoring as "nr of photos taken during mon
 nr_photos_registration.counted_photos_registration as "nr of photos taken during registration",
 akvo_nursery_registration.centroid_coord
 
-from akvo_nursery_monitoring
-JOIN akvo_nursery_registration
+from akvo_nursery_registration
+LEFT JOIN akvo_nursery_monitoring
 ON akvo_nursery_registration.identifier_akvo = akvo_nursery_monitoring.identifier_akvo
-JOIN
-(Select STRING_AGG(akvo_nursery_monitoring_tree_species.tree_species_latin,' | ') species_list,
+LEFT JOIN
+(SELECT STRING_AGG(akvo_nursery_monitoring_tree_species.tree_species_latin,' | ') species_list,
 	akvo_nursery_monitoring_tree_species.instance
 FROM akvo_nursery_monitoring_tree_species
 JOIN akvo_nursery_monitoring
 ON akvo_nursery_monitoring_tree_species.instance = akvo_nursery_monitoring.instance
 GROUP BY akvo_nursery_monitoring_tree_species.instance) species
 ON akvo_nursery_monitoring.instance = species.instance
-JOIN
-(select COUNT(akvo_nursery_monitoring_photos.instance) counted_photos_monitoring, akvo_nursery_monitoring_photos.instance
+LEFT JOIN
+(SELECT COUNT(akvo_nursery_monitoring_photos.instance) counted_photos_monitoring, akvo_nursery_monitoring_photos.instance
 	 FROM akvo_nursery_monitoring_photos
 	 group by akvo_nursery_monitoring_photos.instance) nr_photos_monitoring
 ON akvo_nursery_monitoring.instance = nr_photos_monitoring.instance
 
-JOIN (select COUNT(akvo_nursery_registration_photos.instance) counted_photos_registration, akvo_nursery_registration_photos.instance
+LEFT JOIN (select COUNT(akvo_nursery_registration_photos.instance) counted_photos_registration, akvo_nursery_registration_photos.instance
 	 FROM akvo_nursery_registration_photos
 	 group by akvo_nursery_registration_photos.instance) nr_photos_registration
 ON akvo_nursery_registration.instance = nr_photos_registration.instance
@@ -1625,7 +1625,7 @@ CALC_TAB_Error_partner_report_on_nursery_registration."nr of photos taken during
 CALC_TAB_Error_partner_report_on_nursery_registration."Check nr of photos taken during registration of the nursery"
 
 FROM akvo_nursery_registration
-JOIN CALC_TAB_Error_partner_report_on_nursery_registration
+LEFT JOIN CALC_TAB_Error_partner_report_on_nursery_registration
 ON CALC_TAB_Error_partner_report_on_nursery_registration.identifier_akvo = akvo_nursery_registration.identifier_akvo;
 
 UPDATE superset_ecosia_nursery_registration
