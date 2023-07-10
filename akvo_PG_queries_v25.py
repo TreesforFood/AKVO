@@ -71,7 +71,8 @@ DROP TABLE IF EXISTS superset_ecosia_geolocations;
 DROP TABLE IF EXISTS superset_ecosia_tree_monitoring_photos;
 DROP TABLE IF EXISTS superset_ecosia_tree_registration_light;
 DROP TABLE IF EXISTS superset_ecosia_tree_distribution_unregistered_farmers;
-DROP TABLE IF EXISTS superset_ecosia_site_registration_unregistered_farmers;'''
+DROP TABLE IF EXISTS superset_ecosia_site_registration_unregistered_farmers;
+DROP TABLE IF EXISTS superset_ecosia_contract_overview;'''
 conn.commit()
 
 create_a1 = '''CREATE TABLE akvo_tree_registration_areas_updated
@@ -134,7 +135,11 @@ akvo_tree_monitoring_areas.identifier_akvo,
 akvo_tree_monitoring_areas.instance,
 akvo_tree_registration_areas_updated.id_planting_site,
 akvo_tree_monitoring_areas.submission AS monitoring_submission,
-akvo_tree_monitoring_areas.method_selection,
+
+-- Classify the options of method selection (as in the audit table below) is NOT needed here because
+-- there is only one option to select PCQ or Tree count rows. No grouping problem here(?)
+AKVO_Tree_monitoring_areas.method_selection,
+
 'monitoring_data' AS procedure,
 TO_DATE(akvo_tree_registration_areas_updated.planting_date, 'YYYY-MM-DD') AS planting_date
 FROM akvo_tree_monitoring_areas
@@ -147,7 +152,15 @@ akvo_tree_external_audits_areas.identifier_akvo,
 akvo_tree_external_audits_areas.instance,
 akvo_tree_registration_areas_updated.id_planting_site,
 akvo_tree_external_audits_areas.submission AS monitoring_submission,
-akvo_tree_external_audits_areas.option_tree_count,
+
+-- Classify the options is needed to prevent seperate groups
+CASE
+WHEN AKVO_Tree_external_audits_areas.option_tree_count = 'More than 200 trees planted. Determine tree number with PCQ method'
+OR AKVO_Tree_external_audits_areas.option_tree_count = 'I want to use the PCQ method anyway'
+THEN 'PCQ'
+ELSE 'Tree count'
+END AS method_selection,
+
 'audit_data' AS procedure,
 TO_DATE(akvo_tree_registration_areas_updated.planting_date, 'YYYY-MM-DD') AS planting_date
 FROM akvo_tree_external_audits_areas
@@ -323,8 +336,19 @@ ON merge_pcq_audit_hgt.instance = table_label_strata.instance
 WHERE merge_pcq_audit_hgt.pcq_results_merged_audit_hgt > 0
 AND merge_pcq_audit_hgt.pcq_results_merged_audit_hgt < 100
 GROUP BY merge_pcq_audit_hgt.identifier_akvo,
---table_label_strata.instance,
 table_label_strata.label_strata),
+
+--List the enumerators. Some monitoring submissions were done at the same time by different submittors.
+--We need to bundle them into 1 column so they don't appear as seperate submissions in the result table
+submittors_monitoring AS (SELECT identifier_akvo, STRING_AGG(akvo_tree_monitoring_areas.submitter,' | ') AS submitter
+FROM akvo_tree_monitoring_areas
+GROUP BY identifier_akvo),
+
+--List the enumerators. Some monitoring submissions were done at the same time by different submittors.
+--We need to bundle them into 1 column so they don't appear as seperate submissions in the result table
+submittors_audit AS (SELECT identifier_akvo, STRING_AGG(akvo_tree_external_audits_areas.submitter,' | ') AS submitter
+FROM akvo_tree_external_audits_areas
+GROUP BY identifier_akvo),
 
 -- Sub CTE table to calculate PCQ MONITORING results with CASE more easy and transparent. If we would do this in a subquery it results in
 -- a complex issues of multiple rows combined with grouping problems. This is why this intermediary table is more easy.
@@ -334,7 +358,7 @@ AKVO_Tree_monitoring_areas.identifier_akvo,
 AKVO_Tree_monitoring_areas.display_name,
 LOWER(akvo_tree_registration_areas_updated.country) AS country,
 LOWER(akvo_tree_registration_areas_updated.organisation) AS organisation,
-MAX(AKVO_Tree_monitoring_areas.submitter) AS submitter,
+submittors_monitoring.submitter,
 akvo_tree_registration_areas_updated.contract_number,
 akvo_tree_registration_areas_updated.id_planting_site,
 Akvo_tree_registration_areas_updated.calc_area,
@@ -384,6 +408,8 @@ AND pcq_monitoring_avg_hgt.label_strata = table_label_strata.label_strata
 LEFT JOIN count_pcq_samples
 ON count_pcq_samples.identifier_akvo = AKVO_Tree_monitoring_areas.identifier_akvo
 AND count_pcq_samples.label_strata = table_label_strata.label_strata
+LEFT JOIN submittors_monitoring
+ON submittors_monitoring.identifier_akvo = AKVO_Tree_monitoring_areas.identifier_akvo
 
 where AKVO_Tree_monitoring_areas.method_selection = 'Number of living trees is unknown. Go to PCQ method.'
 AND Akvo_tree_registration_areas_updated.identifier_akvo NOTNULL
@@ -392,6 +418,7 @@ GROUP BY
 table_label_strata.label_strata,
 AKVO_Tree_monitoring_areas.identifier_akvo,
 akvo_tree_registration_areas_updated.organisation,
+submittors_monitoring.submitter,
 akvo_tree_registration_areas_updated.contract_number,
 Akvo_tree_registration_areas_updated.calc_area,
 akvo_tree_registration_areas_updated.tree_number,
@@ -413,7 +440,7 @@ AKVO_Tree_external_audits_areas.identifier_akvo,
 AKVO_Tree_external_audits_areas.display_name,
 LOWER(akvo_tree_registration_areas_updated.country) AS country,
 LOWER(akvo_tree_registration_areas_updated.organisation) AS organisation,
-MAX(AKVO_Tree_external_audits_areas.submitter) AS submitter,
+submittors_audit.submitter,
 akvo_tree_registration_areas_updated.contract_number,
 akvo_tree_registration_areas_updated.id_planting_site,
 akvo_tree_registration_areas_updated.calc_area,
@@ -436,15 +463,13 @@ MAX(table_label_strata.difference_years_reg_monitoring) AS nr_years_registration
 table_label_strata.label_strata,
 
 CASE
-WHEN AKVO_Tree_external_audits_areas.option_tree_count = 'More than 200 trees planted. Determine tree number with PCQ method'
-OR AKVO_Tree_external_audits_areas.option_tree_count = 'I want to use the PCQ method anyway'
+WHEN table_label_strata.method_selection = 'PCQ'
 THEN ROUND(((1/(NULLIF(POWER(pcq_audit_avg_dist.pcq_results_merged_audit,2),0))*10000) * Akvo_tree_registration_areas_updated.calc_area)/NULLIF(akvo_tree_registration_areas_updated.tree_number,0)*100,0)
 ELSE 0
 END AS perc_trees_survived,
 
 CASE
-WHEN AKVO_Tree_external_audits_areas.option_tree_count = 'More than 200 trees planted. Determine tree number with PCQ method'
-OR AKVO_Tree_external_audits_areas.option_tree_count = 'I want to use the PCQ method anyway'
+WHEN table_label_strata.method_selection = 'PCQ'
 THEN ROUND(pcq_audit_avg_hgt.pcq_results_merged_audit_hgt,2)
 ELSE 0
 END AS avg_tree_height
@@ -465,21 +490,21 @@ AND pcq_audit_avg_hgt.label_strata = table_label_strata.label_strata
 LEFT JOIN count_pcq_samples
 ON count_pcq_samples.identifier_akvo = AKVO_Tree_external_audits_areas.identifier_akvo
 AND count_pcq_samples.label_strata = table_label_strata.label_strata
+LEFT JOIN submittors_audit
+ON submittors_audit.identifier_akvo = AKVO_Tree_external_audits_areas.identifier_akvo
 
-WHERE (AKVO_Tree_external_audits_areas.option_tree_count = 'More than 200 trees planted. Determine tree number with PCQ method'
-OR AKVO_Tree_external_audits_areas.option_tree_count = 'I want to use the PCQ method anyway')
-AND Akvo_tree_registration_areas_updated.identifier_akvo NOTNULL
+WHERE table_label_strata.method_selection = 'PCQ' AND Akvo_tree_registration_areas_updated.identifier_akvo NOTNULL
 
 GROUP BY
 table_label_strata.label_strata,
 AKVO_Tree_external_audits_areas.identifier_akvo,
-AKVO_Tree_external_audits_areas.calc_area,
 akvo_tree_registration_areas_updated.calc_area,
 akvo_tree_registration_areas_updated.tree_number,
 count_pcq_samples.number_pcq_samples,
 Akvo_tree_registration_areas_updated.planting_date,
-AKVO_Tree_external_audits_areas.option_tree_count,
+table_label_strata.method_selection,
 akvo_tree_registration_areas_updated.organisation,
+submittors_audit.submitter,
 akvo_tree_registration_areas_updated.contract_number,
 akvo_tree_registration_areas_updated.id_planting_site,
 akvo_tree_registration_areas_updated.country,
@@ -494,7 +519,7 @@ AKVO_Tree_monitoring_areas.identifier_akvo,
 AKVO_Tree_monitoring_areas.display_name,
 LOWER(akvo_tree_registration_areas_updated.country) AS country,
 LOWER(akvo_tree_registration_areas_updated.organisation) AS organisation,
-MAX(AKVO_Tree_monitoring_areas.submitter) AS submitter,
+submittors_monitoring.submitter,
 akvo_tree_registration_areas_updated.contract_number,
 akvo_tree_registration_areas_updated.id_planting_site,
 Akvo_tree_registration_areas_updated.calc_area,
@@ -525,7 +550,7 @@ WHEN
 --AKVO_Tree_monitoring_areas.method_selection = 'The trees were counted'
 SUM(AKVO_Tree_monitoring_counts.number_species) NOTNULL
 THEN ROUND(SUM(AKVO_Tree_monitoring_counts.number_species*1.0)/NULLIF(akvo_tree_registration_areas_updated.tree_number*1.0,0)*100,0)
-ELSE SUM(AKVO_Tree_monitoring_areas.number_living_trees)/NULLIF(akvo_tree_registration_areas_updated.tree_number,0)*100
+ELSE ROUND(SUM(AKVO_Tree_monitoring_areas.number_living_trees)/NULLIF(akvo_tree_registration_areas_updated.tree_number,0)*100,0)
 END AS perc_trees_survived,
 
 ROUND(AVG(akvo_tree_monitoring_areas.avg_tree_height)::numeric,2) AS avg_tree_height
@@ -537,6 +562,8 @@ LEFT JOIN Akvo_tree_registration_areas_updated
 ON AKVO_Tree_monitoring_areas.identifier_akvo = Akvo_tree_registration_areas_updated.identifier_akvo
 LEFT JOIN table_label_strata
 ON AKVO_Tree_monitoring_areas.instance = table_label_strata.instance
+LEFT JOIN submittors_monitoring
+ON submittors_monitoring.identifier_akvo = AKVO_Tree_monitoring_areas.identifier_akvo
 
 WHERE AKVO_Tree_monitoring_areas.method_selection = 'The trees were counted'
 AND Akvo_tree_registration_areas_updated.identifier_akvo NOTNULL
@@ -549,10 +576,12 @@ akvo_tree_registration_areas_updated.tree_number,
 Akvo_tree_registration_areas_updated.planting_date,
 AKVO_Tree_monitoring_areas.method_selection,
 akvo_tree_registration_areas_updated.organisation,
+submittors_monitoring.submitter,
 akvo_tree_registration_areas_updated.contract_number,
 akvo_tree_registration_areas_updated.id_planting_site,
 akvo_tree_registration_areas_updated.country,
 AKVO_Tree_monitoring_areas.display_name),
+
 
 -- Sub CTE table to calculate COUNTS of AUDIT results with CASE more easy and transparent. If we would do this in a subquery it results in
 -- a complex issues of multiple rows combined with grouping problems. This is why this intermediary table is more easy.
@@ -561,7 +590,7 @@ AKVO_Tree_external_audits_areas.identifier_akvo,
 AKVO_Tree_external_audits_areas.display_name,
 LOWER(akvo_tree_registration_areas_updated.country) AS country,
 LOWER(akvo_tree_registration_areas_updated.organisation) AS organisation,
-MAX(AKVO_Tree_external_audits_areas.submitter) AS submitter,
+submittors_audit.submitter,
 akvo_tree_registration_areas_updated.contract_number,
 akvo_tree_registration_areas_updated.id_planting_site,
 Akvo_tree_registration_areas_updated.calc_area,
@@ -573,10 +602,7 @@ akvo_tree_registration_areas_updated.tree_number AS registered_tree_number,
 0 AS avg_audit_tree_density,
 
 CASE
-WHEN
---AKVO_Tree_external_audits_areas.option_tree_count = 'I want to count trees anyway'
---OR AKVO_Tree_external_audits_areas.option_tree_count = 'Less than 200 trees planted. Determine tree number with counting'
-SUM(AKVO_Tree_external_audits_counts.number_species) NOTNULL
+WHEN table_label_strata.method_selection = 'Tree count' AND SUM(AKVO_Tree_external_audits_counts.number_species) NOTNULL
 THEN ROUND(SUM(AKVO_Tree_external_audits_counts.number_species),0)
 ELSE ROUND(SUM(AKVO_Tree_external_audits_areas.audit_reported_trees),0)
 END AS nr_trees_monitored,
@@ -589,12 +615,9 @@ MAX(table_label_strata.difference_years_reg_monitoring) AS nr_years_registration
 table_label_strata.label_strata,
 
 CASE
-WHEN
---AKVO_Tree_external_audits_areas.option_tree_count = 'I want to count trees anyway'
---OR AKVO_Tree_external_audits_areas.option_tree_count = 'Less than 200 trees planted. Determine tree number with counting'
-SUM(AKVO_Tree_external_audits_counts.number_species) NOTNULL
+WHEN table_label_strata.method_selection = 'Tree count' AND SUM(AKVO_Tree_external_audits_counts.number_species) NOTNULL
 THEN ROUND(SUM(AKVO_Tree_external_audits_counts.number_species*1.0)/NULLIF(akvo_tree_registration_areas_updated.tree_number*1.0,0)*100,0)
-ELSE SUM(AKVO_Tree_external_audits_areas.audit_reported_trees)/NULLIF(akvo_tree_registration_areas_updated.tree_number,0)*100
+ELSE ROUND(SUM(AKVO_Tree_external_audits_areas.audit_reported_trees)/NULLIF(akvo_tree_registration_areas_updated.tree_number,0)*100,0)
 END AS perc_trees_survived,
 
 ROUND(AVG(akvo_tree_external_audits_areas.audit_reported_tree_height),2) AS avg_tree_height_m
@@ -606,10 +629,10 @@ LEFT JOIN Akvo_tree_registration_areas_updated
 ON akvo_tree_external_audits_areas.identifier_akvo = Akvo_tree_registration_areas_updated.identifier_akvo
 LEFT JOIN table_label_strata
 ON akvo_tree_external_audits_areas.instance = table_label_strata.instance
+LEFT JOIN submittors_audit
+ON submittors_audit.identifier_akvo = akvo_tree_external_audits_areas.identifier_akvo
 
-WHERE (AKVO_Tree_external_audits_areas.option_tree_count = 'I want to count trees anyway'
-OR AKVO_Tree_external_audits_areas.option_tree_count = 'Less than 200 trees planted. Determine tree number with counting')
-AND Akvo_tree_registration_areas_updated.identifier_akvo NOTNULL
+WHERE table_label_strata.method_selection = 'Tree count' AND Akvo_tree_registration_areas_updated.identifier_akvo NOTNULL
 
 GROUP BY
 table_label_strata.label_strata,
@@ -617,8 +640,10 @@ akvo_tree_external_audits_areas.identifier_akvo,
 Akvo_tree_registration_areas_updated.calc_area,
 akvo_tree_registration_areas_updated.tree_number,
 Akvo_tree_registration_areas_updated.planting_date,
-akvo_tree_external_audits_areas.option_tree_count,
+--akvo_tree_external_audits_areas.option_tree_count,
+table_label_strata.method_selection,
 akvo_tree_registration_areas_updated.organisation,
+submittors_audit.submitter,
 akvo_tree_registration_areas_updated.contract_number,
 akvo_tree_registration_areas_updated.id_planting_site,
 akvo_tree_registration_areas_updated.country,
@@ -1190,7 +1215,7 @@ conn.commit()
 
 create_a15 = '''CREATE TABLE CALC_TAB_tree_submissions_per_contract
 AS WITH CTE_total_tree_registrations AS (
-select
+SELECT
 lower(akvo_tree_registration_areas_updated.country) as name_country,
 lower(akvo_tree_registration_areas_updated.organisation) as organisation,
 akvo_tree_registration_areas_updated.contract_number,
@@ -1201,66 +1226,201 @@ count(DISTINCT akvo_tree_registration_areas_updated.identifier_akvo) AS "Number 
 FROM akvo_tree_registration_areas_updated
 WHERE (akvo_tree_registration_areas_updated.test = '' OR akvo_tree_registration_areas_updated.test = 'This is real, valid data')
 AND NOT akvo_tree_registration_areas_updated.id_planting_site = 'placeholder' AND NOT country = '' AND NOT organisation = ''
-GROUP BY akvo_tree_registration_areas_updated.contract_number,
+GROUP BY
+akvo_tree_registration_areas_updated.contract_number,
 name_country,
 organisation),
 
-CTE_tree_monitoring AS (select
+CTE_union_monitorings_audits AS (SELECT
+AKVO_Tree_monitoring_areas.identifier_akvo,
+AKVO_Tree_monitoring_areas.instance,
+AKVO_Tree_monitoring_areas.submission
+FROM AKVO_Tree_monitoring_areas
+UNION ALL
+SELECT
+AKVO_Tree_external_audits_areas.identifier_akvo,
+AKVO_Tree_external_audits_areas.instance,
+AKVO_Tree_external_audits_areas.submission
+FROM AKVO_Tree_external_audits_areas),
+
+CTE_tree_monitoring AS (
+SELECT
 akvo_tree_registration_areas_updated.contract_number,
-COUNT(DISTINCT AKVO_Tree_monitoring_areas.identifier_akvo) as nr_sites_monitored,
-COUNT(DISTINCT AKVO_Tree_monitoring_areas.instance) as nr_of_monitorings,
-MAX(AKVO_Tree_monitoring_areas.submission) AS "Latest submitted monitoring"
+COUNT(DISTINCT CTE_union_monitorings_audits.identifier_akvo) as nr_sites_monitored_audited,
+COUNT(DISTINCT CTE_union_monitorings_audits.instance) as total_nr_monitorings_audits,
+MAX(CTE_union_monitorings_audits.submission) AS "Latest submitted monitoring or audit"
 FROM akvo_tree_registration_areas_updated
-	LEFT JOIN AKVO_Tree_monitoring_areas
-	ON akvo_tree_registration_areas_updated.identifier_akvo = AKVO_Tree_monitoring_areas.identifier_akvo
-GROUP BY akvo_tree_registration_areas_updated.contract_number
-order by akvo_tree_registration_areas_updated.contract_number),
+LEFT JOIN CTE_union_monitorings_audits
+ON akvo_tree_registration_areas_updated.identifier_akvo = CTE_union_monitorings_audits.identifier_akvo
+GROUP BY akvo_tree_registration_areas_updated.contract_number),
+
+CTE_only_monitorings AS (SELECT
+akvo_tree_registration_areas_updated.contract_number,
+COUNT(DISTINCT AKVO_Tree_monitoring_areas.instance) AS "total nr of monitoring submissions"
+FROM akvo_tree_registration_areas_updated
+LEFT JOIN AKVO_Tree_monitoring_areas
+ON akvo_tree_registration_areas_updated.identifier_akvo = AKVO_Tree_monitoring_areas.identifier_akvo
+GROUP BY akvo_tree_registration_areas_updated.contract_number),
+
+CTE_only_audits AS (SELECT
+akvo_tree_registration_areas_updated.contract_number,
+COUNT(DISTINCT AKVO_Tree_external_audits_areas.instance) AS "total nr of audit submissions"
+FROM akvo_tree_registration_areas_updated
+LEFT JOIN AKVO_Tree_external_audits_areas
+ON akvo_tree_registration_areas_updated.identifier_akvo = AKVO_Tree_external_audits_areas.identifier_akvo
+GROUP BY akvo_tree_registration_areas_updated.contract_number),
 
 CTE_tree_species AS (
 select
 	akvo_tree_registration_areas_updated.contract_number,
 	COUNT(DISTINCT akvo_tree_registration_species.lat_name_species) as "Number of tree species registered"
 	FROM akvo_tree_registration_areas_updated
-JOIN akvo_tree_registration_species
+LEFT JOIN akvo_tree_registration_species
 	ON akvo_tree_registration_areas_updated.identifier_akvo	= akvo_tree_registration_species.identifier_akvo
 	GROUP BY akvo_tree_registration_areas_updated.contract_number),
 
-CTE_registered_tree_number_monitored_sites AS (select akvo_tree_registration_areas_updated.contract_number,
-SUM(akvo_tree_registration_areas_updated.tree_number) as total_registered_trees_on_monitored_sites
-from akvo_tree_registration_areas_updated
-INNER JOIN
+CTE_registered_tree_number_monitored_sites AS (SELECT
+akvo_tree_registration_areas_updated.contract_number,
+SUM(akvo_tree_registration_areas_updated.tree_number) AS total_registered_trees_on_monitored_sites
+FROM akvo_tree_registration_areas_updated
+JOIN
 (SELECT DISTINCT akvo_tree_monitoring_areas.identifier_akvo
- FROM akvo_tree_monitoring_areas) table_x
+FROM akvo_tree_monitoring_areas) table_x
 ON table_x.identifier_akvo = akvo_tree_registration_areas_updated.identifier_akvo
-group by akvo_tree_registration_areas_updated.contract_number),
+group by akvo_tree_registration_areas_updated.contract_number,
+akvo_tree_registration_areas_updated.organisation),
 
-cte_monitored_tree_number_monitored_sites AS (select table_y.contract_number,
-SUM(table_y.monitored_tree_number) as monitored_tree_number
-from (SELECT MAX(CALC_TAB_monitoring_calculations_per_site.label_strata),
-CALC_TAB_monitoring_calculations_per_site.contract_number,
-CALC_TAB_monitoring_calculations_per_site.nr_trees_monitored AS monitored_tree_number
-FROM CALC_TAB_monitoring_calculations_per_site
-WHERE CALC_TAB_monitoring_calculations_per_site.label_strata > 0
-GROUP BY CALC_TAB_monitoring_calculations_per_site.contract_number,
-CALC_TAB_monitoring_calculations_per_site.nr_trees_monitored
-order by CALC_TAB_monitoring_calculations_per_site.contract_number) table_y
-GROUP BY table_y.contract_number)
+CTE_percentage_monitored_trees AS (SELECT
+akvo_tree_registration_areas_updated.contract_number,
+ROUND(CTE_registered_tree_number_monitored_sites.total_registered_trees_on_monitored_sites::decimal/SUM(tree_number)::decimal*100,2)
+AS "percentage of registered trees monitored by partner"
+FROM akvo_tree_registration_areas_updated
+LEFT JOIN CTE_registered_tree_number_monitored_sites
+ON CTE_registered_tree_number_monitored_sites.contract_number = akvo_tree_registration_areas_updated.contract_number
+GROUP BY akvo_tree_registration_areas_updated.contract_number,
+CTE_registered_tree_number_monitored_sites.total_registered_trees_on_monitored_sites),
+
+CTE_monitored_tree_number_monitored_sites AS (SELECT contract_number,
+SUM(nr_trees_monitored) AS number_trees_monitored,
+SUM(calc_area) AS monitored_ha,
+ROUND(AVG(perc_trees_survived),1) AS avg_perc_tree_survival
+FROM (
+SELECT contract_number, perc_trees_survived, calc_area, procedure, label_strata, nr_trees_monitored,
+MAX(label_strata) OVER (PARTITION BY identifier_akvo) AS max_value
+FROM calc_tab_monitoring_calculations_per_site
+where label_strata > 0) subquery
+WHERE label_strata = max_value
+GROUP BY contract_number),
+
+CTE_total_trees_survived_contract AS (SELECT
+CTE_monitored_tree_number_monitored_sites.avg_perc_tree_survival,
+akvo_tree_registration_areas.tree_number
+FROM akvo_tree_registration_areas
+LEFT JOIN CTE_monitored_tree_number_monitored_sites
+ON CTE_monitored_tree_number_monitored_sites.contract_number = akvo_tree_registration_areas.contract_number
+LEFT JOIN calc_tab_monitoring_calculations_per_site
+ON calc_tab_monitoring_calculations_per_site.contract_number = akvo_tree_registration_areas.contract_number
+WHERE calc_tab_monitoring_calculations_per_site.contract_number ISNULL),
+
+-- Give audits and monitoring, PCQ and Tree counts a rank in priority/importance
+CTE_ranking_monitoring_audit_method AS (SELECT
+calc_tab_monitoring_calculations_per_site.*,
+CASE
+WHEN calc_tab_monitoring_calculations_per_site.procedure = 'Audit' and data_collection_method = 'PCQ'
+THEN 4
+WHEN calc_tab_monitoring_calculations_per_site.procedure = 'Audit' and data_collection_method = 'Tree count'
+THEN 3
+WHEN calc_tab_monitoring_calculations_per_site.procedure = 'Monitoring' and data_collection_method = 'PCQ'
+THEN 2
+WHEN calc_tab_monitoring_calculations_per_site.procedure = 'Monitoring' and data_collection_method = 'Tree count'
+THEN 1
+ELSE 0
+END AS rank_monitoring_audit_method
+FROM calc_tab_monitoring_calculations_per_site),
+
+-- Give results for the latest monitoring/audit results, using the ranking of priority/imporance
+CTE_results AS (SELECT
+identifier_akvo,
+MAX(label_strata) AS max_label_strata,
+MAX(rank_monitoring_audit_method) AS max_ranking
+FROM CTE_ranking_monitoring_audit_method
+where rank_monitoring_audit_method > 0
+GROUP BY CTE_ranking_monitoring_audit_method.identifier_akvo),
+
+-- Calculate the weighted average % tree survival on CONTRACT LEVEL based on the latest results from the monitorings/audits
+CTE_calculate_monitoring_audit_results AS
+(SELECT
+contract_number,
+
+ROUND(SUM(perc_trees_survived * registered_tree_number)/SUM(registered_tree_number),1) AS weighted_avg_perc_tree_survival
+
+FROM CTE_ranking_monitoring_audit_method
+JOIN CTE_results
+ON CTE_ranking_monitoring_audit_method.identifier_akvo = CTE_results.identifier_akvo
+AND CTE_ranking_monitoring_audit_method.label_strata = CTE_results.max_label_strata
+AND CTE_ranking_monitoring_audit_method.rank_monitoring_audit_method = CTE_results.max_ranking
+WHERE CTE_ranking_monitoring_audit_method.label_strata > 0
+GROUP BY CTE_ranking_monitoring_audit_method.contract_number),
+
+-- Calculate the latest tree number survival per site (based on the latest results from the monitorings/audits)
+CTE_calculate_latest_tree_number_survival AS
+(SELECT
+CTE_ranking_monitoring_audit_method.identifier_akvo,
+CTE_ranking_monitoring_audit_method.contract_number,
+CTE_ranking_monitoring_audit_method.nr_trees_monitored AS latest_tree_number_survival
+FROM CTE_ranking_monitoring_audit_method
+JOIN CTE_results
+ON CTE_ranking_monitoring_audit_method.identifier_akvo = CTE_results.identifier_akvo
+AND CTE_ranking_monitoring_audit_method.label_strata = CTE_results.max_label_strata
+AND CTE_ranking_monitoring_audit_method.rank_monitoring_audit_method = CTE_results.max_ranking
+WHERE CTE_ranking_monitoring_audit_method.label_strata > 0),
+
+-- Calculate the latest trees number survival based on the latest site specific tree survival rates OR based on the weighted average avg_perc_tree_survival
+-- rate (if no monitoring was done yet for the particular site)
+CTE_calculate_extrapolated_tree_number_site_level AS (SELECT
+akvo_tree_registration_areas_updated.identifier_akvo,
+akvo_tree_registration_areas_updated.contract_number,
+
+CASE
+WHEN CTE_calculate_latest_tree_number_survival.identifier_akvo = akvo_tree_registration_areas_updated.identifier_akvo
+THEN CTE_calculate_latest_tree_number_survival.latest_tree_number_survival
+WHEN CTE_calculate_latest_tree_number_survival.identifier_akvo ISNULL
+THEN ROUND(akvo_tree_registration_areas_updated.tree_number * CTE_calculate_monitoring_audit_results.weighted_avg_perc_tree_survival/100,0)
+ELSE akvo_tree_registration_areas_updated.tree_number
+END AS extrapolated_tree_number_per_site
+
+FROM akvo_tree_registration_areas_updated
+LEFT JOIN CTE_calculate_latest_tree_number_survival
+ON CTE_calculate_latest_tree_number_survival.identifier_akvo = akvo_tree_registration_areas_updated.identifier_akvo
+LEFT JOIN CTE_calculate_monitoring_audit_results
+ON CTE_calculate_monitoring_audit_results.contract_number = akvo_tree_registration_areas_updated.contract_number),
+
+
+-- Calculate the tree number on contract level based on the latest results from the monitorings/audits
+CTE_calculate_extrapolated_tree_number_contract_level AS (SELECT
+contract_number,
+SUM(extrapolated_tree_number_per_site) AS extrapolated_tree_number_contract_level
+FROM CTE_calculate_extrapolated_tree_number_site_level
+GROUP BY CTE_calculate_extrapolated_tree_number_site_level.contract_number)
+
 
 	SELECT
 	CTE_total_tree_registrations.name_country,
 	CTE_total_tree_registrations.organisation,
 	CTE_total_tree_registrations.contract_number AS "Contract number",
-	CTE_total_tree_registrations."Nr of sites registered" AS "Total number of sites registered",
+	CTE_total_tree_registrations."Nr of sites registered" AS "Total number of planting sites registered",
 	CTE_total_tree_registrations."Registered tree number" AS "Total number of trees registered",
-	cte_registered_tree_number_monitored_sites.total_registered_trees_on_monitored_sites AS "Total nr of registered trees on sites that have been monitored",
 	CTE_total_tree_registrations."Latest submitted registration",
-	CTE_tree_monitoring.nr_of_monitorings AS "Total number of monitoring submissions",
-	CTE_tree_monitoring.nr_sites_monitored AS "Number of sites monitored at least 1 time",
-	CTE_tree_monitoring."Latest submitted monitoring",
-	cte_monitored_tree_number_monitored_sites.monitored_tree_number,
-	ROUND(cte_monitored_tree_number_monitored_sites.monitored_tree_number/
-	  NULLIF(cte_registered_tree_number_monitored_sites.total_registered_trees_on_monitored_sites,0)*100
-	 ,2) AS "Survived tree percentage on monitored sites",
+	-- CHANGE BELOW TO PERCENTAGES. MORE MEANINGFULL
+	--cte_registered_tree_number_monitored_sites.total_registered_trees_on_monitored_sites AS "% of registered trees monitored by partner",
+	CTE_only_monitorings."total nr of monitoring submissions",
+	CTE_only_audits."total nr of audit submissions",
+	CTE_tree_monitoring.nr_sites_monitored_audited AS "Number of sites monitored/audited at least 1 time",
+	CTE_tree_monitoring."Latest submitted monitoring or audit",
+	CTE_monitored_tree_number_monitored_sites.monitored_ha,
+	CTE_percentage_monitored_trees."percentage of registered trees monitored by partner",
+	CTE_calculate_monitoring_audit_results.weighted_avg_perc_tree_survival,
+	CTE_calculate_extrapolated_tree_number_contract_level.extrapolated_tree_number_contract_level,
 	CTE_tree_species."Number of tree species registered"
 
 	FROM CTE_total_tree_registrations
@@ -1268,11 +1428,22 @@ GROUP BY table_y.contract_number)
 	ON CTE_tree_monitoring.contract_number = CTE_total_tree_registrations.contract_number
 	LEFT JOIN CTE_tree_species
 	ON CTE_tree_species.contract_number = CTE_total_tree_registrations.contract_number
-	LEFT JOIN cte_monitored_tree_number_monitored_sites
+	LEFT JOIN CTE_monitored_tree_number_monitored_sites
 	ON CTE_tree_monitoring.contract_number = cte_monitored_tree_number_monitored_sites.contract_number
-	LEFT JOIN cte_registered_tree_number_monitored_sites
-	ON cte_registered_tree_number_monitored_sites.contract_number = CTE_tree_monitoring.contract_number;'''
+	LEFT JOIN CTE_registered_tree_number_monitored_sites
+	ON cte_registered_tree_number_monitored_sites.contract_number = CTE_tree_monitoring.contract_number
+	LEFT JOIN CTE_calculate_monitoring_audit_results
+	ON CTE_calculate_monitoring_audit_results.contract_number = CTE_tree_monitoring.contract_number
+	LEFT JOIN CTE_calculate_extrapolated_tree_number_contract_level
+	ON CTE_calculate_extrapolated_tree_number_contract_level.contract_number = CTE_tree_monitoring.contract_number
+	LEFT JOIN CTE_only_monitorings
+	ON CTE_calculate_extrapolated_tree_number_contract_level.contract_number = CTE_only_monitorings.contract_number
+	LEFT JOIN CTE_only_audits
+	ON CTE_calculate_extrapolated_tree_number_contract_level.contract_number = CTE_only_audits.contract_number
+	JOIN CTE_percentage_monitored_trees
+	ON CTE_calculate_extrapolated_tree_number_contract_level.contract_number = CTE_percentage_monitored_trees.contract_number;'''
 
+conn.commit()
 
 create_a16 = '''CREATE TABLE CALC_TAB_Error_check_on_nursery_registration AS select
 akvo_nursery_registration.identifier_akvo,
@@ -2875,6 +3046,7 @@ OR test = '';'''
 conn.commit()
 
 
+
 create_a47 = '''CREATE TABLE superset_ecosia_tree_distribution_unregistered_farmers
 AS SELECT
 
@@ -3004,6 +3176,11 @@ UPDATE superset_ecosia_site_registration_unregistered_farmers
 SET test = 'no'
 WHERE test = 'This is real, valid data'
 OR test = '';'''
+
+conn.commit()
+
+create_a49 = '''CREATE TABLE superset_ecosia_contract_overview
+AS SELECT * FROM CALC_TAB_tree_submissions_per_contract;'''
 
 conn.commit()
 
@@ -3205,7 +3382,7 @@ GRANT SELECT ON TABLE superset_ecosia_tree_registration_light TO ecosia_superset
 GRANT SELECT ON TABLE superset_ecosia_tree_monitoring_photos TO ecosia_superset;
 GRANT SELECT ON TABLE superset_ecosia_tree_distribution_unregistered_farmers TO ecosia_superset;
 GRANT SELECT ON TABLE superset_ecosia_site_registration_unregistered_farmers TO ecosia_superset;
-
+GRANT SELECT ON TABLE superset_ecosia_contract_overview TO ecosia_superset;
 
 DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_nursery_registration;
 DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_tree_registration;
@@ -3225,6 +3402,7 @@ DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_tree_registratio
 DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_tree_monitoring_photos;
 DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_tree_distribution_unregistered_farmers;
 DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_site_registration_unregistered_farmers;
+DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_contract_overview;
 
 ALTER TABLE superset_ecosia_nursery_registration enable ROW LEVEL SECURITY;
 ALTER TABLE superset_ecosia_tree_registration enable ROW LEVEL SECURITY;
@@ -3244,6 +3422,7 @@ ALTER TABLE superset_ecosia_tree_registration_light enable ROW LEVEL SECURITY;
 ALTER TABLE superset_ecosia_tree_monitoring_photos enable ROW LEVEL SECURITY;
 ALTER TABLE superset_ecosia_tree_distribution_unregistered_farmers enable ROW LEVEL SECURITY;
 ALTER TABLE superset_ecosia_site_registration_unregistered_farmers enable ROW LEVEL SECURITY;
+ALTER TABLE superset_ecosia_contract_overview enable ROW LEVEL SECURITY;
 
 CREATE POLICY ecosia_superset_policy ON superset_ecosia_nursery_registration TO ecosia_superset USING (true);
 CREATE POLICY ecosia_superset_policy ON superset_ecosia_tree_registration TO ecosia_superset USING (true);
@@ -3262,7 +3441,8 @@ CREATE POLICY ecosia_superset_policy ON superset_ecosia_geolocations TO ecosia_s
 CREATE POLICY ecosia_superset_policy ON superset_ecosia_tree_registration_light TO ecosia_superset USING (true);
 CREATE POLICY ecosia_superset_policy ON superset_ecosia_tree_monitoring_photos TO ecosia_superset USING (true);
 CREATE POLICY ecosia_superset_policy ON superset_ecosia_tree_distribution_unregistered_farmers TO ecosia_superset USING (true);
-CREATE POLICY ecosia_superset_policy ON superset_ecosia_site_registration_unregistered_farmers TO ecosia_superset USING (true);'''
+CREATE POLICY ecosia_superset_policy ON superset_ecosia_site_registration_unregistered_farmers TO ecosia_superset USING (true);
+CREATE POLICY ecosia_superset_policy ON superset_ecosia_contract_overview TO ecosia_superset USING (true);'''
 
 conn.commit()
 
@@ -3339,6 +3519,7 @@ cur.execute(create_a45)
 cur.execute(create_a46)
 cur.execute(create_a47)
 cur.execute(create_a48)
+cur.execute(create_a49)
 
 cur.execute(create_a17_mkec)
 cur.execute(create_a18_fdia)
