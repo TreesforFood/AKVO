@@ -1301,8 +1301,8 @@ GROUP BY akvo_tree_registration_areas_updated.contract_number,
 CTE_registered_tree_number_monitored_sites.total_registered_trees_on_monitored_sites),
 
 CTE_monitored_tree_number_monitored_sites AS (SELECT contract_number,
-SUM(nr_trees_monitored) AS number_trees_monitored,
-SUM(calc_area) AS monitored_ha,
+--SUM(nr_trees_monitored) AS number_trees_monitored,
+SUM(calc_area) AS monitored_ha_in_last_180_days,
 ROUND(AVG(perc_trees_survived),1) AS avg_perc_tree_survival
 FROM (
 SELECT contract_number, perc_trees_survived, calc_area, procedure, label_strata, nr_trees_monitored,
@@ -1411,13 +1411,10 @@ GROUP BY CTE_calculate_extrapolated_tree_number_site_level.contract_number)
 	CTE_total_tree_registrations."Nr of sites registered" AS "Total number of planting sites registered",
 	CTE_total_tree_registrations."Registered tree number" AS "Total number of trees registered",
 	CTE_total_tree_registrations."Latest submitted registration",
-	-- CHANGE BELOW TO PERCENTAGES. MORE MEANINGFULL
-	--cte_registered_tree_number_monitored_sites.total_registered_trees_on_monitored_sites AS "% of registered trees monitored by partner",
-	CTE_only_monitorings."total nr of monitoring submissions",
 	CTE_only_audits."total nr of audit submissions",
 	CTE_tree_monitoring.nr_sites_monitored_audited AS "Number of sites monitored/audited at least 1 time",
 	CTE_tree_monitoring."Latest submitted monitoring or audit",
-	CTE_monitored_tree_number_monitored_sites.monitored_ha,
+	CTE_monitored_tree_number_monitored_sites.monitored_ha_in_last_180_days,
 	CTE_percentage_monitored_trees."percentage of registered trees monitored by partner",
 	CTE_calculate_monitoring_audit_results.weighted_avg_perc_tree_survival,
 	CTE_calculate_extrapolated_tree_number_contract_level.extrapolated_tree_number_contract_level,
@@ -3383,6 +3380,7 @@ GRANT SELECT ON TABLE superset_ecosia_tree_monitoring_photos TO ecosia_superset;
 GRANT SELECT ON TABLE superset_ecosia_tree_distribution_unregistered_farmers TO ecosia_superset;
 GRANT SELECT ON TABLE superset_ecosia_site_registration_unregistered_farmers TO ecosia_superset;
 GRANT SELECT ON TABLE superset_ecosia_contract_overview TO ecosia_superset;
+GRANT SELECT ON TABLE superset_ecosia_new_devices TO ecosia_superset;
 
 DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_nursery_registration;
 DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_tree_registration;
@@ -3403,6 +3401,7 @@ DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_tree_monitoring_
 DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_tree_distribution_unregistered_farmers;
 DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_site_registration_unregistered_farmers;
 DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_contract_overview;
+DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_new_devices;
 
 ALTER TABLE superset_ecosia_nursery_registration enable ROW LEVEL SECURITY;
 ALTER TABLE superset_ecosia_tree_registration enable ROW LEVEL SECURITY;
@@ -3423,6 +3422,7 @@ ALTER TABLE superset_ecosia_tree_monitoring_photos enable ROW LEVEL SECURITY;
 ALTER TABLE superset_ecosia_tree_distribution_unregistered_farmers enable ROW LEVEL SECURITY;
 ALTER TABLE superset_ecosia_site_registration_unregistered_farmers enable ROW LEVEL SECURITY;
 ALTER TABLE superset_ecosia_contract_overview enable ROW LEVEL SECURITY;
+ALTER TABLE superset_ecosia_new_devices enable ROW LEVEL SECURITY;
 
 CREATE POLICY ecosia_superset_policy ON superset_ecosia_nursery_registration TO ecosia_superset USING (true);
 CREATE POLICY ecosia_superset_policy ON superset_ecosia_tree_registration TO ecosia_superset USING (true);
@@ -3442,7 +3442,8 @@ CREATE POLICY ecosia_superset_policy ON superset_ecosia_tree_registration_light 
 CREATE POLICY ecosia_superset_policy ON superset_ecosia_tree_monitoring_photos TO ecosia_superset USING (true);
 CREATE POLICY ecosia_superset_policy ON superset_ecosia_tree_distribution_unregistered_farmers TO ecosia_superset USING (true);
 CREATE POLICY ecosia_superset_policy ON superset_ecosia_site_registration_unregistered_farmers TO ecosia_superset USING (true);
-CREATE POLICY ecosia_superset_policy ON superset_ecosia_contract_overview TO ecosia_superset USING (true);'''
+CREATE POLICY ecosia_superset_policy ON superset_ecosia_contract_overview TO ecosia_superset USING (true);
+CREATE POLICY ecosia_superset_policy ON superset_ecosia_new_devices TO ecosia_superset USING (true);'''
 
 conn.commit()
 
