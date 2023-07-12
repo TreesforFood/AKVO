@@ -7,8 +7,6 @@ import geodaisy.converters as convert
 from area import area
 import os
 
-config = Config()
-
 #form_monitoring_tree = 'https://api-auth0.akvo.org/flow/orgs/ecosia/form_instances?survey_id=31840001&form_id=11980001'
 devices_api = 'https://api-auth0.akvo.org/flow/orgs/ecosia/devices'
 
