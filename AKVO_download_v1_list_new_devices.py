@@ -38,7 +38,6 @@ counting_pages = 0
 # Add other next-URL's to the list of registration forms
 for all_pages in url_list:
     counting_pages = counting_pages + 1
-    start = time.time()
     print("URL retrieved for listing: ", all_pages)
     print('Total processed urls = ', counting_pages)
     load_page = requests.get(all_pages, headers=headers).content
@@ -56,10 +55,6 @@ for all_pages in url_list:
     else:
         url_subseq_page = json_instance.get('nextPageUrl')
         url_list.append(url_subseq_page)
-        end = time.time()
-        #print("end time to collect urls: ", end)
-        if (end - start) > 60:
-            print("It seems that the script hangs too long")
 
 def left(var, amount):
     return var[:amount]
@@ -70,16 +65,12 @@ def mid(var,begin,end):
 count_pages_registration_data = 0
 
 for all_data in url_list:
-    start = time.time()
     load_page = requests.get(all_data, headers=headers).content
     page_decode = load_page.decode()
     json_dict = json.loads(page_decode)
     count_page = count_pages_registration_data + 1
     print("Nr. processed pages registration data: ", count_page)
-    end = time.time()
-    #print(json_dict)
-    if (end - start) > 60:
-        print("It seems that the script hangs too long")
+
 
 #connect to Postgresql database
 conn = psycopg2.connect(os.environ["DATABASE_URL"], sslmode='require')
