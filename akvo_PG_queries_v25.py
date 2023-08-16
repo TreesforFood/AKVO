@@ -3475,12 +3475,28 @@ GRANT USAGE ON SCHEMA PUBLIC TO ecosia;
 GRANT USAGE ON SCHEMA HEROKU_EXT TO ecosia;
 
 GRANT SELECT ON TABLE akvo_tree_registration_areas_updated TO ecosia;
+GRANT SELECT ON TABLE akvo_tree_area_monitoring TO ecosia;
+GRANT SELECT ON TABLE akvo_nursery_registration TO ecosia;
+GRANT SELECT ON TABLE akvo_nursery_monitoring TO ecosia;
+GRANT SELECT ON TABLE akvo_tree_photo_registration TO ecosia;
 
 DROP POLICY IF EXISTS ecosia_policy ON akvo_tree_registration_areas_updated;
+DROP POLICY IF EXISTS ecosia_policy ON akvo_tree_area_monitoring;
+DROP POLICY IF EXISTS ecosia_policy ON akvo_nursery_registration;
+DROP POLICY IF EXISTS ecosia_policy ON akvo_nursery_monitoring;
+DROP POLICY IF EXISTS ecosia_policy ON akvo_tree_photo_registration;
 
 ALTER TABLE akvo_tree_registration_areas_updated enable ROW LEVEL SECURITY;
+ALTER TABLE akvo_tree_area_monitoring enable ROW LEVEL SECURITY;
+ALTER TABLE akvo_nursery_registration enable ROW LEVEL SECURITY;
+ALTER TABLE akvo_nursery_monitoring enable ROW LEVEL SECURITY;
+ALTER TABLE akvo_tree_photo_registration enable ROW LEVEL SECURITY;
 
-CREATE POLICY ecosia_policy ON akvo_tree_registration_areas_updated TO ecosia USING (true);'''
+CREATE POLICY ecosia_policy ON akvo_tree_registration_areas_updated TO ecosia USING (true);
+CREATE POLICY ecosia_policy ON akvo_tree_area_monitoring TO ecosia USING (true);
+CREATE POLICY ecosia_policy ON akvo_nursery_registration TO ecosia USING (true);
+CREATE POLICY ecosia_policy ON akvo_nursery_monitoring TO ecosia USING (true);
+CREATE POLICY ecosia_policy ON akvo_tree_photo_registration TO ecosia USING (true);'''
 
 conn.commit()
 
