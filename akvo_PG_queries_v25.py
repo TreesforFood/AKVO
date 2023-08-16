@@ -3467,6 +3467,24 @@ CREATE POLICY s4g_ecosia_policy ON CALC_TAB_monitoring_calculations_per_site TO 
 
 conn.commit()
 
+
+create_a22_ecosia_viewing = '''
+REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA public FROM ecosia;
+
+GRANT USAGE ON SCHEMA PUBLIC TO ecosia;
+GRANT USAGE ON SCHEMA HEROKU_EXT TO ecosia;
+
+GRANT SELECT ON TABLE akvo_tree_registration_areas_updated TO ecosia;
+
+DROP POLICY IF EXISTS ecosia_policy ON akvo_tree_registration_areas_updated;
+
+ALTER TABLE akvo_tree_registration_areas_updated enable ROW LEVEL SECURITY;
+
+CREATE POLICY ecosia_policy ON akvo_tree_registration_areas_updated TO ecosia USING (true);'''
+
+conn.commit()
+
+
 # Execute drop tables
 cur.execute(drop_tables)
 conn.commit()
@@ -3526,6 +3544,7 @@ cur.execute(create_a17_mkec)
 cur.execute(create_a18_fdia)
 cur.execute(create_a20_ecosia_superset)
 cur.execute(create_a21_s4g)
+cur.execute(create_a22_ecosia_viewing)
 
 conn.commit()
 
