@@ -604,7 +604,7 @@ akvo_tree_registration_areas_updated.tree_number AS registered_tree_number,
 CASE
 WHEN table_label_strata.method_selection = 'Tree count' AND SUM(AKVO_Tree_external_audits_counts.number_species) NOTNULL
 THEN ROUND(SUM(AKVO_Tree_external_audits_counts.number_species),0)
-ELSE ROUND(SUM(AKVO_Tree_external_audits_areas.audit_reported_trees),0)
+ELSE ROUND(AKVO_Tree_external_audits_areas.audit_reported_trees,0)
 END AS nr_trees_monitored,
 
 0 AS nr_samples_pcq_audit,
@@ -647,7 +647,8 @@ submittors_audit.submitter,
 akvo_tree_registration_areas_updated.contract_number,
 akvo_tree_registration_areas_updated.id_planting_site,
 akvo_tree_registration_areas_updated.country,
-AKVO_Tree_external_audits_areas.display_name),
+AKVO_Tree_external_audits_areas.display_name,
+AKVO_Tree_external_audits_areas.audit_reported_trees),
 
 -- Add the POLYGON results from registrations to the upper table so that the initial registered tree numbers are integrated
 -- including a '0' value for strata '0' (initial tree number). Only for polygons
