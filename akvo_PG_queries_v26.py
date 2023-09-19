@@ -1291,7 +1291,7 @@ CTE_contract_level_monitoring_audit_results_t1 AS (SELECT
 table_a.contract_number,
 ROUND(SUM(perc_trees_survived * registered_tree_number)/SUM(registered_tree_number),1) AS weighted_avg_perc_tree_survival_t1,
 COUNT(*) AS "number of sites monitored by partner in t=1",
-ROUND(COUNT(*)*1.00/table_b.total_nr_planting_sites_per_contract*1.00*100,0) AS "percentage of sites monitored by partner in t=1",
+ROUND(COUNT(*)*1.00/table_b.total_nr_planting_sites_per_contract*1.00*100,2) AS "percentage of sites monitored by partner in t=1",
 ROUND(SUM(registered_tree_number::decimal)/NULLIF(table_b.total_nr_trees_registered_per_contract::decimal,0)*100,2) AS "percentage of trees monitored/audited in t=1",
 ROUND(SUM(table_a.avg_tree_height::decimal*registered_tree_number)/NULLIF(SUM(registered_tree_number),0),1) AS "weighted avg tree_height in t1"
 FROM CTE_ranking_monitoring_audit_method AS table_a
@@ -1323,7 +1323,7 @@ CTE_contract_level_monitoring_audit_results_t2 AS (SELECT
 table_a.contract_number,
 ROUND(SUM(perc_trees_survived * registered_tree_number)/SUM(registered_tree_number),1) AS weighted_avg_perc_tree_survival_t2,
 COUNT(*) AS "number of sites monitored by partner in t=2",
-ROUND(COUNT(*)*1.00/table_b.total_nr_planting_sites_per_contract*1.00*100,0) AS "percentage of sites monitored by partner in t=2",
+ROUND(COUNT(*)*1.00/table_b.total_nr_planting_sites_per_contract*1.00*100,2) AS "percentage of sites monitored by partner in t=2",
 ROUND(SUM(registered_tree_number::decimal)/NULLIF(table_b.total_nr_trees_registered_per_contract::decimal,0)*100,2) AS "percentage of trees monitored/audited in t=2",
 ROUND(SUM(table_a.avg_tree_height::decimal*registered_tree_number)/NULLIF(SUM(registered_tree_number),0),1) AS "weighted avg tree_height in t2"
 FROM CTE_ranking_monitoring_audit_method AS table_a
@@ -1355,7 +1355,7 @@ CTE_contract_level_monitoring_audit_results_t3 AS (SELECT
 table_a.contract_number,
 ROUND(SUM(perc_trees_survived * registered_tree_number)/SUM(registered_tree_number),0) AS weighted_avg_perc_tree_survival_t3,
 COUNT(*) AS "number of sites monitored by partner in t=3",
-ROUND(COUNT(*)*1.00/table_b.total_nr_planting_sites_per_contract*1.00*100,0) AS "percentage of sites monitored by partner in t=3",
+ROUND(COUNT(*)*1.00/table_b.total_nr_planting_sites_per_contract*1.00*100,2) AS "percentage of sites monitored by partner in t=3",
 ROUND(SUM(registered_tree_number::decimal)/NULLIF(table_b.total_nr_trees_registered_per_contract::decimal,0)*100,2) AS "percentage of trees monitored/audited in t=3",
 ROUND(SUM(table_a.avg_tree_height::decimal*registered_tree_number)/NULLIF(SUM(registered_tree_number),0),1) AS "weighted avg tree_height in t3"
 FROM CTE_ranking_monitoring_audit_method AS table_a
@@ -1448,8 +1448,8 @@ WHEN CTE_site_level_monitoring_audit_results_t1.identifier_akvo = akvo_tree_regi
 THEN CTE_site_level_monitoring_audit_results_t1.nr_trees_monitored_t1
 WHEN CTE_site_level_monitoring_audit_results_t1.identifier_akvo ISNULL AND CTE_contract_level_monitoring_audit_results_t1.weighted_avg_perc_tree_survival_t1 NOTNULL
 THEN ROUND(akvo_tree_registration_areas_updated.tree_number * CTE_contract_level_monitoring_audit_results_t1.weighted_avg_perc_tree_survival_t1/100,0)
--- For some contracts, 0 sites have been monitored yet. So there is no weighted average calculated. We put survival percentage on 50% in year 3(?)
-ELSE ROUND(akvo_tree_registration_areas_updated.tree_number * 0.5, 0) -- Put to 50% if no monitoring happened at all for this contract? And do that here or in the CTE_contract_level_monitoring_audit_results_t2 table?
+-- For some contracts, 0 sites have been monitored yet. So there is no weighted average calculated. We put survival percentage oto NULL in year 1(?)
+ELSE NULL -- Put to NULL if no monitoring happened at all for this contract? And do that here or in the CTE_contract_level_monitoring_audit_results_t2 table?
 END AS extrapolated_tree_number_per_site_t1
 FROM akvo_tree_registration_areas_updated
 LEFT JOIN CTE_site_level_monitoring_audit_results_t1
@@ -1471,8 +1471,8 @@ WHEN CTE_site_level_monitoring_audit_results_t2.identifier_akvo = akvo_tree_regi
 THEN CTE_site_level_monitoring_audit_results_t2.nr_trees_monitored_t2
 WHEN CTE_site_level_monitoring_audit_results_t2.identifier_akvo ISNULL AND CTE_contract_level_monitoring_audit_results_t2.weighted_avg_perc_tree_survival_t2 NOTNULL
 THEN ROUND(akvo_tree_registration_areas_updated.tree_number * CTE_contract_level_monitoring_audit_results_t2.weighted_avg_perc_tree_survival_t2/100,0)
--- For some contracts, 0 sites have been monitored yet. So there is no weighted average calculated. We put survival percentage on 50% in year 3(?)
-ELSE ROUND(akvo_tree_registration_areas_updated.tree_number * 0.5, 0) -- Put to 50% if no monitoring happened at all for this contract? And do that here or in the CTE_contract_level_monitoring_audit_results_t2 table?
+-- For some contracts, 0 sites have been monitored yet. So there is no weighted average calculated. We put survival percentage on NULL in year 2(?)
+ELSE NULL -- Put to NULL if no monitoring happened at all for this contract? And do that here or in the CTE_contract_level_monitoring_audit_results_t2 table?
 END AS extrapolated_tree_number_per_site_t2
 
 FROM akvo_tree_registration_areas_updated
@@ -1497,8 +1497,8 @@ WHEN CTE_site_level_monitoring_audit_results_t3.identifier_akvo = akvo_tree_regi
 THEN CTE_site_level_monitoring_audit_results_t3.nr_trees_monitored_t3
 WHEN CTE_site_level_monitoring_audit_results_t3.identifier_akvo ISNULL AND CTE_contract_level_monitoring_audit_results_t3.weighted_avg_perc_tree_survival_t3 NOTNULL
 THEN ROUND(akvo_tree_registration_areas_updated.tree_number * CTE_contract_level_monitoring_audit_results_t3.weighted_avg_perc_tree_survival_t3/100,0)
--- For some contracts, 0 sites have been monitored yet. So there is no weighted average calculated. We put survival percentage on 50% in year 3(?)
-ELSE ROUND(akvo_tree_registration_areas_updated.tree_number * 0.5, 0) -- Put to 50% if no monitoring happened at all for this contract? And do that here or in the CTE_contract_level_monitoring_audit_results_t3 table?
+-- For some contracts, 0 sites have been monitored yet. So there is no weighted average calculated. We put survival percentage to NULL in year 3(?)
+ELSE NULL -- Put to NULL if no monitoring happened at all for this contract? And do that here or in the CTE_contract_level_monitoring_audit_results_t3 table?
 END AS extrapolated_tree_number_per_site_t3
 
 FROM akvo_tree_registration_areas_updated
