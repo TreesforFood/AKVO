@@ -1559,19 +1559,19 @@ END AS "percentage of trees monitored/audited in t=1",
 CASE
 WHEN CTE_contract_level_monitoring_audit_results_t1.weighted_avg_perc_tree_survival_t1 NOTNULL
 THEN CTE_contract_level_monitoring_audit_results_t1.weighted_avg_perc_tree_survival_t1
-ELSE 0
+ELSE NULL
 END AS "weighted avg perc tree_survival in t=1",
 
 CASE
 WHEN CTE_calculate_extrapolated_tree_number_contract_level_t1."total tree number in t=1" NOTNULL
 THEN CTE_calculate_extrapolated_tree_number_contract_level_t1."total tree number in t=1"
-ELSE 0
+ELSE NULL
 END AS "total tree number in t=1",
 
 CASE
 WHEN CTE_contract_level_monitoring_audit_results_t1."weighted avg tree_height in t1" NOTNULL
 THEN CTE_contract_level_monitoring_audit_results_t1."weighted avg tree_height in t1"
-ELSE 0
+ELSE NULL
 END AS "weighted avg tree_height in t1",
 
 CASE
@@ -1595,19 +1595,19 @@ END AS "percentage of trees monitored/audited in t=2",
 CASE
 WHEN CTE_contract_level_monitoring_audit_results_t2.weighted_avg_perc_tree_survival_t2 NOTNULL
 THEN CTE_contract_level_monitoring_audit_results_t2.weighted_avg_perc_tree_survival_t2
-ELSE 0
+ELSE NULL
 END AS "weighted avg perc tree_survival in t=2",
 
 CASE
 WHEN CTE_calculate_extrapolated_tree_number_contract_level_t2."total tree number in t=2" NOTNULL
 THEN CTE_calculate_extrapolated_tree_number_contract_level_t2."total tree number in t=2"
-ELSE 0
+ELSE NULL
 END AS "total tree number in t=2",
 
 CASE
 WHEN CTE_contract_level_monitoring_audit_results_t2."weighted avg tree_height in t2" NOTNULL
 THEN CTE_contract_level_monitoring_audit_results_t2."weighted avg tree_height in t2"
-ELSE 0
+ELSE NULL
 END AS "weighted avg tree_height in t=2",
 
 CASE
@@ -1631,19 +1631,19 @@ END AS "percentage of trees monitored/audited in t=>3",
 CASE
 WHEN CTE_contract_level_monitoring_audit_results_t3.weighted_avg_perc_tree_survival_t3 NOTNULL
 THEN CTE_contract_level_monitoring_audit_results_t3.weighted_avg_perc_tree_survival_t3
-ELSE 0
+ELSE NULL
 END AS "weighted avg perc tree_survival in t=>3",
 
 CASE
 WHEN CTE_calculate_extrapolated_tree_number_contract_level_t3."total tree number in t=3" NOTNULL
 THEN CTE_calculate_extrapolated_tree_number_contract_level_t3."total tree number in t=3"
-ELSE 0
+ELSE NULL
 END AS "total tree number in t=>3",
 
 CASE
 WHEN CTE_contract_level_monitoring_audit_results_t3."weighted avg tree_height in t3" NOTNULL
 THEN CTE_contract_level_monitoring_audit_results_t3."weighted avg tree_height in t3"
-ELSE 0
+ELSE NULL
 END AS "weighted avg tree_height in t=>3",
 
 CTE_tree_monitoring.nr_sites_monitored_audited AS "Total number of sites monitored/audited at least 1 time",
