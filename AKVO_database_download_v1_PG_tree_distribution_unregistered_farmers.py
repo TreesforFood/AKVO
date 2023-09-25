@@ -47,8 +47,6 @@ for all_pages in url_list:
     else:
         url_subseq_page = json_instance.get('nextPageUrl')
         url_list.append(url_subseq_page)
-        if (end - start) > 60:
-            print("It seems that the script hangs too long")
 
 
 #connect to Postgresql database
@@ -102,12 +100,6 @@ for all_data in url_list:
     json_dict = json.loads(page_decode)
     count_page = count_pages_registration_data + 1
     print("Nr. processed pages registration data: ", count_page)
-    if (end - start) > 60:
-        #message_load_registration_data = client.messages.create(body = "It seems that the script hangs too long",
-        #from_ = "+16614853992", to = "+310640569655")
-        #message_load_registration_data.sid
-        print("It seems that the script hangs too long")
-
 
     def left(var, amount):
         return var[:amount]
@@ -312,8 +304,6 @@ for all_pages in url_list_m:
     else:
         url_subseq_page = json_instance.get('nextPageUrl')
         url_list.append(url_subseq_page)
-        if (end - start) > 60:
-            print("It seems that the script hangs too long")
 
 count_pages_monitoring_data = 0
 
@@ -324,8 +314,6 @@ for all_data_m in url_list_m:
     json_dict_m = json.loads(page_decode)
     count_page_m = count_pages_monitoring_data + 1
     print("Nr. processed pages registration data: ", count_page)
-    if (end - start) > 60:
-        print("It seems that the script hangs too long")
 
     for site_registration_distributed_trees in json_dict_m['formInstances']:
 
