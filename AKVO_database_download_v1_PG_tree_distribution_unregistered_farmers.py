@@ -31,8 +31,6 @@ url_list.append(form_site_audits) # this one is needed to add the first url to t
 
 # Add other next-URL's to the list of registration forms
 for all_pages in url_list:
-    #counting_pages = counting_pages + 1
-    start = time.time()
     print("URL retrieved for listing: ", all_pages)
     print('Total processed urls = ', counting_pages)
     load_page = requests.get(all_pages, headers=headers).content
@@ -50,7 +48,6 @@ for all_pages in url_list:
     else:
         url_subseq_page = json_instance.get('nextPageUrl')
         url_list.append(url_subseq_page)
-        end = time.time()
         if (end - start) > 60:
             print("It seems that the script hangs too long")
 
@@ -101,13 +98,11 @@ def mid(var,begin,end):
 count_pages_registration_data = 0
 
 for all_data in url_list:
-    start = time.time()
     load_page = requests.get(all_data, headers=headers).content
     page_decode = load_page.decode()
     json_dict = json.loads(page_decode)
     count_page = count_pages_registration_data + 1
     print("Nr. processed pages registration data: ", count_page)
-    end = time.time()
     if (end - start) > 60:
         #message_load_registration_data = client.messages.create(body = "It seems that the script hangs too long",
         #from_ = "+16614853992", to = "+310640569655")
@@ -303,7 +298,6 @@ counting_pages = 0
 # Add other next-URL's to the list of registration forms
 for all_pages in url_list_m:
     counting_pages = counting_pages + 1
-    start = time.time()
     print("URL retrieved for listing: ", all_pages)
     print('Total processed urls = ', counting_pages)
     load_page = requests.get(all_pages, headers=headers).content
@@ -321,7 +315,6 @@ for all_pages in url_list_m:
     else:
         url_subseq_page = json_instance.get('nextPageUrl')
         url_list.append(url_subseq_page)
-        end = time.time()
         if (end - start) > 60:
             print("It seems that the script hangs too long")
 
@@ -329,13 +322,11 @@ count_pages_monitoring_data = 0
 
 
 for all_data_m in url_list_m:
-    start = time.time()
     load_page = requests.get(all_data_m, headers=headers).content
     page_decode = load_page.decode()
     json_dict_m = json.loads(page_decode)
     count_page_m = count_pages_monitoring_data + 1
     print("Nr. processed pages registration data: ", count_page)
-    end = time.time()
     if (end - start) > 60:
         print("It seems that the script hangs too long")
 
