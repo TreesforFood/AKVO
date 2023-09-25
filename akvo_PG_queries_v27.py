@@ -3368,7 +3368,7 @@ OR test = 'xxxxx';
 
 UPDATE superset_ecosia_tree_distribution_unregistered_farmers
 SET test = 'no'
-WHERE OR test = ''
+WHERE test = ''
 OR test = 'This is real, valid data';'''
 
 conn.commit()
