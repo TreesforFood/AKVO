@@ -7,6 +7,8 @@ import geodaisy.converters as convert
 from area import area
 import os
 
+#config = Config()
+
 # get the token from AKVO
 data = {"client_id": os.environ["CLIENT_ID"], "username" : os.environ["USERNAME"], "password": os.environ["PASSWORD"], "grant_type": os.environ["GRANT_TYPE"], "scope": os.environ["SCOPE"]}
 response = requests.post("https://akvofoundation.eu.auth0.com/oauth/token", data=data)
@@ -22,7 +24,8 @@ else: # in case of error from AKVO server
 
 headers = {'Authorization': "Bearer {}".format(token_id), 'Accept': 'application/vnd.akvo.flow.v2+json'}
 
-form_site_audits = 'https://api-auth0.akvo.org/flow/orgs/ecosia/form_instances?survey_id=31840001&form_id=141500001'
+form_response_tree_distribution = 'https://api-auth0.akvo.org/flow/orgs/ecosia/form_instances?survey_id=215246811&form_id=252327848&page_size=250'
+form_response_tree_registration = 'https://api-auth0.akvo.org/flow/orgs/ecosia/form_instances?survey_id=215246811&form_id=258280042&page_size=250'
 
 # Create list with first url from registration form
 url_list = list()
