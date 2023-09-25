@@ -1353,7 +1353,7 @@ table_b.total_nr_planting_sites_per_contract),
 -- This table calculates results on contract for T=3
 CTE_contract_level_monitoring_audit_results_t3 AS (SELECT
 table_a.contract_number,
-ROUND(SUM(perc_trees_survived * registered_tree_number)/SUM(registered_tree_number),0) AS weighted_avg_perc_tree_survival_t3,
+ROUND(SUM(perc_trees_survived * registered_tree_number)/SUM(registered_tree_number),2) AS weighted_avg_perc_tree_survival_t3,
 COUNT(*) AS "number of sites monitored by partner in t=3",
 ROUND(COUNT(*)*1.00/table_b.total_nr_planting_sites_per_contract*1.00*100,2) AS "percentage of sites monitored by partner in t=3",
 ROUND(SUM(registered_tree_number::decimal)/NULLIF(table_b.total_nr_trees_registered_per_contract::decimal,0)*100,2) AS "percentage of trees monitored/audited in t=3",
