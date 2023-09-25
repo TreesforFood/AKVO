@@ -29,7 +29,7 @@ form_response_tree_registration = 'https://api-auth0.akvo.org/flow/orgs/ecosia/f
 
 # Create list with first url from registration form
 url_list = list()
-url_list.append(form_site_audits) # this one is needed to add the first url to the url list
+url_list.append(form_response_tree_distribution) # this one is needed to add the first url to the url list
 
 # Add other next-URL's to the list of registration forms
 for all_pages in url_list:
