@@ -31,7 +31,7 @@ url_list.append(form_site_audits) # this one is needed to add the first url to t
 
 # Add other next-URL's to the list of registration forms
 for all_pages in url_list:
-    counting_pages = counting_pages + 1
+    #counting_pages = counting_pages + 1
     start = time.time()
     print("URL retrieved for listing: ", all_pages)
     print('Total processed urls = ', counting_pages)
