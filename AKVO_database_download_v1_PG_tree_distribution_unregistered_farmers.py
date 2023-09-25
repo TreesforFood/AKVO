@@ -32,7 +32,6 @@ url_list.append(form_site_audits) # this one is needed to add the first url to t
 # Add other next-URL's to the list of registration forms
 for all_pages in url_list:
     print("URL retrieved for listing: ", all_pages)
-    print('Total processed urls = ', counting_pages)
     load_page = requests.get(all_pages, headers=headers).content
     page_decode = load_page.decode()
     try:
@@ -293,13 +292,11 @@ for all_data in url_list:
 url_list_m = list()
 url_list_m.append(form_response_tree_registration) # this one is needed to add the first url to the url list
 
-counting_pages = 0
+
 
 # Add other next-URL's to the list of registration forms
 for all_pages in url_list_m:
-    counting_pages = counting_pages + 1
     print("URL retrieved for listing: ", all_pages)
-    print('Total processed urls = ', counting_pages)
     load_page = requests.get(all_pages, headers=headers).content
     page_decode = load_page.decode()
     try:
