@@ -3646,7 +3646,7 @@ GRANT SELECT ON TABLE superset_ecosia_s4g_deforestation TO ecosia_superset;
 GRANT SELECT ON TABLE superset_ecosia_geolocations TO ecosia_superset;
 GRANT SELECT ON TABLE superset_ecosia_tree_registration_light TO ecosia_superset;
 GRANT SELECT ON TABLE superset_ecosia_tree_monitoring_photos TO ecosia_superset;
-GRANT SELECT ON TABLE superset_ecosia_tree_distribution_unregistered_farmers TO ecosia_superset;
+--GRANT SELECT ON TABLE superset_ecosia_tree_distribution_unregistered_farmers TO ecosia_superset;
 GRANT SELECT ON TABLE superset_ecosia_site_registration_unregistered_farmers TO ecosia_superset;
 GRANT SELECT ON TABLE superset_ecosia_contract_overview TO ecosia_superset;
 GRANT SELECT ON TABLE superset_ecosia_new_devices TO ecosia_superset;
@@ -3666,7 +3666,7 @@ DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_s4g_deforestatio
 DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_geolocations;
 DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_tree_registration_light;
 DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_tree_monitoring_photos;
-DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_tree_distribution_unregistered_farmers;
+--DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_tree_distribution_unregistered_farmers;
 DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_site_registration_unregistered_farmers;
 DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_contract_overview;
 DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_new_devices;
@@ -3686,7 +3686,7 @@ ALTER TABLE superset_ecosia_s4g_deforestation enable ROW LEVEL SECURITY;
 ALTER TABLE superset_ecosia_geolocations enable ROW LEVEL SECURITY;
 ALTER TABLE superset_ecosia_tree_registration_light enable ROW LEVEL SECURITY;
 ALTER TABLE superset_ecosia_tree_monitoring_photos enable ROW LEVEL SECURITY;
-ALTER TABLE superset_ecosia_tree_distribution_unregistered_farmers enable ROW LEVEL SECURITY;
+--ALTER TABLE superset_ecosia_tree_distribution_unregistered_farmers enable ROW LEVEL SECURITY;
 ALTER TABLE superset_ecosia_site_registration_unregistered_farmers enable ROW LEVEL SECURITY;
 ALTER TABLE superset_ecosia_contract_overview enable ROW LEVEL SECURITY;
 ALTER TABLE superset_ecosia_new_devices enable ROW LEVEL SECURITY;
@@ -3706,7 +3706,7 @@ CREATE POLICY ecosia_superset_policy ON superset_ecosia_s4g_deforestation TO eco
 CREATE POLICY ecosia_superset_policy ON superset_ecosia_geolocations TO ecosia_superset USING (true);
 CREATE POLICY ecosia_superset_policy ON superset_ecosia_tree_registration_light TO ecosia_superset USING (true);
 CREATE POLICY ecosia_superset_policy ON superset_ecosia_tree_monitoring_photos TO ecosia_superset USING (true);
-CREATE POLICY ecosia_superset_policy ON superset_ecosia_tree_distribution_unregistered_farmers TO ecosia_superset USING (true);
+--CREATE POLICY ecosia_superset_policy ON superset_ecosia_tree_distribution_unregistered_farmers TO ecosia_superset USING (true);
 CREATE POLICY ecosia_superset_policy ON superset_ecosia_site_registration_unregistered_farmers TO ecosia_superset USING (true);
 CREATE POLICY ecosia_superset_policy ON superset_ecosia_contract_overview TO ecosia_superset USING (true);
 CREATE POLICY ecosia_superset_policy ON superset_ecosia_new_devices TO ecosia_superset USING (true);'''
