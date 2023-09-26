@@ -3327,10 +3327,14 @@ LOWER(AKVO_tree_distribution_unregistered_farmers.country) AS country,
 AKVO_tree_distribution_unregistered_farmers.test,
 
 -- Create a unique code for filtering in superset, based on main organisation name
-CAST(CONCAT(
+CASE
+WHEN AKVO_tree_distribution_unregistered_farmers.organisation NOTNULL
+THEN CAST(CONCAT(
 	POWER(ASCII(LEFT(LOWER(AKVO_tree_distribution_unregistered_farmers.organisation),1)),3),
 	POWER(ASCII(LEFT(LOWER(AKVO_tree_distribution_unregistered_farmers.organisation),2)),2),
-	SQRT(POWER(ASCII(LEFT(LOWER(AKVO_tree_distribution_unregistered_farmers.organisation),3)),4))) AS NUMERIC) AS partnercode_main,
+	SQRT(POWER(ASCII(LEFT(LOWER(AKVO_tree_distribution_unregistered_farmers.organisation),3)),4))) AS NUMERIC)
+ELSE 0
+END AS partnercode_main,
 
 -- Create a unique code for filtering in superset, based on main sub-organisation name
 CASE
