@@ -3451,7 +3451,56 @@ OR test = 'This is real, valid data';'''
 conn.commit()
 
 create_a49 = '''CREATE TABLE superset_ecosia_contract_overview
-AS SELECT * FROM CALC_TAB_tree_submissions_per_contract;'''
+AS SELECT
+
+CALC_TAB_tree_submissions_per_contract.name_country,
+CALC_TAB_tree_submissions_per_contract.organisation,
+
+-- Create a unique code for filtering in superset, based on main organisation name
+CAST(CONCAT(
+	POWER(ASCII(LEFT(LOWER(CALC_TAB_tree_submissions_per_contract.organisation),1)),3),
+	POWER(ASCII(LEFT(LOWER(CALC_TAB_tree_submissions_per_contract.organisation),2)),2),
+	SQRT(POWER(ASCII(LEFT(LOWER(CALC_TAB_tree_submissions_per_contract.organisation),3)),4))) AS NUMERIC) AS partnercode_main,
+
+-- Create a unique code for filtering in superset, based on main sub-organisation name
+CASE
+WHEN POSITION('-' IN CALC_TAB_tree_submissions_per_contract.organisation) > 0
+THEN CAST(CONCAT(POWER(ASCII(RIGHT((LOWER(CALC_TAB_tree_submissions_per_contract.organisation)),
+			LENGTH(CALC_TAB_tree_submissions_per_contract.organisation) - POSITION('-' IN CALC_TAB_tree_submissions_per_contract.organisation) - 1)),3),
+		    POWER(ASCII(RIGHT((LOWER(CALC_TAB_tree_submissions_per_contract.organisation)),
+			LENGTH(CALC_TAB_tree_submissions_per_contract.organisation) - POSITION('-' IN CALC_TAB_tree_submissions_per_contract.organisation) - 2)),2),
+		   	POWER(ASCII(RIGHT((LOWER(CALC_TAB_tree_submissions_per_contract.organisation)),
+			LENGTH(CALC_TAB_tree_submissions_per_contract.organisation) - POSITION('-' IN CALC_TAB_tree_submissions_per_contract.organisation) - 3)),2)) AS NUMERIC)
+ELSE
+0
+END AS partnercode_sub,
+
+CALC_TAB_tree_submissions_per_contract."Contract number",
+CALC_TAB_tree_submissions_per_contract."Total number of planting sites registered at t=0",
+CALC_TAB_tree_submissions_per_contract."Total number of trees registered at t=0",
+CALC_TAB_tree_submissions_per_contract."Latest submitted registration at t=0",
+CALC_TAB_tree_submissions_per_contract."number of sites monitored/audited in t=1",
+CALC_TAB_tree_submissions_per_contract."percentage of sites monitored/audited in t=1",
+CALC_TAB_tree_submissions_per_contract."percentage of trees monitored/audited in t=1",
+CALC_TAB_tree_submissions_per_contract."weighted avg perc tree_survival in t=1",
+CALC_TAB_tree_submissions_per_contract."total tree number in t=1",
+CALC_TAB_tree_submissions_per_contract."weighted avg tree_height in t1",
+CALC_TAB_tree_submissions_per_contract."number of sites monitored/audited in t=2",
+CALC_TAB_tree_submissions_per_contract."percentage of sites monitored/audited in t=2",
+CALC_TAB_tree_submissions_per_contract."percentage of trees monitored/audited in t=2",
+CALC_TAB_tree_submissions_per_contract."weighted avg perc tree_survival in t=2",
+CALC_TAB_tree_submissions_per_contract."total tree number in t=2",
+CALC_TAB_tree_submissions_per_contract."weighted avg tree_height in t=2",
+CALC_TAB_tree_submissions_per_contract."number of sites monitored/audited in t=>3",
+CALC_TAB_tree_submissions_per_contract."percentage of sites monitored/audited in t=>3",
+CALC_TAB_tree_submissions_per_contract."percentage of trees monitored/audited in t=>3",
+CALC_TAB_tree_submissions_per_contract."weighted avg perc tree_survival in t=>3",
+CALC_TAB_tree_submissions_per_contract."total tree number in t=>3",
+CALC_TAB_tree_submissions_per_contract."weighted avg tree_height in t=>3",
+CALC_TAB_tree_submissions_per_contract."Total number of sites monitored/audited at least 1 time",
+CALC_TAB_tree_submissions_per_contract."Number of tree species registered"
+
+FROM CALC_TAB_tree_submissions_per_contract;'''
 
 conn.commit()
 
