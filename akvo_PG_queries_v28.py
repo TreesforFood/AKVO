@@ -3475,7 +3475,7 @@ ELSE
 0
 END AS partnercode_sub,
 
-CALC_TAB_tree_submissions_per_contract."Contract number",
+CALC_TAB_tree_submissions_per_contract."Contract number" AS contract_number,
 CALC_TAB_tree_submissions_per_contract."Total number of planting sites registered at t=0",
 CALC_TAB_tree_submissions_per_contract."Total number of trees registered at t=0",
 CALC_TAB_tree_submissions_per_contract."Latest submitted registration at t=0",
