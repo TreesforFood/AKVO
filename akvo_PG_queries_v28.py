@@ -732,12 +732,47 @@ SELECT * FROM monitoring_tree_numbers;'''
 conn.commit()
 
 
+# With this query we make sure that all photos (with a photo-id) get an 'https://akvoflow-201.s3.amazonaws.com/images' url for every photo (some in the API do not seem to have one)
 create_a3 = '''
-UPDATE akvo_tree_registration_photos
-SET photo_url = RIGHT(photo_url, strpos(reverse(photo_url),'/'));
+UPDATE akvo_tree_registration_areas_updated
+SET photo_owner = CASE
+WHEN photo_owner LIKE '%/%'
+THEN RIGHT(photo_owner, strpos(reverse(photo_owner),'/')-1)
+ELSE photo_owner
+END;
+
+UPDATE akvo_tree_registration_areas_updated
+SET photo_owner = CONCAT('https://akvoflow-201.s3.amazonaws.com/images/',photo_owner);
 
 UPDATE akvo_tree_registration_photos
-SET photo_url = CONCAT('https://akvoflow-201.s3.amazonaws.com/images',photo_url);'''
+SET photo_url = CASE
+WHEN photo_url LIKE '%/%'
+THEN RIGHT(photo_url, strpos(reverse(photo_url),'/')-1)
+ELSE photo_url
+END;
+
+UPDATE akvo_tree_registration_photos
+SET photo_url = CONCAT('https://akvoflow-201.s3.amazonaws.com/images/',photo_url);
+
+UPDATE AKVO_Tree_external_audits_photos
+SET url_photo = CASE
+WHEN url_photo LIKE '%/%'
+THEN RIGHT(url_photo, strpos(reverse(url_photo),'/')-1)
+ELSE url_photo
+END;
+
+UPDATE AKVO_Tree_external_audits_photos
+SET url_photo = CONCAT('https://akvoflow-201.s3.amazonaws.com/images/',url_photo);
+
+UPDATE akvo_tree_monitoring_photos
+SET photo_url = CASE
+WHEN photo_url LIKE '%/%'
+THEN RIGHT(photo_url, strpos(reverse(photo_url),'/')-1)
+ELSE photo_url
+END;
+
+UPDATE akvo_tree_monitoring_photos
+SET photo_url = CONCAT('https://akvoflow-201.s3.amazonaws.com/images/',photo_url);'''
 
 conn.commit()
 
