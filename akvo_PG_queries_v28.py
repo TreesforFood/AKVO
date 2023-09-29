@@ -742,7 +742,8 @@ ELSE photo_owner
 END;
 
 UPDATE akvo_tree_registration_areas_updated
-SET photo_owner = CONCAT('https://akvoflow-201.s3.amazonaws.com/images/',photo_owner);
+SET photo_owner = CONCAT('https://akvoflow-201.s3.amazonaws.com/images/',photo_owner)
+WHERE photo_owner NOTNULL;
 
 UPDATE akvo_tree_registration_photos
 SET photo_url = CASE
@@ -922,154 +923,122 @@ ORDER BY "Submission Date" desc;'''
 conn.commit()
 
 
-create_a6 = '''CREATE TABLE CALC_GEOM_PCQ_calculations_per_site_by_external_audit
-AS
-WITH species_audited AS (SELECT list.identifier_akvo,  COUNT(*) AS "Number of species audited", STRING_AGG(list.species,' | ') "Species audited"
-FROM (SELECT DISTINCT AKVO_Tree_external_audits_pcq.identifier_akvo, AKVO_Tree_external_audits_pcq.q1_spec
- AS species
-FROM AKVO_Tree_external_audits_pcq
-	  WHERE AKVO_Tree_external_audits_pcq.q1_spec <>''
-UNION
-SELECT DISTINCT AKVO_Tree_external_audits_pcq.identifier_akvo, AKVO_Tree_external_audits_pcq.q2_spec
-FROM AKVO_Tree_external_audits_pcq
-	  WHERE AKVO_Tree_external_audits_pcq.q2_spec <>''
-UNION
-SELECT DISTINCT AKVO_Tree_external_audits_pcq.identifier_akvo, AKVO_Tree_external_audits_pcq.q3_spec
-FROM AKVO_Tree_external_audits_pcq
-	  WHERE AKVO_Tree_external_audits_pcq.q3_spec <>''
-UNION
-SELECT DISTINCT AKVO_Tree_external_audits_pcq.identifier_akvo, AKVO_Tree_external_audits_pcq.q4_spec
-FROM AKVO_Tree_external_audits_pcq
-	 WHERE AKVO_Tree_external_audits_pcq.q4_spec <> '') AS list
-					 GROUP BY identifier_akvo),
-
-latest_monitoring_results AS (SELECT
-CALC_TAB_monitoring_calculations_per_site.identifier_akvo,
-
-MAX(CASE
-WHEN CALC_TAB_monitoring_calculations_per_site.label_strata >= 180
-THEN CALC_TAB_monitoring_calculations_per_site."Tree density (trees/ha)"
-END) as "Latest monitored tree density (trees/ha)",
-
-MAX(CASE
-WHEN CALC_TAB_monitoring_calculations_per_site.label_strata >= 180
-THEN CALC_TAB_monitoring_calculations_per_site."Percentage of survived trees"
-END) AS "Latest monitored survival percentage"
-
-FROM CALC_TAB_monitoring_calculations_per_site
-
-GROUP BY
-CALC_TAB_monitoring_calculations_per_site.identifier_akvo),
-
--- Get all PCQ distance values into 1 column in order to calculate the average
-merge_pcq AS (select
-identifier_akvo,
-Q1_dist AS pcq_results_merged
-FROM akvo_tree_external_audits_pcq
-UNION ALL
-Select identifier_akvo,	Q2_dist AS pcq_results_merged
-FROM akvo_tree_external_audits_pcq
-UNION ALL
-Select identifier_akvo, Q3_dist AS pcq_results_merged
-FROM akvo_tree_external_audits_pcq
-UNION ALL
-Select identifier_akvo, Q4_dist AS pcq_results_merged
-FROM akvo_tree_external_audits_pcq),
-
--- Remove outliers from values (zero's and > 1000)
-skipped_pcq_outliers AS (Select
-* FROM merge_pcq
-where merge_pcq.pcq_results_merged > 0 AND merge_pcq.pcq_results_merged < 1000),
-
-average_audited_tree_distance AS (SELECT skipped_pcq_outliers.identifier_akvo,
-AVG(skipped_pcq_outliers.pcq_results_merged) AS avg_audited_tree_distance
-FROM skipped_pcq_outliers
-GROUP BY skipped_pcq_outliers.identifier_akvo),
-
-auditors AS (SELECT identifier_akvo,  STRING_AGG(submitter,' | ') "Name auditor(s)"
-FROM AKVO_Tree_external_audits_areas
-GROUP BY identifier_akvo)
-
+create_a6 = '''
+-- Below we determine the trend (linear regression) for survival percentage and tree height by calculating the slope- and intercept values
+CREATE TABLE CALC_TAB_linear_regression_results AS WITH linear_regression_field_data AS (SELECT
+h.identifier_akvo,
+h.id_planting_site,
+table_g.maximum_label_strata,
+table_g.perc_trees_survived,
+table_g.avg_tree_height,
+h.slope_survival_perc,
+y_bar_max_survival_perc - x_bar_max * slope_survival_perc AS intercept_survival_perc,
+h.slope_avg_tree_height,
+y_bar_max_avg_tree_height - x_bar_max * slope_avg_tree_height AS intercept_avg_tree_height
+FROM (
 SELECT
-akvo_tree_registration_areas_updated.centroid_coord,
-akvo_tree_registration_areas_updated.identifier_akvo AS "Identifier AKVO",
-LOWER(akvo_tree_registration_areas_updated.organisation) AS "Name organisation",
-akvo_tree_registration_areas_updated.submitter AS "Submitter of registration data",
-auditors."Name auditor(s)",
-MAX(AKVO_Tree_external_audits_areas.submission) AS "Latest submission date audit",
-akvo_tree_registration_areas_updated.id_planting_site AS "ID planting site",
-akvo_tree_registration_areas_updated.planting_date AS "Planting date of site",
-akvo_tree_registration_areas_updated.estimated_area AS "Estimated area registered polygon",
-akvo_tree_registration_areas_updated.contract_number AS "Contract number",
-akvo_tree_registration_areas_updated.calc_area AS "Calculated area registered polygon",
-AKVO_Tree_external_audits_areas.calc_area AS "Calculated area of audit polygon",
-akvo_tree_registration_areas_updated.tree_number AS "Registered nr trees by partner",
+s.identifier_akvo,
+s.id_planting_site,
+SUM((label_strata - x_bar_label_strata) * (perc_trees_survived - y_bar_survival_perc)) / NULLIF(sum((label_strata - x_bar_label_strata) * (label_strata - x_bar_label_strata)),0) AS slope_survival_perc,
+SUM((label_strata - x_bar_label_strata) * (avg_tree_height - y_bar_avg_tree_height)) / NULLIF(sum((label_strata - x_bar_label_strata) * (label_strata - x_bar_label_strata)),0) AS slope_avg_tree_height,
+MAX(x_bar_label_strata) AS x_bar_max,
+MAX(y_bar_survival_perc) AS y_bar_max_survival_perc,
+MAX(y_bar_avg_tree_height) AS y_bar_max_avg_tree_height
+FROM (
+SELECT
+identifier_akvo,
+id_planting_site,
+label_strata,
+perc_trees_survived,
+avg_tree_height,
+AVG(label_strata) OVER (PARTITION BY identifier_akvo) AS x_bar_label_strata,
+AVG(perc_trees_survived) OVER (PARTITION BY identifier_akvo) AS y_bar_survival_perc,
+AVG(avg_tree_height) OVER (PARTITION BY identifier_akvo) AS y_bar_avg_tree_height
+FROM calc_tab_monitoring_calculations_per_site) s
+GROUP BY s.identifier_akvo, s.id_planting_site) h
+
+JOIN (SELECT
+table_e.identifier_akvo,
+table_e.label_strata AS maximum_label_strata,
+table_e.perc_trees_survived,
+table_e.avg_tree_height
+FROM calc_tab_monitoring_calculations_per_site table_e
+JOIN (SELECT identifier_akvo, MAX(label_strata) AS max_label_strata FROM calc_tab_monitoring_calculations_per_site
+	 GROUP BY identifier_akvo) table_f
+ON table_f.identifier_akvo = table_e.identifier_akvo
+	 AND table_f.max_label_strata = table_e.label_strata) table_g
+ON table_g.identifier_akvo = h.identifier_akvo)
+
+
+-- Below we classify the site development by first calculating the prognosis on survival percentage and tree height in year 3, using the linear regression (y=mx+c)
+-- The prognosis (survival perc in t=3 and tree height in t=3) are then used to classify the tree development on the sites
+SELECT
+linear_regression_field_data.identifier_akvo,
+calc_tab_monitoring_calculations_per_site.country,
+calc_tab_monitoring_calculations_per_site.organisation,
+calc_tab_monitoring_calculations_per_site.contract_number,
+calc_tab_monitoring_calculations_per_site.id_planting_site,
+COUNT(calc_tab_monitoring_calculations_per_site.label_strata) AS "number of label_strata (monitoring periods)",
+linear_regression_field_data.maximum_label_strata AS "latest monitoring (max label_strata)",
+linear_regression_field_data.perc_trees_survived AS "latest monitored tree number (at max label_strata)",
+linear_regression_field_data.avg_tree_height AS "latest monitored tree height (at max label_strata)",
+
+ROUND(linear_regression_field_data.slope_survival_perc,6) AS site_linear_regression_slope_survival_perc,
+ROUND(linear_regression_field_data.intercept_survival_perc,2) AS site_intercept_value_linear_regression_survival_perc,
+ROUND(((1080 * linear_regression_field_data.slope_survival_perc) + linear_regression_field_data.intercept_survival_perc),2) AS site_estimated_survival_perc_linear_regression_t3,
+ROUND(linear_regression_field_data.slope_avg_tree_height::DECIMAL,6) AS site_linear_regression_slope_avg_tree_height,
+ROUND(linear_regression_field_data.intercept_avg_tree_height::DECIMAL,2) AS site_intercept_value_linear_regression_avg_tree_height,
+ROUND(((1080 * linear_regression_field_data.slope_avg_tree_height) + linear_regression_field_data.intercept_avg_tree_height)::DECIMAL,2) AS site_estimated_avg_tree_height_linear_regression_t3,
 
 CASE
-WHEN akvo_tree_registration_areas_updated.calc_area NOTNULL AND (akvo_tree_registration_areas_updated.tree_number NOTNULL AND akvo_tree_registration_areas_updated.tree_number > 0)
-THEN CAST(SQRT(akvo_tree_registration_areas_updated.calc_area*10000)/NULLIF(SQRT(akvo_tree_registration_areas_updated.tree_number),0) AS NUMERIC(8,2))
-ELSE 0
-END AS "Registered avg tree distance (m)",
+WHEN ROUND(((1080 * linear_regression_field_data.slope_survival_perc) + linear_regression_field_data.intercept_survival_perc),2) > 100
+AND ROUND(((1080 * linear_regression_field_data.slope_avg_tree_height) + linear_regression_field_data.intercept_avg_tree_height)::DECIMAL,2) > 2
+AND linear_regression_field_data.slope_avg_tree_height > 0
+THEN 'tree development very likely positive (survival% >100%, tree height > 2m and showing positive trend at t=3)'
 
-ROUND(average_audited_tree_distance.avg_audited_tree_distance,2) AS "Average audited tree distance",
 
-ROUND((1/(NULLIF(POWER(average_audited_tree_distance.avg_audited_tree_distance,2),0))*10000),0) AS "Audited tree density (trees/ha)",
+WHEN ROUND(((1080 * linear_regression_field_data.slope_survival_perc) + linear_regression_field_data.intercept_survival_perc),2) BETWEEN 100 AND 80
+AND ROUND(((1080 * linear_regression_field_data.slope_avg_tree_height) + linear_regression_field_data.intercept_avg_tree_height)::DECIMAL,2) > 1
+AND linear_regression_field_data.slope_avg_tree_height > 0
+THEN 'tree development likely positive (survival between 100% and 80%, tree height > 1m or showing positive trend at t=3)'
 
-CASE
-WHEN AKVO_Tree_external_audits_areas.calc_area NOTNULL
-THEN ROUND((1/(NULLIF(POWER(average_audited_tree_distance.avg_audited_tree_distance,2),0))*10000) * NULLIF(AKVO_Tree_external_audits_areas.calc_area,0),0)
-ELSE ROUND((1/(NULLIF(POWER(average_audited_tree_distance.avg_audited_tree_distance,2),0))*10000) * NULLIF(akvo_tree_registration_areas_updated.calc_area,0),0)
-END AS "Total audited nr trees for this site",
+WHEN ROUND(((1080 * linear_regression_field_data.slope_survival_perc) + linear_regression_field_data.intercept_survival_perc),2) BETWEEN 79.99 AND 60
+THEN 'tree development unsure (survival between 80% and 60%, no height criteria at t=3)'
 
-latest_monitoring_results."Latest monitored tree density (trees/ha)",
-latest_monitoring_results."Latest monitored survival percentage",
+WHEN ROUND(((1080 * linear_regression_field_data.slope_survival_perc) + linear_regression_field_data.intercept_survival_perc),2) BETWEEN 59.9 AND 25
+AND linear_regression_field_data.slope_avg_tree_height <= 0
+THEN 'tree development likely negative (survival between 60% and 25% and negative height trend at t=3)'
 
-CASE
-WHEN AKVO_Tree_external_audits_areas.calc_area NOTNULL
-THEN ROUND((1/NULLIF(POWER(average_audited_tree_distance.avg_audited_tree_distance,2),0)*10000 * NULLIF(AKVO_Tree_external_audits_areas.calc_area,0)/NULLIF(akvo_tree_registration_areas_updated.tree_number,0)*100),0)
-ELSE ROUND((1/NULLIF(POWER(average_audited_tree_distance.avg_audited_tree_distance,2),0)*10000 * NULLIF(akvo_tree_registration_areas_updated.calc_area,0)/NULLIF(akvo_tree_registration_areas_updated.tree_number,0)*100),0)
-END AS "Audited % survived trees",
+WHEN ROUND(((1080 * linear_regression_field_data.slope_survival_perc) + linear_regression_field_data.intercept_survival_perc),2) BETWEEN 24.9 AND 0
+AND linear_regression_field_data.slope_avg_tree_height <= 0
+THEN 'tree development very likely negative (survival between 25% and 0% and negative height trend at t=3)'
 
-species_audited."Number of species audited",
-species_audited."Species audited"
+ELSE 'tree development unclear'
 
-FROM AKVO_Tree_external_audits_areas
-JOIN AKVO_Tree_external_audits_pcq
-ON AKVO_Tree_external_audits_areas.identifier_akvo = AKVO_Tree_external_audits_pcq.identifier_akvo
-JOIN akvo_tree_registration_areas_updated_updated
-ON akvo_tree_registration_areas_updated.identifier_akvo = AKVO_Tree_external_audits_areas.identifier_akvo
-LEFT JOIN species_audited
-ON AKVO_Tree_external_audits_areas.identifier_akvo = species_audited.identifier_akvo
-LEFT JOIN CALC_TAB_monitoring_calculations_per_site
-ON CALC_TAB_monitoring_calculations_per_site.identifier_akvo = akvo_tree_registration_areas_updated.identifier_akvo
-LEFT JOIN latest_monitoring_results
-ON AKVO_Tree_external_audits_areas.identifier_akvo = latest_monitoring_results.identifier_akvo
-LEFT JOIN average_audited_tree_distance
-ON AKVO_Tree_external_audits_areas.identifier_akvo = average_audited_tree_distance.identifier_akvo
-LEFT JOIN auditors
-ON AKVO_Tree_external_audits_areas.identifier_akvo = auditors.identifier_akvo
+END AS prognosis_tree_development_site_level_linear_regression
 
+FROM linear_regression_field_data
+JOIN calc_tab_monitoring_calculations_per_site
+ON linear_regression_field_data.identifier_akvo = calc_tab_monitoring_calculations_per_site.identifier_akvo
+
+WHERE calc_tab_monitoring_calculations_per_site.label_strata > 0
 
 GROUP BY
-akvo_tree_registration_areas_updated.centroid_coord,
-akvo_tree_registration_areas_updated.identifier_akvo,
-akvo_tree_registration_areas_updated.organisation,
-akvo_tree_registration_areas_updated.submitter,
-auditors."Name auditor(s)",
-akvo_tree_registration_areas_updated.id_planting_site,
-akvo_tree_registration_areas_updated.estimated_area,
-akvo_tree_registration_areas_updated.contract_number,
-akvo_tree_registration_areas_updated.calc_area,
-AKVO_Tree_external_audits_areas.calc_area,
-akvo_tree_registration_areas_updated.tree_number,
-species_audited."Species audited",
-species_audited."Number of species audited",
-akvo_tree_registration_areas_updated.planting_date,
-average_audited_tree_distance.avg_audited_tree_distance,
-latest_monitoring_results."Latest monitored tree density (trees/ha)",
-latest_monitoring_results."Latest monitored survival percentage"
-
-ORDER BY akvo_tree_registration_areas_updated.organisation, akvo_tree_registration_areas_updated.id_planting_site;'''
+linear_regression_field_data.identifier_akvo,
+calc_tab_monitoring_calculations_per_site.country,
+calc_tab_monitoring_calculations_per_site.organisation,
+calc_tab_monitoring_calculations_per_site.contract_number,
+calc_tab_monitoring_calculations_per_site.id_planting_site,
+linear_regression_field_data.maximum_label_strata,
+linear_regression_field_data.slope_survival_perc,
+linear_regression_field_data.intercept_survival_perc,
+site_estimated_survival_perc_linear_regression_t3,
+site_linear_regression_slope_avg_tree_height,
+site_intercept_value_linear_regression_avg_tree_height,
+site_estimated_avg_tree_height_linear_regression_t3,
+linear_regression_field_data.slope_avg_tree_height,
+linear_regression_field_data.perc_trees_survived,
+linear_regression_field_data.avg_tree_height;'''
 
 conn.commit()
 
@@ -2082,7 +2051,10 @@ SELECT identifier_akvo FROM AKVO_Tree_registration_photos
 UNION ALL
 SELECT identifier_akvo FROM AKVO_Tree_monitoring_photos
 UNION ALL
-SELECT identifier_akvo FROM AKVO_Tree_external_audits_photos),
+SELECT identifier_akvo FROM AKVO_Tree_external_audits_photos
+UNION ALL
+SELECT identifier_akvo FROM AKVO_tree_registration_areas_updated
+WHERE AKVO_tree_registration_areas_updated.photo_owner NOTNULL),
 
 count_total_number_photos_per_site AS (SELECT identifier_akvo, COUNT(identifier_akvo) AS total_nr_photos
 FROM COUNT_Total_number_of_photos_taken
@@ -3864,7 +3836,7 @@ cur.execute(create_a2)
 cur.execute(create_a3)
 cur.execute(create_a4)
 cur.execute(create_a5)
-#cur.execute(create_a6)
+cur.execute(create_a6)
 #cur.execute(create_a7)
 cur.execute(create_a8)
 cur.execute(create_a9)
