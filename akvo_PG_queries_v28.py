@@ -18,6 +18,7 @@ DROP TABLE IF EXISTS AKVO_tree_registration_areas_updated;
 DROP TABLE IF EXISTS CALC_TAB_monitoring_calculations_per_site_by_partner;
 DROP TABLE IF EXISTS CALC_TAB_monitoring_calculations_per_site;
 DROP TABLE IF EXISTS CALC_TAB_Error_check_on_site_registration;
+DROP TABLE IF EXISTS CALC_TAB_linear_regression_results;
 DROP TABLE IF EXISTS CALC_TAB_Error_partner_report_on_site_registration;
 DROP TABLE IF EXISTS CALC_GEOM_pcq_calculations_per_site_by_external_audit;
 DROP TABLE IF EXISTS CALC_GEOM_Trees_counted_per_site_by_external_audit;
