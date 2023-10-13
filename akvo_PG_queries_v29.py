@@ -185,7 +185,15 @@ combine_monitorings_audits.planting_date,
 combine_monitorings_audits.monitoring_submission AS submission,
 combine_monitorings_audits.monitoring_submission - planting_date AS difference_days_reg_monitoring,
 CAST((combine_monitorings_audits.monitoring_submission - planting_date)*1.0/365 * 1.0 AS DECIMAL(7,1)) AS difference_years_reg_monitoring,
-CEILING((combine_monitorings_audits.monitoring_submission - planting_date)*1.0/180)*180 AS label_strata
+
+-- Calculate label-strata. Include rule that if a monitoring and a registration is carried out on the same day (= 0 days difference)
+-- the label-strata for that monitoring instance receives a value 180 (and not 0)
+CASE
+WHEN CEILING((combine_monitorings_audits.monitoring_submission - planting_date)*1.0/180)*180 > 0
+THEN CEILING((combine_monitorings_audits.monitoring_submission - planting_date)*1.0/180)*180
+ELSE 180
+END AS label_strata
+
 FROM combine_monitorings_audits
 order by identifier_akvo),
 
