@@ -9,7 +9,8 @@ from area import area
 import psycopg2
 import os
 import cloudpickle
-from osgeo import ogr
+from ogr2ogr import ogr
+#import ogr2ogr
 
 print("The Python script that is running is version: 6.7")
 
