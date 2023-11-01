@@ -5,3 +5,4 @@ geodaisy
 area
 cloudpickle
 geopy
+gdal
