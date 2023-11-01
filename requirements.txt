@@ -5,4 +5,4 @@ geodaisy
 area
 cloudpickle
 geopy
-gdal
+osgeo
