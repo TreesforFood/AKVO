@@ -140,6 +140,7 @@ akvo_tree_monitoring_areas.submission AS monitoring_submission,
 
 -- Classify the options of method selection (as in the audit table below) is NOT needed here because
 -- there is only one option to select PCQ or Tree count rows. No grouping problem here(?)
+
 AKVO_Tree_monitoring_areas.method_selection,
 
 'monitoring_data' AS procedure,
@@ -350,7 +351,7 @@ table_label_strata.label_strata),
 
 -- Calculate AVERAGE tree count results for the MONITORING COUNTS (in case multiple COUNTS are carried out in the same label_strata)
 count_monitoring_avg_count AS (SELECT
-akvo_tree_monitoring_counts.identifier_akvo,
+AKVO_Tree_monitoring_areas.identifier_akvo,
 akvo_tree_monitoring_counts.instance,
 table_label_strata.label_strata,
 
@@ -366,7 +367,7 @@ END AS nr_trees_monitored
 FROM AKVO_Tree_monitoring_areas
 JOIN table_label_strata
 ON AKVO_Tree_monitoring_areas.instance = table_label_strata.instance
-JOIN akvo_tree_monitoring_counts
+LEFT JOIN akvo_tree_monitoring_counts
 ON akvo_tree_monitoring_counts.instance = AKVO_Tree_monitoring_areas.instance
 GROUP BY akvo_tree_monitoring_counts.instance,
 akvo_tree_monitoring_counts.identifier_akvo,
@@ -375,7 +376,7 @@ AKVO_Tree_monitoring_areas.number_living_trees),
 
 -- Calculate AVERAGE tree count results for the AUDIT COUNTS (in case multiple COUNTS are carried out in the same label_strata)
 count_audit_avg_count AS (SELECT
-akvo_tree_external_audits_counts.identifier_akvo,
+akvo_tree_external_audits_areas.identifier_akvo,
 akvo_tree_external_audits_counts.instance,
 table_label_strata.label_strata,
 
@@ -391,7 +392,7 @@ END AS nr_trees_monitored
 FROM akvo_tree_external_audits_areas
 JOIN table_label_strata
 ON akvo_tree_external_audits_areas.instance = table_label_strata.instance
-JOIN akvo_tree_external_audits_counts
+LEFT JOIN akvo_tree_external_audits_counts
 ON akvo_tree_external_audits_counts.instance = akvo_tree_external_audits_areas.instance
 GROUP BY akvo_tree_external_audits_counts.instance,
 akvo_tree_external_audits_counts.identifier_akvo,
