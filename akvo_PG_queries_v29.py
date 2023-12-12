@@ -140,6 +140,7 @@ akvo_tree_monitoring_areas.submission AS monitoring_submission,
 
 -- Classify the options of method selection (as in the audit table below) is NOT needed here because
 -- there is only one option to select PCQ or Tree count rows. No grouping problem here(?)
+
 AKVO_Tree_monitoring_areas.method_selection,
 
 'monitoring_data' AS procedure,
@@ -611,7 +612,7 @@ ROUND(AVG(akvo_tree_monitoring_areas.avg_tree_height)::numeric,2) AS avg_tree_he
 
 FROM AKVO_Tree_monitoring_areas
 LEFT JOIN count_monitoring_avg_count
-ON AKVO_Tree_monitoring_areas.instance = count_monitoring_avg_count.instance
+ON AKVO_Tree_monitoring_areas.identifier_akvo = count_monitoring_avg_count.identifier_akvo
 LEFT JOIN Akvo_tree_registration_areas_updated
 ON AKVO_Tree_monitoring_areas.identifier_akvo = Akvo_tree_registration_areas_updated.identifier_akvo
 LEFT JOIN table_label_strata
@@ -670,7 +671,7 @@ ROUND(AVG(akvo_tree_external_audits_areas.audit_reported_tree_height),2) AS avg_
 
 FROM akvo_tree_external_audits_areas
 LEFT JOIN count_audit_avg_count
-ON akvo_tree_external_audits_areas.instance = count_audit_avg_count.instance
+ON akvo_tree_external_audits_areas.identifier_akvo = count_audit_avg_count.identifier_akvo
 LEFT JOIN Akvo_tree_registration_areas_updated
 ON akvo_tree_external_audits_areas.identifier_akvo = Akvo_tree_registration_areas_updated.identifier_akvo
 LEFT JOIN table_label_strata
