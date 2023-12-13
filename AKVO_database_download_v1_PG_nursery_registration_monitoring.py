@@ -10,7 +10,6 @@ import geodaisy.converters as convert
 from area import area
 import os
 
-config = Config()
 
 # AKVO url entry levels. Modify the id to get the right folder/survey:
 form_registration_nursery = 'https://api-auth0.akvo.org/flow/orgs/ecosia/form_instances?survey_id=38030003&form_id=30050006'
@@ -27,8 +26,9 @@ form_monitoring_nursery = 'https://api-auth0.akvo.org/flow/orgs/ecosia/form_inst
 
 
 # get the token from AKVO
-data = {"client_id": config.CONF["CLIENT_ID"], "username" : config.CONF["USERNAME"], "password": config.CONF["PASSWORD"], "grant_type": config.CONF["GRANT_TYPE"], "scope": config.CONF["SCOPE"]}
+data = {"client_id": os.environ["CLIENT_ID"], "username" : os.environ["USERNAME"], "password": os.environ["PASSWORD"], "grant_type": os.environ["GRANT_TYPE"], "scope": os.environ["SCOPE"]}
 response = requests.post("https://akvofoundation.eu.auth0.com/oauth/token", data=data)
+
 
 if response.status_code in [200]: # in case good response from AKVO server
     tok_dict = json.loads(response.text)
@@ -61,8 +61,7 @@ for all_pages in url_list:
 
 #print(url_list)
 #connect to Postgresql database
-conn = psycopg2.connect(host= config.CONF["HOST_PSTGRS"],database= config.CONF["DATABASE_PSTGRS"],user= config.CONF["USER_PSTGRS"],password= config.CONF["PASSWORD_PSTGRS"])
-
+conn = psycopg2.connect(os.environ["DATABASE_URL"], sslmode='require')
 cur = conn.cursor()
 
 
