@@ -3,17 +3,12 @@
 
 import requests
 import json
-import sqlite3
+import psycopg2
 import re
 import geojson
-import psycopg2
 import geodaisy.converters as convert
 from area import area
-from hanging_threads import start_monitoring
-from dotenv import load_dotenv, find_dotenv
 import os
-start_monitoring(seconds_frozen=10, test_interval=100)
-from akvo_api_config import Config
 
 config = Config()
 
@@ -266,7 +261,7 @@ for all_data_m in url_list_m:
         submission_date = level1_m['submissionDate']
         submission_time = mid(submissiondate, 11,19)
         submitter = level1_m['submitter']
-
+        print(level1_m)
 
         try:
             name_nursery_manager = level1_m['responses']['28140007'][0]['24170016']
@@ -274,7 +269,7 @@ for all_data_m in url_list_m:
             name_nursery_manager = ''
 
         try:
-            test = level1_m['responses']['28020008'][0]['33540002']
+            test = level1_m['responses']['28140007'][0]['33540002'][0].get('text')
         except (KeyError, IndexError):
             test = ''
 
@@ -294,6 +289,7 @@ for all_data_m in url_list_m:
             number_trees_produced_currently = None
 
         try:
+            print_month_planting_stock = ''
             for list_month_planting_stock in level1_m['responses']['28020008'][0]['196392790']:
                 select_value = list_month_planting_stock['code']
                 print_month_planting_stock +=  select_value + ' '
