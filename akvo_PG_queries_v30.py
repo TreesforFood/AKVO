@@ -2493,8 +2493,6 @@ conn.commit()
 
 create_a38 = '''CREATE TABLE superset_ecosia_nursery_registration_photos
 AS SELECT
---akvo_nursery_registration.identifier_akvo,
---akvo_nursery_registration.instance,
 akvo_nursery_registration.display_name,
 LOWER(akvo_nursery_registration.country) AS country,
 
@@ -2543,7 +2541,14 @@ ADD photo_url_preset TEXT;
 
 UPDATE superset_ecosia_nursery_registration_photos
 SET photo_url_preset = CONCAT('<img src="', photo_url, '" alt="s3 image" height=200/>')
-WHERE photo_url NOTNULL;'''
+WHERE photo_url NOTNULL;
+
+UPDATE superset_ecosia_nursery_registration_photos
+SET photo_url = CASE
+WHEN photo_url LIKE '%data/user/0/org.akvo.flow/files%'
+THEN RIGHT(photo_url, strpos(reverse(photo_owner),'/')-1)
+ELSE photo_url
+END;'''
 
 conn.commit()
 
