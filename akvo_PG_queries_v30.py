@@ -2546,7 +2546,7 @@ WHERE photo_url NOTNULL;
 UPDATE superset_ecosia_nursery_registration_photos
 SET photo_url = CASE
 WHEN photo_url LIKE '%data/user/0/org.akvo.flow/files%'
-THEN RIGHT(photo_url, strpos(reverse(photo_owner),'/')-1)
+THEN RIGHT(photo_url, strpos(reverse(photo_url),'/')-1)
 ELSE photo_url
 END;'''
 
