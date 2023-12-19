@@ -822,12 +822,9 @@ THEN RIGHT(photo_url, strpos(reverse(photo_url),'/')-1)
 ELSE photo_url
 END;
 
-UPDATE akvo_tree_monitoring_photos
-SET photo_url = CONCAT('https://akvoflow-201.s3.amazonaws.com/images/',photo_url);
-
 UPDATE akvo_nursery_registration_photos
 SET photo_url = CASE
-WHEN photo_url LIKE '%data/user/0/org.akvo.flow/files%'
+WHEN photo_url LIKE '%/%'
 THEN RIGHT(photo_url, strpos(reverse(photo_url),'/')-1)
 ELSE photo_url
 END;
