@@ -823,7 +823,18 @@ ELSE photo_url
 END;
 
 UPDATE akvo_tree_monitoring_photos
-SET photo_url = CONCAT('https://akvoflow-201.s3.amazonaws.com/images/',photo_url);'''
+SET photo_url = CONCAT('https://akvoflow-201.s3.amazonaws.com/images/',photo_url);
+
+UPDATE akvo_nursery_registration_photos
+SET photo_url = CASE
+WHEN photo_url LIKE '%data/user/0/org.akvo.flow/files%'
+THEN RIGHT(photo_url, strpos(reverse(photo_url),'/')-1)
+ELSE photo_url
+END;
+
+UPDATE akvo_nursery_registration_photos
+SET photo_url = CONCAT('https://akvoflow-201.s3.amazonaws.com/images/',photo_url)
+WHERE photo_url NOTNULL;'''
 
 conn.commit()
 
@@ -2541,14 +2552,7 @@ ADD photo_url_preset TEXT;
 
 UPDATE superset_ecosia_nursery_registration_photos
 SET photo_url_preset = CONCAT('<img src="', photo_url, '" alt="s3 image" height=200/>')
-WHERE photo_url NOTNULL;
-
-UPDATE superset_ecosia_nursery_registration_photos
-SET photo_url = CASE
-WHEN photo_url LIKE '%data/user/0/org.akvo.flow/files%'
-THEN RIGHT(photo_url, strpos(reverse(photo_url),'/')-1)
-ELSE photo_url
-END;'''
+WHERE photo_url NOTNULL;'''
 
 conn.commit()
 
