@@ -143,10 +143,16 @@ akvo_tree_monitoring_areas.instance,
 akvo_tree_registration_areas_updated.id_planting_site,
 akvo_tree_monitoring_areas.submission AS monitoring_submission,
 
--- Classify the options of method selection (as in the audit table below) is NOT needed here because
--- there is only one option to select PCQ or Tree count rows. No grouping problem here.
-
-AKVO_Tree_monitoring_areas.method_selection,
+-- Classify the options is needed to prevent seperate groups
+CASE
+WHEN akvo_tree_monitoring_areas.method_selection = 'Number of living trees is unknown. Go to PCQ method.'
+THEN 'PCQ'
+WHEN akvo_tree_monitoring_areas.method_selection = 'The trees were counted'
+THEN 'Tree count'
+WHEN akvo_tree_monitoring_areas.method_selection = 'We used our own inventory method'
+THEN 'Own method'
+ELSE 'Unknown'
+END AS method_selection,
 
 'monitoring_data' AS procedure,
 TO_DATE(akvo_tree_registration_areas_updated.planting_date, 'YYYY-MM-DD') AS planting_date
@@ -444,7 +450,7 @@ GROUP BY akvo_tree_external_audits_areas.identifier_akvo,
 table_label_strata.label_strata),
 
 -- Sub CTE table to calculate PCQ MONITORING results with CASE more easy and transparent. If we would do this in a subquery it results in
--- a complex issues of multiple rows combined with grouping problems. This is why this intermediary table is more easy.
+-- a complex issues of multiple rows combined with grouping problems. This is why this temporary CTE table is more easy.
 calc_interm_results_tree_numbers_pcq_monitoring AS (
 SELECT
 AKVO_Tree_monitoring_areas.identifier_akvo,
@@ -536,7 +542,7 @@ pcq_monitoring_avg_hgt.pcq_results_merged_monitoring_hgt,
 AKVO_Tree_monitoring_areas.display_name),
 
 -- Sub CTE table to calculate PCQ AUDIT results with CASE more easy and transparent. If we would do this in a subquery it results in
--- a complex issue of multiple rows combined with grouping problems. This is why this intermediary table is more easy.
+-- a complex issue of multiple rows combined with grouping problems. This is why this tenmporary CTE table is more easy.
 calc_interm_results_tree_numbers_pcq_audit AS (SELECT
 AKVO_Tree_external_audits_areas.identifier_akvo,
 AKVO_Tree_external_audits_areas.display_name,
@@ -601,7 +607,6 @@ LEFT JOIN site_impressions_audit
 ON site_impressions_audit.identifier_akvo = AKVO_Tree_external_audits_areas.identifier_akvo
 AND site_impressions_audit.label_strata = table_label_strata.label_strata
 
-
 WHERE table_label_strata.method_selection = 'PCQ' AND Akvo_tree_registration_areas_updated.identifier_akvo NOTNULL
 
 GROUP BY
@@ -637,9 +642,11 @@ akvo_tree_registration_areas_updated.tree_number AS registered_tree_number,
 'Monitoring' AS procedure,
 'Tree count' AS data_collection_method,
 
-0 AS avg_monitored_tree_distance,
-0 AS avg_audit_tree_density,
+--0 AS avg_monitored_tree_distance,
+--0 AS avg_audit_tree_density,
 
+ROUND(100/NULLIF(SQRT(count_monitoring_avg_count.nr_trees_monitored/NULLIF(akvo_tree_registration_areas_updated.calc_area,0)),0),2) AS avg_monitored_tree_distance,
+ROUND(AVG(count_monitoring_avg_count.nr_trees_monitored)/NULLIF(akvo_tree_registration_areas_updated.calc_area,0),0) AS avg_monitored_tree_density,
 ROUND(AVG(count_monitoring_avg_count.nr_trees_monitored),0) AS nr_trees_monitored,
 
 0 AS nr_samples_pcq_monitoring,
@@ -685,8 +692,81 @@ site_impressions_monitoring.site_impressions,
 akvo_tree_registration_areas_updated.contract_number,
 akvo_tree_registration_areas_updated.id_planting_site,
 akvo_tree_registration_areas_updated.country,
-AKVO_Tree_monitoring_areas.display_name),
+AKVO_Tree_monitoring_areas.display_name,
+count_monitoring_avg_count.nr_trees_monitored),
 
+---------------
+-- Sub CTE table to calculate OWN METHOD of MONITORING results with CASE more easy and transparent. If we would do this in a subquery it results in
+-- a complex issues of multiple rows combined with grouping problems. This is why this intermediary table is more easy.
+calc_interm_results_tree_numbers_own_method_monitoring AS (SELECT
+AKVO_Tree_monitoring_areas.identifier_akvo,
+AKVO_Tree_monitoring_areas.display_name,
+LOWER(akvo_tree_registration_areas_updated.country) AS country,
+LOWER(akvo_tree_registration_areas_updated.organisation) AS organisation,
+submittors_monitoring.submitter,
+akvo_tree_registration_areas_updated.contract_number,
+akvo_tree_registration_areas_updated.id_planting_site,
+Akvo_tree_registration_areas_updated.calc_area,
+akvo_tree_registration_areas_updated.tree_number AS registered_tree_number,
+'Monitoring' AS procedure,
+'Own method' AS data_collection_method,
+
+--0 AS avg_monitored_tree_distance,
+--0 AS avg_audit_tree_density,
+
+ROUND(100/NULLIF(SQRT(count_monitoring_avg_count.nr_trees_monitored/NULLIF(akvo_tree_registration_areas_updated.calc_area,0)),0),2) AS avg_monitored_tree_distance,
+ROUND(AVG(count_monitoring_avg_count.nr_trees_monitored)/NULLIF(akvo_tree_registration_areas_updated.calc_area,0),0) AS avg_monitored_tree_density,
+
+
+ROUND(AVG(count_monitoring_avg_count.nr_trees_monitored),0) AS nr_trees_monitored,
+
+0 AS nr_samples_pcq_monitoring,
+Akvo_tree_registration_areas_updated.planting_date AS planting_date,
+MAX(table_label_strata.submission) AS latest_monitoring_submission,
+MAX(table_label_strata.difference_days_reg_monitoring) AS nr_days_registration_monitoring,
+MAX(table_label_strata.difference_years_reg_monitoring) AS nr_years_registration_monitoring,
+table_label_strata.label_strata,
+
+ROUND(AVG(count_monitoring_avg_count.nr_trees_monitored)/NULLIF(Akvo_tree_registration_areas_updated.tree_number,0)*100,2) AS perc_trees_survived,
+
+ROUND(AVG(akvo_tree_monitoring_areas.avg_tree_height)::numeric,2) AS avg_tree_height,
+
+site_impressions_monitoring.site_impressions
+
+FROM AKVO_Tree_monitoring_areas
+LEFT JOIN count_monitoring_avg_count
+ON AKVO_Tree_monitoring_areas.identifier_akvo = count_monitoring_avg_count.identifier_akvo
+LEFT JOIN Akvo_tree_registration_areas_updated
+ON AKVO_Tree_monitoring_areas.identifier_akvo = Akvo_tree_registration_areas_updated.identifier_akvo
+LEFT JOIN table_label_strata
+ON AKVO_Tree_monitoring_areas.instance = table_label_strata.instance
+LEFT JOIN submittors_monitoring
+ON submittors_monitoring.identifier_akvo = AKVO_Tree_monitoring_areas.identifier_akvo
+AND submittors_monitoring.label_strata = table_label_strata.label_strata
+LEFT JOIN site_impressions_monitoring
+ON site_impressions_monitoring.identifier_akvo = AKVO_Tree_monitoring_areas.identifier_akvo
+AND site_impressions_monitoring.label_strata = table_label_strata.label_strata
+
+WHERE AKVO_Tree_monitoring_areas.method_selection = 'We used our own inventory method'
+AND Akvo_tree_registration_areas_updated.identifier_akvo NOTNULL
+
+GROUP BY
+table_label_strata.label_strata,
+AKVO_Tree_monitoring_areas.identifier_akvo,
+Akvo_tree_registration_areas_updated.calc_area,
+akvo_tree_registration_areas_updated.tree_number,
+Akvo_tree_registration_areas_updated.planting_date,
+AKVO_Tree_monitoring_areas.method_selection,
+akvo_tree_registration_areas_updated.organisation,
+submittors_monitoring.submitter,
+site_impressions_monitoring.site_impressions,
+akvo_tree_registration_areas_updated.contract_number,
+akvo_tree_registration_areas_updated.id_planting_site,
+akvo_tree_registration_areas_updated.country,
+AKVO_Tree_monitoring_areas.display_name,
+count_monitoring_avg_count.nr_trees_monitored),
+
+-------------------------
 
 -- Sub CTE table to calculate COUNTS of AUDIT results with CASE more easy and transparent. If we would do this in a subquery it results in
 -- a complex issues of multiple rows combined with grouping problems. This is why this intermediary table is more easy.
@@ -703,8 +783,12 @@ akvo_tree_registration_areas_updated.tree_number AS registered_tree_number,
 'Audit' AS procedure,
 'Tree count' AS data_collection_method,
 
-0 AS avg_audit_tree_distance,
-0 AS avg_audit_tree_density,
+--0 AS avg_audit_tree_distance,
+--0 AS avg_audit_tree_density,
+
+ROUND(100/NULLIF(SQRT(count_audit_avg_count.nr_trees_monitored/NULLIF(akvo_tree_registration_areas_updated.calc_area,0)),0),2) AS avg_audit_tree_distance,
+ROUND(AVG(count_audit_avg_count.nr_trees_monitored)/NULLIF(akvo_tree_registration_areas_updated.calc_area,0),0) AS avg_audit_tree_density,
+
 
 ROUND(AVG(count_audit_avg_count.nr_trees_monitored),0) AS nr_trees_monitored,
 
@@ -750,7 +834,8 @@ site_impressions_audit.site_impressions,
 akvo_tree_registration_areas_updated.contract_number,
 akvo_tree_registration_areas_updated.id_planting_site,
 akvo_tree_registration_areas_updated.country,
-AKVO_Tree_external_audits_areas.display_name),
+AKVO_Tree_external_audits_areas.display_name,
+count_audit_avg_count.nr_trees_monitored),
 
 -- Add the POLYGON results from registrations to the upper table so that the initial registered tree numbers are integrated
 -- including a '0' value for strata '0' (initial registered tree number). Only for polygons
@@ -824,6 +909,8 @@ UNION ALL
 SELECT * FROM calc_interm_results_tree_numbers_pcq_audit
 UNION ALL
 SELECT * FROM calc_interm_results_tree_numbers_count_monitoring
+UNION ALL
+SELECT * FROM calc_interm_results_tree_numbers_own_method_monitoring
 UNION ALL
 SELECT * FROM calc_interm_results_tree_numbers_audit
 UNION ALL
