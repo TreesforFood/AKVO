@@ -144,7 +144,7 @@ akvo_tree_registration_areas_updated.id_planting_site,
 akvo_tree_monitoring_areas.submission AS monitoring_submission,
 
 -- Classify the options of method selection (as in the audit table below) is NOT needed here because
--- there is only one option to select PCQ or Tree count rows. No grouping problem here(?)
+-- there is only one option to select PCQ or Tree count rows. No grouping problem here.
 
 AKVO_Tree_monitoring_areas.method_selection,
 
@@ -409,16 +409,39 @@ akvo_tree_external_audits_areas.audit_reported_trees),
 
 --List the enumerators. Some monitoring submissions were done at the same time by different submittors.
 --We need to bundle them into 1 column so they don't appear as seperate submissions in the result table
-submittors_monitoring AS (SELECT identifier_akvo, STRING_AGG(akvo_tree_monitoring_areas.submitter,' | ') AS submitter
+submittors_monitoring AS (SELECT akvo_tree_monitoring_areas.identifier_akvo, table_label_strata.label_strata, STRING_AGG(akvo_tree_monitoring_areas.submitter,' | ') AS submitter
 FROM akvo_tree_monitoring_areas
-GROUP BY identifier_akvo),
+JOIN table_label_strata
+ON akvo_tree_monitoring_areas.instance = table_label_strata.instance
+GROUP BY akvo_tree_monitoring_areas.identifier_akvo,
+table_label_strata.label_strata),
 
 --List the enumerators. Some monitoring submissions were done at the same time by different submittors.
 --We need to bundle them into 1 column so they don't appear as seperate submissions in the result table
-submittors_audit AS (SELECT identifier_akvo, STRING_AGG(akvo_tree_external_audits_areas.submitter,' | ') AS submitter
+submittors_audit AS (SELECT akvo_tree_external_audits_areas.identifier_akvo, table_label_strata.label_strata, STRING_AGG(akvo_tree_external_audits_areas.submitter,' | ') AS submitter
 FROM akvo_tree_external_audits_areas
-GROUP BY identifier_akvo),
+JOIN table_label_strata
+ON akvo_tree_external_audits_areas.instance = table_label_strata.instance
+GROUP BY akvo_tree_external_audits_areas.identifier_akvo,
+table_label_strata.label_strata),
 
+-- Group the "site impressions" from MONITORINGS on label_strata level + identifier. This enables
+-- to add site impressions to the each label strata (for a specific monitoring period)
+site_impressions_monitoring AS (SELECT akvo_tree_monitoring_areas.identifier_akvo, table_label_strata.label_strata, STRING_AGG(akvo_tree_monitoring_areas.site_impression,' | ') AS site_impressions
+FROM akvo_tree_monitoring_areas
+JOIN table_label_strata
+ON akvo_tree_monitoring_areas.instance = table_label_strata.instance
+GROUP BY akvo_tree_monitoring_areas.identifier_akvo,
+table_label_strata.label_strata),
+
+-- Group the "site impressions" from AUDITS on label_strata level + identifier. This enables
+-- to add all site impressions to the each label strata (for a specific monitoring period)
+site_impressions_audit AS (SELECT akvo_tree_external_audits_areas.identifier_akvo, table_label_strata.label_strata, STRING_AGG(akvo_tree_external_audits_areas.impression_site,' | ') AS site_impressions
+FROM akvo_tree_external_audits_areas
+JOIN table_label_strata
+ON akvo_tree_external_audits_areas.instance = table_label_strata.instance
+GROUP BY akvo_tree_external_audits_areas.identifier_akvo,
+table_label_strata.label_strata),
 
 -- Sub CTE table to calculate PCQ MONITORING results with CASE more easy and transparent. If we would do this in a subquery it results in
 -- a complex issues of multiple rows combined with grouping problems. This is why this intermediary table is more easy.
@@ -462,7 +485,9 @@ CASE
 WHEN AKVO_Tree_monitoring_areas.method_selection = 'Number of living trees is unknown. Go to PCQ method.'
 THEN ROUND(pcq_results_merged_monitoring_hgt,2)
 ElSE AVG(akvo_tree_monitoring_areas.avg_tree_height)
-END AS avg_tree_height
+END AS avg_tree_height,
+
+site_impressions_monitoring.site_impressions
 
 FROM AKVO_Tree_monitoring_areas
 LEFT JOIN AKVO_Tree_monitoring_pcq
@@ -482,6 +507,10 @@ ON count_pcq_samples.identifier_akvo = AKVO_Tree_monitoring_areas.identifier_akv
 AND count_pcq_samples.label_strata = table_label_strata.label_strata
 LEFT JOIN submittors_monitoring
 ON submittors_monitoring.identifier_akvo = AKVO_Tree_monitoring_areas.identifier_akvo
+AND submittors_monitoring.label_strata = table_label_strata.label_strata
+LEFT JOIN site_impressions_monitoring
+ON site_impressions_monitoring.identifier_akvo = AKVO_Tree_monitoring_areas.identifier_akvo
+AND site_impressions_monitoring.label_strata = table_label_strata.label_strata
 
 where AKVO_Tree_monitoring_areas.method_selection = 'Number of living trees is unknown. Go to PCQ method.'
 AND Akvo_tree_registration_areas_updated.identifier_akvo NOTNULL
@@ -491,6 +520,7 @@ table_label_strata.label_strata,
 AKVO_Tree_monitoring_areas.identifier_akvo,
 akvo_tree_registration_areas_updated.organisation,
 submittors_monitoring.submitter,
+site_impressions_monitoring.site_impressions,
 akvo_tree_registration_areas_updated.contract_number,
 Akvo_tree_registration_areas_updated.calc_area,
 akvo_tree_registration_areas_updated.tree_number,
@@ -544,7 +574,9 @@ CASE
 WHEN table_label_strata.method_selection = 'PCQ'
 THEN ROUND(pcq_audit_avg_hgt.pcq_results_merged_audit_hgt,2)
 ELSE 0
-END AS avg_tree_height
+END AS avg_tree_height,
+
+site_impressions_audit.site_impressions
 
 FROM AKVO_Tree_external_audits_areas
 LEFT JOIN AKVO_Tree_external_audits_pcq
@@ -564,6 +596,11 @@ ON count_pcq_samples.identifier_akvo = AKVO_Tree_external_audits_areas.identifie
 AND count_pcq_samples.label_strata = table_label_strata.label_strata
 LEFT JOIN submittors_audit
 ON submittors_audit.identifier_akvo = AKVO_Tree_external_audits_areas.identifier_akvo
+AND submittors_audit.label_strata = table_label_strata.label_strata
+LEFT JOIN site_impressions_audit
+ON site_impressions_audit.identifier_akvo = AKVO_Tree_external_audits_areas.identifier_akvo
+AND site_impressions_audit.label_strata = table_label_strata.label_strata
+
 
 WHERE table_label_strata.method_selection = 'PCQ' AND Akvo_tree_registration_areas_updated.identifier_akvo NOTNULL
 
@@ -577,6 +614,7 @@ Akvo_tree_registration_areas_updated.planting_date,
 table_label_strata.method_selection,
 akvo_tree_registration_areas_updated.organisation,
 submittors_audit.submitter,
+site_impressions_audit.site_impressions,
 akvo_tree_registration_areas_updated.contract_number,
 akvo_tree_registration_areas_updated.id_planting_site,
 akvo_tree_registration_areas_updated.country,
@@ -613,7 +651,9 @@ table_label_strata.label_strata,
 
 ROUND(AVG(count_monitoring_avg_count.nr_trees_monitored)/NULLIF(Akvo_tree_registration_areas_updated.tree_number,0)*100,2) AS perc_trees_survived,
 
-ROUND(AVG(akvo_tree_monitoring_areas.avg_tree_height)::numeric,2) AS avg_tree_height
+ROUND(AVG(akvo_tree_monitoring_areas.avg_tree_height)::numeric,2) AS avg_tree_height,
+
+site_impressions_monitoring.site_impressions
 
 FROM AKVO_Tree_monitoring_areas
 LEFT JOIN count_monitoring_avg_count
@@ -624,6 +664,10 @@ LEFT JOIN table_label_strata
 ON AKVO_Tree_monitoring_areas.instance = table_label_strata.instance
 LEFT JOIN submittors_monitoring
 ON submittors_monitoring.identifier_akvo = AKVO_Tree_monitoring_areas.identifier_akvo
+AND submittors_monitoring.label_strata = table_label_strata.label_strata
+LEFT JOIN site_impressions_monitoring
+ON site_impressions_monitoring.identifier_akvo = AKVO_Tree_monitoring_areas.identifier_akvo
+AND site_impressions_monitoring.label_strata = table_label_strata.label_strata
 
 WHERE AKVO_Tree_monitoring_areas.method_selection = 'The trees were counted'
 AND Akvo_tree_registration_areas_updated.identifier_akvo NOTNULL
@@ -637,6 +681,7 @@ Akvo_tree_registration_areas_updated.planting_date,
 AKVO_Tree_monitoring_areas.method_selection,
 akvo_tree_registration_areas_updated.organisation,
 submittors_monitoring.submitter,
+site_impressions_monitoring.site_impressions,
 akvo_tree_registration_areas_updated.contract_number,
 akvo_tree_registration_areas_updated.id_planting_site,
 akvo_tree_registration_areas_updated.country,
@@ -672,7 +717,9 @@ table_label_strata.label_strata,
 
 ROUND(AVG(count_audit_avg_count.nr_trees_monitored)/NULLIF(Akvo_tree_registration_areas_updated.tree_number,0)*100,2) AS perc_trees_survived,
 
-ROUND(AVG(akvo_tree_external_audits_areas.audit_reported_tree_height),2) AS avg_tree_height_m
+ROUND(AVG(akvo_tree_external_audits_areas.audit_reported_tree_height),2) AS avg_tree_height_m,
+
+site_impressions_audit.site_impressions
 
 FROM akvo_tree_external_audits_areas
 LEFT JOIN count_audit_avg_count
@@ -683,6 +730,10 @@ LEFT JOIN table_label_strata
 ON akvo_tree_external_audits_areas.instance = table_label_strata.instance
 LEFT JOIN submittors_audit
 ON submittors_audit.identifier_akvo = akvo_tree_external_audits_areas.identifier_akvo
+AND submittors_audit.label_strata = table_label_strata.label_strata
+LEFT JOIN site_impressions_audit
+ON site_impressions_audit.identifier_akvo = akvo_tree_external_audits_areas.identifier_akvo
+AND site_impressions_audit.label_strata = table_label_strata.label_strata
 
 WHERE table_label_strata.method_selection = 'Tree count' AND Akvo_tree_registration_areas_updated.identifier_akvo NOTNULL
 
@@ -695,6 +746,7 @@ Akvo_tree_registration_areas_updated.planting_date,
 table_label_strata.method_selection,
 akvo_tree_registration_areas_updated.organisation,
 submittors_audit.submitter,
+site_impressions_audit.site_impressions,
 akvo_tree_registration_areas_updated.contract_number,
 akvo_tree_registration_areas_updated.id_planting_site,
 akvo_tree_registration_areas_updated.country,
@@ -726,7 +778,8 @@ akvo_tree_registration_areas_updated.submission AS latest_registration_submissio
 0 AS nr_years_planting_date_registration,
 0 AS label_strata,
 100 AS "Percentage of trees survived",
-0 AS "Average tree height (m)"
+0 AS "Average tree height (m)",
+'No site impression yet because it is a first registration.' AS site_impressions
 
 FROM akvo_tree_registration_areas_updated
 WHERE polygon NOTNULL),
@@ -758,7 +811,8 @@ akvo_tree_registration_areas_updated.submission AS latest_registration_submissio
 0 AS nr_years_planting_date_registration,
 0 AS label_strata,
 100 AS "Percentage of trees survived",
-0 AS "Average tree height (m)"
+0 AS "Average tree height (m)",
+'No site impression yet because it is a first registration.' AS site_impressions
 
 FROM akvo_tree_registration_areas_updated
 WHERE polygon ISNULL),
@@ -2337,12 +2391,9 @@ CALC_TAB_monitoring_calculations_per_site.nr_days_registration_monitoring,
 CALC_TAB_monitoring_calculations_per_site.nr_years_registration_monitoring,
 CALC_TAB_monitoring_calculations_per_site.label_strata,
 CALC_TAB_monitoring_calculations_per_site.perc_trees_survived,
-CALC_TAB_monitoring_calculations_per_site.avg_tree_height,
-akvo_tree_monitoring_areas.site_impression
+CALC_TAB_monitoring_calculations_per_site.avg_tree_height
 
 FROM CALC_TAB_monitoring_calculations_per_site
-JOIN akvo_tree_monitoring_areas
-ON akvo_tree_monitoring_areas.identifier_akvo = CALC_TAB_monitoring_calculations_per_site.identifier_akvo
 WHERE CALC_TAB_monitoring_calculations_per_site.organisation NOTNULL;'''
 
 conn.commit()
