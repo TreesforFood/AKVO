@@ -26,9 +26,6 @@ FROM AKVO_tree_registration_areas_updated_self_intersections
 WHERE akvo_tree_registration_areas_updated.identifier_akvo = AKVO_tree_registration_areas_updated_self_intersections.identifier_akvo
 ;'''
 
-cur.execute(drop_tables)
-conn.commit()
-cur.execute(create_a1)
 conn.commit()
 cur.execute(detect_self_intersections)
 conn.commit()
