@@ -24,7 +24,12 @@ ST_Length(ST_LongestLine(pol, pol), true) > 5000)
 UPDATE akvo_tree_registration_areas_updated
 SET needle_shape = akvo_tree_registration_areas_updated_needle_polygons.lenll_m
 FROM akvo_tree_registration_areas_updated_needle_polygons
-WHERE akvo_tree_registration_areas_updated.identifier_akvo = akvo_tree_registration_areas_updated_needle_polygons.identifier_akvo;'''
+WHERE akvo_tree_registration_areas_updated.identifier_akvo = akvo_tree_registration_areas_updated_needle_polygons.identifier_akvo;
+
+UPDATE superset_ecosia_tree_registration
+SET polygon_is_spatially_distorted = akvo_tree_registration_areas_updated.needle_shape
+FROM akvo_tree_registration_areas_updated
+WHERE akvo_tree_registration_areas_updated.identifier_akvo = superset_ecosia_tree_registration.identifier_akvo;'''
 
 count_total_geometric_errors = '''WITH total_errors AS (SELECT identifier_akvo,
 CASE
@@ -56,7 +61,12 @@ FROM akvo_tree_registration_areas_updated)
 UPDATE akvo_tree_registration_areas_updated
 SET total_nr_geometric_errors = total_errors.true_count
 FROM total_errors
-WHERE akvo_tree_registration_areas_updated.identifier_akvo = total_errors.identifier_akvo;'''
+WHERE akvo_tree_registration_areas_updated.identifier_akvo = total_errors.identifier_akvo;
+
+UPDATE superset_ecosia_tree_registration
+SET total_nr_polygon_errors_found = akvo_tree_registration_areas_updated.total_nr_geometric_errors
+FROM akvo_tree_registration_areas_updated
+WHERE akvo_tree_registration_areas_updated.identifier_akvo = superset_ecosia_tree_registration.identifier_akvo;'''
 
 cur.execute(detect_needle_polygons)
 conn.commit()

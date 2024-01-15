@@ -25,7 +25,13 @@ a.identifier_akvo != c.identifier_akvo)
 UPDATE akvo_tree_registration_areas_updated
 SET overlap = akvo_tree_registration_areas_updated_overlap.overlap
 FROM akvo_tree_registration_areas_updated_overlap
-WHERE akvo_tree_registration_areas_updated.identifier_akvo = akvo_tree_registration_areas_updated_overlap.identifier_akvo;'''
+WHERE akvo_tree_registration_areas_updated.identifier_akvo = akvo_tree_registration_areas_updated_overlap.identifier_akvo;
+
+UPDATE superset_ecosia_tree_registration
+SET polygon_has_overlap_with_other_polygon = akvo_tree_registration_areas_updated.overlap
+FROM akvo_tree_registration_areas_updated
+WHERE akvo_tree_registration_areas_updated.identifier_akvo = superset_ecosia_tree_registration.identifier_akvo
+;'''
 
 cur.execute(detect_overlap)
 conn.commit()

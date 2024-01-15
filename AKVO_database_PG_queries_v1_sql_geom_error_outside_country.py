@@ -24,8 +24,13 @@ GROUP BY a.identifier_akvo HAVING count(*) > 1)
 UPDATE akvo_tree_registration_areas_updated
 SET outside_country = akvo_tree_registration_areas_updated_outside_country.outside_country
 FROM akvo_tree_registration_areas_updated_outside_country
-WHERE akvo_tree_registration_areas_updated.identifier_akvo = akvo_tree_registration_areas_updated_outside_country.identifier_akvo
-;'''
+WHERE akvo_tree_registration_areas_updated.identifier_akvo = akvo_tree_registration_areas_updated_outside_country.identifier_akvo;
+
+UPDATE superset_ecosia_tree_registration
+SET polygon_overlaps_country_boundary = akvo_tree_registration_areas_updated.outside_country
+FROM akvo_tree_registration_areas_updated
+WHERE akvo_tree_registration_areas_updated.identifier_akvo = superset_ecosia_tree_registration.identifier_akvo;
+'''
 
 cur.execute(detect_outside_country)
 conn.commit()
