@@ -23,7 +23,13 @@ WHERE polygon NOTNULL AND ST_IsValid(polygon::geometry) = False)
 UPDATE akvo_tree_registration_areas_updated
 SET self_intersection = AKVO_tree_registration_areas_updated_self_intersections.self_intersect
 FROM AKVO_tree_registration_areas_updated_self_intersections
-WHERE akvo_tree_registration_areas_updated.identifier_akvo = AKVO_tree_registration_areas_updated_self_intersections.identifier_akvo
+WHERE akvo_tree_registration_areas_updated.identifier_akvo = AKVO_tree_registration_areas_updated_self_intersections.identifier_akvo;
+
+UPDATE superset_ecosia_tree_registration
+SET polygon_has_selfintersection = akvo_tree_registration_areas_updated.self_intersection
+FROM akvo_tree_registration_areas_updated
+WHERE akvo_tree_registration_areas_updated.identifier_akvo = superset_ecosia_tree_registration.identifier_akvo
+
 ;'''
 
 conn.commit()
