@@ -2379,23 +2379,12 @@ THEN 0
 END AS nr_photos_png_format,
 
 
-s4g_ecosia_data_quality.geometric_sum_errors_detected AS "total nr of mapping errors detected",
-s4g_ecosia_data_quality.geometric_error_polygon AS "site was mapped with too few points (less than 3)",
-s4g_ecosia_data_quality.geometric_error_point AS "site was mapped wrongly",
-s4g_ecosia_data_quality.geometric_error_sliver_polygon AS "mapped site has multiple areas",
-s4g_ecosia_data_quality.geometric_error_area_too_large AS "area of the site is unrealisticly large",
-s4g_ecosia_data_quality.geometric_error_area_too_small AS "area of the site is unrealisticly small",
-s4g_ecosia_data_quality.geometric_error_area_boundary_overlap_other_site AS "mapped site has overlap with another site",
-s4g_ecosia_data_quality.geometric_error_boundary_too_large AS "boundary of mapped site seems unrealistic",
-s4g_ecosia_data_quality.geometric_error_site_not_in_country AS "mapped site not located in country of project",
-s4g_ecosia_data_quality.geometric_error_water_body_located_in_site AS "mapped site contains water area",
-s4g_ecosia_data_quality.geometric_error_urban_body_located_in_site AS "mapped site contains urban area",
-s4g_ecosia_data_quality.buffer_area_around_point_location AS "artificial 50m buffer placed around mapped site (points)",
 count_number_tree_species_registered.nr_species_registered,
-S4G_API_health_indicators.health_index,
-S4G_API_health_indicators.health_index_normalized,
-S4G_API_health_indicators.health_trend,
-S4G_API_health_indicators.health_trend_normalized,
+t.self_intersection AS polygon_has_selfintersection,
+t.overlap AS polygon_has_overlap_with_other_polygon,
+t.outside_country AS polygon_overlaps_country_boundary,
+t.needle_shape AS polygon_is_spatially_distorted,
+t.total_nr_geometric_errors AS total_nr_polygon_errors_found,
 
 json_build_object(
 'type', 'Polygon',
@@ -2403,10 +2392,7 @@ json_build_object(
 
 FROM
 akvo_tree_registration_areas_updated AS t
-LEFT JOIN s4g_ecosia_data_quality
-ON t.identifier_akvo = s4g_ecosia_data_quality.identifier_akvo
-LEFT JOIN S4G_API_health_indicators
-ON t.identifier_akvo = S4G_API_health_indicators.identifier_akvo
+
 LEFT JOIN count_total_number_photos_per_site
 ON count_total_number_photos_per_site.identifier_akvo = t.identifier_akvo
 LEFT JOIN count_number_tree_species_registered
