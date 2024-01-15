@@ -6,3 +6,12 @@ area
 cloudpickle
 geopy
 gdal == 3.5.0
+
+nasa_wildfires
+geopandas
+math
+shapely
+matplotlib
+numpy
+psycopg2
+sqlalchemy
