@@ -2,11 +2,10 @@ requests
 geojson
 psycopg2
 geodaisy
-area
+area
 cloudpickle
 geopy
 gdal == 3.5.0
-
 nasa_wildfires
 geopandas
 math
