@@ -139,7 +139,7 @@ AND
 a.needle_shape = false;
 
 -- Create table with historic fires (if not yet exists) for all registration areas where at least 1 time a fire occured
-CREATE TABLE IF NOT EXISTS AKVO_tree_registration_areas_updated_historic_fires (
+CREATE TABLE IF NOT EXISTS superset_ecosia_firms_historic_fires (
 identifier_akvo TEXT,
 date TEXT,
 confidence_level TEXT,
@@ -151,7 +151,7 @@ xcenter REAL,
 ycenter REAL);
 
 -- Add new 24h fires to historic fire table to build up an historic fire database for each planting site
-INSERT INTO AKVO_tree_registration_areas_updated_historic_fires
+INSERT INTO superset_ecosia_firms_historic_fires
 (identifier_akvo, date, confidence_level, brightness_pix_temp_kelvin_channel4, satellite_name,
 fire_radiative_power_megawatt, area_overlap_firepixel, xcenter, ycenter)
 SELECT identifier_akvo, date, confidence_level, brightness_pix_temp_kelvin_channel4, satellite_name,
@@ -162,6 +162,26 @@ FROM AKVO_tree_registration_areas_updated_new_24h_fires;
 conn.commit()
 
 cur.execute('''DROP TABLE IF EXISTS AKVO_tree_registration_areas_updated_new_24h_fires;''')
+
+conn.commit()
+
+cur.execute('''DROP TABLE IF EXISTS FIRES_FIRM_GLOBAL;''')
+
+conn.commit()
+
+cur.execute('''
+REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA public FROM ecosia_superset;
+
+GRANT USAGE ON SCHEMA PUBLIC TO ecosia_superset;
+GRANT USAGE ON SCHEMA HEROKU_EXT TO ecosia_superset;
+
+GRANT SELECT ON TABLE superset_ecosia_firms_historic_fires TO ecosia_superset;
+
+DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_firms_historic_fires;
+
+ALTER TABLE superset_ecosia_firms_historic_fires enable ROW LEVEL SECURITY;
+
+CREATE POLICY ecosia_superset_policy ON superset_ecosia_firms_historic_fires TO ecosia_superset USING (true);''')
 
 conn.commit()
 
