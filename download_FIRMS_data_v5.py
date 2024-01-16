@@ -9,7 +9,6 @@ import numpy as np
 import math
 import psycopg2
 import os
-from dotenv import load_dotenv, find_dotenv
 from sqlalchemy import create_engine
 
 # retrieve specific sensor and specific region data
