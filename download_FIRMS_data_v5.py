@@ -149,7 +149,7 @@ satellite_name TEXT,
 fire_radiative_power_megawatt NUMERIC(10,2),
 area_overlap_firepixel NUMERIC(10,2),
 xcenter REAL,
-ycenter REAL;
+ycenter REAL);
 
 ALTER TABLE superset_ecosia_firms_historic_fires
 ADD COLUMN fire_pixel geography(POLYGON, 4326);
