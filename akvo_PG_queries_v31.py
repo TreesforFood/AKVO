@@ -120,8 +120,8 @@ b.check_ownership_trees,
 b.gender_tree_receiver,
 b.name_tree_receiver
 
-FROM  akvo_tree_distribution_unregistered_farmers AS a
-INNER JOIN akvo_site_registration_distributed_trees AS b
+FROM akvo_site_registration_distributed_trees AS a
+INNER JOIN akvo_tree_distribution_unregistered_farmers AS b
 ON a.identifier_akvo = b.identifier_akvo),
 
 -- Merge (UNION) all data from the akvo tree registration form with the data from the tree registration of unregistered farmers
