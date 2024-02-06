@@ -2453,7 +2453,9 @@ UNION ALL
 SELECT identifier_akvo, url_photo FROM AKVO_Tree_external_audits_photos
 UNION ALL
 SELECT identifier_akvo, photo_owner FROM AKVO_tree_registration_areas_updated
-WHERE AKVO_tree_registration_areas_updated.photo_owner NOTNULL),
+WHERE AKVO_tree_registration_areas_updated.photo_owner NOTNULL
+UNION ALL
+SELECT identifier_akvo, photo_url_4 FROM akvo_site_registration_distributed_trees_photos),
 
 count_total_number_photos_per_site AS (SELECT identifier_akvo, COUNT(identifier_akvo) AS total_nr_photos
 FROM COUNT_Total_number_of_photos_taken
