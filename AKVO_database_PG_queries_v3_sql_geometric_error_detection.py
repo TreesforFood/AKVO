@@ -111,7 +111,7 @@ WHERE akvo_tree_registration_areas_updated.identifier_akvo = akvo_tree_registrat
 
 conn.commit()
 
-count_total_geometric_errors = '''WITH total_errors AS (SELECT identifier_akvo,
+count_total_geometric_errors_akvo = '''WITH total_errors AS (SELECT identifier_akvo,
 CASE
 WHEN self_intersection = True
 THEN 1
@@ -145,12 +145,47 @@ WHERE akvo_tree_registration_areas_updated.identifier_akvo = total_errors.identi
 
 conn.commit()
 
+count_total_geometric_errors_superset = '''WITH total_errors AS (SELECT identifier_akvo,
+CASE
+WHEN self_intersection = True
+THEN 1
+ELSE 0
+END +
+
+CASE
+WHEN overlap = True
+THEN 1
+ELSE 0
+END +
+
+CASE
+WHEN outside_country = True
+THEN 1
+ELSE 0
+END +
+
+CASE
+WHEN needle_shape = True
+THEN 1
+ELSE 0
+END AS true_count
+
+FROM akvo_tree_registration_areas_updated)
+
+UPDATE superset_ecosia_tree_registration
+SET total_nr_polygon_errors_found = total_errors.true_count
+FROM total_errors
+WHERE superset_ecosia_tree_registration.identifier_akvo = total_errors.identifier_akvo;'''
+
+conn.commit()
+
 cur.execute(drop_tables)
 cur.execute(detect_self_intersections)
 cur.execute(detect_overlap)
 cur.execute(detect_outside_country)
 cur.execute(detect_needle_polygons)
-cur.execute(count_total_geometric_errors)
+cur.execute(count_total_geometric_errors_akvo)
+cur.execute(count_total_geometric_errors_superset)
 
 conn.commit()
 cur.close()
