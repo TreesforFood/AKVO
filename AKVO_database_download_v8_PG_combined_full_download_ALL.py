@@ -1,16 +1,11 @@
 import requests
 import json
-import sqlite3
+import psycopg2
 import re
 import geojson
 import geodaisy.converters as convert
 from area import area
-import psycopg2
-from dotenv import load_dotenv, find_dotenv
 import os
-from akvo_api_config import Config
-from osgeo import ogr
-import sys
 
 config = Config()
 
@@ -2121,7 +2116,7 @@ for first_download_url in fetch_latest_url: # Parse through the nextPageUrl page
             pass
         else:
             for species in registration_distributed_trees['responses']['242845264']:
-            
+
                 try:
                     species['258032656']
                 except KeyError:
