@@ -1407,7 +1407,6 @@ for first_download_url in fetch_latest_url: # Parse through the nextPageUrl page
             pass
         else:
             for pcq_results in level1_exaudits['responses']['158130010']:
-                print('PCQ results :' ,pcq_results)
 
                 try:
                     lat_sample_pcq = pcq_results['158130011']['lat']
