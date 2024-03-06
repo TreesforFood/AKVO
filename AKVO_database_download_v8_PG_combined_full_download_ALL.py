@@ -6,6 +6,8 @@ import geojson
 import geodaisy.converters as convert
 from area import area
 import os
+from osgeo import ogr
+import sys
 
 def left(var, amount):
     return var[:amount]
