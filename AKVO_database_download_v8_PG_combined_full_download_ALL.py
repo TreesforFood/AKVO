@@ -7,6 +7,14 @@ import geodaisy.converters as convert
 from area import area
 import os
 
+def left(var, amount):
+    return var[:amount]
+
+def mid(var,begin,end):
+    return var[begin:end]
+
+count_pages_registration_data = 0
+
 # get the token from AKVO
 data = {"client_id": os.environ["CLIENT_ID"], "username" : os.environ["USERNAME"], "password": os.environ["PASSWORD"], "grant_type": os.environ["GRANT_TYPE"], "scope": os.environ["SCOPE"]}
 response = requests.post("https://akvofoundation.eu.auth0.com/oauth/token", data=data)
