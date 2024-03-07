@@ -116,6 +116,7 @@ conn.commit()
 
 cur.execute('''
 DROP TABLE IF EXISTS AKVO_tree_registration_areas_updated_new_24h_fires;''')
+
 conn.commit()
 
 
@@ -142,12 +143,12 @@ FROM AKVO_tree_registration_areas_updated AS a
 INNER JOIN FIRES_FIRM_GLOBAL AS b
 ON ST_Intersects(a.polygon::geometry, b.pix_polygon::geometry)
 INNER JOIN superset_ecosia_tree_registration AS c
-ON superset_ecosia_tree_registration.identifier_akvo = AKVO_tree_registration_areas_updated.identifier_akvo
+ON c.identifier_akvo = a.identifier_akvo
 WHERE a.polygon NOTNULL
 AND
-self_intersection ISNULL
+a.self_intersection ISNULL
 AND
-needle_shape ISNULL);
+a.needle_shape ISNULL);
 
 -- Create table with historic fires (if not yet exists) for all registration areas where at least 1 time a fire occured
 CREATE TABLE IF NOT EXISTS superset_ecosia_firms_historic_fires (
