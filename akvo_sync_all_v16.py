@@ -1603,6 +1603,9 @@ for level1 in changes_form_30050006_lst:
                         photo_lon = str(photo_lon)
                         photo_location = 'POINT('+ photo_lon + ' ' + photo_lat + ')'
 
+                    else:
+                        photo_location = None
+
                 except:
                     photo_lat = None
                     photo_lon = None
@@ -1696,6 +1699,9 @@ for level1_m in changes_form_6070006_lst:
                         photo_lat_m = str(photo_lat_m)
                         photo_lon_m = str(photo_lon_m)
                         photo_location_m = 'POINT('+ photo_lon_m + ' ' + photo_lat_m + ')'
+
+                    else:
+                        photo_location_m = None
 
                 except:
                     photo_lat_m = None
