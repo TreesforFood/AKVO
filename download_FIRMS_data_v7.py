@@ -189,7 +189,17 @@ WHEN perc_firepixel_covered_by_overlap > 75 AND confidence_level <> 'low'
 THEN 'fire almost definitely inside planting site'
 ELSE 'fire reported around or in the planting site, but with low confidence'
 END;
+
+UPDATE superset_ecosia_firms_historic_fires
+SET
+partnercode_main = b.partnercode_main,
+partnercode_sub = b.partnercode_sub,
+contract_number = b.contract_number
+FROM superset_ecosia_firms_historic_fires a
+INNER JOIN superset_ecosia_tree_registration b
+ON a.identifier_akvo = b.identifier_akvo;
 ''')
+
 conn.commit()
 
 cur.execute('''DROP TABLE IF EXISTS AKVO_tree_registration_areas_updated_new_24h_fires;''')
