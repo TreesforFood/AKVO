@@ -190,6 +190,14 @@ THEN 'fire almost definitely inside planting site'
 ELSE 'fire reported around or in the planting site, but with low confidence'
 END;
 
+UPDATE superset_ecosia_firms_historic_fires AS ta
+SET
+partnercode_main = tb.partnercode_main,
+partnercode_sub = tb.partnercode_sub,
+contract_number = tb.contract_number
+FROM superset_ecosia_tree_registration AS tb
+WHERE ta.identifier_akvo = tb.identifier_akvo;
+
 ''')
 
 conn.commit()
