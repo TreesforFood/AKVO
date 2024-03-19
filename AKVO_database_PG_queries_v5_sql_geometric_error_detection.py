@@ -63,22 +63,19 @@ INNER JOIN akvo_tree_registration_areas_updated_temp_table c
 ON (a.pol && c.pol
 AND ST_Overlaps(a.pol,c.pol))
 WHERE
-a.identifier_akvo != c.identifier_akvo
-AND a.total_nr_geometric_errors ISNULL)
+a.identifier_akvo != c.identifier_akvo)
 
 UPDATE akvo_tree_registration_areas_updated
 SET overlap = akvo_tree_registration_areas_updated_overlap.overlap
 FROM akvo_tree_registration_areas_updated_overlap
-WHERE akvo_tree_registration_areas_updated.identifier_akvo = akvo_tree_registration_areas_updated_overlap.identifier_akvo
-AND akvo_tree_registration_areas_updated.total_nr_geometric_errors ISNULL;'''
+WHERE akvo_tree_registration_areas_updated.identifier_akvo = akvo_tree_registration_areas_updated_overlap.identifier_akvo;'''
 
 conn.commit()
 
 detect_outside_country = '''
 WITH akvo_tree_registration_areas_updated_temp_table AS (SELECT identifier_akvo, id_planting_site, organisation, country, ST_MakeValid(polygon::geometry) AS pol
 FROM akvo_tree_registration_areas_updated
-WHERE polygon NOTNULL
-AND akvo_tree_registration_areas_updated.total_nr_geometric_errors ISNULL),
+WHERE polygon NOTNULL),
 
 --CHECK IF POLYGON IS WITHIN A COUNTRY
 akvo_tree_registration_areas_updated_outside_country AS (SELECT a.identifier_akvo,
@@ -94,8 +91,7 @@ GROUP BY a.identifier_akvo HAVING count(*) > 1)
 UPDATE akvo_tree_registration_areas_updated
 SET outside_country = akvo_tree_registration_areas_updated_outside_country.outside_country
 FROM akvo_tree_registration_areas_updated_outside_country
-WHERE akvo_tree_registration_areas_updated.identifier_akvo = akvo_tree_registration_areas_updated_outside_country.identifier_akvo
-AND akvo_tree_registration_areas_updated.total_nr_geometric_errors ISNULL;'''
+WHERE akvo_tree_registration_areas_updated.identifier_akvo = akvo_tree_registration_areas_updated_outside_country.identifier_akvo;'''
 
 conn.commit()
 
@@ -119,8 +115,7 @@ ST_Length(ST_LongestLine(pol, pol), true) > 5000)
 UPDATE akvo_tree_registration_areas_updated
 SET needle_shape = akvo_tree_registration_areas_updated_needle_polygons.lenll_m
 FROM akvo_tree_registration_areas_updated_needle_polygons
-WHERE akvo_tree_registration_areas_updated.identifier_akvo = akvo_tree_registration_areas_updated_needle_polygons.identifier_akvo
-AND akvo_tree_registration_areas_updated.total_nr_geometric_errors ISNULL;'''
+WHERE akvo_tree_registration_areas_updated.identifier_akvo = akvo_tree_registration_areas_updated_needle_polygons.identifier_akvo;'''
 
 conn.commit()
 
@@ -138,8 +133,7 @@ WHERE t.total_nr_geometric_errors ISNULL)
 UPDATE akvo_tree_registration_areas_updated
 SET check_200_trees = akvo_tree_registration_areas_updated_check_200_trees.check_200_trees
 FROM akvo_tree_registration_areas_updated_check_200_trees
-WHERE akvo_tree_registration_areas_updated.identifier_akvo = akvo_tree_registration_areas_updated_check_200_trees.identifier_akvo
-AND akvo_tree_registration_areas_updated.total_nr_geometric_errors ISNULL;'''
+WHERE akvo_tree_registration_areas_updated.identifier_akvo = akvo_tree_registration_areas_updated_check_200_trees.identifier_akvo;'''
 
 conn.commit()
 
@@ -188,8 +182,7 @@ WHERE akvo_tree_registration_areas_updated.total_nr_geometric_errors ISNULL)
 UPDATE akvo_tree_registration_areas_updated
 SET total_nr_geometric_errors = total_errors.true_count
 FROM total_errors
-WHERE akvo_tree_registration_areas_updated.identifier_akvo = total_errors.identifier_akvo
-AND akvo_tree_registration_areas_updated.total_nr_geometric_errors ISNULL;'''
+WHERE akvo_tree_registration_areas_updated.identifier_akvo = total_errors.identifier_akvo;'''
 
 conn.commit()
 
@@ -206,8 +199,7 @@ polygon_is_spatially_distorted = akvo_tree_registration_areas_updated.needle_sha
 total_nr_polygon_errors_found = akvo_tree_registration_areas_updated.total_nr_geometric_errors
 
 FROM akvo_tree_registration_areas_updated
-WHERE superset_ecosia_tree_registration.identifier_akvo = akvo_tree_registration_areas_updated.identifier_akvo
-AND akvo_tree_registration_areas_updated.total_nr_geometric_errors ISNULL;'''
+WHERE superset_ecosia_tree_registration.identifier_akvo = akvo_tree_registration_areas_updated.identifier_akvo;'''
 
 conn.commit()
 
