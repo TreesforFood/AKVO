@@ -137,6 +137,28 @@ WHERE akvo_tree_registration_areas_updated.identifier_akvo = akvo_tree_registrat
 
 conn.commit()
 
+check_duplicate_polygons = '''WITH duplicate_polygons AS (
+SELECT
+a.identifier_akvo AS identifier_akvo_a,
+b.identifier_akvo AS identifier_akvo_b
+FROM akvo_tree_registration_areas_updated a, akvo_tree_registration_areas_updated b
+WHERE ST_EQUALS(a.polygon::geometry, b.polygon::geometry)
+AND a.identifier_akvo != b.identifier_akvo),
+
+-- Transpose all identifiers_akvo from multiple rows into 1 row
+transpose_duplicate_identifiers AS
+(SELECT duplicate_polygons.identifier_akvo_a AS identifier_akvo,
+STRING_AGG(duplicate_polygons.identifier_akvo_b,' | ') duplicates
+FROM duplicate_polygons
+GROUP BY duplicate_polygons.identifier_akvo_a)
+
+UPDATE akvo_tree_registration_areas_updated
+SET check_duplicate_polygons = transpose_duplicate_identifiers.duplicates
+FROM transpose_duplicate_identifiers
+WHERE akvo_tree_registration_areas_updated.identifier_akvo = transpose_duplicate_identifiers.identifier_akvo;'''
+
+conn.commit()
+
 count_total_geometric_errors_akvo = '''WITH total_errors AS (SELECT identifier_akvo,
 CASE
 WHEN self_intersection = True
@@ -163,6 +185,14 @@ END
 +
 
 CASE
+WHEN check_duplicate_polygons NOTNULL
+THEN 1
+ELSE 0
+END
+
++
+
+CASE
 WHEN outside_country = True
 THEN 1
 ELSE 0
@@ -176,8 +206,7 @@ THEN 1
 ELSE 0
 END AS true_count
 
-FROM akvo_tree_registration_areas_updated
-WHERE akvo_tree_registration_areas_updated.total_nr_geometric_errors ISNULL)
+FROM akvo_tree_registration_areas_updated)
 
 UPDATE akvo_tree_registration_areas_updated
 SET total_nr_geometric_errors = total_errors.true_count
@@ -185,7 +214,6 @@ FROM total_errors
 WHERE akvo_tree_registration_areas_updated.identifier_akvo = total_errors.identifier_akvo;'''
 
 conn.commit()
-
 
 # UPDATE THE SUPERSET TABLE SEPERATLY SINCE WE FIRST CREATE THIS TABLE BY COPYING THE TABLE akvo_tree_registration_areas_updated.
 count_total_geometric_errors_superset = '''
@@ -195,6 +223,7 @@ polygon_has_selfintersection = akvo_tree_registration_areas_updated.self_interse
 polygon_has_overlap_with_other_polygon = akvo_tree_registration_areas_updated.overlap,
 polygon_overlaps_country_boundary = akvo_tree_registration_areas_updated.outside_country,
 more_200_trees_no_polygon = akvo_tree_registration_areas_updated.check_200_trees,
+check_duplicate_polygons = akvo_tree_registration_areas_updated.check_duplicate_polygons,
 polygon_is_spatially_distorted = akvo_tree_registration_areas_updated.needle_shape,
 total_nr_polygon_errors_found = akvo_tree_registration_areas_updated.total_nr_geometric_errors
 
@@ -209,6 +238,7 @@ cur.execute(detect_overlap)
 cur.execute(detect_outside_country)
 cur.execute(detect_needle_polygons)
 cur.execute(check_200_trees)
+cur.execute(check_duplicate_polygons)
 cur.execute(count_total_geometric_errors_akvo)
 cur.execute(count_total_geometric_errors_superset)
 
