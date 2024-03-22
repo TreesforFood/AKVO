@@ -251,6 +251,7 @@ ADD self_intersection BOOLEAN,
 ADD overlap BOOLEAN,
 ADD outside_country BOOLEAN,
 ADD check_200_trees BOOLEAN,
+ADD check_duplicate_polygons TEXT,
 ADD needle_shape BOOLEAN,
 ADD total_nr_geometric_errors INTEGER;
 
@@ -2567,6 +2568,7 @@ t.self_intersection AS polygon_has_selfintersection,
 t.overlap AS polygon_has_overlap_with_other_polygon,
 t.outside_country AS polygon_overlaps_country_boundary,
 t.check_200_trees AS more_200_trees_no_polygon,
+t.check_duplicate_polygons,
 t.needle_shape AS polygon_is_spatially_distorted,
 t.total_nr_geometric_errors AS total_nr_polygon_errors_found,
 
