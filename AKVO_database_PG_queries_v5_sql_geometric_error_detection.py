@@ -185,14 +185,6 @@ END
 +
 
 CASE
-WHEN check_duplicate_polygons NOTNULL
-THEN 1
-ELSE 0
-END
-
-+
-
-CASE
 WHEN outside_country = True
 THEN 1
 ELSE 0
@@ -238,7 +230,6 @@ cur.execute(detect_overlap)
 cur.execute(detect_outside_country)
 cur.execute(detect_needle_polygons)
 cur.execute(check_200_trees)
-cur.execute(check_duplicate_polygons)
 cur.execute(count_total_geometric_errors_akvo)
 cur.execute(count_total_geometric_errors_superset)
 
