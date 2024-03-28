@@ -22,10 +22,11 @@ references = requests.get(f"{root}/projects", headers = headers)
 projects_dict = references.json()
 
 cur.execute('''DROP TABLE IF EXISTS KANOP_analysis_polygon_level_1_moment;''')
+cur.execute('''DROP TABLE IF EXISTS superset_ecosia_KANOP_polygon_level_1_moment;''')
 
 conn.commit()
 
-cur.execute('''CREATE TABLE IF NOT EXISTS KANOP_analysis_polygon_level_1_moment (
+cur.execute('''CREATE TABLE IF NOT EXISTS superset_ecosia_KANOP_polygon_level_1_moment (
 identifier_akvo TEXT,
 request_measurement_date DATE,
 kanop_project_id TEXT,
@@ -304,7 +305,7 @@ for project_list in project_list_overview:
                                     co2eqPerHa = value['value']
 
                 # Populate the KANOP table
-                cur.execute('''INSERT INTO KANOP_analysis_polygon_level_1_moment (
+                cur.execute('''INSERT INTO superset_ecosia_KANOP_polygon_level_1_moment (
                 identifier_akvo,request_measurement_date, kanop_project_id, forestCover, canopyCover, canopyHeightMean, treeHeightMean,
                 livingAbovegroundBiomass,livingAbovegroundBiomassPerHa,livingBelowgroundBiomass,livingBelowgroundBiomassPerHa,
                 livingBiomass,livingBiomassPerHa,carbon,carbonPerHa,co2eq,co2eqPerHa)
