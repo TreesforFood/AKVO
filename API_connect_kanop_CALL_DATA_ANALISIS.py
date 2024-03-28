@@ -4,6 +4,7 @@ import psycopg2
 import cgi
 import re
 import geojson
+import os
 
 
 #connect to Heroku Postgresql database
