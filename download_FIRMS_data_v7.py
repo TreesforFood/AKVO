@@ -94,7 +94,7 @@ DROP TABLE IF EXISTS FIRES_FIRM_GLOBAL;''')
 conn.commit()
 
 cur.execute('''
-CREATE TABLE FIRES_FIRM_GLOBAL (date TEXT, confidence_level TEXT, brightness_pix_temp_kelvin_channel4 NUMERIC(10,2),
+CREATE TABLE FIRES_FIRM_GLOBAL (date DATE, confidence_level TEXT, brightness_pix_temp_kelvin_channel4 NUMERIC(10,2),
 satellite_name TEXT, fire_radiative_power_megawatt NUMERIC(10,2), xcenter REAL, ycenter REAL, pix_polygon geography(POLYGON, 4326));
 ''')
 conn.commit()
@@ -190,6 +190,7 @@ THEN 'fire almost definitely inside planting site'
 ELSE 'fire reported around or in the planting site, but with low confidence'
 END;
 
+--- Do a final update of rows that did not had the partner_code and contract number yet (older requests)
 UPDATE superset_ecosia_firms_historic_fires AS ta
 SET
 partnercode_main = tb.partnercode_main,
@@ -197,6 +198,11 @@ partnercode_sub = tb.partnercode_sub,
 contract_number = tb.contract_number
 FROM superset_ecosia_tree_registration AS tb
 WHERE ta.identifier_akvo = tb.identifier_akvo;
+
+UPDATE superset_ecosia_firms_historic_fires
+SET geojson = json_build_object(
+'type', 'Polygon',
+'geometry', ST_AsGeoJSON(fire_pixel)::json)::text;
 
 ''')
 
