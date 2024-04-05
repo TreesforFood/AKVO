@@ -199,10 +199,22 @@ contract_number = tb.contract_number
 FROM superset_ecosia_tree_registration AS tb
 WHERE ta.identifier_akvo = tb.identifier_akvo;
 
+WITH geojson_table AS (select identifier_akvo, geojson, date, jsonb_build_object(
+    'type',       'FeatureCollection',
+    'features',   json_agg(json_build_object(
+        'type',       'Feature',
+		'properties', 'fire_location',
+        'geometry',   ST_AsGeoJSON(fire_pixel)::json)))::text AS geojson_fires
+
+FROM superset_ecosia_firms_historic_fires
+group by geojson, date, identifier_akvo)
+
 UPDATE superset_ecosia_firms_historic_fires
-SET geojson = json_build_object(
-'type', 'Polygon',
-'geometry', ST_AsGeoJSON(fire_pixel)::json)::text;
+SET geojson = geojson_table.geojson_fires
+from geojson_table
+WHERE superset_ecosia_firms_historic_fires.identifier_akvo = geojson_table.identifier_akvo
+AND superset_ecosia_firms_historic_fires.date = geojson_table.date
+AND superset_ecosia_firms_historic_fires.geojson = geojson_table.geojson;''')
 
 ''')
 
