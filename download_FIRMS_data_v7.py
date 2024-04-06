@@ -216,8 +216,6 @@ WHERE superset_ecosia_firms_historic_fires.identifier_akvo = geojson_table.ident
 AND superset_ecosia_firms_historic_fires.date = geojson_table.date
 AND superset_ecosia_firms_historic_fires.geojson = geojson_table.geojson;''')
 
-''')
-
 conn.commit()
 
 cur.execute('''DROP TABLE IF EXISTS AKVO_tree_registration_areas_updated_new_24h_fires;''')
