@@ -211,8 +211,8 @@ else:
                                 photo_lat = str(photo_lat)
                                 photo_lon = str(photo_lon)
                                 photo_location = 'POINT('+ photo_lon + ' ' + photo_lat + ')'
-                        else:
-                            photo_location = None
+                            else:
+                                photo_location = None
 
                         except:
                             photo_lat = None
