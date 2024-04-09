@@ -2421,7 +2421,7 @@ LOWER(akvo_nursery_registration.organisation) AS organisation,
 
 CASE
 WHEN POSITION('-' IN akvo_nursery_registration.organisation) > 0
-THEN LOWER(left(akvo_nursery_registration.organisation, strpos(akvo_nursery_registration.organisation, '-') - 1))
+THEN LOWER(left(akvo_nursery_registration.organisation, strpos(akvo_nursery_registration.organisation, '-') - 2))
 WHEN POSITION(' -' IN akvo_nursery_registration.organisation) > 0
 THEN LOWER(left(akvo_nursery_registration.organisation, strpos(akvo_nursery_registration.organisation, '-')))
 WHEN POSITION('/' IN akvo_nursery_registration.organisation) > 0
@@ -2542,7 +2542,7 @@ t.organisation,
 
 CASE
 WHEN POSITION('-' IN t.organisation) > 0
-THEN LOWER(left(t.organisation, strpos(t.organisation, '-') - 1))
+THEN LOWER(left(t.organisation, strpos(t.organisation, '-') - 2))
 WHEN POSITION(' -' IN t.organisation) > 0
 THEN LOWER(left(t.organisation, strpos(t.organisation, '-')))
 WHEN POSITION('/' IN t.organisation) > 0
@@ -2696,26 +2696,18 @@ LOWER(CALC_TAB_monitoring_calculations_per_site.organisation) AS organisation,
 
 CASE
 WHEN POSITION('-' IN CALC_TAB_monitoring_calculations_per_site.organisation) > 0
-THEN LOWER(left(CALC_TAB_monitoring_calculations_per_site.organisation, strpos(CALC_TAB_monitoring_calculations_per_site.organisation, '-') - 1))
-WHEN POSITION(' -' IN CALC_TAB_monitoring_calculations_per_site.organisation) > 0
-THEN LOWER(left(CALC_TAB_monitoring_calculations_per_site.organisation, strpos(CALC_TAB_monitoring_calculations_per_site.organisation, '-')))
+THEN LOWER(left(CALC_TAB_monitoring_calculations_per_site.organisation, strpos(CALC_TAB_monitoring_calculations_per_site.organisation, '-') - 2))
 WHEN POSITION('/' IN CALC_TAB_monitoring_calculations_per_site.organisation) > 0
 THEN LOWER(left(CALC_TAB_monitoring_calculations_per_site.organisation, strpos(CALC_TAB_monitoring_calculations_per_site.organisation, '/') - 1))
-WHEN POSITION(' /' IN CALC_TAB_monitoring_calculations_per_site.organisation) > 0
-THEN LOWER(left(CALC_TAB_monitoring_calculations_per_site.organisation, strpos(CALC_TAB_monitoring_calculations_per_site.organisation, '/')))
 ElSE
 LOWER(CALC_TAB_monitoring_calculations_per_site.organisation)
 END AS partner,
 
 CASE
-WHEN POSITION('- ' IN CALC_TAB_monitoring_calculations_per_site.organisation) > 0
-THEN LOWER(right(CALC_TAB_monitoring_calculations_per_site.organisation, (LENGTH(CALC_TAB_monitoring_calculations_per_site.organisation) - strpos(CALC_TAB_monitoring_calculations_per_site.organisation, '-')-1)))
 WHEN POSITION('-' IN CALC_TAB_monitoring_calculations_per_site.organisation) > 0
-THEN LOWER(right(CALC_TAB_monitoring_calculations_per_site.organisation, (LENGTH(CALC_TAB_monitoring_calculations_per_site.organisation) - strpos(CALC_TAB_monitoring_calculations_per_site.organisation, '-'))))
+THEN LOWER(right(CALC_TAB_monitoring_calculations_per_site.organisation, (LENGTH(CALC_TAB_monitoring_calculations_per_site.organisation) - strpos(CALC_TAB_monitoring_calculations_per_site.organisation, '-')-1)))
 WHEN POSITION('/' IN CALC_TAB_monitoring_calculations_per_site.organisation) > 0
 THEN LOWER(right(CALC_TAB_monitoring_calculations_per_site.organisation, (LENGTH(CALC_TAB_monitoring_calculations_per_site.organisation) - strpos(CALC_TAB_monitoring_calculations_per_site.organisation, '/'))))
-WHEN POSITION('/ ' IN CALC_TAB_monitoring_calculations_per_site.organisation) > 0
-THEN LOWER(right(CALC_TAB_monitoring_calculations_per_site.organisation, (LENGTH(CALC_TAB_monitoring_calculations_per_site.organisation) - strpos(CALC_TAB_monitoring_calculations_per_site.organisation, '/')-1)))
 ElSE
 ''
 END AS sub_partner,
@@ -2854,7 +2846,7 @@ LOWER(akvo_nursery_registration.organisation) AS organisation,
 
 CASE
 WHEN POSITION('-' IN akvo_nursery_registration.organisation) > 0
-THEN LOWER(left(akvo_nursery_registration.organisation, strpos(akvo_nursery_registration.organisation, '-') - 1))
+THEN LOWER(left(akvo_nursery_registration.organisation, strpos(akvo_nursery_registration.organisation, '-') - 2))
 WHEN POSITION(' -' IN akvo_nursery_registration.organisation) > 0
 THEN LOWER(left(akvo_nursery_registration.organisation, strpos(akvo_nursery_registration.organisation, '-')))
 WHEN POSITION('/' IN akvo_nursery_registration.organisation) > 0
@@ -2929,7 +2921,7 @@ LOWER(akvo_nursery_registration.organisation) AS organisation,
 
 CASE
 WHEN POSITION('-' IN akvo_nursery_registration.organisation) > 0
-THEN LOWER(left(akvo_nursery_registration.organisation, strpos(akvo_nursery_registration.organisation, '-') - 1))
+THEN LOWER(left(akvo_nursery_registration.organisation, strpos(akvo_nursery_registration.organisation, '-') - 2))
 WHEN POSITION(' -' IN akvo_nursery_registration.organisation) > 0
 THEN LOWER(left(akvo_nursery_registration.organisation, strpos(akvo_nursery_registration.organisation, '-')))
 WHEN POSITION('/' IN akvo_nursery_registration.organisation) > 0
@@ -2993,7 +2985,7 @@ LOWER(akvo_nursery_registration.organisation) AS organisation,
 
 CASE
 WHEN POSITION('-' IN akvo_nursery_registration.organisation) > 0
-THEN LOWER(left(akvo_nursery_registration.organisation, strpos(akvo_nursery_registration.organisation, '-') - 1))
+THEN LOWER(left(akvo_nursery_registration.organisation, strpos(akvo_nursery_registration.organisation, '-') - 2))
 WHEN POSITION(' -' IN akvo_nursery_registration.organisation) > 0
 THEN LOWER(left(akvo_nursery_registration.organisation, strpos(akvo_nursery_registration.organisation, '-')))
 WHEN POSITION('/' IN akvo_nursery_registration.organisation) > 0
@@ -3074,7 +3066,7 @@ LOWER(akvo_nursery_registration.organisation) AS organisation,
 
 CASE
 WHEN POSITION('-' IN akvo_nursery_registration.organisation) > 0
-THEN LOWER(left(akvo_nursery_registration.organisation, strpos(akvo_nursery_registration.organisation, '-') - 1))
+THEN LOWER(left(akvo_nursery_registration.organisation, strpos(akvo_nursery_registration.organisation, '-') - 2))
 WHEN POSITION(' -' IN akvo_nursery_registration.organisation) > 0
 THEN LOWER(left(akvo_nursery_registration.organisation, strpos(akvo_nursery_registration.organisation, '-')))
 WHEN POSITION('/' IN akvo_nursery_registration.organisation) > 0
@@ -3163,7 +3155,7 @@ LOWER(akvo_tree_registration_areas_updated.organisation) AS organisation,
 
 CASE
 WHEN POSITION('-' IN akvo_tree_registration_areas_updated.organisation) > 0
-THEN LOWER(left(akvo_tree_registration_areas_updated.organisation, strpos(akvo_tree_registration_areas_updated.organisation, '-') - 1))
+THEN LOWER(left(akvo_tree_registration_areas_updated.organisation, strpos(akvo_tree_registration_areas_updated.organisation, '-') - 2))
 WHEN POSITION(' -' IN akvo_tree_registration_areas_updated.organisation) > 0
 THEN LOWER(left(akvo_tree_registration_areas_updated.organisation, strpos(akvo_tree_registration_areas_updated.organisation, '-')))
 WHEN POSITION('/' IN akvo_tree_registration_areas_updated.organisation) > 0
@@ -3233,7 +3225,7 @@ LOWER(akvo_tree_registration_areas_updated.organisation) AS organisation,
 
 CASE
 WHEN POSITION('-' IN akvo_tree_registration_areas_updated.organisation) > 0
-THEN LOWER(left(akvo_tree_registration_areas_updated.organisation, strpos(akvo_tree_registration_areas_updated.organisation, '-') - 1))
+THEN LOWER(left(akvo_tree_registration_areas_updated.organisation, strpos(akvo_tree_registration_areas_updated.organisation, '-') - 2))
 WHEN POSITION(' -' IN akvo_tree_registration_areas_updated.organisation) > 0
 THEN LOWER(left(akvo_tree_registration_areas_updated.organisation, strpos(akvo_tree_registration_areas_updated.organisation, '-')))
 WHEN POSITION('/' IN akvo_tree_registration_areas_updated.organisation) > 0
@@ -3334,7 +3326,7 @@ LOWER(akvo_tree_registration_areas_updated.organisation) AS organisation,
 
 CASE
 WHEN POSITION('-' IN akvo_tree_registration_areas_updated.organisation) > 0
-THEN LOWER(left(akvo_tree_registration_areas_updated.organisation, strpos(akvo_tree_registration_areas_updated.organisation, '-') - 1))
+THEN LOWER(left(akvo_tree_registration_areas_updated.organisation, strpos(akvo_tree_registration_areas_updated.organisation, '-') - 2))
 WHEN POSITION(' -' IN akvo_tree_registration_areas_updated.organisation) > 0
 THEN LOWER(left(akvo_tree_registration_areas_updated.organisation, strpos(akvo_tree_registration_areas_updated.organisation, '-')))
 WHEN POSITION('/' IN akvo_tree_registration_areas_updated.organisation) > 0
@@ -3405,7 +3397,7 @@ LOWER(akvo_tree_registration_areas_updated.organisation) AS organisation,
 
 CASE
 WHEN POSITION('-' IN akvo_tree_registration_areas_updated.organisation) > 0
-THEN LOWER(left(akvo_tree_registration_areas_updated.organisation, strpos(akvo_tree_registration_areas_updated.organisation, '-') - 1))
+THEN LOWER(left(akvo_tree_registration_areas_updated.organisation, strpos(akvo_tree_registration_areas_updated.organisation, '-') - 2))
 WHEN POSITION(' -' IN akvo_tree_registration_areas_updated.organisation) > 0
 THEN LOWER(left(akvo_tree_registration_areas_updated.organisation, strpos(akvo_tree_registration_areas_updated.organisation, '-')))
 WHEN POSITION('/' IN akvo_tree_registration_areas_updated.organisation) > 0
@@ -3475,7 +3467,7 @@ LOWER(akvo_tree_registration_areas_updated.organisation) AS organisation,
 
 CASE
 WHEN POSITION('-' IN akvo_tree_registration_areas_updated.organisation) > 0
-THEN LOWER(left(akvo_tree_registration_areas_updated.organisation, strpos(akvo_tree_registration_areas_updated.organisation, '-') - 1))
+THEN LOWER(left(akvo_tree_registration_areas_updated.organisation, strpos(akvo_tree_registration_areas_updated.organisation, '-') - 2))
 WHEN POSITION(' -' IN akvo_tree_registration_areas_updated.organisation) > 0
 THEN LOWER(left(akvo_tree_registration_areas_updated.organisation, strpos(akvo_tree_registration_areas_updated.organisation, '-')))
 WHEN POSITION('/' IN akvo_tree_registration_areas_updated.organisation) > 0
@@ -3544,7 +3536,7 @@ LOWER(t.organisation) AS organisation,
 
 CASE
 WHEN POSITION('-' IN t.organisation) > 0
-THEN LOWER(left(t.organisation, strpos(t.organisation, '-') - 1))
+THEN LOWER(left(t.organisation, strpos(t.organisation, '-') - 2))
 WHEN POSITION(' -' IN t.organisation) > 0
 THEN LOWER(left(t.organisation, strpos(t.organisation, '-')))
 WHEN POSITION('/' IN t.organisation) > 0
@@ -3615,7 +3607,7 @@ LOWER(t.organisation) AS organisation,
 
 CASE
 WHEN POSITION('-' IN t.organisation) > 0
-THEN LOWER(left(t.organisation, strpos(t.organisation, '-') - 1))
+THEN LOWER(left(t.organisation, strpos(t.organisation, '-') - 2))
 WHEN POSITION(' -' IN t.organisation) > 0
 THEN LOWER(left(t.organisation, strpos(t.organisation, '-')))
 WHEN POSITION('/' IN t.organisation) > 0
@@ -3674,7 +3666,7 @@ t.organisation,
 
 CASE
 WHEN POSITION('-' IN t.organisation) > 0
-THEN LOWER(left(t.organisation, strpos(t.organisation, '-') - 1))
+THEN LOWER(left(t.organisation, strpos(t.organisation, '-') - 2))
 WHEN POSITION(' -' IN t.organisation) > 0
 THEN LOWER(left(t.organisation, strpos(t.organisation, '-')))
 WHEN POSITION('/' IN t.organisation) > 0
@@ -3743,7 +3735,7 @@ LOWER(akvo_tree_registration_areas_updated.organisation) AS organisation,
 
 CASE
 WHEN POSITION('-' IN akvo_tree_registration_areas_updated.organisation) > 0
-THEN LOWER(left(akvo_tree_registration_areas_updated.organisation, strpos(akvo_tree_registration_areas_updated.organisation, '-') - 1))
+THEN LOWER(left(akvo_tree_registration_areas_updated.organisation, strpos(akvo_tree_registration_areas_updated.organisation, '-') - 2))
 WHEN POSITION(' -' IN akvo_tree_registration_areas_updated.organisation) > 0
 THEN LOWER(left(akvo_tree_registration_areas_updated.organisation, strpos(akvo_tree_registration_areas_updated.organisation, '-')))
 WHEN POSITION('/' IN akvo_tree_registration_areas_updated.organisation) > 0
@@ -3816,7 +3808,7 @@ LOWER(akvo_tree_registration_areas_updated.organisation) AS organisation,
 
 CASE
 WHEN POSITION('-' IN akvo_tree_registration_areas_updated.organisation) > 0
-THEN LOWER(left(akvo_tree_registration_areas_updated.organisation, strpos(akvo_tree_registration_areas_updated.organisation, '-') - 1))
+THEN LOWER(left(akvo_tree_registration_areas_updated.organisation, strpos(akvo_tree_registration_areas_updated.organisation, '-') - 2))
 WHEN POSITION(' -' IN akvo_tree_registration_areas_updated.organisation) > 0
 THEN LOWER(left(akvo_tree_registration_areas_updated.organisation, strpos(akvo_tree_registration_areas_updated.organisation, '-')))
 WHEN POSITION('/' IN akvo_tree_registration_areas_updated.organisation) > 0
@@ -3890,7 +3882,7 @@ LOWER(akvo_tree_registration_areas_updated.organisation) AS organisation,
 
 CASE
 WHEN POSITION('-' IN akvo_tree_registration_areas_updated.organisation) > 0
-THEN LOWER(left(akvo_tree_registration_areas_updated.organisation, strpos(akvo_tree_registration_areas_updated.organisation, '-') - 1))
+THEN LOWER(left(akvo_tree_registration_areas_updated.organisation, strpos(akvo_tree_registration_areas_updated.organisation, '-') - 2))
 WHEN POSITION(' -' IN akvo_tree_registration_areas_updated.organisation) > 0
 THEN LOWER(left(akvo_tree_registration_areas_updated.organisation, strpos(akvo_tree_registration_areas_updated.organisation, '-')))
 WHEN POSITION('/' IN akvo_tree_registration_areas_updated.organisation) > 0
@@ -3964,7 +3956,7 @@ LOWER(akvo_tree_registration_areas_updated.organisation) AS organisation,
 
 CASE
 WHEN POSITION('-' IN akvo_tree_registration_areas_updated.organisation) > 0
-THEN LOWER(left(akvo_tree_registration_areas_updated.organisation, strpos(akvo_tree_registration_areas_updated.organisation, '-') - 1))
+THEN LOWER(left(akvo_tree_registration_areas_updated.organisation, strpos(akvo_tree_registration_areas_updated.organisation, '-') - 2))
 WHEN POSITION(' -' IN akvo_tree_registration_areas_updated.organisation) > 0
 THEN LOWER(left(akvo_tree_registration_areas_updated.organisation, strpos(akvo_tree_registration_areas_updated.organisation, '-')))
 WHEN POSITION('/' IN akvo_tree_registration_areas_updated.organisation) > 0
@@ -4039,7 +4031,7 @@ LOWER(akvo_tree_registration_areas_updated.organisation) AS organisation,
 
 CASE
 WHEN POSITION('-' IN akvo_tree_registration_areas_updated.organisation) > 0
-THEN LOWER(left(akvo_tree_registration_areas_updated.organisation, strpos(akvo_tree_registration_areas_updated.organisation, '-') - 1))
+THEN LOWER(left(akvo_tree_registration_areas_updated.organisation, strpos(akvo_tree_registration_areas_updated.organisation, '-') - 2))
 WHEN POSITION(' -' IN akvo_tree_registration_areas_updated.organisation) > 0
 THEN LOWER(left(akvo_tree_registration_areas_updated.organisation, strpos(akvo_tree_registration_areas_updated.organisation, '-')))
 WHEN POSITION('/' IN akvo_tree_registration_areas_updated.organisation) > 0
@@ -4113,7 +4105,7 @@ LOWER(akvo_tree_registration_areas_updated.organisation) AS organisation,
 
 CASE
 WHEN POSITION('-' IN akvo_tree_registration_areas_updated.organisation) > 0
-THEN LOWER(left(akvo_tree_registration_areas_updated.organisation, strpos(akvo_tree_registration_areas_updated.organisation, '-') - 1))
+THEN LOWER(left(akvo_tree_registration_areas_updated.organisation, strpos(akvo_tree_registration_areas_updated.organisation, '-') - 2))
 WHEN POSITION(' -' IN akvo_tree_registration_areas_updated.organisation) > 0
 THEN LOWER(left(akvo_tree_registration_areas_updated.organisation, strpos(akvo_tree_registration_areas_updated.organisation, '-')))
 WHEN POSITION('/' IN akvo_tree_registration_areas_updated.organisation) > 0
@@ -4213,7 +4205,7 @@ LOWER(akvo_tree_registration_areas_updated.organisation) AS organisation,
 
 CASE
 WHEN POSITION('-' IN akvo_tree_registration_areas_updated.organisation) > 0
-THEN LOWER(left(akvo_tree_registration_areas_updated.organisation, strpos(akvo_tree_registration_areas_updated.organisation, '-') - 1))
+THEN LOWER(left(akvo_tree_registration_areas_updated.organisation, strpos(akvo_tree_registration_areas_updated.organisation, '-') - 2))
 WHEN POSITION(' -' IN akvo_tree_registration_areas_updated.organisation) > 0
 THEN LOWER(left(akvo_tree_registration_areas_updated.organisation, strpos(akvo_tree_registration_areas_updated.organisation, '-')))
 WHEN POSITION('/' IN akvo_tree_registration_areas_updated.organisation) > 0
@@ -4277,7 +4269,7 @@ LOWER(akvo_tree_registration_areas_updated.organisation) AS organisation,
 
 CASE
 WHEN POSITION('-' IN akvo_tree_registration_areas_updated.organisation) > 0
-THEN LOWER(left(akvo_tree_registration_areas_updated.organisation, strpos(akvo_tree_registration_areas_updated.organisation, '-') - 1))
+THEN LOWER(left(akvo_tree_registration_areas_updated.organisation, strpos(akvo_tree_registration_areas_updated.organisation, '-') - 2))
 WHEN POSITION(' -' IN akvo_tree_registration_areas_updated.organisation) > 0
 THEN LOWER(left(akvo_tree_registration_areas_updated.organisation, strpos(akvo_tree_registration_areas_updated.organisation, '-')))
 WHEN POSITION('/' IN akvo_tree_registration_areas_updated.organisation) > 0
@@ -4379,7 +4371,7 @@ LOWER(table_t.organisation) AS organisation,
 
 CASE
 WHEN POSITION('-' IN table_t.organisation) > 0
-THEN LOWER(left(table_t.organisation, strpos(table_t.organisation, '-') - 1))
+THEN LOWER(left(table_t.organisation, strpos(table_t.organisation, '-') - 2))
 WHEN POSITION(' -' IN table_t.organisation) > 0
 THEN LOWER(left(table_t.organisation, strpos(table_t.organisation, '-')))
 WHEN POSITION('/' IN table_t.organisation) > 0
@@ -4488,7 +4480,7 @@ LOWER(AKVO_tree_distribution_unregistered_farmers.organisation) AS organisation,
 
 CASE
 WHEN POSITION('-' IN AKVO_tree_distribution_unregistered_farmers.organisation) > 0
-THEN LOWER(left(AKVO_tree_distribution_unregistered_farmers.organisation, strpos(AKVO_tree_distribution_unregistered_farmers.organisation, '-') - 1))
+THEN LOWER(left(AKVO_tree_distribution_unregistered_farmers.organisation, strpos(AKVO_tree_distribution_unregistered_farmers.organisation, '-') - 2))
 WHEN POSITION(' -' IN AKVO_tree_distribution_unregistered_farmers.organisation) > 0
 THEN LOWER(left(AKVO_tree_distribution_unregistered_farmers.organisation, strpos(AKVO_tree_distribution_unregistered_farmers.organisation, '-')))
 WHEN POSITION('/' IN AKVO_tree_distribution_unregistered_farmers.organisation) > 0
@@ -4583,7 +4575,7 @@ LOWER(AKVO_tree_distribution_unregistered_farmers.organisation) AS organisation,
 
 CASE
 WHEN POSITION('-' IN AKVO_tree_distribution_unregistered_farmers.organisation) > 0
-THEN LOWER(left(AKVO_tree_distribution_unregistered_farmers.organisation, strpos(AKVO_tree_distribution_unregistered_farmers.organisation, '-') - 1))
+THEN LOWER(left(AKVO_tree_distribution_unregistered_farmers.organisation, strpos(AKVO_tree_distribution_unregistered_farmers.organisation, '-') - 2))
 WHEN POSITION(' -' IN AKVO_tree_distribution_unregistered_farmers.organisation) > 0
 THEN LOWER(left(AKVO_tree_distribution_unregistered_farmers.organisation, strpos(AKVO_tree_distribution_unregistered_farmers.organisation, '-')))
 WHEN POSITION('/' IN AKVO_tree_distribution_unregistered_farmers.organisation) > 0
