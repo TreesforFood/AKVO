@@ -129,6 +129,7 @@ a.identifier_akvo,
 a.display_name,
 c.partnercode_main,
 c.partnercode_sub,
+c.organisation,
 c.partner,
 c.sub_partner,
 c.contract,
@@ -155,10 +156,10 @@ a.needle_shape ISNULL);
 
 -- Add new 24h fires to historic fire table to build up an historic fire database for each planting site
 INSERT INTO superset_ecosia_firms_historic_fires
-(identifier_akvo, partnercode_main, partnercode_sub, partner, sub_partner, contract, date, confidence_level, brightness_pix_temp_kelvin_channel4, satellite_name,
+(identifier_akvo, partnercode_main, partnercode_sub, organisation, partner, sub_partner, contract, date, confidence_level, brightness_pix_temp_kelvin_channel4, satellite_name,
 fire_radiative_power_megawatt, perc_firepixel_covered_by_overlap, xcenter, ycenter, fire_pixel)
 
-SELECT identifier_akvo, partnercode_main, partnercode_sub, partner, sub_partner, contract, date, confidence_level, brightness_pix_temp_kelvin_channel4, satellite_name,
+SELECT identifier_akvo, partnercode_main, partnercode_sub, organisation, partner, sub_partner, contract, date, confidence_level, brightness_pix_temp_kelvin_channel4, satellite_name,
 fire_radiative_power_megawatt, perc_firepixel_covered_by_overlap, xcenter, ycenter, pix_polygon
 FROM AKVO_tree_registration_areas_updated_new_24h_fires;
 
@@ -182,6 +183,7 @@ SET
 display_name = tb.display_name,
 partnercode_main = tb.partnercode_main,
 partnercode_sub = tb.partnercode_sub,
+organisation = tb.organisation,
 partner = tb.partner,
 sub_partner = tb.sub_partner,
 
@@ -197,7 +199,7 @@ WITH geojson_table AS (select identifier_akvo, geojson, date, jsonb_build_object
         'geometry',   ST_AsGeoJSON(fire_pixel)::json)))::text AS geojson_fires
 
 FROM superset_ecosia_firms_historic_fires
-group by geojson, date, identifier_akvo)
+group by geojson, date, identifier_akvo);
 
 UPDATE superset_ecosia_firms_historic_fires
 SET geojson = geojson_table.geojson_fires
