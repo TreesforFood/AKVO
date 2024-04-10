@@ -155,10 +155,10 @@ a.needle_shape ISNULL);
 
 -- Add new 24h fires to historic fire table to build up an historic fire database for each planting site
 INSERT INTO superset_ecosia_firms_historic_fires
-(identifier_akvo, partnercode_main, partnercode_sub, contract, date, confidence_level, brightness_pix_temp_kelvin_channel4, satellite_name,
+(identifier_akvo, partnercode_main, partnercode_sub, partner, sub_partner, contract, date, confidence_level, brightness_pix_temp_kelvin_channel4, satellite_name,
 fire_radiative_power_megawatt, perc_firepixel_covered_by_overlap, xcenter, ycenter, fire_pixel)
 
-SELECT identifier_akvo, partnercode_main, partnercode_sub, contract, date, confidence_level, brightness_pix_temp_kelvin_channel4, satellite_name,
+SELECT identifier_akvo, partnercode_main, partnercode_sub, partner, sub_partner, contract, date, confidence_level, brightness_pix_temp_kelvin_channel4, satellite_name,
 fire_radiative_power_megawatt, perc_firepixel_covered_by_overlap, xcenter, ycenter, pix_polygon
 FROM AKVO_tree_registration_areas_updated_new_24h_fires;
 
