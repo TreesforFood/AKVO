@@ -199,7 +199,7 @@ WITH geojson_table AS (select identifier_akvo, geojson, date, jsonb_build_object
         'geometry',   ST_AsGeoJSON(fire_pixel)::json)))::text AS geojson_fires
 
 FROM superset_ecosia_firms_historic_fires
-group by geojson, date, identifier_akvo);
+group by geojson, date, identifier_akvo)
 
 UPDATE superset_ecosia_firms_historic_fires
 SET geojson = geojson_table.geojson_fires
