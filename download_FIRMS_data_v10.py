@@ -121,9 +121,44 @@ conn.commit()
 
 
 cur.execute('''
+DROP TABLE IF EXISTS AKVO_tree_registration_areas_updated_new_24h_fires;''')
+conn.commit()
+
+
+cur.execute('''
 -- Create a table that spatially joins the registration areas and fire pixels of the last 24h
 
-CREATE TABLE AKVO_tree_registration_areas_updated_new_24h_fires
+-- We first create a temporary table to convert geography format to geometry format and index these
+CREATE TEMPORARY TABLE new_24h_fires
+AS (
+SELECT
+b.date,
+b.confidence_level,
+b.brightness_pix_temp_kelvin_channel4,
+b.satellite_name,
+b.fire_radiative_power_megawatt,
+b.xcenter,
+b.ycenter,
+ST_Transform(b.pix_polygon::geometry,4326) AS fire_polygon_format_geometry,
+b.pix_polygon AS fire_polygon_format_geography
+FROM FIRES_FIRM_GLOBAL AS b);
+
+CREATE INDEX IF NOT EXISTS index_fire_pol ON new_24h_fires USING gist(fire_polygon_format_geometry);
+
+-- We first create a temporary table to convert geography format to geometry format and index these
+CREATE TEMPORARY TABLE indexed_registrations AS (
+SELECT
+a.identifier_akvo,
+a.display_name,
+a.self_intersection,
+a.needle_shape,
+ST_Transform(a.polygon::geometry,4326) AS reg_polygon_format_geometry
+FROM AKVO_tree_registration_areas_updated AS a);
+
+CREATE INDEX IF NOT EXISTS index_reg_pol ON indexed_registrations USING gist(reg_polygon_format_geometry);
+
+-- We now check which fire polygons overlap a registration polygon (using their indexed geometries)
+CREATE TEMPORARY TABLE AKVO_tree_registration_areas_updated_new_24h_fires
 AS (SELECT
 a.identifier_akvo,
 a.display_name,
@@ -138,21 +173,22 @@ b.confidence_level,
 b.brightness_pix_temp_kelvin_channel4,
 b.satellite_name,
 b.fire_radiative_power_megawatt,
-ROUND((ST_Area(ST_Intersection(a.polygon, b.pix_polygon))/ST_Area(b.pix_polygon)*100)::numeric,2) AS perc_firepixel_covered_by_overlap,
+ROUND((ST_Area(ST_Intersection(a.reg_polygon_format_geometry, b.fire_polygon_format_geometry))/ST_Area(b.fire_polygon_format_geometry)*100)::numeric,2) AS perc_firepixel_covered_by_overlap,
 b.xcenter,
 b.ycenter,
-b.pix_polygon
-
-FROM AKVO_tree_registration_areas_updated AS a
-INNER JOIN FIRES_FIRM_GLOBAL AS b
-ON ST_Intersects(a.polygon::geometry, b.pix_polygon::geometry)
+b.fire_polygon_format_geography
+FROM indexed_registrations AS a
+INNER JOIN new_24h_fires AS b
+ON ST_Intersects(a.reg_polygon_format_geometry, b.fire_polygon_format_geometry)
 INNER JOIN superset_ecosia_tree_registration AS c
 ON c.identifier_akvo = a.identifier_akvo
-WHERE a.polygon NOTNULL
+WHERE a.reg_polygon_format_geometry NOTNULL
 AND
 a.self_intersection ISNULL
 AND
-a.needle_shape ISNULL);
+a.needle_shape ISNULL
+);
+
 
 -- Add new 24h fires to historic fire table to build up an historic fire database for each planting site
 INSERT INTO superset_ecosia_firms_historic_fires
@@ -160,12 +196,14 @@ INSERT INTO superset_ecosia_firms_historic_fires
 fire_radiative_power_megawatt, perc_firepixel_covered_by_overlap, xcenter, ycenter, fire_pixel)
 
 SELECT identifier_akvo, partnercode_main, partnercode_sub, organisation, partner, sub_partner, contract, date, confidence_level, brightness_pix_temp_kelvin_channel4, satellite_name,
-fire_radiative_power_megawatt, perc_firepixel_covered_by_overlap, xcenter, ycenter, pix_polygon
+fire_radiative_power_megawatt, perc_firepixel_covered_by_overlap, xcenter, ycenter, fire_polygon_format_geography
 FROM AKVO_tree_registration_areas_updated_new_24h_fires;
 
+--ALTER TABLE superset_ecosia_firms_historic_fires ADD COLUMN id SERIAL PRIMARY KEY;
 
-UPDATE superset_ecosia_firms_historic_fires
-SET likeliness_of_fire =
+UPDATE superset_ecosia_firms_historic_fires AS ta
+SET
+likeliness_of_fire =
 CASE
 WHEN perc_firepixel_covered_by_overlap < 25
 THEN 'fire reported, but not likely inside planting site or with low confidence'
@@ -176,22 +214,21 @@ THEN 'fire very likely inside planting site'
 WHEN perc_firepixel_covered_by_overlap > 75 AND confidence_level <> 'low'
 THEN 'fire almost definitely inside planting site'
 ELSE 'fire reported around or in the planting site, but with low confidence'
-END;
+END,
 
-UPDATE superset_ecosia_firms_historic_fires AS ta
-SET
 display_name = tb.display_name,
 partnercode_main = tb.partnercode_main,
 partnercode_sub = tb.partnercode_sub,
 organisation = tb.organisation,
 partner = tb.partner,
+sub_contract = tb.sub_contract,
 sub_partner = tb.sub_partner,
-
 contract = tb.contract
+
 FROM superset_ecosia_tree_registration AS tb
 WHERE ta.identifier_akvo = tb.identifier_akvo;
 
-WITH geojson_table AS (select identifier_akvo, geojson, date, jsonb_build_object(
+WITH geojson_table AS (select id, jsonb_build_object(
     'type',       'FeatureCollection',
     'features',   json_agg(json_build_object(
         'type',       'Feature',
@@ -199,23 +236,22 @@ WITH geojson_table AS (select identifier_akvo, geojson, date, jsonb_build_object
         'geometry',   ST_AsGeoJSON(fire_pixel)::json)))::text AS geojson_fires
 
 FROM superset_ecosia_firms_historic_fires
-group by geojson, date, identifier_akvo)
+group by id)
 
 UPDATE superset_ecosia_firms_historic_fires
 SET geojson = geojson_table.geojson_fires
 from geojson_table
-WHERE superset_ecosia_firms_historic_fires.identifier_akvo = geojson_table.identifier_akvo
-AND superset_ecosia_firms_historic_fires.date = geojson_table.date
-AND superset_ecosia_firms_historic_fires.geojson = geojson_table.geojson;''')
+WHERE superset_ecosia_firms_historic_fires.id = geojson_table.id;''')
 
 conn.commit()
 
 cur.execute('''DROP TABLE IF EXISTS AKVO_tree_registration_areas_updated_new_24h_fires;''')
-
 conn.commit()
-
+cur.execute('''DROP TABLE IF EXISTS new_24h_fires;''')
+conn.commit()
+cur.execute('''DROP TABLE IF EXISTS indexed_registrations;''')
+conn.commit()
 cur.execute('''DROP TABLE IF EXISTS FIRES_FIRM_GLOBAL;''')
-
 conn.commit()
 
 cur.execute('''
