@@ -2642,10 +2642,12 @@ ON COUNT_number_photos_png_format.identifier_akvo = t.identifier_akvo;
 
 --The column below is UPDATED by the following sql. This is to create clean contract numbers for Superset
 ALTER TABLE superset_ecosia_tree_registration
-ADD contract NUMERIC(20,0);
+ADD contract NUMERIC(10,0);
 
 UPDATE superset_ecosia_tree_registration
-SET contract = CAST(sub_contract AS INTEGER);
+--SET contract = CAST(sub_contract AS INTEGER);
+SET contract = TRUNC(sub_contract);
+
 
 UPDATE superset_ecosia_tree_registration
 SET test = 'yes'
@@ -2744,7 +2746,7 @@ ALTER TABLE superset_ecosia_tree_monitoring
 ADD contract NUMERIC(20,0);
 
 UPDATE superset_ecosia_tree_monitoring
-SET contract = CAST(sub_contract AS INTEGER);'''
+SET contract = TRUNC(sub_contract);'''
 
 conn.commit()
 
@@ -3289,10 +3291,10 @@ WHERE photo_url NOTNULL;
 
 --The column below is UPDATED by the following sql. This is to create clean contract numbers for Superset
 ALTER TABLE superset_ecosia_tree_registration_photos
-ADD contract NUMERIC(20,0);
+ADD contract NUMERIC(10,0);
 
 UPDATE superset_ecosia_tree_registration_photos
-SET contract = CAST(sub_contract AS INTEGER);'''
+SET contract = TRUNC(sub_contract);'''
 
 conn.commit()
 
@@ -3361,10 +3363,10 @@ ON AKVO_tree_registration_species.identifier_akvo = akvo_tree_registration_areas
 
 --The column below is UPDATED by the following sql. This is to create clean contract numbers for Superset
 ALTER TABLE superset_ecosia_tree_registration_species
-ADD contract NUMERIC(20,0);
+ADD contract NUMERIC(10,0);
 
 UPDATE superset_ecosia_tree_registration_species
-SET contract = CAST(sub_contract AS INTEGER);'''
+SET contract = TRUNC(sub_contract);'''
 
 conn.commit()
 
@@ -3846,6 +3848,8 @@ jsonb_build_object(
         'geometry',   ST_AsGeoJSON(tree_registration_photos_geotag.photo_geotag_location)::json)
 
     ))::text AS superset_geojson
+
+
 FROM akvo_tree_registration_photos AS tree_registration_photos_geotag
 JOIN akvo_tree_registration_areas_updated
 ON tree_registration_photos_geotag.identifier_akvo = akvo_tree_registration_areas_updated.identifier_akvo
@@ -4169,10 +4173,10 @@ SELECT * FROM wkt_count_samples_audit_to_geojson;
 
 --The column below is UPDATED by the following sql. This is to create clean contract numbers for Superset
 ALTER TABLE superset_ecosia_geolocations
-ADD contract NUMERIC(20,0);
+ADD contract NUMERIC(10,0);
 
 UPDATE superset_ecosia_geolocations
-SET contract = CAST(sub_contract AS INTEGER);'''
+SET contract = TRUNC(sub_contract);'''
 
 conn.commit()
 
@@ -4326,10 +4330,10 @@ WHERE photo_url NOTNULL;
 
 --The column below is UPDATED by the following sql. This is to create clean contract numbers for Superset
 ALTER TABLE superset_ecosia_tree_monitoring_photos
-ADD contract NUMERIC(20,0);
+ADD contract NUMERIC(10,0);
 
 UPDATE superset_ecosia_tree_monitoring_photos
-SET contract = CAST(sub_contract AS INTEGER);'''
+SET contract = TRUNC(sub_contract);'''
 
 conn.commit()
 
@@ -4434,10 +4438,10 @@ OR test = '';
 
 --The column below is UPDATED by the following sql. This is to create clean contract numbers for Superset
 ALTER TABLE superset_ecosia_tree_registration_light
-ADD contract NUMERIC(20,0);
+ADD contract NUMERIC(10,0);
 
 UPDATE superset_ecosia_tree_registration_light
-SET contract = CAST(sub_contract AS INTEGER);'''
+SET contract = TRUNC(sub_contract);'''
 
 conn.commit()
 
@@ -4531,10 +4535,10 @@ OR test = '';
 
 --The column below is UPDATED by the following sql. This is to create clean contract numbers for Superset
 ALTER TABLE superset_ecosia_tree_distribution_unregistered_farmers
-ADD contract NUMERIC(20,0);
+ADD contract NUMERIC(10,0);
 
 UPDATE superset_ecosia_tree_distribution_unregistered_farmers
-SET contract = CAST(sub_contract AS INTEGER);'''
+SET contract = TRUNC(sub_contract);'''
 
 conn.commit()
 
@@ -4639,10 +4643,10 @@ OR test = '';
 
 --The column below is UPDATED by the following sql. This is to create clean contract numbers for Superset
 ALTER TABLE superset_ecosia_site_registration_unregistered_farmers
-ADD contract NUMERIC(20,0);
+ADD contract NUMERIC(10,0);
 
 UPDATE superset_ecosia_site_registration_unregistered_farmers
-SET contract = CAST(sub_contract AS INTEGER);'''
+SET contract = TRUNC(sub_contract);'''
 
 conn.commit()
 
@@ -4726,10 +4730,131 @@ FROM CALC_TAB_tree_submissions_per_contract;
 
 --The column below is UPDATED by the following sql. This is to create clean contract numbers for Superset
 ALTER TABLE superset_ecosia_contract_overview
-ADD contract NUMERIC(20,0);
+ADD contract NUMERIC(10,0);
 
 UPDATE superset_ecosia_contract_overview
-SET contract = CAST(sub_contract AS INTEGER);'''
+SET contract = TRUNC(sub_contract);'''
+
+conn.commit()
+
+create_a50 = ('''
+CREATE TABLE superset_ecosia_global_tree_species_distribution
+AS SELECT
+
+b.centroid_coord,
+a.identifier_akvo,
+'tree registration' AS source_species,
+a.lat_name_species,
+a.local_name_species
+FROM akvo_tree_registration_species a
+JOIN akvo_tree_registration_areas_updated b
+ON a.identifier_akvo = b.identifier_akvo
+
+UNION
+
+SELECT
+d.centroid_coord,
+c.identifier_akvo,
+'tree monitoring COUNTS' AS source_species,
+c.name_species AS lat_name_species,
+c.loc_name_spec AS local_name_species
+FROM akvo_tree_monitoring_counts c
+JOIN akvo_tree_registration_areas_updated d
+ON c.identifier_akvo = d.identifier_akvo
+
+UNION ALL
+
+SELECT
+e.pcq_location AS centroid_coord,
+e.identifier_akvo,
+'tree monitoring PCQ' AS source_species,
+e.q1_spec AS lat_name_species,
+'' AS local_name_species
+FROM akvo_tree_monitoring_pcq e
+WHERE NOT e.q1_spec = ''
+AND NOT e.q1_spec = 'other'
+
+UNION ALL
+
+SELECT
+f.pcq_location AS centroid_coord,
+f.identifier_akvo,
+'tree monitoring PCQ' AS source_species,
+f.q2_spec AS lat_name_species,
+'' AS local_name_species
+FROM akvo_tree_monitoring_pcq f
+WHERE NOT f.q2_spec = ''
+AND NOT f.q2_spec = 'other'
+
+UNION ALL
+
+SELECT
+g.pcq_location AS centroid_coord,
+g.identifier_akvo,
+'tree monitoring PCQ' AS source_species,
+g.q3_spec AS lat_name_species,
+'' AS local_name_species
+FROM akvo_tree_monitoring_pcq g
+WHERE NOT g.q3_spec = ''
+AND NOT g.q3_spec = 'other'
+
+UNION ALL
+
+SELECT
+h.pcq_location AS centroid_coord,
+h.identifier_akvo,
+'tree monitoring PCQ' AS source_species,
+h.q4_spec AS lat_name_species,
+'' AS local_name_species
+FROM akvo_tree_monitoring_pcq h
+WHERE NOT h.q4_spec = ''
+AND NOT h.q4_spec = 'other'
+
+UNION ALL
+
+SELECT
+j.gps_corner_1 AS centroid_coord,
+i.identifier_akvo,
+'tree registration LIGHT VERSION' AS source_species,
+
+CASE
+WHEN POSITION('|' IN i.lat_name_species) > 0
+THEN SUBSTRING(i.lat_name_species FROM POSITION('|' IN i.lat_name_species)+1 FOR
+LENGTH(i.lat_name_species) - POSITION(':' IN reverse(i.lat_name_species))- POSITION('|' IN i.lat_name_species))
+END AS lat_name_species,
+
+CASE
+WHEN POSITION('(' IN i.lat_name_species) > 0
+THEN reverse(SUBSTRING(reverse(i.lat_name_species) FROM POSITION(')' IN reverse(i.lat_name_species))+1 FOR
+POSITION('(' IN reverse(i.lat_name_species))- POSITION(')' IN reverse(i.lat_name_species))-1))
+END AS local_name_species
+
+FROM akvo_tree_registration_species_light_version i
+JOIN akvo_tree_registration_locations_light_version j
+ON i.identifier_akvo = j.identifier_akvo
+
+UNION ALL
+
+SELECT
+l.centroid_coord,
+l.identifier_akvo,
+'tree registration DISTRIBUTED TREES' AS source_species,
+k.species_lat AS lat_name_species,
+k.species_local AS local_name_species
+FROM akvo_site_registration_distributed_trees_species k
+JOIN akvo_site_registration_distributed_trees l
+ON k.identifier_akvo = l.identifier_akvo;
+
+ALTER TABLE superset_ecosia_global_tree_species_distribution
+ADD COLUMN geojson TEXT;
+
+UPDATE superset_ecosia_global_tree_species_distribution
+SET geojson = centroid_coord,
+WHERE centroid_coord NOTNULL;
+
+lat_y = ST_Y(centroid_coord::geometry),
+lon_x = ST_X(centroid_coord::geometry)
+WHERE centroid_coord NOTNULL;''')
 
 conn.commit()
 
@@ -4933,7 +5058,7 @@ GRANT SELECT ON TABLE superset_ecosia_tree_distribution_unregistered_farmers TO 
 GRANT SELECT ON TABLE superset_ecosia_contract_overview TO ecosia_superset;
 GRANT SELECT ON TABLE superset_ecosia_new_devices TO ecosia_superset;
 GRANT SELECT ON TABLE superset_ecosia_firms_historic_fires TO ecosia_superset;
-GRANT SELECT ON TABLE superset_ecosia_KANOP_polygon_level_1_moment TO ecosia_superset;
+GRANT SELECT ON TABLE superset_ecosia_global_tree_species_distribution TO ecosia_superset;
 
 DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_nursery_registration;
 DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_tree_registration;
@@ -4955,7 +5080,7 @@ DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_tree_distributio
 DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_contract_overview;
 DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_new_devices;
 DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_firms_historic_fires;
-DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_KANOP_polygon_level_1_moment;
+DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_global_tree_species_distribution;
 
 ALTER TABLE superset_ecosia_nursery_registration enable ROW LEVEL SECURITY;
 ALTER TABLE superset_ecosia_tree_registration enable ROW LEVEL SECURITY;
@@ -4977,7 +5102,7 @@ ALTER TABLE superset_ecosia_tree_distribution_unregistered_farmers enable ROW LE
 ALTER TABLE superset_ecosia_contract_overview enable ROW LEVEL SECURITY;
 ALTER TABLE superset_ecosia_new_devices enable ROW LEVEL SECURITY;
 ALTER TABLE superset_ecosia_firms_historic_fires enable ROW LEVEL SECURITY;
-ALTER TABLE superset_ecosia_KANOP_polygon_level_1_moment enable ROW LEVEL SECURITY;
+ALTER TABLE superset_ecosia_global_tree_species_distribution enable ROW LEVEL SECURITY;
 
 CREATE POLICY ecosia_superset_policy ON superset_ecosia_nursery_registration TO ecosia_superset USING (true);
 CREATE POLICY ecosia_superset_policy ON superset_ecosia_tree_registration TO ecosia_superset USING (true);
@@ -4999,7 +5124,7 @@ CREATE POLICY ecosia_superset_policy ON superset_ecosia_tree_distribution_unregi
 CREATE POLICY ecosia_superset_policy ON superset_ecosia_contract_overview TO ecosia_superset USING (true);
 CREATE POLICY ecosia_superset_policy ON superset_ecosia_new_devices TO ecosia_superset USING (true);
 CREATE POLICY ecosia_superset_policy ON superset_ecosia_firms_historic_fires TO ecosia_superset USING (true);
-CREATE POLICY ecosia_superset_policy ON superset_ecosia_KANOP_polygon_level_1_moment TO ecosia_superset USING (true);'''
+CREATE POLICY ecosia_superset_policy ON superset_ecosia_global_tree_species_distribution TO ecosia_superset USING (true);'''
 
 conn.commit()
 
