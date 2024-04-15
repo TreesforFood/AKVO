@@ -535,23 +535,25 @@ table_label_strata.label_strata,
 
 CASE
 WHEN
-SUM(AKVO_Tree_monitoring_counts.number_species) NOTNULL
+SUM(AKVO_Tree_monitoring_counts.number_species) NOTNULL AND SUM(AKVO_Tree_monitoring_areas.number_living_trees) ISNULL
 THEN SUM(AKVO_Tree_monitoring_counts.number_species)
-WHEN SUM(AKVO_Tree_monitoring_counts.number_species) ISNULL AND AKVO_Tree_monitoring_areas.number_living_trees NOTNULL
-THEN AKVO_Tree_monitoring_areas.number_living_trees
-ELSE NULL
+WHEN SUM(AKVO_Tree_monitoring_counts.number_species) ISNULL AND SUM(AKVO_Tree_monitoring_areas.number_living_trees) NOTNULL
+THEN SUM(AKVO_Tree_monitoring_areas.number_living_trees)
+WHEN SUM(AKVO_Tree_monitoring_counts.number_species) NOTNULL AND SUM(AKVO_Tree_monitoring_areas.number_living_trees) NOTNULL
+THEN SUM(AKVO_Tree_monitoring_areas.number_living_trees)
+WHEN SUM(AKVO_Tree_monitoring_counts.number_species) ISNULL AND SUM(AKVO_Tree_monitoring_areas.number_living_trees) ISNULL
+THEN NULL
 END AS nr_trees_monitored
 
 FROM AKVO_Tree_monitoring_areas
 JOIN table_label_strata
 ON AKVO_Tree_monitoring_areas.instance = table_label_strata.instance
-LEFT JOIN akvo_tree_monitoring_counts
+JOIN akvo_tree_monitoring_counts
 ON akvo_tree_monitoring_counts.instance = AKVO_Tree_monitoring_areas.instance
 GROUP BY
 AKVO_Tree_monitoring_areas.identifier_akvo,
 akvo_tree_monitoring_counts.instance,
-table_label_strata.label_strata,
-AKVO_Tree_monitoring_areas.number_living_trees),
+table_label_strata.label_strata),
 
 -- Calculate AVERAGE tree count results for the AUDIT COUNTS (in case multiple COUNTS are carried out in the same label_strata)
 count_audit_avg_count AS (SELECT
@@ -2732,14 +2734,9 @@ CALC_TAB_monitoring_calculations_per_site.nr_years_registration_monitoring,
 CALC_TAB_monitoring_calculations_per_site.label_strata,
 CALC_TAB_monitoring_calculations_per_site.perc_trees_survived,
 CALC_TAB_monitoring_calculations_per_site.avg_tree_height,
-akvo_tree_monitoring_areas.site_impression
+CALC_TAB_monitoring_calculations_per_site.site_impressions
 
-FROM CALC_TAB_monitoring_calculations_per_site
-
----WRONG!! The link should be on instance not on identifier!!!
-LEFT JOIN akvo_tree_monitoring_areas
-ON akvo_tree_monitoring_areas.identifier_akvo = CALC_TAB_monitoring_calculations_per_site.identifier_akvo
-WHERE CALC_TAB_monitoring_calculations_per_site.organisation NOTNULL;
+FROM CALC_TAB_monitoring_calculations_per_site;
 
 --The column below is UPDATED by the following sql. This is to create clean contract numbers for Superset
 ALTER TABLE superset_ecosia_tree_monitoring
