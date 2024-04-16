@@ -233,16 +233,27 @@ contract = tb.contract
 FROM superset_ecosia_tree_registration AS tb
 WHERE ta.identifier_akvo = tb.identifier_akvo;
 
+--    'type',       'FeatureCollection',
+--    'features',   json_agg(json_build_object(
+--        'type', 'Feature',
+--		'properties', json_build_object(
+--			'stroke', '#555555',
+--			'stroke-width', 2,
+--			'stroke-opacity', 1,
+--			'fill', '#ffff00',
+--			'fill-opacity', 0.5
+--		), 'geometry', ST_AsGeoJSON(fire_pixel)::json)))::text AS geojson_fires
+--
+--FROM superset_ecosia_firms_historic_fires
+--group by id)
+
 WITH geojson_table AS (select id, jsonb_build_object(
     'type',       'FeatureCollection',
     'features',   json_agg(json_build_object(
         'type', 'Feature',
-		'properties', json_build_object(
-			'stroke', '#555555',
-			'stroke-width', 2,
-			'stroke-opacity', 1,
-			'fill', '#ffff00',
-			'fill-opacity', 0.5
+		'paint', json_build_object(
+			'fill-color', '#ffff00',
+			'fill-opacity', 0.4
 		), 'geometry', ST_AsGeoJSON(fire_pixel)::json)))::text AS geojson_fires
 
 FROM superset_ecosia_firms_historic_fires
