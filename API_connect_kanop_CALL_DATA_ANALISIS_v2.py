@@ -533,4 +533,20 @@ WHERE a.id = b.id
 
 ''')
 conn.commit()
+
+cur.execute('''
+
+GRANT USAGE ON SCHEMA PUBLIC TO ecosia_superset;
+GRANT USAGE ON SCHEMA HEROKU_EXT TO ecosia_superset;
+
+GRANT SELECT ON TABLE superset_ecosia_kanop_polygon_level_1_moment TO ecosia_superset;
+
+DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_kanop_polygon_level_1_moment;
+
+ALTER TABLE superset_ecosia_kanop_polygon_level_1_moment enable ROW LEVEL SECURITY;
+
+CREATE POLICY ecosia_superset_policy ON superset_ecosia_kanop_polygon_level_1_moment TO ecosia_superset USING (true);''')
+
+conn.commit()
+
 cur.close()
