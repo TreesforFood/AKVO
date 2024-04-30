@@ -1096,9 +1096,8 @@ conn.commit()
 create_a3 = '''
 UPDATE akvo_tree_registration_areas_updated
 SET photo_owner = CASE
-WHEN photo_owner LIKE '%/%'
+WHEN photo_owner LIKE '%/%' AND '.' LIKE SUBSTRING(REVERSE(photo_owner), 4, 1)
 THEN RIGHT(photo_owner, strpos(reverse(photo_owner),'/')-1)
-ELSE photo_owner
 END;
 
 UPDATE akvo_tree_registration_areas_updated
@@ -1107,36 +1106,38 @@ WHERE photo_owner NOTNULL;
 
 UPDATE akvo_tree_registration_photos
 SET photo_url = CASE
-WHEN photo_url LIKE '%/%'
+WHEN photo_url LIKE '%/%' AND '.' LIKE SUBSTRING(REVERSE(photo_url), 4, 1)
 THEN RIGHT(photo_url, strpos(reverse(photo_url),'/')-1)
-ELSE photo_url
 END;
 
 UPDATE akvo_tree_registration_photos
-SET photo_url = CONCAT('https://akvoflow-201.s3.amazonaws.com/images/',photo_url);
+SET photo_url = CONCAT('https://akvoflow-201.s3.amazonaws.com/images/',photo_url)
+WHERE photo_url NOTNULL;
 
 UPDATE AKVO_Tree_external_audits_photos
 SET url_photo = CASE
-WHEN url_photo LIKE '%/%'
+WHEN url_photo LIKE '%/%' AND '.' LIKE SUBSTRING(REVERSE(url_photo), 4, 1)
 THEN RIGHT(url_photo, strpos(reverse(url_photo),'/')-1)
-ELSE url_photo
 END;
 
 UPDATE AKVO_Tree_external_audits_photos
-SET url_photo = CONCAT('https://akvoflow-201.s3.amazonaws.com/images/',url_photo);
+SET url_photo = CONCAT('https://akvoflow-201.s3.amazonaws.com/images/',url_photo)
+WHERE url_photo NOTNULL;
 
 UPDATE akvo_tree_monitoring_photos
 SET photo_url = CASE
-WHEN photo_url LIKE '%/%'
+WHEN photo_url LIKE '%/%' AND '.' LIKE SUBSTRING(REVERSE(photo_url), 4, 1)
 THEN RIGHT(photo_url, strpos(reverse(photo_url),'/')-1)
-ELSE photo_url
 END;
+
+UPDATE akvo_tree_monitoring_photos
+SET photo_url = CONCAT('https://akvoflow-201.s3.amazonaws.com/images/',photo_url)
+WHERE photo_url NOTNULL;
 
 UPDATE akvo_nursery_registration_photos
 SET photo_url = CASE
-WHEN photo_url LIKE '%/%'
+WHEN photo_url LIKE '%/%' AND '.' LIKE SUBSTRING(REVERSE(photo_url), 4, 1)
 THEN RIGHT(photo_url, strpos(reverse(photo_url),'/')-1)
-ELSE photo_url
 END;
 
 UPDATE akvo_nursery_registration_photos
