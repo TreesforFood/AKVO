@@ -30,6 +30,9 @@ conn.commit()
 cur.execute('''CREATE TABLE superset_ecosia_KANOP_polygon_level_1_moment (
 id SERIAL,
 identifier_akvo TEXT,
+name_project TEXT,
+processing_status_site_year TEXT,
+processing_status_site_overall TEXT,
 request_measurement_date DATE,
 kanop_project_id TEXT,
 forestCover_present NUMERIC(20,1),
@@ -113,7 +116,7 @@ project_list_overview = projects_dict['projects'] # Generates a list with dictio
 
 for project_list in project_list_overview:
     # Get details for a project
-    print('Details of project: ', project_list)
+    #print('Details of project: ', project_list)
     project_id = str(project_list['projectId'])
     contract_number = project_list['name']
     country = project_list['country']
@@ -126,7 +129,6 @@ for project_list in project_list_overview:
     project_details = project_details.json()
     metrics = project_details['metrics']
     name_project = project_details.get('name')
-    #print(metrics)
     indicators = ','.join(metrics)
     #print('Metrics of a project: ', metrics) # Output: Metrics of a project:  ['forestCover', 'canopyCover', 'canopyHeightMean', 'treeHeightMean', 'livingAbovegroundBiomass', 'livingAbovegroundBiomassPerHa', 'livingBelowgroundBiomass', 'livingBelowgroundBiomassPerHa', 'livingBiomass', 'livingBiomassPerHa', 'carbon', 'carbonPerHa', 'co2eq', 'co2eqPerHa']
 
@@ -185,7 +187,7 @@ for project_list in project_list_overview:
                     kanop_project_id = project_id
                     #print(project_id, name_project, status_project)
                     cur.execute('''INSERT INTO superset_ecosia_KANOP_polygon_level_1_moment (
-                    identifier_akvo, name_project, status_project, request_measurement_date, kanop_project_id)
+                    identifier_akvo, name_project, processing_status_site_year, request_measurement_date, kanop_project_id)
                     VALUES (%s,%s,%s,%s,%s)''',
                     (identifier_akvo, name_project, status_project, request_measurement_date, kanop_project_id))
 
@@ -200,21 +202,15 @@ for project_list in project_list_overview:
                 project_year_metrics_carbon = response_project_level_metrics['results']['carbon']
                 project_year_metrics_co2seq = response_project_level_metrics['results']['co2eq']
 
-                #print('Project ID: ', project_id, contract_number, 'request_id: ', request_id, 'request_measurement_date: ', request_measurement_date, 'site_year_metrics_forest_cover: ', site_year_metrics_forest_cover, 'site_year_metrics_mean_canopy_height: ', site_year_metrics_mean_canopy_height, 'site_year_metrics_mean_tree_height: ', site_year_metrics_mean_tree_height, 'site_year_metrics_carbon: ', site_year_metrics_carbon)
-                # Output: Project ID:  1880 APAF request_id:  cb1631a7-f9f4-407e-84a1-db6fa9087ed8 request_measurement_date:  2022-07-01 site_year_metrics_forest_cover:  73.58588194556484 site_year_metrics_mean_canopy_height:  3.854736898602207 site_year_metrics_mean_tree_height:  6.7732785701801745 site_year_metrics_carbon:  2038
-                # Project ID:  1880 APAF request_id:  6fb1e7b6-662f-485f-80ea-2a1beb70d2a4 request_measurement_date:  2019-07-01 site_year_metrics_forest_cover:  68.84960117740289 site_year_metrics_mean_canopy_height:  4.0949824766278295 site_year_metrics_mean_tree_height:  6.956564657732989 site_year_metrics_carbon:  2359
-
             # Get metrics' on POLYGON LEVEL. Here the polygon ID's can be linked with the results (results on polygon level)
             metrics_polygon_level = requests.get(f"{root}/projects/{project_id}/requests/{request_id}/metrics/{indicators}",headers=headers)
             metrics_polygon_level = metrics_polygon_level.json()
-            #print('metrics_polygon_level: ', project_id, request_measurement_date, metrics_polygon_level)
+            #print('metrics_polygon_level: ', name_project, status_project, project_id, request_measurement_date, metrics_polygon_level)
             metrics_polygon_level = metrics_polygon_level['results']
-            #print(type(metrics_polygon_level))
 
             for polygon_id in polygon_id_list:
-                #print(project_id, request_measurement_date, polygon_id)
+                #print(project_id, name_project, status_project, request_measurement_date, polygon_id)
                 for k,v in metrics_polygon_level.items():
-                    #print(k,v['averageDistribution'])
                     identifier_akvo = polygon_id
                     request_measurement_date = request_measurement_date
                     kanop_project_id = project_id
@@ -365,11 +361,11 @@ for project_list in project_list_overview:
 
                 # Populate the KANOP table
                 cur.execute('''INSERT INTO superset_ecosia_KANOP_polygon_level_1_moment (
-                identifier_akvo,request_measurement_date, kanop_project_id, forestCover_present, canopyCover_present, canopyHeightMean_present, treeHeightMean_present,
+                identifier_akvo, name_project, processing_status_site_year, request_measurement_date, kanop_project_id, forestCover_present, canopyCover_present, canopyHeightMean_present, treeHeightMean_present,
                 livingAbovegroundBiomass_present,livingAbovegroundBiomassPerHa_present,livingBelowgroundBiomass_present,livingBelowgroundBiomassPerHa_present,
                 livingBiomass_present,livingBiomassPerHa_present,carbon_present,carbonPerHa_present,co2eq_present,co2eqPerHa_present)
-                VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)''',
-                (identifier_akvo,request_measurement_date, kanop_project_id, forestCover, canopyCover, canopyHeightMean, treeHeightMean,
+                VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)''',
+                (identifier_akvo, name_project, status_project, request_measurement_date, kanop_project_id, forestCover, canopyCover, canopyHeightMean, treeHeightMean,
                 livingAbovegroundBiomass,livingAbovegroundBiomassPerHa,livingBelowgroundBiomass,livingBelowgroundBiomassPerHa,
                 livingBiomass,livingBiomassPerHa,carbon,carbonPerHa,co2eq,co2eqPerHa))
 
@@ -396,16 +392,6 @@ for project_list in project_list_overview:
 
         list_change_gis_files = requests.get(f"{root}/projects/{project_id}/requests/{request_id}/variationGisFiles",headers=headers)
         list_change_gis_files = list_change_gis_files.json()  #[0].get('name')
-        #print(len(list_change_gis_files[0]))
-        #if len(list_change_gis_files)>0:
-        #print(country, organisation, list_change_gis_files['variationGISFiles'])
-
-        #list_stock_change_gis_files = requests.post(f"{root}/projects/{project_id}/requests/{request_id}/variationGisFiles/{variationGisFileName}?referenceYear={referenceYear}&versusYear={versusYear}",headers=headers)
-        #print(list_stock_change_gis_files.json())
-
-        #response = requests.get(f"{root}/projects/{project_id}/requests/{request_id}/variationGisFiles/{variationGisFileName}?referenceYear={referenceYear}&versusYear={versusYear}",headers=headers)
-        #print(response.status_code)
-        #print(response.json())
 
         list_gis_indicators = ['forest_cover', 'canopy_height_mean', 'tree_height_mean', 'living_aboveground_biomass_per_ha', 'living_belowground_biomass_per_ha', 'living_biomass_per_ha', 'living_biomass_carbon_stock_per_ha', 'living_biomass_CO2eq_per_ha']
 
