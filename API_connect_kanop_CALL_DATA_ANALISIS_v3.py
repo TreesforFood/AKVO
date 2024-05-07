@@ -424,9 +424,6 @@ identifier_akvo,
 request_measurement_date,
 processing_status_site_year,
 
-LAG(processing_status_site_year)
-OVER (PARTITION BY identifier_akvo ORDER BY request_measurement_date) AS processing_status_site_previous,
-
 LAG(forestCover_present)
 OVER (PARTITION BY identifier_akvo ORDER BY request_measurement_date) AS forestCover_previous,
 forestCover_present - LAG(forestCover_present)
@@ -500,39 +497,62 @@ OVER (PARTITION BY identifier_akvo ORDER BY request_measurement_date) AS co2eqPe
 FROM superset_ecosia_kanop_polygon_level_1_moment
 ORDER BY request_measurement_date),
 
--- This table is to create 1 value for the processing status in order to link this to the table in superset.
--- Namely, the Superset table is just showing 1 row for each site (and multiple columns for the request date)
-kanop_processing_status AS (SELECT
+kanop_processing_status_ranking AS (SELECT
 id,
 identifier_akvo,
 request_measurement_date,
 processing_status_site_year,
 
 CASE
-WHEN processing_status_site_previous ISNULL
-THEN processing_status_site_year
-WHEN processing_status_site_year = 'COMPLETED' AND processing_status_site_previous = 'RUNNING'
-THEN 'RUNNING'
-WHEN processing_status_site_year = 'RUNNING' AND processing_status_site_previous = 'COMPLETED'
-THEN 'RUNNING'
-WHEN processing_status_site_year = 'RUNNING' AND processing_status_site_previous = 'RUNNING'
-THEN 'RUNNING'
-WHEN processing_status_site_year = 'COMPLETED' AND processing_status_site_previous = 'COMPLETED'
-THEN 'COMPLETED'
-WHEN processing_status_site_year = 'CANCELLED' OR processing_status_site_previous = 'CANCELLED'
-THEN 'CANCELLED'
-WHEN processing_status_site_year = 'REQUESTED' OR processing_status_site_previous = 'REQUESTED'
-THEN 'REQUESTED'
-WHEN processing_status_site_year = 'APPROVED' OR processing_status_site_previous = 'APPROVED'
-THEN 'APPROVED'
-END AS processing_status_site_overall
+WHEN processing_status_site_year ISNULL
+THEN 0
+WHEN processing_status_site_year = 'CANCELLED'
+THEN 1
+WHEN processing_status_site_year = 'REQUESTED'
+THEN 2
+WHEN processing_status_site_year = 'APPROVED'
+THEN 3
+WHEN processing_status_site_year = 'RUNNING'
+THEN 4
+WHEN processing_status_site_year = 'COMPLETED'
+THEN 5
+END AS calculation
+FROM superset_ecosia_kanop_polygon_level_1_moment),
 
-FROM kanop_change_table
-ORDER BY request_measurement_date)
+sum_results_rankings AS (SELECT
+identifier_akvo,
+SUM(calculation) AS calculation
+FROM kanop_processing_status_ranking
+GROUP BY identifier_akvo),
+
+classify_sum_rankings AS (SELECT
+identifier_akvo,
+CASE
+WHEN calculation <= 2
+THEN 'CANCELLED'
+WHEN calculation > 2 AND calculation <= 4
+THEN 'REQUESTED'
+WHEN calculation > 4 AND calculation < 10
+THEN 'RUNNING'
+WHEN calculation = 10
+THEN 'COMPLETED'
+END AS status_processing
+FROM sum_results_rankings),
+
+kanop_processing_status_overall AS (SELECT
+id,
+y.identifier_akvo,
+request_measurement_date,
+processing_status_site_year,
+status_processing
+
+FROM superset_ecosia_kanop_polygon_level_1_moment z
+JOIN classify_sum_rankings y
+ON y.identifier_akvo = z.identifier_akvo)
 
 UPDATE superset_ecosia_kanop_polygon_level_1_moment AS a
 SET
-processing_status_site_overall = c.processing_status_site_overall,
+processing_status_site_overall = c.status_processing,
 forestCover_previous = b.forestCover_previous,
 forestCover_change = b.forestCover_change,
 canopyCover_previous = b.canopyCover_previous,
@@ -564,12 +584,9 @@ co2eqPerHa_change = b.co2eqPerHa_change
 
 FROM
 kanop_change_table b
-JOIN kanop_processing_status c
-ON b.id = c.id
+JOIN kanop_processing_status_overall c
+ON b.identifier_akvo = c.identifier_akvo
 WHERE a.id = b.id;
-
-SELECT * FROM superset_ecosia_kanop_polygon_level_1_moment
-order by identifier_akvo, request_measurement_date;
 
 ''')
 conn.commit()
