@@ -500,6 +500,7 @@ ORDER BY request_measurement_date),
 kanop_processing_status_ranking AS (SELECT
 id,
 identifier_akvo,
+name_project,
 request_measurement_date,
 processing_status_site_year,
 
@@ -523,7 +524,7 @@ sum_results_rankings AS (SELECT
 identifier_akvo,
 SUM(calculation) AS calculation
 FROM kanop_processing_status_ranking
-GROUP BY identifier_akvo),
+GROUP BY identifier_akvo, name_project),
 
 classify_sum_rankings AS (SELECT
 identifier_akvo,
