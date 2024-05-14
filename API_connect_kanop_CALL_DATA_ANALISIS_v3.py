@@ -534,7 +534,7 @@ WHEN calculation > 2 AND calculation <= 4
 THEN 'REQUESTED'
 WHEN calculation > 4 AND calculation < 10
 THEN 'RUNNING'
-WHEN calculation = 10
+WHEN calculation >= 10
 THEN 'COMPLETED'
 END AS status_processing
 FROM sum_results_rankings),
