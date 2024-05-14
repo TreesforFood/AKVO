@@ -590,6 +590,7 @@ ON b.identifier_akvo = c.identifier_akvo
 WHERE a.id = b.id;
 
 ''')
+
 conn.commit()
 
 cur.execute('''
