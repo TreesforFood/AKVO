@@ -395,15 +395,15 @@ for project_list in project_list_overview:
 
         list_gis_indicators = ['forest_cover', 'canopy_height_mean', 'tree_height_mean', 'living_aboveground_biomass_per_ha', 'living_belowground_biomass_per_ha', 'living_biomass_per_ha', 'living_biomass_carbon_stock_per_ha', 'living_biomass_CO2eq_per_ha']
 
-        variationGisFilesByRequest = requests.get(f"{root}/projects/{project_id}/requests/{request_id}/variationGisFilesByRequest",headers=headers)
-        variationGisFilesByRequest = variationGisFilesByRequest.json()
-        #print(project_id, variationGisFilesByRequest)
-        for variation_indicator in variationGisFilesByRequest['variationGISFilesByRequest']:
-            for gis_indicator in list_gis_indicators:
-                if variation_indicator['name'] == gis_indicator:
-                    variationGisFileName = variation_indicator['name']
-                    compareToRequestID = variation_indicator['compareToRequestId']
-                    compareToYear = variation_indicator['compareToYear']
+        # variationGisFilesByRequest = requests.get(f"{root}/projects/{project_id}/requests/{request_id}/variationGisFilesByRequest",headers=headers)
+        # variationGisFilesByRequest = variationGisFilesByRequest.json()
+        # #print(project_id, variationGisFilesByRequest)
+        # for variation_indicator in variationGisFilesByRequest['variationGISFilesByRequest']:
+        #     for gis_indicator in list_gis_indicators:
+        #         if variation_indicator['name'] == gis_indicator:
+        #             variationGisFileName = variation_indicator['name']
+        #             compareToRequestID = variation_indicator['compareToRequestId']
+        #             compareToYear = variation_indicator['compareToYear']
                     #print('TEST: ', variationGisFileName, compareToRequestID, compareToYear)
 
 
