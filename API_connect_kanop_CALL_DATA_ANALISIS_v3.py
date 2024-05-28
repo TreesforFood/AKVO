@@ -424,78 +424,78 @@ identifier_akvo,
 request_measurement_date,
 processing_status_site_year,
 
-LAG(forestCover_present)
-OVER (PARTITION BY identifier_akvo ORDER BY request_measurement_date) AS forestCover_previous,
-forestCover_present - LAG(forestCover_present)
-OVER (PARTITION BY identifier_akvo ORDER BY request_measurement_date) AS forestCover_change,
+LAG(forestCover_present) OVER (PARTITION BY identifier_akvo, kanop_project_id ORDER BY request_measurement_date) AS forestCover_previous,
+forestCover_present - LAG(forestCover_present) OVER (PARTITION BY identifier_akvo, kanop_project_id ORDER BY request_measurement_date) AS forestCover_change,
 
 LAG(canopyCover_present)
-OVER (PARTITION BY identifier_akvo ORDER BY request_measurement_date) AS canopyCover_previous,
+OVER (PARTITION BY identifier_akvo, kanop_project_id ORDER BY request_measurement_date) AS canopyCover_previous,
 canopyCover_present - LAG(canopyCover_present)
-OVER (PARTITION BY identifier_akvo ORDER BY request_measurement_date) AS canopyCover_change,
+OVER (PARTITION BY identifier_akvo, kanop_project_id ORDER BY request_measurement_date) AS canopyCover_change,
 
 LAG(canopyHeightMean_present)
-OVER (PARTITION BY identifier_akvo ORDER BY request_measurement_date) AS canopyHeightMean_previous,
+OVER (PARTITION BY identifier_akvo, kanop_project_id ORDER BY request_measurement_date) AS canopyHeightMean_previous,
 canopyHeightMean_present - LAG(canopyHeightMean_present)
-OVER (PARTITION BY identifier_akvo ORDER BY request_measurement_date) AS canopyHeightMean_change,
+OVER (PARTITION BY identifier_akvo, kanop_project_id ORDER BY request_measurement_date) AS canopyHeightMean_change,
 
 LAG(treeHeightMean_present)
-OVER (PARTITION BY identifier_akvo ORDER BY request_measurement_date) AS treeHeightMean_previous,
+OVER (PARTITION BY identifier_akvo, kanop_project_id ORDER BY request_measurement_date) AS treeHeightMean_previous,
 treeHeightMean_present - LAG(treeHeightMean_present)
-OVER (PARTITION BY identifier_akvo ORDER BY request_measurement_date) AS treeHeightMean_change,
+OVER (PARTITION BY identifier_akvo, kanop_project_id ORDER BY request_measurement_date) AS treeHeightMean_change,
 
 LAG(livingAbovegroundBiomass_present)
-OVER (PARTITION BY identifier_akvo ORDER BY request_measurement_date) AS livingAbovegroundBiomass_previous,
+OVER (PARTITION BY identifier_akvo, kanop_project_id ORDER BY request_measurement_date) AS livingAbovegroundBiomass_previous,
 livingAbovegroundBiomass_present - LAG(livingAbovegroundBiomass_present)
-OVER (PARTITION BY identifier_akvo ORDER BY request_measurement_date) AS livingAbovegroundBiomass_change,
+OVER (PARTITION BY identifier_akvo, kanop_project_id ORDER BY request_measurement_date) AS livingAbovegroundBiomass_change,
 
 LAG(livingAbovegroundBiomassPerHa_present)
-OVER (PARTITION BY identifier_akvo ORDER BY request_measurement_date) AS livingAbovegroundBiomassPerHa_previous,
+OVER (PARTITION BY identifier_akvo, kanop_project_id ORDER BY request_measurement_date) AS livingAbovegroundBiomassPerHa_previous,
 livingAbovegroundBiomassPerHa_present - LAG(livingAbovegroundBiomassPerHa_present)
-OVER (PARTITION BY identifier_akvo ORDER BY request_measurement_date) AS livingAbovegroundBiomassPerHa_change,
+OVER (PARTITION BY identifier_akvo, kanop_project_id ORDER BY request_measurement_date) AS livingAbovegroundBiomassPerHa_change,
 
 LAG(livingBelowgroundBiomass_present)
-OVER (PARTITION BY identifier_akvo ORDER BY request_measurement_date) AS livingBelowgroundBiomass_previous,
+OVER (PARTITION BY identifier_akvo, kanop_project_id ORDER BY request_measurement_date) AS livingBelowgroundBiomass_previous,
 livingBelowgroundBiomass_present - LAG(livingBelowgroundBiomass_present)
-OVER (PARTITION BY identifier_akvo ORDER BY request_measurement_date) AS livingBelowgroundBiomass_change,
+OVER (PARTITION BY identifier_akvo, kanop_project_id ORDER BY request_measurement_date) AS livingBelowgroundBiomass_change,
 
 LAG(livingBelowgroundBiomassPerHa_present)
-OVER (PARTITION BY identifier_akvo ORDER BY request_measurement_date) AS livingBelowgroundBiomassPerHa_previous,
+OVER (PARTITION BY identifier_akvo, kanop_project_id ORDER BY request_measurement_date) AS livingBelowgroundBiomassPerHa_previous,
 livingBelowgroundBiomassPerHa_present - LAG(livingBelowgroundBiomassPerHa_present)
-OVER (PARTITION BY identifier_akvo ORDER BY request_measurement_date) AS livingBelowgroundBiomassPerHa_change,
+OVER (PARTITION BY identifier_akvo, kanop_project_id ORDER BY request_measurement_date) AS livingBelowgroundBiomassPerHa_change,
 
 LAG(livingBiomass_present)
-OVER (PARTITION BY identifier_akvo ORDER BY request_measurement_date) AS livingBiomass_previous,
+OVER (PARTITION BY identifier_akvo, kanop_project_id ORDER BY request_measurement_date) AS livingBiomass_previous,
 livingBiomass_present - LAG(livingBiomass_present)
-OVER (PARTITION BY identifier_akvo ORDER BY request_measurement_date) AS livingBiomass_change,
+OVER (PARTITION BY identifier_akvo, kanop_project_id ORDER BY request_measurement_date) AS livingBiomass_change,
 
 LAG(livingBiomassPerHa_present)
-OVER (PARTITION BY identifier_akvo ORDER BY request_measurement_date) AS livingBiomassPerHa_previous,
+OVER (PARTITION BY identifier_akvo, kanop_project_id ORDER BY request_measurement_date) AS livingBiomassPerHa_previous,
 livingBiomassPerHa_present - LAG(livingBiomassPerHa_present)
-OVER (PARTITION BY identifier_akvo ORDER BY request_measurement_date) AS livingBiomassPerHa_change,
+OVER (PARTITION BY identifier_akvo, kanop_project_id ORDER BY request_measurement_date) AS livingBiomassPerHa_change,
 
 LAG(carbon_present)
-OVER (PARTITION BY identifier_akvo ORDER BY request_measurement_date) AS carbon_previous,
+OVER (PARTITION BY identifier_akvo, kanop_project_id ORDER BY request_measurement_date) AS carbon_previous,
 carbon_present - LAG(carbon_present)
-OVER (PARTITION BY identifier_akvo ORDER BY request_measurement_date) AS carbon_change,
+OVER (PARTITION BY identifier_akvo, kanop_project_id ORDER BY request_measurement_date) AS carbon_change,
 
 LAG(carbonPerHa_present)
-OVER (PARTITION BY identifier_akvo ORDER BY request_measurement_date) AS carbonPerHa_previous,
+OVER (PARTITION BY identifier_akvo, kanop_project_id ORDER BY request_measurement_date) AS carbonPerHa_previous,
 carbonPerHa_present - LAG(carbonPerHa_present)
-OVER (PARTITION BY identifier_akvo ORDER BY request_measurement_date) AS carbonPerHa_change,
+OVER (PARTITION BY identifier_akvo, kanop_project_id ORDER BY request_measurement_date) AS carbonPerHa_change,
 
 LAG(co2eq_present)
-OVER (PARTITION BY identifier_akvo ORDER BY request_measurement_date) AS co2eq_previous,
+OVER (PARTITION BY identifier_akvo, kanop_project_id ORDER BY request_measurement_date) AS co2eq_previous,
 co2eq_present - LAG(co2eq_present)
-OVER (PARTITION BY identifier_akvo ORDER BY request_measurement_date) AS co2eq_change,
+OVER (PARTITION BY identifier_akvo, kanop_project_id ORDER BY request_measurement_date) AS co2eq_change,
 
 LAG(co2eqPerHa_present)
-OVER (PARTITION BY identifier_akvo ORDER BY request_measurement_date) AS co2eqPerHa_previous,
+OVER (PARTITION BY identifier_akvo, kanop_project_id ORDER BY request_measurement_date) AS co2eqPerHa_previous,
 co2eqPerHa_present - LAG(co2eqPerHa_present)
-OVER (PARTITION BY identifier_akvo ORDER BY request_measurement_date) AS co2eqPerHa_change
+OVER (PARTITION BY identifier_akvo, kanop_project_id ORDER BY request_measurement_date) AS co2eqPerHa_change
 
 FROM superset_ecosia_kanop_polygon_level_1_moment
 ORDER BY request_measurement_date),
+
+------------------
 
 kanop_processing_status_ranking AS (SELECT
 id,
