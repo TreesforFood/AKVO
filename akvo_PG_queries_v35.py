@@ -4184,6 +4184,7 @@ AS SELECT
 akvo_tree_registration_areas_updated.display_name,
 LOWER(akvo_tree_registration_areas_updated.country) AS country,
 
+
 -- Create a unique code for filtering in superset, based on main organisation name
 CAST(CONCAT(
 	POWER(ASCII(LEFT(LOWER(akvo_tree_registration_areas_updated.organisation),1)),3),
@@ -4235,12 +4236,16 @@ akvo_tree_registration_areas_updated.contract_number AS sub_contract,
 'Monitoring' as procedure,
 akvo_tree_monitoring_photos.identifier_akvo,
 akvo_tree_monitoring_photos.instance,
+akvo_tree_monitoring_areas.submitter,
+akvo_tree_monitoring_areas.submission,
 akvo_tree_monitoring_photos.photo_url,
 akvo_tree_monitoring_photos.photo_location
 
 FROM akvo_tree_monitoring_photos
 JOIN akvo_tree_registration_areas_updated
 ON akvo_tree_monitoring_photos.identifier_akvo = akvo_tree_registration_areas_updated.identifier_akvo
+JOIN akvo_tree_monitoring_areas
+ON akvo_tree_monitoring_photos.instance = akvo_tree_monitoring_areas.instance
 
 UNION All
 
@@ -4300,12 +4305,16 @@ akvo_tree_registration_areas_updated.contract_number AS sub_contract,
 
 AKVO_Tree_external_audits_photos.identifier_akvo,
 AKVO_Tree_external_audits_photos.instance,
+akvo_tree_external_audits_areas.submitter,
+akvo_tree_external_audits_areas.submission,
 AKVO_Tree_external_audits_photos.url_photo AS photo_url,
 AKVO_Tree_external_audits_photos.location_photo AS photo_location
 
 FROM AKVO_Tree_external_audits_photos
 JOIN akvo_tree_registration_areas_updated
-ON AKVO_Tree_external_audits_photos.identifier_akvo = akvo_tree_registration_areas_updated.identifier_akvo;
+ON AKVO_Tree_external_audits_photos.identifier_akvo = akvo_tree_registration_areas_updated.identifier_akvo
+JOIN akvo_tree_external_audits_areas
+ON AKVO_Tree_external_audits_photos.instance = akvo_tree_external_audits_areas.instance;
 
 ALTER TABLE superset_ecosia_tree_monitoring_photos
 ADD lat_y REAL;
