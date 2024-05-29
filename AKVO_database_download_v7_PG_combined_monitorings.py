@@ -38,7 +38,7 @@ headers = {'Authorization': "Bearer {}".format(token_id), 'Accept': 'application
 initial_url_monitoring_data = 'https://api-auth0.akvo.org/flow/orgs/ecosia/form_instances?survey_id=31840001&form_id=11980001&page_size=200'
 
 ################################## STORE FIRST DOWNLOAD URL IN DATABASE
-conn = psycopg2.connect(host= config.CONF["HOST_PSTGRS"],database= config.CONF["DATABASE_PSTGRS"],user= config.CONF["USER_PSTGRS"],password= config.CONF["PASSWORD_PSTGRS"])
+conn = psycopg2.connect(os.environ["DATABASE_URL"], sslmode='require')
 cur = conn.cursor()
 
 cur.execute('''CREATE TABLE IF NOT EXISTS temporary_url_download_table_monitorings(id SERIAL PRIMARY KEY, download_url TEXT);''')
