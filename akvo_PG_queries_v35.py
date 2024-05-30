@@ -3512,6 +3512,8 @@ AS WITH
 wkt_polygons_to_geojson AS (
 SELECT
 t.identifier_akvo,
+t.submission,
+t.country,
 
 -- Create a unique code for filtering in superset, based on main organisation name
 CAST(CONCAT(
@@ -3575,14 +3577,15 @@ jsonb_build_object(
     ))::text AS superset_geojson
 FROM akvo_tree_registration_areas_updated AS t
 where t.polygon NOTNULL
-GROUP BY t.identifier_akvo, t.organisation, t.contract_number, t.display_name),
-
-
+GROUP BY t.identifier_akvo, t.organisation, t.contract_number, t.display_name,
+t.submission, t.country),
 
 
 -- Here we convert the centroid-point locations from WKT format to geojson string format that can be read by superset
 buffer_around_200_trees_centroids AS (SELECT
 identifier_akvo,
+t.submission,
+t.country,
 
 -- Create a unique code for filtering in superset, based on main organisation name
 CAST(CONCAT(
@@ -3642,6 +3645,8 @@ WHERE t.polygon ISNULL),
 wkt_buffer_200_trees_areas_to_geojson AS (
 SELECT
 t.identifier_akvo,
+t.submission,
+t.country,
 
 -- Create a unique code for filtering in superset, based on main organisation name
 CAST(CONCAT(
@@ -3705,12 +3710,15 @@ jsonb_build_object(
     ))::text AS superset_geojson
 
 FROM buffer_around_200_trees_centroids AS t
-group by t.identifier_akvo, t.organisation, t.sub_contract, t.display_name),
+group by t.identifier_akvo, t.organisation, t.sub_contract, t.display_name,
+t.submission, t.country),
 
 -- Here we convert the PCQ MONITORING sample point locations from WKT format to geojson string format that can be read by superset
 wkt_pcq_samples_monitoring_to_geojson AS
 (SELECT
 pcq_samples_monitorings.identifier_akvo,
+akvo_tree_registration_areas_updated.submission,
+akvo_tree_registration_areas_updated.country,
 
 -- Create a unique code for filtering in superset, based on main organisation name
 CAST(CONCAT(
@@ -3777,13 +3785,18 @@ FROM akvo_tree_monitoring_pcq AS pcq_samples_monitorings
 JOIN akvo_tree_registration_areas_updated
 ON pcq_samples_monitorings.identifier_akvo = akvo_tree_registration_areas_updated.identifier_akvo
 GROUP BY pcq_samples_monitorings.identifier_akvo,
-akvo_tree_registration_areas_updated.organisation, akvo_tree_registration_areas_updated.contract_number,
-akvo_tree_registration_areas_updated.display_name),
+akvo_tree_registration_areas_updated.organisation,
+akvo_tree_registration_areas_updated.contract_number,
+akvo_tree_registration_areas_updated.display_name,
+akvo_tree_registration_areas_updated.submission,
+akvo_tree_registration_areas_updated.country),
 
 -- Here we convert the photo (GEOTAG) locations (TREE REGISTRATION) from WKT format to geojson string format that can be read by superset
 wkt_photo_registration_geotag_to_geojson AS
 (SELECT
 tree_registration_photos_geotag.identifier_akvo,
+akvo_tree_registration_areas_updated.submission,
+akvo_tree_registration_areas_updated.country,
 
 -- Create a unique code for filtering in superset, based on main organisation name
 CAST(CONCAT(
@@ -3854,12 +3867,16 @@ ON tree_registration_photos_geotag.identifier_akvo = akvo_tree_registration_area
 WHERE tree_registration_photos_geotag.photo_geotag_location NOTNULL
 GROUP BY tree_registration_photos_geotag.identifier_akvo,
 akvo_tree_registration_areas_updated.organisation, akvo_tree_registration_areas_updated.contract_number,
-akvo_tree_registration_areas_updated.display_name),
+akvo_tree_registration_areas_updated.display_name,
+akvo_tree_registration_areas_updated.submission,
+akvo_tree_registration_areas_updated.country),
 
 -- Here we convert the photo (GPS) locations (TREE REGISTRATION) from WKT format to geojson string format that can be read by superset
 wkt_photo_registration_gps_to_geojson AS
 (SELECT
 tree_registration_photos_gps.identifier_akvo,
+akvo_tree_registration_areas_updated.submission,
+akvo_tree_registration_areas_updated.country,
 
 -- Create a unique code for filtering in superset, based on main organisation name
 CAST(CONCAT(
@@ -3928,12 +3945,16 @@ ON tree_registration_photos_gps.identifier_akvo = akvo_tree_registration_areas_u
 WHERE tree_registration_photos_gps.photo_geotag_location ISNULL
 GROUP BY tree_registration_photos_gps.identifier_akvo,
 akvo_tree_registration_areas_updated.organisation, akvo_tree_registration_areas_updated.contract_number,
-akvo_tree_registration_areas_updated.display_name),
+akvo_tree_registration_areas_updated.display_name,
+akvo_tree_registration_areas_updated.submission,
+akvo_tree_registration_areas_updated.country),
 
 -- Here we convert the PCQ sample point AUDIT locations from WKT format to geojson string format that can be read by superset
 wkt_pcq_samples_audit_to_geojson AS
 (SELECT
 pcq_samples_audits.identifier_akvo,
+akvo_tree_registration_areas_updated.submission,
+akvo_tree_registration_areas_updated.country,
 
 -- Create a unique code for filtering in superset, based on main organisation name
 CAST(CONCAT(
@@ -4002,13 +4023,17 @@ JOIN akvo_tree_registration_areas_updated
 ON pcq_samples_audits.identifier_akvo = akvo_tree_registration_areas_updated.identifier_akvo
 GROUP BY pcq_samples_audits.identifier_akvo,
 akvo_tree_registration_areas_updated.organisation, akvo_tree_registration_areas_updated.contract_number,
-akvo_tree_registration_areas_updated.display_name),
+akvo_tree_registration_areas_updated.display_name,
+akvo_tree_registration_areas_updated.submission,
+akvo_tree_registration_areas_updated.country),
 
 
 -- Here we convert the COUNT sample MONITORING locations from WKT format to geojson string format that can be read by superset
 wkt_count_samples_monitoring_to_geojson AS
 (SELECT
 count_samples_monitoring.identifier_akvo,
+akvo_tree_registration_areas_updated.submission,
+akvo_tree_registration_areas_updated.country,
 
 -- Create a unique code for filtering in superset, based on main organisation name
 CAST(CONCAT(
@@ -4076,13 +4101,17 @@ JOIN akvo_tree_registration_areas_updated
 ON count_samples_monitoring.identifier_akvo = akvo_tree_registration_areas_updated.identifier_akvo
 GROUP BY count_samples_monitoring.identifier_akvo,
 akvo_tree_registration_areas_updated.organisation, akvo_tree_registration_areas_updated.contract_number,
-akvo_tree_registration_areas_updated.display_name),
+akvo_tree_registration_areas_updated.display_name,
+akvo_tree_registration_areas_updated.submission,
+akvo_tree_registration_areas_updated.country),
 
 
 -- Here we convert the COUNT sample AUDIT locations from WKT format to geojson string format that can be read by superset
 wkt_count_samples_audit_to_geojson AS
 (SELECT
 count_samples_audit.identifier_akvo,
+akvo_tree_registration_areas_updated.submission,
+akvo_tree_registration_areas_updated.country,
 
 -- Create a unique code for filtering in superset, based on main organisation name
 CAST(CONCAT(
@@ -4150,7 +4179,9 @@ JOIN akvo_tree_registration_areas_updated
 ON count_samples_audit.identifier_akvo = akvo_tree_registration_areas_updated.identifier_akvo
 GROUP BY count_samples_audit.identifier_akvo,
 akvo_tree_registration_areas_updated.organisation, akvo_tree_registration_areas_updated.contract_number,
-akvo_tree_registration_areas_updated.display_name)
+akvo_tree_registration_areas_updated.display_name,
+akvo_tree_registration_areas_updated.submission,
+akvo_tree_registration_areas_updated.country)
 
 
 SELECT * FROM wkt_polygons_to_geojson
