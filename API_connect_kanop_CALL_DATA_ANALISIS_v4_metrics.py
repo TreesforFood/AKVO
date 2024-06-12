@@ -427,6 +427,7 @@ id,
 identifier_akvo,
 request_measurement_date,
 processing_status_site_year,
+kanop_project_id,
 
 LAG(forestCover_present) OVER (PARTITION BY identifier_akvo, kanop_project_id ORDER BY request_measurement_date) AS forestCover_previous,
 forestCover_present - LAG(forestCover_present) OVER (PARTITION BY identifier_akvo, kanop_project_id ORDER BY request_measurement_date) AS forestCover_change,
@@ -504,9 +505,9 @@ ORDER BY request_measurement_date),
 kanop_processing_status_ranking AS (SELECT
 id,
 identifier_akvo,
-name_project,
 request_measurement_date,
 processing_status_site_year,
+kanop_project_id,
 
 CASE
 WHEN processing_status_site_year ISNULL
@@ -526,12 +527,14 @@ FROM superset_ecosia_kanop_polygon_level_1_moment),
 
 sum_results_rankings AS (SELECT
 identifier_akvo,
+kanop_project_id,
 SUM(calculation) AS calculation
 FROM kanop_processing_status_ranking
-GROUP BY identifier_akvo, name_project),
+GROUP BY kanop_project_id, identifier_akvo),
 
 classify_sum_rankings AS (SELECT
 identifier_akvo,
+kanop_project_id,
 CASE
 WHEN calculation <= 2
 THEN 'CANCELLED'
@@ -547,13 +550,15 @@ FROM sum_results_rankings),
 kanop_processing_status_overall AS (SELECT
 id,
 y.identifier_akvo,
+y.kanop_project_id,
 request_measurement_date,
 processing_status_site_year,
 status_processing
 
 FROM superset_ecosia_kanop_polygon_level_1_moment z
 JOIN classify_sum_rankings y
-ON y.identifier_akvo = z.identifier_akvo)
+ON y.identifier_akvo = z.identifier_akvo
+AND y.kanop_project_id = z.kanop_project_id)
 
 UPDATE superset_ecosia_kanop_polygon_level_1_moment AS a
 SET
@@ -591,6 +596,7 @@ FROM
 kanop_change_table b
 JOIN kanop_processing_status_overall c
 ON b.identifier_akvo = c.identifier_akvo
+AND b.kanop_project_id = c.kanop_project_id
 WHERE a.id = b.id;
 
 ''')
