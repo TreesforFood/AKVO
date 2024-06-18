@@ -138,4 +138,17 @@ for row in project_ids_not_in_db:
                 conn.commit()
 
 
+
+cur.execute('''
+
+GRANT SELECT ON TABLE superset_ecosia_KANOP_polygon_gain_loss_net TO ecosia_superset;
+
+DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_KANOP_polygon_gain_loss_net;
+
+ALTER TABLE superset_ecosia_KANOP_polygon_gain_loss_net enable ROW LEVEL SECURITY;
+
+CREATE POLICY ecosia_superset_policy ON superset_ecosia_KANOP_polygon_gain_loss_net TO ecosia_superset USING (true);''')
+
+conn.commit()
+
 cur.close()
