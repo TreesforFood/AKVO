@@ -77,6 +77,7 @@ DROP TABLE IF EXISTS superset_ecosia_site_registration_unregistered_farmers;
 DROP TABLE IF EXISTS superset_ecosia_contract_overview;'''
 conn.commit()
 
+# Works well
 create_a1 = '''
 CREATE TABLE akvo_tree_registration_areas_updated
 AS
