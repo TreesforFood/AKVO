@@ -297,7 +297,15 @@ AND akvo_tree_monitoring_remapped_areas.polygon_remapped NOTNULL;
 
 UPDATE akvo_tree_registration_areas_updated
 SET calc_area = 0.2
-WHERE polygon ISNULL;'''
+WHERE polygon ISNULL
+
+-- Correct polygons with self-intersections
+-- UPDATE akvo_tree_registration_areas_updated
+-- SET polygon_corr_self_intersections = ST_buffer(polygon,0.0)
+-- WHERE polygon NOTNULL
+-- AND self_intersection = true
+
+;'''
 
 conn.commit()
 
