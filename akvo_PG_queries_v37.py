@@ -537,6 +537,7 @@ table_label_strata.label_strata),
 count_monitoring_avg_count AS (SELECT
 AKVO_Tree_monitoring_areas.identifier_akvo,
 AKVO_Tree_monitoring_areas.instance,
+--AKVO_Tree_monitoring_counts.instance,
 table_label_strata.label_strata,
 
 CASE
@@ -554,12 +555,12 @@ END AS nr_trees_monitored
 FROM AKVO_Tree_monitoring_areas
 JOIN table_label_strata
 ON AKVO_Tree_monitoring_areas.instance = table_label_strata.instance
-LEFT JOIN akvo_tree_monitoring_counts
-ON akvo_tree_monitoring_counts.identifier_akvo = AKVO_Tree_monitoring_areas.identifier_akvo
+JOIN akvo_tree_monitoring_counts
+ON akvo_tree_monitoring_counts.instance = AKVO_Tree_monitoring_areas.instance
 GROUP BY
 AKVO_Tree_monitoring_areas.identifier_akvo,
---AKVO_Tree_monitoring_areas.instance,
 AKVO_Tree_monitoring_areas.instance,
+--akvo_tree_monitoring_counts.instance,
 table_label_strata.label_strata),
 
 -- Calculate AVERAGE tree count results for the AUDIT COUNTS (in case multiple COUNTS are carried out in the same label_strata)
@@ -840,7 +841,7 @@ site_impressions_monitoring.site_impressions
 
 FROM AKVO_Tree_monitoring_areas
 LEFT JOIN count_monitoring_avg_count
-ON AKVO_Tree_monitoring_areas.identifier_akvo = count_monitoring_avg_count.identifier_akvo
+ON AKVO_Tree_monitoring_areas.instance = count_monitoring_avg_count.instance
 LEFT JOIN Akvo_tree_registration_areas_updated
 ON AKVO_Tree_monitoring_areas.identifier_akvo = Akvo_tree_registration_areas_updated.identifier_akvo
 LEFT JOIN table_label_strata
@@ -983,7 +984,7 @@ site_impressions_audit.site_impressions
 
 FROM akvo_tree_external_audits_areas
 LEFT JOIN count_audit_avg_count
-ON akvo_tree_external_audits_areas.identifier_akvo = count_audit_avg_count.identifier_akvo
+ON akvo_tree_external_audits_areas.instance = count_audit_avg_count.instance
 LEFT JOIN Akvo_tree_registration_areas_updated
 ON akvo_tree_external_audits_areas.identifier_akvo = Akvo_tree_registration_areas_updated.identifier_akvo
 LEFT JOIN table_label_strata
