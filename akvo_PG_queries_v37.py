@@ -274,11 +274,13 @@ WHERE t.identifier_akvo = akvo_tree_registration_areas_updated.identifier_akvo;
 
 UPDATE akvo_tree_registration_areas_updated
 SET
-polygon = akvo_tree_monitoring_remapped_areas.polygon_remapped
+polygon = (SELECT akvo_tree_monitoring_remapped_areas.polygon_remapped
 FROM akvo_tree_monitoring_remapped_areas
 WHERE akvo_tree_registration_areas_updated.identifier_akvo
 = akvo_tree_monitoring_remapped_areas.identifier_akvo
-AND akvo_tree_monitoring_remapped_areas.polygon_remapped NOTNULL;
+AND akvo_tree_monitoring_remapped_areas.polygon_remapped NOTNULL
+order by akvo_tree_monitoring_remapped_areas.submission DESC
+LIMIT 1);
 
 UPDATE akvo_tree_registration_areas_updated
 SET
