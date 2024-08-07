@@ -1507,6 +1507,33 @@ for level1_monitoring in changes_form_11980001_lst:
 for level1 in changes_form_30050006_lst:
 
     try:
+        identifier = level1['identifier']
+    except (KeyError, IndexError):
+        identifier = ''
+
+    try:
+        displayname = level1['displayName']
+    except (KeyError, IndexError):
+        displayname = ''
+
+    try:
+        deviceidentifier = level1['deviceIdentifier']
+    except (KeyError, IndexError):
+        deviceidentifier = ''
+
+    instance = level1['id']
+
+    try:
+        submissiondate = level1['submissionDate']
+    except (KeyError, IndexError):
+        submissiondate = ''
+
+    if not submissiondate:
+        submissiontime = ''
+    else:
+        submissiontime = mid(submissiondate, 11,19)
+
+    try:
         submissiondate_trunc = left(submissiondate,10)
     except:
         submissiondate_trunc = None
@@ -1575,6 +1602,7 @@ for level1 in changes_form_30050006_lst:
         elevation = level1['responses']['10050016'][0]['30140002']['elev']
     except (KeyError, IndexError):
         elevation = None
+
 
 
     # Populate the tree registration table
