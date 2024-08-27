@@ -249,7 +249,7 @@ ADD species_latin text,
 
 --The columns below are UPDATED with the geometric error script (AKVO_database_PG_queries_v1_sql_geometric_error_detection.py)
 ADD self_intersection BOOLEAN,
-ADD overlap BOOLEAN,
+ADD overlap TEXT,
 ADD outside_country BOOLEAN,
 ADD check_200_trees BOOLEAN,
 ADD check_duplicate_polygons TEXT,
@@ -383,7 +383,7 @@ FROM combine_monitorings_audits
 order by identifier_akvo),
 
 -- List number of PCQ samples of audits and monitorings
-list_pcq_samples AS (SELECT
+list_pcq_samples AS (SELECTsuperset_ecosia_kanop_polygon_level_1_moment
 identifier_akvo, instance
 FROM akvo_tree_monitoring_pcq
 UNION ALL
