@@ -383,7 +383,7 @@ FROM combine_monitorings_audits
 order by identifier_akvo),
 
 -- List number of PCQ samples of audits and monitorings
-list_pcq_samples AS (SELECTsuperset_ecosia_kanop_polygon_level_1_moment
+list_pcq_samples AS (SELECT superset_ecosia_kanop_polygon_level_1_moment
 identifier_akvo, instance
 FROM akvo_tree_monitoring_pcq
 UNION ALL
