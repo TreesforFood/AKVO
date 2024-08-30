@@ -1146,7 +1146,7 @@ for level1_monitoring in changes_form_11980001_lst:
         impression_site = ''
 
     try:
-        testing_m = level1_monitoring['42120002'][0]['text']
+        testing_m = level1_monitoring['responses']['50110001'][0]['42120002'][0]['text']
     except (IndexError,KeyError):
         testing_m = ''
 
