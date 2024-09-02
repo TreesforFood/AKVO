@@ -313,6 +313,7 @@ create_a2 = '''CREATE TABLE CALC_TAB_monitoring_calculations_per_site AS
 WITH plot_dates_monitorings AS (SELECT
 akvo_tree_monitoring_areas.identifier_akvo,
 akvo_tree_monitoring_areas.instance,
+akvo_tree_monitoring_areas.test,
 akvo_tree_registration_areas_updated.id_planting_site,
 akvo_tree_monitoring_areas.submission AS monitoring_submission,
 
@@ -337,6 +338,7 @@ ON akvo_tree_monitoring_areas.identifier_akvo = akvo_tree_registration_areas_upd
 plot_dates_audits AS (SELECT
 akvo_tree_external_audits_areas.identifier_akvo,
 akvo_tree_external_audits_areas.instance,
+akvo_tree_external_audits_areas.test AS test_monitoring,
 akvo_tree_registration_areas_updated.id_planting_site,
 akvo_tree_external_audits_areas.submission AS monitoring_submission,
 
@@ -364,6 +366,7 @@ SELECT * FROM plot_dates_audits),
 table_label_strata AS (SELECT
 combine_monitorings_audits.identifier_akvo,
 combine_monitorings_audits.instance,
+combine_monitorings_audits.test,
 combine_monitorings_audits.method_selection,
 combine_monitorings_audits.procedure,
 combine_monitorings_audits.planting_date,
@@ -535,7 +538,7 @@ table_label_strata.label_strata),
 
 -- Calculate AVERAGE tree count results for the MONITORING COUNTS (in case multiple COUNTS are carried out in the same label_strata)
 count_monitoring_avg_count AS (SELECT
---AKVO_Tree_monitoring_areas.identifier_akvo,
+AKVO_Tree_monitoring_areas.identifier_akvo,
 AKVO_Tree_monitoring_areas.instance,
 --AKVO_Tree_monitoring_counts.instance,
 table_label_strata.label_strata,
@@ -555,7 +558,7 @@ END AS nr_trees_monitored
 FROM AKVO_Tree_monitoring_areas
 JOIN table_label_strata
 ON AKVO_Tree_monitoring_areas.instance = table_label_strata.instance
-JOIN akvo_tree_monitoring_counts
+LEFT JOIN akvo_tree_monitoring_counts
 ON akvo_tree_monitoring_counts.instance = AKVO_Tree_monitoring_areas.instance
 GROUP BY
 AKVO_Tree_monitoring_areas.identifier_akvo,
@@ -633,6 +636,7 @@ calc_interm_results_tree_numbers_pcq_monitoring AS (
 SELECT
 AKVO_Tree_monitoring_areas.identifier_akvo,
 AKVO_Tree_monitoring_areas.display_name,
+AKVO_Tree_monitoring_areas.test,
 LOWER(akvo_tree_registration_areas_updated.country) AS country,
 LOWER(akvo_tree_registration_areas_updated.organisation) AS organisation,
 submittors_monitoring.submitter,
@@ -702,6 +706,7 @@ AND Akvo_tree_registration_areas_updated.identifier_akvo NOTNULL
 GROUP BY
 table_label_strata.label_strata,
 AKVO_Tree_monitoring_areas.identifier_akvo,
+AKVO_Tree_monitoring_areas.test,
 akvo_tree_registration_areas_updated.organisation,
 submittors_monitoring.submitter,
 site_impressions_monitoring.site_impressions,
@@ -724,6 +729,7 @@ AKVO_Tree_monitoring_areas.display_name),
 calc_interm_results_tree_numbers_pcq_audit AS (SELECT
 AKVO_Tree_external_audits_areas.identifier_akvo,
 AKVO_Tree_external_audits_areas.display_name,
+AKVO_Tree_external_audits_areas.test,
 LOWER(akvo_tree_registration_areas_updated.country) AS country,
 LOWER(akvo_tree_registration_areas_updated.organisation) AS organisation,
 submittors_audit.submitter,
@@ -790,6 +796,7 @@ WHERE table_label_strata.method_selection = 'PCQ' AND Akvo_tree_registration_are
 GROUP BY
 table_label_strata.label_strata,
 AKVO_Tree_external_audits_areas.identifier_akvo,
+AKVO_Tree_external_audits_areas.test,
 akvo_tree_registration_areas_updated.calc_area,
 akvo_tree_registration_areas_updated.tree_number,
 count_pcq_samples.number_pcq_samples,
@@ -810,6 +817,7 @@ AKVO_Tree_external_audits_areas.display_name),
 calc_interm_results_tree_numbers_count_monitoring AS (SELECT
 AKVO_Tree_monitoring_areas.identifier_akvo,
 AKVO_Tree_monitoring_areas.display_name,
+AKVO_Tree_monitoring_areas.test,
 LOWER(akvo_tree_registration_areas_updated.country) AS country,
 LOWER(akvo_tree_registration_areas_updated.organisation) AS organisation,
 submittors_monitoring.submitter,
@@ -860,6 +868,7 @@ AND Akvo_tree_registration_areas_updated.identifier_akvo NOTNULL
 GROUP BY
 table_label_strata.label_strata,
 AKVO_Tree_monitoring_areas.identifier_akvo,
+AKVO_Tree_monitoring_areas.test,
 Akvo_tree_registration_areas_updated.calc_area,
 akvo_tree_registration_areas_updated.tree_number,
 Akvo_tree_registration_areas_updated.planting_date,
@@ -879,6 +888,7 @@ count_monitoring_avg_count.nr_trees_monitored),
 calc_interm_results_tree_numbers_own_method_monitoring AS (SELECT
 AKVO_Tree_monitoring_areas.identifier_akvo,
 AKVO_Tree_monitoring_areas.display_name,
+AKVO_Tree_monitoring_areas.test,
 LOWER(akvo_tree_registration_areas_updated.country) AS country,
 LOWER(akvo_tree_registration_areas_updated.organisation) AS organisation,
 submittors_monitoring.submitter,
@@ -931,6 +941,7 @@ AND Akvo_tree_registration_areas_updated.identifier_akvo NOTNULL
 GROUP BY
 table_label_strata.label_strata,
 AKVO_Tree_monitoring_areas.identifier_akvo,
+AKVO_Tree_monitoring_areas.test,
 Akvo_tree_registration_areas_updated.calc_area,
 akvo_tree_registration_areas_updated.tree_number,
 Akvo_tree_registration_areas_updated.planting_date,
@@ -951,6 +962,7 @@ count_monitoring_avg_count.nr_trees_monitored),
 calc_interm_results_tree_numbers_audit AS (SELECT
 AKVO_Tree_external_audits_areas.identifier_akvo,
 AKVO_Tree_external_audits_areas.display_name,
+AKVO_Tree_external_audits_areas.test,
 LOWER(akvo_tree_registration_areas_updated.country) AS country,
 LOWER(akvo_tree_registration_areas_updated.organisation) AS organisation,
 submittors_audit.submitter,
@@ -1002,6 +1014,7 @@ WHERE table_label_strata.method_selection = 'Tree count' AND Akvo_tree_registrat
 GROUP BY
 table_label_strata.label_strata,
 akvo_tree_external_audits_areas.identifier_akvo,
+AKVO_Tree_external_audits_areas.test,
 Akvo_tree_registration_areas_updated.calc_area,
 akvo_tree_registration_areas_updated.tree_number,
 Akvo_tree_registration_areas_updated.planting_date,
@@ -1020,6 +1033,7 @@ count_audit_avg_count.nr_trees_monitored),
 registration_results_polygon AS (SELECT
 akvo_tree_registration_areas_updated.identifier_akvo,
 akvo_tree_registration_areas_updated.display_name,
+akvo_tree_registration_areas_updated.test,
 LOWER(akvo_tree_registration_areas_updated.country) AS country,
 LOWER(akvo_tree_registration_areas_updated.organisation) AS organisation,
 akvo_tree_registration_areas_updated.submitter,
@@ -1053,6 +1067,7 @@ WHERE polygon NOTNULL),
 registration_results_non_polygon AS (SELECT
 akvo_tree_registration_areas_updated.identifier_akvo,
 akvo_tree_registration_areas_updated.display_name,
+akvo_tree_registration_areas_updated.test,
 LOWER(akvo_tree_registration_areas_updated.country) AS country,
 LOWER(akvo_tree_registration_areas_updated.organisation) AS organisation,
 akvo_tree_registration_areas_updated.submitter,
@@ -1099,7 +1114,6 @@ SELECT * FROM registration_results_non_polygon)
 SELECT * FROM monitoring_tree_numbers;'''
 
 conn.commit()
-
 
 # With this query we make sure that all photos (with a photo-id) get an 'https://akvoflow-201.s3.amazonaws.com/images' url for every photo (some in the API do not seem to have one)
 create_a3 = '''
@@ -2731,6 +2745,7 @@ CALC_TAB_monitoring_calculations_per_site.contract_number AS sub_contract,
 CALC_TAB_monitoring_calculations_per_site.id_planting_site,
 CALC_TAB_monitoring_calculations_per_site.calc_area,
 CALC_TAB_monitoring_calculations_per_site.registered_tree_number,
+CALC_TAB_monitoring_calculations_per_site.test,
 CALC_TAB_monitoring_calculations_per_site.procedure,
 CALC_TAB_monitoring_calculations_per_site.data_collection_method,
 CALC_TAB_monitoring_calculations_per_site.avg_tree_distance_m,
