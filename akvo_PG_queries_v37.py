@@ -2419,6 +2419,7 @@ create_a31 = '''CREATE TABLE superset_ecosia_nursery_registration
 AS SELECT
 akvo_nursery_registration.identifier_akvo,
 akvo_nursery_registration.display_name,
+akvo_nursery_registration.submitter,
 akvo_nursery_registration.instance,
 akvo_nursery_registration.submission,
 LOWER(akvo_nursery_registration.country) AS country,
