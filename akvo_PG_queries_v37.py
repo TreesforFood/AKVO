@@ -3537,6 +3537,7 @@ AS WITH
 wkt_polygons_to_geojson AS (
 SELECT
 t.identifier_akvo,
+t.instance,
 t.submission,
 t.test,
 t.country,
@@ -3603,13 +3604,14 @@ jsonb_build_object(
     ))::text AS superset_geojson
 FROM akvo_tree_registration_areas_updated AS t
 where t.polygon NOTNULL
-GROUP BY t.identifier_akvo, t.test, t.organisation, t.contract_number, t.display_name,
+GROUP BY t.identifier_akvo, t.instance, t.test, t.organisation, t.contract_number, t.display_name,
 t.submission, t.country),
 
 
 -- Here we convert the centroid-point locations from WKT format to geojson string format that can be read by superset
 buffer_around_200_trees_centroids AS (SELECT
 identifier_akvo,
+t.instance,
 t.submission,
 t.test,
 t.country,
@@ -3672,6 +3674,7 @@ WHERE t.polygon ISNULL),
 wkt_buffer_200_trees_areas_to_geojson AS (
 SELECT
 t.identifier_akvo,
+t.instance,
 t.submission,
 t.test,
 t.country,
@@ -3738,13 +3741,14 @@ jsonb_build_object(
     ))::text AS superset_geojson
 
 FROM buffer_around_200_trees_centroids AS t
-group by t.identifier_akvo, t.test, t.organisation, t.sub_contract, t.display_name,
+group by t.identifier_akvo, t.instance, t.test, t.organisation, t.sub_contract, t.display_name,
 t.submission, t.country),
 
 -- Here we convert the PCQ MONITORING sample point locations from WKT format to geojson string format that can be read by superset
 wkt_pcq_samples_monitoring_to_geojson AS
 (SELECT
 pcq_samples_monitorings.identifier_akvo,
+akvo_tree_monitoring_areas.instance,
 akvo_tree_registration_areas_updated.submission,
 akvo_tree_monitoring_areas.test,
 akvo_tree_registration_areas_updated.country,
@@ -3816,6 +3820,7 @@ ON pcq_samples_monitorings.identifier_akvo = akvo_tree_registration_areas_update
 JOIN akvo_tree_monitoring_areas
 ON akvo_tree_monitoring_areas.identifier_akvo = pcq_samples_monitorings.identifier_akvo
 GROUP BY pcq_samples_monitorings.identifier_akvo,
+akvo_tree_monitoring_areas.instance,
 akvo_tree_monitoring_areas.test,
 akvo_tree_registration_areas_updated.organisation,
 akvo_tree_registration_areas_updated.contract_number,
@@ -3827,6 +3832,7 @@ akvo_tree_registration_areas_updated.country),
 wkt_photo_registration_geotag_to_geojson AS
 (SELECT
 tree_registration_photos_geotag.identifier_akvo,
+akvo_tree_monitoring_areas.instance,
 akvo_tree_registration_areas_updated.submission,
 akvo_tree_monitoring_areas.test,
 akvo_tree_registration_areas_updated.country,
@@ -3901,6 +3907,7 @@ JOIN akvo_tree_monitoring_areas
 ON akvo_tree_monitoring_areas.identifier_akvo = tree_registration_photos_geotag.identifier_akvo
 WHERE tree_registration_photos_geotag.photo_geotag_location NOTNULL
 GROUP BY tree_registration_photos_geotag.identifier_akvo,
+akvo_tree_monitoring_areas.instance,
 akvo_tree_registration_areas_updated.organisation,
 akvo_tree_monitoring_areas.test,
 akvo_tree_registration_areas_updated.contract_number,
@@ -3912,6 +3919,7 @@ akvo_tree_registration_areas_updated.country),
 wkt_photo_registration_gps_to_geojson AS
 (SELECT
 tree_registration_photos_gps.identifier_akvo,
+akvo_tree_monitoring_areas.instance,
 akvo_tree_registration_areas_updated.submission,
 akvo_tree_monitoring_areas.test,
 akvo_tree_registration_areas_updated.country,
@@ -3984,6 +3992,7 @@ JOIN akvo_tree_monitoring_areas
 ON akvo_tree_monitoring_areas.identifier_akvo = tree_registration_photos_gps.identifier_akvo
 WHERE tree_registration_photos_gps.photo_geotag_location ISNULL
 GROUP BY tree_registration_photos_gps.identifier_akvo,
+akvo_tree_monitoring_areas.instance,
 akvo_tree_registration_areas_updated.organisation,
 akvo_tree_monitoring_areas.test,
 akvo_tree_registration_areas_updated.contract_number,
@@ -3995,6 +4004,7 @@ akvo_tree_registration_areas_updated.country),
 wkt_pcq_samples_audit_to_geojson AS
 (SELECT
 pcq_samples_audits.identifier_akvo,
+akvo_tree_monitoring_areas.instance,
 akvo_tree_registration_areas_updated.submission,
 akvo_tree_monitoring_areas.test,
 akvo_tree_registration_areas_updated.country,
@@ -4067,6 +4077,7 @@ ON pcq_samples_audits.identifier_akvo = akvo_tree_registration_areas_updated.ide
 JOIN akvo_tree_monitoring_areas
 ON akvo_tree_monitoring_areas.identifier_akvo = pcq_samples_audits.identifier_akvo
 GROUP BY pcq_samples_audits.identifier_akvo,
+akvo_tree_monitoring_areas.instance,
 akvo_tree_registration_areas_updated.organisation,
 akvo_tree_monitoring_areas.test,
 akvo_tree_registration_areas_updated.contract_number,
@@ -4079,6 +4090,7 @@ akvo_tree_registration_areas_updated.country),
 wkt_count_samples_monitoring_to_geojson AS
 (SELECT
 count_samples_monitoring.identifier_akvo,
+count_samples_monitoring.instance,
 akvo_tree_registration_areas_updated.submission,
 count_samples_monitoring.test,
 akvo_tree_registration_areas_updated.country,
@@ -4148,6 +4160,7 @@ FROM akvo_tree_monitoring_areas AS count_samples_monitoring
 JOIN akvo_tree_registration_areas_updated
 ON count_samples_monitoring.identifier_akvo = akvo_tree_registration_areas_updated.identifier_akvo
 GROUP BY count_samples_monitoring.identifier_akvo,
+count_samples_monitoring.instance,
 akvo_tree_registration_areas_updated.organisation,
 count_samples_monitoring.test,
 akvo_tree_registration_areas_updated.contract_number,
@@ -4160,6 +4173,7 @@ akvo_tree_registration_areas_updated.country),
 wkt_count_samples_audit_to_geojson AS
 (SELECT
 count_samples_audit.identifier_akvo,
+akvo_tree_monitoring_areas.instance,
 akvo_tree_registration_areas_updated.submission,
 akvo_tree_monitoring_areas.test,
 akvo_tree_registration_areas_updated.country,
@@ -4231,6 +4245,7 @@ ON count_samples_audit.identifier_akvo = akvo_tree_registration_areas_updated.id
 JOIN akvo_tree_monitoring_areas
 ON akvo_tree_monitoring_areas.identifier_akvo = count_samples_audit.identifier_akvo
 GROUP BY count_samples_audit.identifier_akvo,
+akvo_tree_monitoring_areas.instance,
 akvo_tree_registration_areas_updated.organisation,
 akvo_tree_monitoring_areas.test,
 akvo_tree_registration_areas_updated.contract_number,
@@ -4263,7 +4278,6 @@ UPDATE superset_ecosia_geolocations
 SET contract = TRUNC(sub_contract);'''
 
 conn.commit()
-
 
 create_a45 = '''CREATE TABLE superset_ecosia_tree_monitoring_photos
 AS SELECT
