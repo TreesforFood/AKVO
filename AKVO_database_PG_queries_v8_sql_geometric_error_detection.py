@@ -58,7 +58,10 @@ DROP TABLE IF EXISTS akvo_tree_registration_areas_updated_temp_table2;
 CREATE TEMPORARY TABLE akvo_tree_registration_areas_updated_temp_table1 AS (SELECT identifier_akvo, id_planting_site, organisation, country,
 total_nr_geometric_errors, ST_MakeValid(polygon::geometry) AS pol, ST_Transform(polygon::geometry,4326) AS polgeo
 FROM akvo_tree_registration_areas_updated
-WHERE polygon NOTNULL);
+WHERE polygon NOTNULL
+AND test != 'xxxxx'
+AND test != 'This is a test, this record can be deleted.'
+AND test != 'This is a test, this record can be deleted');
 
 CREATE TEMPORARY TABLE akvo_tree_registration_areas_updated_temp_table2 AS (SELECT identifier_akvo, id_planting_site, organisation, country,
 total_nr_geometric_errors, ST_Transform(polgeo::geometry,4326) AS polgeo
