@@ -1730,7 +1730,9 @@ ROUND(COUNT(*)*1.00/table_b.total_nr_planting_sites_per_contract*1.00*100,2) AS 
 ROUND(SUM(registered_tree_number::decimal)/NULLIF(table_b.total_nr_trees_registered_per_contract::decimal,0)*100,2) AS "percentage of trees monitored/audited in t=1",
 ROUND(SUM(table_a.avg_tree_height::decimal*registered_tree_number)/NULLIF(SUM(registered_tree_number),0),1) AS "weighted avg tree_height in t1"
 FROM CTE_ranking_monitoring_audit_method AS table_a
+
 JOIN
+
 -- Below the number of trees in the entire contract is calculated. This cannot be retrieved from the CTE_ranking_monitoring_audit_method
 -- since this table only shows the registered trees (on site level)	multiple times for various label strata (0, 360, etc).
 (SELECT contract_number,
@@ -3540,7 +3542,7 @@ t.identifier_akvo,
 t.instance,
 t.submission,
 t.test,
-t.country,
+LOWER(t.country) AS country,
 
 -- Create a unique code for filtering in superset, based on main organisation name
 CAST(CONCAT(
