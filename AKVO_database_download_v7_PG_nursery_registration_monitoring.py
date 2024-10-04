@@ -203,24 +203,31 @@ else:
                 for photo in level1['responses']['46400174']: # Get first 4 photos from registration. This loop was tested in file: AKVO_database_download_v7_test_first_4_reg_photos.py
                     photo_list = list(photo.values())
                     for photo in photo_list:
-                        photo_url = photo['filename']
-                        try: #print(photo_url) # print multiple rows well up to here with only urls
-                            if photo['location'] is not None:
-                                photo_lat = photo['location']['latitude']
-                                photo_lon = photo['location']['longitude']
-                                photo_lat = str(photo_lat)
-                                photo_lon = str(photo_lon)
-                                photo_location = 'POINT('+ photo_lon + ' ' + photo_lat + ')'
-                            else:
+                        try:
+                            photo_url = photo['filename']
+                        except KeyError:
+                            photo_url = None
+                        else:
+                            photo_url = photo['filename']
+                            try: #print(photo_url) # print multiple rows well up to here with only urls
+                                if photo['location'] is not None:
+                                    photo_lat = photo['location']['latitude']
+                                    photo_lon = photo['location']['longitude']
+                                    photo_lat = str(photo_lat)
+                                    photo_lon = str(photo_lon)
+                                    photo_location = 'POINT('+ photo_lon + ' ' + photo_lat + ')'
+
+                                else:
+                                    photo_location = None
+
+                            except:
+                                photo_lat = None
+                                photo_lon = None
                                 photo_location = None
 
-                        except:
-                            photo_lat = None
-                            photo_lon = None
-                            photo_location = None
 
+                            cur.execute('''INSERT INTO AKVO_Nursery_registration_photos (identifier_akvo, instance, photo_url, centroid_coord) VALUES (%s,%s,%s,%s)''', (identifier, instance, photo_url, photo_location))
 
-                        cur.execute('''INSERT INTO AKVO_Nursery_registration_photos (identifier_akvo, instance, photo_url, centroid_coord) VALUES (%s,%s,%s,%s)''', (identifier, instance, photo_url, photo_location))
 
 
         # WHEN ALL DATA FROM A PAGE IS PROCESSED SUCCESFULLY, THE nextPageUrl IS ADDED TO THE DATABASE.
@@ -389,27 +396,32 @@ else:
                     photo_list_m = list(photo_m.values())
 
                     for photo_m in photo_list_m:
-                        photo_url_m = photo_m['filename']
+                        try:
+                            photo_url_m = photo_m['filename']
+                        except KeyError:
+                            photo_url_m = None
+                        else:
+                            photo_url_m = photo_m['filename']
 
-                        try: #print(photo_url) # print multiple rows well up to here with only urls
-                            if photo_m['location'] is not None:
-                                photo_lat_m = photo_m['location']['latitude']
-                                photo_lon_m = photo_m['location']['longitude']
-                                photo_lat_m = str(photo_lat_m)
-                                photo_lon_m = str(photo_lon_m)
-                                photo_location_m = 'POINT('+ photo_lon_m + ' ' + photo_lat_m + ')'
+                            try: #print(photo_url) # print multiple rows well up to here with only urls
+                                if photo_m['location'] is not None:
+                                    photo_lat_m = photo_m['location']['latitude']
+                                    photo_lon_m = photo_m['location']['longitude']
+                                    photo_lat_m = str(photo_lat_m)
+                                    photo_lon_m = str(photo_lon_m)
+                                    photo_location_m = 'POINT('+ photo_lon_m + ' ' + photo_lat_m + ')'
 
-                            else:
+                                else:
+                                    photo_location_m = None
+
+                            except:
+                                photo_lat_m = None
+                                photo_lon_m = None
                                 photo_location_m = None
 
-                        except:
-                            photo_lat_m = None
-                            photo_lon_m = None
-                            photo_location_m = None
 
-
-                        cur.execute('''INSERT INTO AKVO_Nursery_monitoring_photos (identifier_akvo, instance, photo_url, centroid_coord)
-                        VALUES (%s,%s,%s,%s)''', (identifier, instance, photo_url_m, photo_location_m))
+                            cur.execute('''INSERT INTO AKVO_Nursery_monitoring_photos (identifier_akvo, instance, photo_url, centroid_coord)
+                            VALUES (%s,%s,%s,%s)''', (identifier, instance, photo_url_m, photo_location_m))
 
             try:
                 level1_m['responses']['16220016']
