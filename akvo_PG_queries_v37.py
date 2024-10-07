@@ -3616,7 +3616,7 @@ identifier_akvo,
 t.instance,
 t.submission,
 t.test,
-t.country,
+LOWER(t.country) AS country,
 
 -- Create a unique code for filtering in superset, based on main organisation name
 CAST(CONCAT(
@@ -3679,7 +3679,7 @@ t.identifier_akvo,
 t.instance,
 t.submission,
 t.test,
-t.country,
+LOWER(t.country) AS country,
 
 -- Create a unique code for filtering in superset, based on main organisation name
 CAST(CONCAT(
@@ -3700,7 +3700,7 @@ ELSE
 0
 END AS partnercode_sub,
 
-t.organisation,
+LOWER(t.organisation) AS organisation,
 
 CASE
 WHEN POSITION('-' IN t.organisation) > 0
@@ -3753,7 +3753,7 @@ pcq_samples_monitorings.identifier_akvo,
 akvo_tree_monitoring_areas.instance,
 akvo_tree_registration_areas_updated.submission,
 akvo_tree_monitoring_areas.test,
-akvo_tree_registration_areas_updated.country,
+LOWER(akvo_tree_registration_areas_updated.country) AS country,
 
 -- Create a unique code for filtering in superset, based on main organisation name
 CAST(CONCAT(
@@ -3837,7 +3837,7 @@ tree_registration_photos_geotag.identifier_akvo,
 akvo_tree_monitoring_areas.instance,
 akvo_tree_registration_areas_updated.submission,
 akvo_tree_monitoring_areas.test,
-akvo_tree_registration_areas_updated.country,
+LOWER(akvo_tree_registration_areas_updated.country) AS country,
 
 -- Create a unique code for filtering in superset, based on main organisation name
 CAST(CONCAT(
@@ -3924,7 +3924,7 @@ tree_registration_photos_gps.identifier_akvo,
 akvo_tree_monitoring_areas.instance,
 akvo_tree_registration_areas_updated.submission,
 akvo_tree_monitoring_areas.test,
-akvo_tree_registration_areas_updated.country,
+LOWER(akvo_tree_registration_areas_updated.country) AS country,
 
 -- Create a unique code for filtering in superset, based on main organisation name
 CAST(CONCAT(
@@ -4009,7 +4009,7 @@ pcq_samples_audits.identifier_akvo,
 akvo_tree_monitoring_areas.instance,
 akvo_tree_registration_areas_updated.submission,
 akvo_tree_monitoring_areas.test,
-akvo_tree_registration_areas_updated.country,
+LOWER(akvo_tree_registration_areas_updated.country) AS country,
 
 -- Create a unique code for filtering in superset, based on main organisation name
 CAST(CONCAT(
@@ -4095,7 +4095,7 @@ count_samples_monitoring.identifier_akvo,
 count_samples_monitoring.instance,
 akvo_tree_registration_areas_updated.submission,
 count_samples_monitoring.test,
-akvo_tree_registration_areas_updated.country,
+LOWER(akvo_tree_registration_areas_updated.country) AS country,
 
 -- Create a unique code for filtering in superset, based on main organisation name
 CAST(CONCAT(
@@ -4178,7 +4178,7 @@ count_samples_audit.identifier_akvo,
 akvo_tree_monitoring_areas.instance,
 akvo_tree_registration_areas_updated.submission,
 akvo_tree_monitoring_areas.test,
-akvo_tree_registration_areas_updated.country,
+LOWER(akvo_tree_registration_areas_updated.country) AS country,
 
 -- Create a unique code for filtering in superset, based on main organisation name
 CAST(CONCAT(
