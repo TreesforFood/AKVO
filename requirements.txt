@@ -13,3 +13,5 @@ matplotlib
 numpy
 psycopg2
 sqlalchemy
+rq
+pyodk == 3.12
