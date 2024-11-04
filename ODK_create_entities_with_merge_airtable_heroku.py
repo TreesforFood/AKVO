@@ -27,9 +27,6 @@ url_contracts = os.environ["URL_AIRTABLE_CONTRACTS"]
 response = requests.get(url_contracts, headers=headers)
 data_contracts = response.json()
 
-# get the token from AKVO
-data = {"client_id": os.environ["CLIENT_ID"], "username" : os.environ["USERNAME"], "password": os.environ["PASSWORD"], "grant_type": os.environ["GRANT_TYPE"], "scope": os.environ["SCOPE"]}
-response = requests.post("https://akvofoundation.eu.auth0.com/oauth/token", data=data)
 
 # Harvest the contract numbers from the FIRST page in airtable (100 rows per page), using no 'offset' string code (since it needs to be collected first)
 # Not the most clean solution. Ideally, we create a function for this in order not to use two of the same loops.
@@ -51,7 +48,7 @@ list_offsets.append(offset)
 
 # Loop through the first (again), second and subsequent 100 row pages and collect the offset string codes and put them into the offset list
 for offset_loop in list_offsets:
-    url_contracts = "https://api.airtable.com/v0/appkx2PPsqz3axWDy/Contracts" + "?offset=" + offset_loop
+    url_contracts = "" + "?offset=" + offset_loop
     response = requests.get(url_contracts, headers=headers)
     data_contracts = response.json()
     try:
