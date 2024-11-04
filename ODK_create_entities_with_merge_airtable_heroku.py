@@ -5,7 +5,6 @@ from pyodk.client import Client
 import pandas as pd
 import requests
 import psycopg2
-from dotenv import load_dotenv, find_dotenv
 from sqlalchemy import create_engine
 import requests
 import os
