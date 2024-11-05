@@ -72,7 +72,7 @@ list_offsets.append(offset)
 
 # Loop through the first (again), second and subsequent 100 row pages and collect the offset string codes and put them into the offset list
 for offset_loop in list_offsets:
-    url_contracts = "" + "?offset=" + offset_loop
+    url_contracts = os.environ["URL_AIRTABLE_CONTRACTS"] + "?offset=" + offset_loop
     response = requests.get(url_contracts, headers=headers)
     data_contracts = response.json()
     try:
