@@ -119,7 +119,14 @@ contract_number::varchar(255),
 ST_AsText(polygon) AS new_polygon,
 identifier_akvo AS ecosia_site_id,
 calc_area::varchar(255) AS area_ha,
-tree_number::varchar(255) AS tree_number,
+
+CASE
+WHEN tree_number NOTNULL
+THEN 'tree_number'
+WHEN tree_number ISNULL
+THEN '0'
+END AS tree_number,
+
 submitter AS user_name_enumerator
 FROM akvo_tree_registration_areas_updated
 WHERE polygon NOTNULL
@@ -140,12 +147,20 @@ contract_number::varchar(255),
 ST_AsText(centroid_coord) AS new_polygon,
 identifier_akvo AS ecosia_site_id,
 calc_area::varchar(255) AS area_ha,
-tree_number::varchar(255) AS tree_number,
+
+CASE
+WHEN tree_number NOTNULL
+THEN 'tree_number'
+WHEN tree_number ISNULL
+THEN '0'
+END AS tree_number,
+
 submitter AS user_name_enumerator
 FROM akvo_tree_registration_areas_updated
 WHERE polygon ISNULL AND centroid_coord NOTNULL) table_entity
 
 WHERE table_entity.contract_number IN %s;''', (tuple_contracts_to_monitor,))
+
 conn.commit()
 
 cur.execute('''SELECT new_polygon, ecosia_site_id FROM getodk_entities_upload_table;''')
