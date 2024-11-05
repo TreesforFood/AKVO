@@ -9,12 +9,36 @@ from sqlalchemy import create_engine
 import requests
 import os
 
+# Retrieve environment variables
+base_url = "https://ecosia.getodk.cloud"
+username = os.environ["ODK_CENTRAL_USERNAME"]
+password = os.environ["ODK_CENTRAL_PASSWORD"]
+default_project_id = 1
 
-#connect to Postgresql database
+# Define the file content
+file_content = f"""[central]
+base_url = "{base_url}"
+username = "{username}"
+password = "{password}"
+default_project_id = {default_project_id}
+"""
+
+# Define a writable path (/app/tmp is a writable directory on Heroku)
+file_path = "/app/tmp/pyodk_config.ini"
+
+# Create the directory if it doesn't exist
+os.makedirs(os.path.dirname(file_path), exist_ok=True)
+
+# Write the configuration to the file
+with open(file_path, "w") as file:
+    file.write(file_content)
+
+
+# Connect to the Postgresql database on Heroku
 conn = psycopg2.connect(os.environ["DATABASE_URL"], sslmode='require')
 cur = conn.cursor()
 
-# first drop the latests upload table
+# Drop the latests upload table
 cur.execute('''DROP TABLE IF EXISTS getodk_entities_upload_table;''')
 
 #Create empty contract list to collect all activated contracts for monitoring
@@ -159,8 +183,8 @@ for row in rows_dict:
     entities_list.append(entities.copy())
 
 
-#Connect to ODK central server and use the merge command
-client = Client(config_path="config.toml", cache_path="pyodk_cache.toml")
+# Connect to ODK central server and use the merge command
+client = Client(config_path=,"/app/tmp/pyodk_config.ini", cache_path="/app/tmp/pyodk_cache.ini")
 client.open()
 
 client.entities.merge(entities_list, entity_list_name='monitoring_trees', project_id=1, match_keys=None, add_new_properties=True, update_matched=False, delete_not_matched=True, source_label_key='label', source_keys=None,create_source=None, source_size=None)
@@ -168,7 +192,7 @@ client.entities.merge(entities_list, entity_list_name='monitoring_trees', projec
 client.close()
 
 
-# first drop the latests upload table
+# Drop the upload table for the next script run
 cur.execute('''DROP TABLE IF EXISTS getodk_entities_upload_table;''')
 conn.commit()
 cur.close()
