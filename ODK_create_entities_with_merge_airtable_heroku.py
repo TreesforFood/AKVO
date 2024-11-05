@@ -102,13 +102,13 @@ print(tuple_contracts_to_monitor)
 # Also duplicate labels should be avoided!
 cur.execute(
 '''CREATE TABLE getodk_entities_upload_table AS
-SELECT
-DISTINCT(CONCAT('Country: ', country, ' | Organisation: ', LOWER(organisation), ' | Contract number: ', contract_number, ' | Site ID: ', REGEXP_REPLACE(id_planting_site, '[^a-zA-Z0-9 ]', '', 'g'), ' | Ecosia site id:', identifier_akvo)) AS label,
+SELECT * FROM
+(SELECT DISTINCT(CONCAT('Country: ', country, ' | Organisation: ', LOWER(organisation), ' | Contract number: ', contract_number, ' | Site ID: ', REGEXP_REPLACE(id_planting_site, '[^a-zA-Z0-9 ]', '', 'g'), ' | Ecosia site id:', identifier_akvo)) AS label,
 country,
 LOWER(organisation) as organisation,
 id_planting_site, '' AS location_area,
 '' AS geometry,
-polygon,
+'' AS polygon,
 '' AS geometry_point,
 '' AS odk_entity_geometry,
 contract_number::varchar(255),
@@ -118,10 +118,31 @@ identifier_akvo AS ecosia_site_id,
 calc_area::varchar(255) AS area_ha,
 tree_number::varchar(255) AS tree_number,
 submitter AS user_name_enumerator
-
 FROM akvo_tree_registration_areas_updated
-WHERE polygon NOTNULL AND contract_number IN %s''', (tuple_contracts_to_monitor,))
+WHERE polygon NOTNULL
 
+UNION -- Union sites with Polygons and sites with Points into 1 table
+
+SELECT
+DISTINCT(CONCAT('Country: ', country, ' | Organisation: ', LOWER(organisation), ' | Contract number: ', contract_number, ' | Site ID: ', REGEXP_REPLACE(id_planting_site, '[^a-zA-Z0-9 ]', '', 'g'), ' | Ecosia site id:', identifier_akvo)) AS label,
+country,
+LOWER(organisation) as organisation,
+id_planting_site, '' AS location_area,
+'' AS geometry,
+'' AS polygon,
+'' AS geometry_point,
+'' AS odk_entity_geometry,
+contract_number::varchar(255),
+'' AS identifier_akvo,
+ST_AsText(centroid_coord) AS new_polygon,
+identifier_akvo AS ecosia_site_id,
+calc_area::varchar(255) AS area_ha,
+tree_number::varchar(255) AS tree_number,
+submitter AS user_name_enumerator
+FROM akvo_tree_registration_areas_updated
+WHERE polygon ISNULL AND centroid_coord NOTNULL) table_entity
+
+WHERE table_entity.contract_number IN %s;''', (tuple_contracts_to_monitor,))
 conn.commit()
 
 cur.execute('''SELECT new_polygon, ecosia_site_id FROM getodk_entities_upload_table;''')
