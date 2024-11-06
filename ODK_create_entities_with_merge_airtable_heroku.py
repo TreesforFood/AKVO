@@ -114,17 +114,17 @@ id_planting_site, '' AS location_area,
 '' AS polygon,
 '' AS geometry_point,
 '' AS odk_entity_geometry,
-contract_number::varchar(255),
+contract_number::varchar(10),
 '' AS identifier_akvo,
 ST_AsText(polygon) AS new_polygon,
 identifier_akvo AS ecosia_site_id,
-calc_area::varchar(255) AS area_ha,
+calc_area::varchar(10) AS area_ha,
 
 CASE
 WHEN tree_number NOTNULL
-THEN 'tree_number'
+THEN CAST(tree_number AS text)
 WHEN tree_number ISNULL
-THEN '0'
+THEN CAST(0 AS text)
 END AS tree_number,
 
 submitter AS user_name_enumerator
@@ -142,17 +142,17 @@ id_planting_site, '' AS location_area,
 '' AS polygon,
 '' AS geometry_point,
 '' AS odk_entity_geometry,
-contract_number::varchar(255),
+contract_number::varchar(10),
 '' AS identifier_akvo,
 ST_AsText(centroid_coord) AS new_polygon,
 identifier_akvo AS ecosia_site_id,
-calc_area::varchar(255) AS area_ha,
+calc_area::varchar(10) AS area_ha,
 
 CASE
 WHEN tree_number NOTNULL
-THEN 'tree_number'
+THEN CAST(tree_number AS text)
 WHEN tree_number ISNULL
-THEN '0'
+THEN CAST(0 AS text)
 END AS tree_number,
 
 submitter AS user_name_enumerator
@@ -197,9 +197,16 @@ for key,value in dict.items():
     WHERE ecosia_site_id = %s''', (value,key))
     conn.commit()
 
-# Remove the WKT format ('Polygon(( etc))')
+# Remove the WKT format ('POLYGON(( etc))')
 cur.execute('''UPDATE getodk_entities_upload_table
-SET geometry = REPLACE(RTRIM(LTRIM(geometry,'POLYGON (('),'))'),',',';');''')
+SET geometry = REPLACE(RTRIM(LTRIM(geometry,'POLYGON (('),'))'),',',';')::varchar(5000)
+WHERE geometry LIKE 'POLYGON%';''')
+conn.commit()
+
+# Remove the WKT format ('POINT(( etc))')
+cur.execute('''UPDATE getodk_entities_upload_table
+SET geometry = REPLACE(RTRIM(LTRIM(geometry,'POINT (('),'))'),',',';')::varchar(5000)
+WHERE geometry LIKE 'POINT%';''')
 conn.commit()
 
 cur.execute('''SELECT * FROM getodk_entities_upload_table''')
@@ -226,7 +233,7 @@ for row in rows_dict:
 client = Client(config_path="/app/tmp/pyodk_config.ini", cache_path="/app/tmp/pyodk_cache.ini")
 client.open()
 
-client.entities.merge(entities_list, entity_list_name='monitoring_trees', project_id=1, match_keys=None, add_new_properties=True, update_matched=False, delete_not_matched=True, source_label_key='label', source_keys=None,create_source=None, source_size=None)
+client.entities.merge(entities_list, entity_list_name='monitoring_trees', project_id=1, match_keys=None, add_new_properties=True, update_matched=True, delete_not_matched=True, source_label_key='label', source_keys=None,create_source=None, source_size=None)
 
 client.close()
 
