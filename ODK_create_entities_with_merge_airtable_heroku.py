@@ -58,6 +58,7 @@ for ids in data_contracts['records']:
     try:
         contract_id = ids['fields']['ID']
         contract_id = str(contract_id)+'.00'
+        #print('1:', contract_id)
         confirmation_monitoring = ids['fields']['monitor?'] # Returns true if activated. If not activated it loops into the python Except
         if confirmation_monitoring is True:
             list_contracts.append(contract_id)
@@ -71,6 +72,7 @@ offset = data_contracts['offset']
 list_offsets = []
 list_offsets.append(offset)
 
+
 # Loop through the first (again), second and subsequent 100 row pages and collect the offset string codes and put them into the offset list
 for offset_loop in list_offsets:
     url_contracts = "https://api.airtable.com/v0/appkx2PPsqz3axWDy/Contracts" + "?offset=" + offset_loop
@@ -78,7 +80,16 @@ for offset_loop in list_offsets:
     data_contracts = response.json()
     try:
         data_contracts['offset']
-    except KeyError:
+    except KeyError: # with Keyerror there is NO more subsequent page. However, the data from this last page still needs to be processed
+        for ids in data_contracts['records']:
+            try:
+                contract_id = ids['fields']['ID']
+                contract_id = str(contract_id)+'.00'
+                confirmation_monitoring = ids['fields']['monitor?'] # Returns true if activated. If not activated it loops into the python Except
+                if confirmation_monitoring is True:
+                    list_contracts.append(contract_id)
+            except:
+                continue
         break
     else:
         offset = data_contracts['offset']
@@ -91,14 +102,13 @@ for offset_loop in list_offsets:
                 confirmation_monitoring = ids['fields']['monitor?'] # Returns true if activated. If not activated it loops into the python Except
                 if confirmation_monitoring is True:
                     list_contracts.append(contract_id)
-                    tuple_contracts_to_monitor = tuple(list_contracts,)
             except:
                 continue
 
+tuple_contracts_to_monitor = tuple(list_contracts,)
+
 for contracts_uploaded in list_contracts:
     print("Uploaded contracts: ", contracts_uploaded)
-
-print(tuple_contracts_to_monitor)
 
 
 # Select entities to upload to GetODK. Note that the label column of the ODK entities table does not accept strange characters. So these are removed in this sql
