@@ -187,9 +187,20 @@ else:
             except (KeyError, IndexError): # Since landtitle has 'other' as option, the list will always be created. As such, there will never be an IndexError. However, it might still be that no value is submitted. In that case the Key will not be found ( as the list will be empty)
                 land_title = ''
 
-            name_village = level1['responses']['1960001'][0].get('61910570','')
-            name_region = level1['responses']['1960001'][0].get('44110002','')
-            name_owner = level1['responses']['1960001'][0].get('54050003','')
+            try:
+                name_village = level1['responses']['1960001'][0]['61910570']
+            except (KeyError, IndexError): # Since landtitle has 'other' as option, the list will always be created. As such, there will never be an IndexError. However, it might still be that no value is submitted. In that case the Key will not be found ( as the list will be empty)
+                name_village = ''
+
+            try:
+                name_region = level1['responses']['1960001'][0]['44110002']
+            except (KeyError, IndexError): # Since landtitle has 'other' as option, the list will always be created. As such, there will never be an IndexError. However, it might still be that no value is submitted. In that case the Key will not be found ( as the list will be empty)
+                name_region = ''
+
+            try:
+                name_owner = level1['responses']['1960001'][0]['54050003']
+            except (KeyError, IndexError): # Since landtitle has 'other' as option, the list will always be created. As such, there will never be an IndexError. However, it might still be that no value is submitted. In that case the Key will not be found ( as the list will be empty)
+                name_owner = ''
 
             try:
                 photo_owner = level1['responses']['1960001'][0]['31840003']['filename']
