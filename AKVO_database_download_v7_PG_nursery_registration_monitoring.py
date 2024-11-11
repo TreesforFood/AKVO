@@ -42,6 +42,9 @@ initial_url_nursery_monitoring = 'https://api-auth0.akvo.org/flow/orgs/ecosia/fo
 conn = psycopg2.connect(os.environ["DATABASE_URL"], sslmode='require')
 cur = conn.cursor()
 
+#cur.execute('''DROP TABLE temporary_url_download_table_nurseries;''')
+#conn.commit()
+
 cur.execute('''CREATE TABLE IF NOT EXISTS temporary_url_download_table_nurseries(id SERIAL PRIMARY KEY, download_url TEXT);''')
 conn.commit()
 
@@ -167,20 +170,16 @@ else:
 
             try:
                 lat_centr = level1['responses']['10050016'][0]['30140002']['lat']
+                lon_centr = level1['responses']['10050016'][0]['30140002']['long']
+                print(lat_centr, lon_centr)
+            except (KeyError, IndexError, ValueError):
+                centroid_coord = None
+            else:
+                lat_centr = level1['responses']['10050016'][0]['30140002']['lat']
                 lat_centr_conv = str(lat_centr)
-            except (KeyError, IndexError):
-                lat_centr = None
-
-            try:
                 lon_centr = level1['responses']['10050016'][0]['30140002']['long']
                 lon_centr_conv = str(lon_centr)
-            except (KeyError, IndexError):
-                lon_centr = None
-
-            try:
                 centroid_coord = 'POINT (' + lon_centr_conv +' '+ lat_centr_conv +')'
-            except (KeyError, IndexError):
-                centroid_coord = None
 
             try:
                 elevation = level1['responses']['10050016'][0]['30140002']['elev']

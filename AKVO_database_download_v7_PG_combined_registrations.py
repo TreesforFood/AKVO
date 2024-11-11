@@ -171,8 +171,16 @@ else:
             except (KeyError, IndexError): # It may be that country is not filled in. In that case, the list will not be created and an Index error will occur (listitem 1 is not found)
                 name_organisation = ''
 
-            contract_number = level1['responses']['1960001'][0].get('52070068', 0.0)
-            id_planting_site = level1['responses']['1960001'][0].get('58000002','')
+            try:
+                #contract_number = level1['responses']['1960001'][0].get('52070068', 0.0)
+                contract_number = level1['responses']['1960001'][0]['52070068']
+            except KeyError:
+                contract_number = None
+
+            try:
+                id_planting_site = level1['responses']['1960001'][0].get('58000002','')
+            except KeyError:
+                id_planting_site = None
 
             try:
                 land_title = level1['responses']['1960001'][0]['52070069'][0]['text']
