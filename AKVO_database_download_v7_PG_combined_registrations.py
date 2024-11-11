@@ -178,9 +178,9 @@ else:
                 contract_number = None
 
             try:
-                id_planting_site = level1['responses']['1960001'][0].get('58000002','')
+                id_planting_site = level1['responses']['1960001'][0]['58000002']
             except KeyError:
-                id_planting_site = None
+                id_planting_site = ''
 
             try:
                 land_title = level1['responses']['1960001'][0]['52070069'][0]['text']
