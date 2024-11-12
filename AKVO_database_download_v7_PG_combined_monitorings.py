@@ -118,6 +118,7 @@ else:
 
 
         for level1_monitoring in json_dict['formInstances']:
+            print('nr identifiers downloaded so far: ', count_identifiers, ': ', level1_monitoring['identifier'])
             submitter_m = level1_monitoring['submitter']
             identifier_m = level1_monitoring['identifier']
             displayname_m = level1_monitoring['displayName']
