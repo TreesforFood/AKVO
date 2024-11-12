@@ -68,11 +68,11 @@ if fetch_download_url[0][0] != True: # Output from this is Boolean! If the resul
 
     ################################## DOWNLOAD IS STARTED FROM SCRATCH, SO ALL TABLES ARE DROPPED AND REBUILD FIRST
     cur.execute('''
-    DROP TABLE IF EXISTS AKVO_Tree_registration_species;
-    DROP TABLE IF EXISTS AKVO_Tree_registration_photos;
-    DROP TABLE IF EXISTS AKVO_Tree_registration_areas;
-    DROP TABLE IF EXISTS AKVO_Tree_registration_areas_baseline_counts;
-    DROP TABLE IF EXISTS AKVO_Tree_registration_areas_baseline_pcq;''')
+    DROP TABLE IF EXISTS AKVO_Tree_registration_species cascade;
+    DROP TABLE IF EXISTS AKVO_Tree_registration_photos cascade;
+    DROP TABLE IF EXISTS AKVO_Tree_registration_areas cascade;
+    DROP TABLE IF EXISTS AKVO_Tree_registration_areas_baseline_counts cascade;
+    DROP TABLE IF EXISTS AKVO_Tree_registration_areas_baseline_pcq cascade;''')
 
     conn.commit()
 
