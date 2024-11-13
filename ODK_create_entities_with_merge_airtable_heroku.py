@@ -115,7 +115,7 @@ for contracts_uploaded in list_contracts:
 # Also duplicate labels should be avoided!
 cur.execute(
 '''CREATE TABLE getodk_entities_upload_table AS
-SELECT * FROM
+WITH TEST AS (SELECT * FROM
 (SELECT DISTINCT(CONCAT('Country: ', country, ' | Organisation: ', LOWER(organisation), ' | Contract number: ', contract_number, ' | Site ID: ', REGEXP_REPLACE(id_planting_site, '[^a-zA-Z0-9 ]', '', 'g'), ' | Ecosia site id:', identifier_akvo)) AS label,
 country,
 LOWER(organisation) as organisation,
@@ -124,7 +124,7 @@ id_planting_site, '' AS location_area,
 '' AS polygon,
 '' AS geometry_point,
 '' AS odk_entity_geometry,
-contract_number::varchar(10),
+CONCAT(contract_number::INTEGER::varchar(10),'.00') AS contract_number,
 '' AS identifier_akvo,
 ST_AsText(polygon) AS new_polygon,
 identifier_akvo AS ecosia_site_id,
@@ -152,7 +152,7 @@ id_planting_site, '' AS location_area,
 '' AS polygon,
 '' AS geometry_point,
 '' AS odk_entity_geometry,
-contract_number::varchar(10),
+CONCAT(contract_number::INTEGER::varchar(10),'.00') AS contract_number,
 '' AS identifier_akvo,
 ST_AsText(centroid_coord) AS new_polygon,
 identifier_akvo AS ecosia_site_id,
@@ -167,13 +167,10 @@ END AS tree_number,
 
 submitter AS user_name_enumerator
 FROM akvo_tree_registration_areas_updated
-WHERE polygon ISNULL AND centroid_coord NOTNULL) table_entity
+WHERE polygon ISNULL AND centroid_coord NOTNULL) table_entity)
 
-WHERE table_entity.contract_number IN %s;''', (tuple_contracts_to_monitor,))
+SELECT * FROM TEST WHERE contract_number IN %s;''', (tuple_contracts_to_monitor,))
 
-conn.commit()
-
-cur.execute('''SELECT new_polygon, ecosia_site_id FROM getodk_entities_upload_table;''')
 conn.commit()
 
 rows = cur.fetchall()
