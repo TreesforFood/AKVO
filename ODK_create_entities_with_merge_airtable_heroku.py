@@ -192,6 +192,9 @@ where contract_number_match_airtable IN %s;''', (tuple_contracts_to_monitor,))
 
 conn.commit()
 
+cur.execute('''SELECT new_polygon, ecosia_site_id FROM getodk_entities_upload_table;''')
+conn.commit()
+
 rows = cur.fetchall()
 
 # Reverse the x and y coordinates
