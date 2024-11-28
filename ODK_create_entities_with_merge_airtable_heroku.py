@@ -228,13 +228,13 @@ for key,value in dict.items():
 
 # Remove the WKT format ('POLYGON(( etc))')
 cur.execute('''UPDATE getodk_entities_upload_table
-SET geometry = REPLACE(RTRIM(LTRIM(geometry,'POLYGON (('),'))'),',',';')::varchar(5000)
+SET geometry = REPLACE(RTRIM(LTRIM(geometry,'POLYGON (('),'))'),',',';')::varchar(20000)
 WHERE geometry LIKE 'POLYGON%';''')
 conn.commit()
 
 # Remove the WKT format ('POINT(( etc))')
 cur.execute('''UPDATE getodk_entities_upload_table
-SET geometry = REPLACE(RTRIM(LTRIM(geometry,'POINT (('),'))'),',',';')::varchar(5000)
+SET geometry = REPLACE(RTRIM(LTRIM(geometry,'POINT (('),'))'),',',';')::varchar(20000)
 WHERE geometry LIKE 'POINT%';''')
 conn.commit()
 
