@@ -15,4 +15,8 @@ psycopg2
 sqlalchemy
 rq
 pyodk
-
+base64==1.4.0
+glob
+segno==1.6.1
+typing
+boto3==1.35.72
