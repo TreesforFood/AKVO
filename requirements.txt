@@ -15,7 +15,6 @@ psycopg2
 sqlalchemy
 rq
 pyodk
-glob
 segno @ git+https://github.com/heuer/segno.git
 typing
 boto3==1.35.72
