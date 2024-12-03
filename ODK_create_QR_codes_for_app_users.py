@@ -100,7 +100,7 @@ for username in data_contracts['records']:
         continue
 
 def get_settings(server_url: str, project_name: str, username: str) -> dict[str, Any]:
-    """Template for the settings to encode in the QR image. Customise as needed."""
+    """Settings to encode in the QR image"""
     return {
         "general": {
             "form_update_mode": "match_exactly",
@@ -110,7 +110,7 @@ def get_settings(server_url: str, project_name: str, username: str) -> dict[str,
             "username": username,
         },
         "admin": {
-            "admin_pw": ADMIN_PASSWORD,
+            "admin_pw": password,
             "change_server": False,
             "automatic_update": False,
             "change_autosend": False,
@@ -149,7 +149,7 @@ for key, value in desired_users.items():
     id_airtable = key
     list_user_name_airtable.append(value)
     provisioned_users = client.projects.create_app_users(display_names=list_user_name_airtable, forms=FORMS_TO_ACCESS, project_id=PROJECT_ID)
-    print(id_airtable, provisioned_users)
+
 
     ## Generate the QR codes.
     for user in provisioned_users:
