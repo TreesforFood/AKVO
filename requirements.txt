@@ -17,6 +17,6 @@ rq
 pyodk
 base64==1.4.0
 glob
-segno @ https://github.com/heuer/segno.git
+segno @ git+https://github.com/heuer/segno.git
 typing
 boto3==1.35.72
