@@ -49,6 +49,9 @@ default_project_id = {default_project_id}
 # Define a writable path for GetODK (/app/tmp is a writable directory on Heroku)
 file_path = "/app/tmp/pyodk_config.ini"
 
+# Create the GetODK directory if it doesn't exist
+os.makedirs(os.path.dirname(file_path), exist_ok=True)
+
 # Write the GetODK configuration to the file
 with open(file_path, "w") as file:
     file.write(file_content)
