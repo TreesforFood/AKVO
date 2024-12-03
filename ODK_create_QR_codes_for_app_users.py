@@ -125,9 +125,7 @@ try:
     ImageFont.truetype("Arial.ttf", 24)
 except OSError:
     print(
-        "Font file 'Roboto-Regular.ttf' not found. This can be downloaded "
-        "from Google, or copied from the Examples directory. "
-        "Source: https://fonts.google.com/specimen/Roboto/about"
+        "Font file 'Arial.ttf' not found. This can be downloaded"
     )
 
 
