@@ -122,7 +122,7 @@ def get_settings(server_url: str, project_name: str, username: str) -> dict[str,
 
 # Check that the Roboto font used for the QR images is available (e.g. on Linux / Win).
 try:
-    ImageFont.truetype("NimbusRoman-Regular.ttf", 24)
+    ImageFont.truetype("app/NimbusRoman-Regular.ttf", 24)
 except OSError:
     print(
         "Font file 'NimbusRoman-Regular.ttf' not found. This can be downloaded"
@@ -168,7 +168,7 @@ for key, value in desired_users.items():
         text_anchor = png.height
         png = ImageOps.expand(png, border=(10, 10, 10, 60), fill=(255, 255, 255))
         draw = ImageDraw.Draw(png)
-        font = ImageFont.truetype("NimbusRoman-Regular.ttf", 24)
+        font = ImageFont.truetype("/app/NimbusRoman-Regular.ttf", 24)
         draw.text((20, text_anchor - 10), "GetODK QR code for:\n" + user.displayName, font=font, fill=(0, 0, 0))
         in_mem_file = io.BytesIO()
         png.save(in_mem_file, "PNG")
