@@ -122,7 +122,7 @@ def get_settings(server_url: str, project_name: str, username: str) -> dict[str,
 
 # Check that the Roboto font used for the QR images is available (e.g. on Linux / Win).
 try:
-    ImageFont.truetype("Roboto-Regular.ttf", 24)
+    ImageFont.truetype("Arial.ttf", 24)
 except OSError:
     print(
         "Font file 'Roboto-Regular.ttf' not found. This can be downloaded "
