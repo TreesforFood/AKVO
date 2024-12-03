@@ -32,11 +32,26 @@ import boto3
 from io import BytesIO
 import io
 
-# Retrieve environment variables from ODK
+# Retrieve environment variables from GetODK
 base_url = "https://ecosia.getodk.cloud"
 username = os.environ["ODK_CENTRAL_USERNAME"]
 password = os.environ["ODK_CENTRAL_PASSWORD"]
 default_project_id = 1
+
+# Define the GetODK file content
+file_content = f"""[central]
+base_url = "{base_url}"
+username = "{username}"
+password = "{password}"
+default_project_id = {default_project_id}
+"""
+
+# Define a writable path for GetODK (/app/tmp is a writable directory on Heroku)
+file_path = "/app/tmp/pyodk_config.ini"
+
+# Write the GetODK configuration to the file
+with open(file_path, "w") as file:
+    file.write(file_content)
 
 # Retrieve environment variables from Airtable
 auth_token = os.environ["TOKEN_AIRTABLE"]
@@ -113,8 +128,8 @@ except OSError:
     )
 
 
-#Connect to ODK central server and use the merge command
-client = Client(config_path="config.toml", cache_path="pyodk_cache.toml")
+# Connect to ODK central server and use the merge command
+client = Client(config_path="/app/tmp/pyodk_config.ini", cache_path="/app/tmp/pyodk_cache.ini")
 client.open()
 
 def create_url_friendly_filename(filename):
