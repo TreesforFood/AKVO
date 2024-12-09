@@ -117,7 +117,7 @@ def get_settings(server_url: str, project_name: str, username: str) -> dict[str,
             "change_autosend": False,
         },
 
-        "project": {"name": project_name, "color": "#ffeb3b", "icon": "💥"},
+        "project": {"name": project_name, "color": "#ffffff", "icon": "✅"},
         }
 
 # Connect to ODK central server and use the merge command
