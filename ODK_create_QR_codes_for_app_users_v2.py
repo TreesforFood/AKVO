@@ -179,7 +179,7 @@ for key, value in desired_users.items():
         url_s3 = create_url_friendly_filename(url_s3)
 
         # Upload url to Airtable
-        row_airtable_to_update = f"{url_test_table}/{id_airtable}"
+        row_airtable_to_update = f"https://api.airtable.com/v0/appkx2PPsqz3axWDy/ODK users/{id_airtable}"
 
         # Set the new field values for the record
         update_fields_airtable = {'fields':{'QR code': url_s3}}
