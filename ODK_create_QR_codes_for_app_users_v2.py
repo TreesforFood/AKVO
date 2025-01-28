@@ -87,9 +87,8 @@ desired_users = {}
 for username in data_contracts['records']:
     #print(username)
     try:
-        if username['fields']['Name'] is not None:
-            #print('A:', username)
-            users = username['fields']['Name']
+        if username['fields']['Username'] is not None:
+            users = username['fields']['Username']
             id_airtable = username['id']
             #desired_users.append(users)
             desired_users[id_airtable] = users
@@ -101,7 +100,7 @@ for username in data_contracts['records']:
         continue
 
 def get_settings(server_url: str, project_name: str, username: str) -> dict[str, Any]:
-    """Settings to encode in the QR image"""
+    """Template for the settings to encode in the QR image. Customise as needed."""
     return {
         "general": {
             "form_update_mode": "match_exactly",
@@ -112,14 +111,25 @@ def get_settings(server_url: str, project_name: str, username: str) -> dict[str,
             "reference_layer": "https://drive.google.com/drive/folders/1XoDDGYV5wZ_aEOX6RmoCAB5c5avVFwe7"
         },
         "admin": {
-            "admin_pw": password,
+            "admin_pw": ADMIN_PASSWORD,
             "change_server": False,
             "automatic_update": False,
             "change_autosend": False,
         },
 
-        "project": {"name": project_name, "color": "#ffffff", "icon": "✅"},
+        "project": {"name": project_name, "color": "#ffffff", "icon": "✅"}, # icon is emoji symbol
         }
+#ffeb3b
+
+# Check that the Roboto font used for the QR images is available (e.g. on Linux / Win).
+try:
+    ImageFont.truetype("Roboto-Regular.ttf", 24)
+except OSError:
+    print(
+        "Font file 'Roboto-Regular.ttf' not found. This can be downloaded "
+        "from Google, or copied from the Examples directory. "
+        "Source: https://fonts.google.com/specimen/Roboto/about"
+    )
 
 # Connect to ODK central server and use the merge command
 client = Client(config_path="/app/tmp/pyodk_config.ini", cache_path="/app/tmp/pyodk_cache.ini")
@@ -134,12 +144,12 @@ def create_url_friendly_filename(filename):
 for key, value in desired_users.items():
     # Create an Airtable username list here so that through very loop iteration,
     # the list is empty again. So there will be 1 username in each iteration,
-    # that is connected with the specific Airtable ID
+    #that is connected with the specific Airtable ID
     list_user_name_airtable = []
     id_airtable = key
     list_user_name_airtable.append(value)
     provisioned_users = client.projects.create_app_users(display_names=list_user_name_airtable, forms=FORMS_TO_ACCESS, project_id=PROJECT_ID)
-
+    #print(id_airtable, provisioned_users)
 
     ## Generate the QR codes.
     for user in provisioned_users:
@@ -160,12 +170,19 @@ for key, value in desired_users.items():
         text_anchor = png.height
         png = ImageOps.expand(png, border=(10, 10, 10, 60), fill=(255, 255, 255))
         draw = ImageDraw.Draw(png)
-        #font = ImageFont.truetype("/app/NimbusRoman-Regular.ttf", 24)
-        #draw.text((20, text_anchor - 10), "GetODK QR code for:\n" + user.displayName, font=font, fill=(0, 0, 0))
-        draw.text((20, text_anchor - 10), "GetODK QR code for:\n" + user.displayName, fill=(0, 0, 0))
+        font = ImageFont.truetype("Roboto-Regular.ttf", 24)
+        draw.text((20, text_anchor - 10), "GetODK QR code for:\n" + user.displayName, font=font, fill=(0, 0, 0))
         in_mem_file = io.BytesIO()
         png.save(in_mem_file, "PNG")
+
+        #png.save(f"settings-{user.displayName}.png", format="PNG")
+        #png.save(byte_io, 'PNG')
+        #png = img_byte_arr.getvalue()
         in_mem_file.seek(0)
+        #file_name = '/Users/edmond/Documents/Python_scripts/GetODK/settings-veritree_melissa hartog.png'
+        #response = s3_client.upload_file(Filename=png, Bucket=S3_BUCKET,Key=f"settings-{user.displayName}.png")
+        #response = s3_client.put_object(Filename=img_byte_arr, Bucket=S3_BUCKET,Key=f"settings-{user.displayName}.png")
+        #response = s3_client.put_object(Filename=img_byte_arr, Bucket=S3_BUCKET,Key=f"settings-{user.displayName}.png")
 
         # DEZE WERK! response = s3_client.upload_fileobj(in_mem_file, 'getodk-qr-codes','test.png')
         response = s3_client.upload_fileobj(in_mem_file, 'getodk-qr-codes',f"settings-{user.displayName}.png")
@@ -177,12 +194,18 @@ for key, value in desired_users.items():
         url_s3 = "https://s3-%s.amazonaws.com/%s/%s" % (get_bucket_location, 'getodk-qr-codes', name)
 
         url_s3 = create_url_friendly_filename(url_s3)
+        #https://getodk-qr-codes.s3.eu-north-1.amazonaws.com/settings-fundacion+dia_user_12.png
+        print(url_s3)
+
+        # get_url = s3_client.get_object_url('getodk-qr-codes', f"settings-{user.displayName}.png")
+        # print(get_url)
 
         # Upload url to Airtable
         row_airtable_to_update = f"https://api.airtable.com/v0/appkx2PPsqz3axWDy/ODK users/{id_airtable}"
 
         # Set the new field values for the record
         update_fields_airtable = {'fields':{'QR code': url_s3}}
+        #data_airtable = {'fields': update_fields_airtable}
 
         # Send your request to update the record and parse the response
         response_airtable = requests.patch(row_airtable_to_update, headers=headers, json=update_fields_airtable)
