@@ -121,15 +121,6 @@ def get_settings(server_url: str, project_name: str, username: str) -> dict[str,
         }
 #ffeb3b
 
-# Check that the Roboto font used for the QR images is available (e.g. on Linux / Win).
-try:
-    ImageFont.truetype("Roboto-Regular.ttf", 24)
-except OSError:
-    print(
-        "Font file 'Roboto-Regular.ttf' not found. This can be downloaded "
-        "from Google, or copied from the Examples directory. "
-        "Source: https://fonts.google.com/specimen/Roboto/about"
-    )
 
 # Connect to ODK central server and use the merge command
 client = Client(config_path="/app/tmp/pyodk_config.ini", cache_path="/app/tmp/pyodk_cache.ini")
