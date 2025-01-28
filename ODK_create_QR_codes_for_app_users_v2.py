@@ -59,8 +59,8 @@ with open(file_path, "w") as file:
 # Retrieve environment variables from Airtable
 auth_token = os.environ["TOKEN_AIRTABLE"]
 headers = {"Authorization": f"Bearer {auth_token}"}
-url_test_table = os.environ["URL_AIRTABLE_USERNAMES"]
-response = requests.get(url_test_table, headers=headers)
+url_odk_users_table = os.environ["URL_AIRTABLE_USERNAMES"]
+response = requests.get(url_odk_users_table, headers=headers)
 data_contracts = response.json()
 
 # Retrieve environment variables from Amazone S3
