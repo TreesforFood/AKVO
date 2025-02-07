@@ -3261,7 +3261,7 @@ NULL AS photo_geotag_location,
 akvo_tree_registration_areas_updated.centroid_coord AS photo_gps_location
 FROM akvo_tree_registration_areas_updated
 where akvo_tree_registration_areas_updated.photo_owner NOTNULL
-AND NOT akvo_tree_registration_areas_updated.photo_owner ~ '^\s*$'; -- This last row is needed as not all empty rows are captured by the NOTNULL (strange)
+AND NOT akvo_tree_registration_areas_updated.photo_owner ~ '^\s*$';  -- This last row is needed as not all empty rows are captured by the NOTNULL (strange)
 
 ALTER TABLE superset_ecosia_tree_registration_photos
 ADD lat_y REAL;
@@ -5327,7 +5327,6 @@ CREATE POLICY ecosia_superset_policy ON superset_ecosia_new_devices TO ecosia_su
 CREATE POLICY ecosia_superset_policy ON superset_ecosia_firms_historic_fires TO ecosia_superset USING (true);
 CREATE POLICY ecosia_superset_policy ON superset_ecosia_global_tree_species_distribution TO ecosia_superset USING (true);'''
 
-
 conn.commit()
 
 # create_a21_s4g = '''
@@ -5354,25 +5353,26 @@ conn.commit()
 #
 # conn.commit()
 
-create_a22_ecosia_viewing = '''
-REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA public FROM ecosia;
-
-GRANT USAGE ON SCHEMA PUBLIC TO ecosia;
-GRANT USAGE ON SCHEMA HEROKU_EXT TO ecosia;
-
-GRANT SELECT ON TABLE akvo_tree_registration_areas_updated TO ecosia;
-
-DROP POLICY IF EXISTS ecosia_policy ON akvo_tree_registration_areas_updated;
-
-ALTER TABLE akvo_tree_registration_areas_updated enable ROW LEVEL SECURITY;
-
-CREATE POLICY ecosia_policy ON akvo_tree_registration_areas_updated TO ecosia USING (true);'''
-
-conn.commit()
+# create_a22_ecosia_viewing = '''
+# REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA public FROM ecosia;
+#
+# GRANT USAGE ON SCHEMA PUBLIC TO ecosia;
+# GRANT USAGE ON SCHEMA HEROKU_EXT TO ecosia;
+#
+# GRANT SELECT ON TABLE akvo_tree_registration_areas_updated TO ecosia;
+#
+# DROP POLICY IF EXISTS ecosia_policy ON akvo_tree_registration_areas_updated;
+#
+# ALTER TABLE akvo_tree_registration_areas_updated enable ROW LEVEL SECURITY;
+#
+# CREATE POLICY ecosia_policy ON akvo_tree_registration_areas_updated TO ecosia USING (true);'''
+#
+# conn.commit()
 
 
 # Execute drop tables
 cur.execute(drop_tables)
+
 conn.commit()
 
 # Execute create tables
@@ -5427,6 +5427,8 @@ cur.execute(create_a47)
 cur.execute(create_a49)
 #cur.execute(create_a50)
 cur.execute(create_a51)
+
+cur.execute(create_a20_ecosia_superset)
 
 conn.commit()
 
