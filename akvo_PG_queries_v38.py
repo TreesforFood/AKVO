@@ -53,7 +53,8 @@ create_a1 = '''
 CREATE TABLE akvo_tree_registration_areas_updated
 AS
 
--- JOIN the distribution table and registration table to get all columns for the registration table.
+-- JOIN the ODK registration table, the tree distribution table (of unregistered farmers) and ('normal') tree registration table to get all columns for the registration table.
+
 WITH join_tree_distribution_and_registration AS (SELECT
 a.identifier_akvo,
 a.displayname,
@@ -112,7 +113,7 @@ c.submission_year,
 c.submissiontime,
 c.submitter,
 c.modifiedat,
-c.akvo_form_version,
+c.akvo_form_version::varchar(10),
 c.country,
 c.test,
 c.organisation,
@@ -167,7 +168,7 @@ NULL AS submission_year,
 'n/a' AS submissiontime,
 d.submitter,
 'n/a' AS modifiedat,
-d.form_version,
+d.form_version::varchar(10),
 d.country,
 d.test,
 d.organisation,
@@ -182,7 +183,7 @@ d.gender_owner_planting_site,
 'n/a' AS objective_site,
 'n/a' AS site_preparation,
 'n/a' AS planting_technique,
-'n/a' AS planting_technique,
+'n/a' AS planting_system,
 d.comment_enumerator,
 d.more_less_200_trees,
 d.date_tree_planting,
@@ -209,7 +210,63 @@ d.check_ownership_trees,
 d.gender_tree_receiver,
 d.name_tree_receiver
 
-FROM join_tree_distribution_and_registration AS d)
+FROM join_tree_distribution_and_registration AS d
+
+UNION ALL
+
+SELECT
+h.submissionid_odk as identifier_akvo,
+'n/a' AS displayname,
+h.device_id,
+0 AS instance,
+h.submission_date,
+NULL AS submission_year,
+'n/a' AS submissiontime,
+h.submitter,
+'n/a' AS modifiedat,
+h.odk_form_version AS form_version,
+'n/a' AS country,
+h.test,
+h.organisation,
+h.contract_number,
+h.id_planting_site AS name_site_id_tree_planting,
+h.land_title AS check_ownership_land,
+'n/a' AS name_region_village_planting_site,
+'n/a' AS name_region,
+h.name_owner AS name_owner_planting_site,
+h.photo_owner AS photo_owner_planting_site,
+h.gender_owner AS gender_owner_planting_site,
+'n/a' AS objective_site,
+'n/a' AS site_preparation,
+h.planting_technique,
+'n/a' AS planting_system,
+h.remark AS comment_enumerator,
+h.nr_trees_option AS more_less_200_trees,
+h.planting_date AS date_tree_planting,
+h.tree_number AS estimated_tree_number_planted,
+h.calc_area AS estimated_area,
+h.calc_area AS area_ha,
+NULL AS lat_y,
+NULL AS lon_x,
+6 AS number_coord_pol,
+h.centroid_coord,
+h.polygon,
+NULL AS confirm_plant_location_own_land,
+'n/a' AS one_multiple_planting_sites,
+'n/a' AS confirm_plant_location_own_land,
+'n/a' AS one_multiple_planting_sites,
+0 AS nr_trees_given_away,
+0 AS nr_trees_received,
+'n/a' AS url_photo_receiver_trees,
+'n/a' AS location_house_tree_receiver,
+'n/a' AS confirm_planting_location,
+'n/a' AS url_signature_tree_receiver,
+0 AS total_number_trees_received,
+'n/a' AS check_ownership_trees,
+'n/a' AS gender_tree_receiver,
+'n/a' AS name_tree_receiver
+
+FROM odk_tree_registration_main AS h)
 
 SELECT * FROM union_tree_registration_tree_registration_unreg_farmers
 WHERE organisation != '';
@@ -276,7 +333,6 @@ WHERE polygon ISNULL
 ;'''
 
 conn.commit()
-
 
 # Works well
 create_a2 = '''CREATE TABLE CALC_TAB_monitoring_calculations_per_site AS
