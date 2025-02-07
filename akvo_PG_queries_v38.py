@@ -43,8 +43,11 @@ DROP TABLE IF EXISTS superset_ecosia_tree_registration_light;
 DROP TABLE IF EXISTS superset_ecosia_tree_distribution_unregistered_farmers;
 DROP TABLE IF EXISTS superset_ecosia_site_registration_unregistered_farmers;
 DROP TABLE IF EXISTS superset_ecosia_contract_overview;
-DROP TABLE IF EXISTS AKVO_tree_registration_areas_updated_KANOP;'''
+DROP TABLE IF EXISTS AKVO_tree_registration_areas_updated_KANOP;
+DROP TABLE IF EXISTS CALC_TAB_Error_partner_report_on_nursery_registration;
+DROP TABLE IF EXISTS CALC_TAB_Error_check_on_nursery_registration;'''
 conn.commit()
+
 
 create_a1 = '''
 CREATE TABLE akvo_tree_registration_areas_updated
@@ -2076,6 +2079,7 @@ LEFT JOIN CTE_calculate_extrapolated_tree_number_contract_level_t3
 ON CTE_calculate_extrapolated_tree_number_contract_level_t3.contract_number = CTE_total_tree_registrations.contract_number;'''
 
 conn.commit()
+
 
 create_a16 = '''CREATE TABLE CALC_TAB_Error_check_on_nursery_registration AS select
 akvo_nursery_registration.identifier_akvo,
