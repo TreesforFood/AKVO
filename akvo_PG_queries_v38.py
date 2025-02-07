@@ -63,6 +63,7 @@ a.instance,
 a.submission_date,
 a.submitter,
 a.form_version,
+'AKVO' AS source_data,
 b.country,
 b.organisation,
 b.contract_number,
@@ -114,6 +115,7 @@ c.submissiontime,
 c.submitter,
 c.modifiedat,
 c.akvo_form_version::varchar(10),
+'AKVO' AS source_data,
 c.country,
 c.test,
 c.organisation,
@@ -169,6 +171,7 @@ NULL AS submission_year,
 d.submitter,
 'n/a' AS modifiedat,
 d.form_version::varchar(10),
+'AKVO' AS source_data,
 d.country,
 d.test,
 d.organisation,
@@ -225,8 +228,16 @@ NULL AS submission_year,
 h.submitter,
 'n/a' AS modifiedat,
 h.odk_form_version AS form_version,
+'ODK' AS source_data,
 'n/a' AS country,
-h.test,
+
+CASE
+WHEN h.test = 'test_data'
+THEN ''
+WHEN h.test = 'valid_data'
+THEN 'This is real, valid data'
+END AS test,
+
 h.organisation,
 h.contract_number,
 h.id_planting_site AS name_site_id_tree_planting,
@@ -333,6 +344,7 @@ WHERE polygon ISNULL
 ;'''
 
 conn.commit()
+
 
 # Works well
 create_a2 = '''CREATE TABLE CALC_TAB_monitoring_calculations_per_site AS
