@@ -63,6 +63,9 @@ os.makedirs(os.path.dirname(file_path), exist_ok=True)
 with open(file_path, "w") as file:
     file.write(file_content)
 
+# Connect to ODK central server and use the merge command
+client = Client(config_path="/app/tmp/pyodk_config.ini", cache_path="/app/tmp/pyodk_cache.ini")
+client.open()
 
 json_registration = client.submissions.get_table(form_id='planting_site_reporting')['value']
 json_photos_planting_site = client.submissions.get_table(form_id='planting_site_reporting', table_name='Submissions.group_new_site.group_tree_photos.repeat_photos_polygon')['value']
