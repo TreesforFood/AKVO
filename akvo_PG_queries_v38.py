@@ -229,7 +229,7 @@ h.submitter,
 'n/a' AS modifiedat,
 h.odk_form_version AS form_version,
 'ODK' AS source_data,
-'n/a' AS country,
+h.country,
 
 CASE
 WHEN h.test = 'test_data'
