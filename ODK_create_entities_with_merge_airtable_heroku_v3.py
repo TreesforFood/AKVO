@@ -55,16 +55,27 @@ data_contracts = response.json()
 # Harvest the contract numbers from the FIRST page in airtable (100 rows per page), using no 'offset' string code (since it needs to be collected first)
 # Not the most clean solution. Ideally, we create a function for this in order not to use two of the same loops.
 for ids in data_contracts['records']:
+    #print(ids)
     try:
         contract_id = ids['fields']['ID']
         contract_id = str(contract_id)+'.00'
-        #print('1:', contract_id)
-        confirmation_monitoring = ids['fields']['monitor?'] # Returns true if activated. If not activated it loops into the python Except
-        if confirmation_monitoring is True:
-            list_contracts.append(contract_id)
-            tuple_contracts_to_monitor = tuple(list_contracts)
+        confirmation_monitoring = ids['fields']['monitor?']
+        if confirmation_monitoring is True: # Returns true if activated. If not activated it loops into the python Except
+            try:
+                check_availability_identifiers_akvo = ids['fields']['sites for monitor']
+            except KeyError:
+            # Only store contract numbers where no identifier is given. If an identifier is given, no contract number must be added to the list/tuple
+                list_contracts.append(contract_id)
+                #print("TEST 1 contracts: ", list_contracts)
+            else:
+                list_identifiers_01 = ids['fields']['sites for monitor'].split(",")
+                for x in list_identifiers_01:
+                    list_identifiers.append(x)
+                    #print("TEST 1 identifiers: ", list_identifiers)
     except:
         continue
+
+
 
 # Collect the first 'offset' string code for the NEXT 100 rows page. Put that into a offset list for iteration
 # Not the most clean solution. Ideally, we create a function for this in order not to use two of the same loops.
@@ -85,12 +96,23 @@ for offset_loop in list_offsets:
             try:
                 contract_id = ids['fields']['ID']
                 contract_id = str(contract_id)+'.00'
-                confirmation_monitoring = ids['fields']['monitor?'] # Returns true if activated. If not activated it loops into the python Except
-                if confirmation_monitoring is True:
-                    list_contracts.append(contract_id)
+                confirmation_monitoring = ids['fields']['monitor?']
+                if confirmation_monitoring is True: # Returns true if activated. If not activated it loops into the python Except
+                    try:
+                        check_availability_identifiers_akvo = ids['fields']['sites for monitor']
+                    except KeyError:
+                    # Only store contract numbers where no identifier is given. If an identifier is given, no contract number must be added to the list/tuple
+                        list_contracts.append(contract_id)
+                        #print("TEST 2 contracts: ", list_contracts)
+                    else:
+                        list_identifiers_02 = ids['fields']['sites for monitor'].split(",")
+                        for x in list_identifiers_02:
+                            list_identifiers.append(x)
+                            #print("TEST 2 identifiers: ", list_identifiers)
             except:
                 continue
         break
+
     else:
         offset = data_contracts['offset']
         list_offsets.append(offset)
@@ -99,16 +121,34 @@ for offset_loop in list_offsets:
             try:
                 contract_id = ids['fields']['ID']
                 contract_id = str(contract_id)+'.00'
-                confirmation_monitoring = ids['fields']['monitor?'] # Returns true if activated. If not activated it loops into the python Except
-                if confirmation_monitoring is True:
-                    list_contracts.append(contract_id)
+                confirmation_monitoring = ids['fields']['monitor?']
+                if confirmation_monitoring is True: # Returns true if activated. If not activated it loops into the python Except
+                    try:
+                        check_availability_identifiers_akvo = ids['fields']['sites for monitor']
+                    except KeyError:
+                    # Only store contract numbers where no identifier is given. If an identifier is given, no contract number must be added to the list/tuple
+                        list_contracts.append(contract_id)
+                        #tuple_contracts_to_monitor = tuple(list_contracts)
+                        #print("TEST 3 contracts: ", list_contracts)
+                    else:
+                        list_identifiers_03 = ids['fields']['sites for monitor'].split(",")
+                        for x in list_identifiers_03:
+                            list_identifiers.append(x)
+                            #print("TEST 3 identifiers: ", list_identifiers)
             except:
                 continue
 
-tuple_contracts_to_monitor = tuple(list_contracts,)
+tuple_contracts = tuple(list_contracts)
+#print(tuple_contracts)
+list_identifiers_clean = []
+for i in list_identifiers:
+    j = i.replace(' ','')
+    list_identifiers_clean.append(j)
+#print(list_identifiers_clean)
+tuple_identifiers = tuple(list_identifiers_clean)
 
-for contracts_uploaded in list_contracts:
-    print("Uploaded contracts: ", contracts_uploaded)
+print(tuple_identifiers)
+print(list_contracts)
 
 
 # Select entities to upload to GetODK. Note that the label column of the ODK entities table does not accept strange characters. So these are removed in this sql
