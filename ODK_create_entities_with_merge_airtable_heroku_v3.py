@@ -43,6 +43,7 @@ cur.execute('''DROP TABLE IF EXISTS getodk_entities_upload_table;''')
 
 #Create empty contract list to collect all activated contracts for monitoring
 list_contracts = []
+list_identifiers = []
 
 # Connect to Airtable
 auth_token = os.environ["TOKEN_AIRTABLE"]
