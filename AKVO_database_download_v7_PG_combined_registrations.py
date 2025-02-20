@@ -68,9 +68,9 @@ if fetch_download_url[0][0] != True: # Output from this is Boolean! If the resul
 
     ################################## DOWNLOAD IS STARTED FROM SCRATCH, SO ALL TABLES ARE DROPPED AND REBUILD FIRST
     cur.execute('''
+    DROP TABLE IF EXISTS AKVO_Tree_registration_areas cascade;
     DROP TABLE IF EXISTS AKVO_Tree_registration_species cascade;
     DROP TABLE IF EXISTS AKVO_Tree_registration_photos cascade;
-    DROP TABLE IF EXISTS AKVO_Tree_registration_areas cascade;
     DROP TABLE IF EXISTS AKVO_Tree_registration_areas_baseline_counts cascade;
     DROP TABLE IF EXISTS AKVO_Tree_registration_areas_baseline_pcq cascade;''')
 
@@ -176,6 +176,7 @@ else:
                 contract_number = level1['responses']['1960001'][0]['52070068']
             except KeyError:
                 contract_number = None
+
 
             try:
                 id_planting_site = level1['responses']['1960001'][0]['58000002']
@@ -328,7 +329,6 @@ else:
                 area_ha = None
                 geometry = None
                 get_geom_type = None
-
 
             # Populate the tree registration table
             cur.execute('''INSERT INTO AKVO_Tree_registration_areas (identifier_akvo, display_name, device_id, instance, submission, submission_year, submissiontime, submitter, modifiedAt, AKVO_form_version, country, test, organisation, contract_number, id_planting_site, land_title, name_village, name_region, name_owner, photo_owner, gender_owner, objective_site, site_preparation, planting_technique, planting_system, remark, nr_trees_option, planting_date, tree_number, estimated_area, calc_area, lat_y, lon_x, number_coord_polygon, centroid_coord, polygon, multipoint)
