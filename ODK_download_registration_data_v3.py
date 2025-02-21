@@ -1,4 +1,4 @@
-from pyodk.client import Client
+rom pyodk.client import Client
 import pandas as pd
 import requests
 import re
@@ -39,13 +39,37 @@ CREATE TABLE ODK_Tree_registration_species (submissionid_odk TEXT, repeatid_odk 
 
 conn.commit()
 
-client = Client(config_path="config.toml", cache_path="pyodk_cache.toml")
+# Retrieve environment variables
+base_url = "https://ecosia.getodk.cloud"
+username = os.environ["ODK_CENTRAL_USERNAME"]
+password = os.environ["ODK_CENTRAL_PASSWORD"]
+default_project_id = 1
+
+# Define the file content
+file_content = f"""[central]
+base_url = "{base_url}"
+username = "{username}"
+password = "{password}"
+default_project_id = {default_project_id}
+"""
+
+# Define a writable path (/app/tmp is a writable directory on Heroku)
+file_path = "/app/tmp/pyodk_config.ini"
+
+# Create the directory if it doesn't exist
+os.makedirs(os.path.dirname(file_path), exist_ok=True)
+
+# Write the configuration to the file
+with open(file_path, "w") as file:
+    file.write(file_content)
+
+# Connect to ODK central server and use the merge command
+client = Client(config_path="/app/tmp/pyodk_config.ini", cache_path="/app/tmp/pyodk_cache.ini")
 client.open()
 
 json_registration = client.submissions.get_table(form_id='planting_site_reporting')['value']
 json_photos_planting_site = client.submissions.get_table(form_id='planting_site_reporting', table_name='Submissions.group_new_site.group_tree_photos.repeat_photos_polygon')['value']
 #print(json_pcq_method)
-
 
 
 # check for audit requests: https://docs.getodk.org/central-api-system-endpoints/#server-audit-logs
@@ -54,7 +78,6 @@ audit_report_soft_deleted_submissions = client.get('audits?action=submission.del
 audit_report_modified_submissions = client.get('audits?action=submission.update.version', headers={'X-Extended-Metadata': 'true'}).json()
 #print(audit_report_modified_submissions)
 audit_report_created_submissions = client.get('audits?action=submission.create', headers={'X-Extended-Metadata': 'true'}).json()
-
 
 
 """Converts list of coordinates into WKT and reverse latlon to lonlat)"""
