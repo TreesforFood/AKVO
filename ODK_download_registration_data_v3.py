@@ -1,4 +1,4 @@
-rom pyodk.client import Client
+from pyodk.client import Client
 import pandas as pd
 import requests
 import re
