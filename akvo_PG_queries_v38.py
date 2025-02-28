@@ -5130,188 +5130,20 @@ ADD check_duplicate_polygons_before_self_corrections TEXT;''')
 conn.commit()
 
 
-
-# create_a17_mkec = '''
-# REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA public FROM kenya_mkec;
-#
-# GRANT USAGE ON SCHEMA PUBLIC TO kenya_mkec;
-# GRANT USAGE ON SCHEMA HEROKU_EXT TO kenya_mkec;
-#
-# GRANT SELECT ON TABLE akvo_ecosia_tree_area_registration TO kenya_mkec;
-# GRANT SELECT ON TABLE akvo_ecosia_tree_area_monitoring TO kenya_mkec;
-# GRANT SELECT ON TABLE akvo_ecosia_nursery_registration TO kenya_mkec;
-# GRANT SELECT ON TABLE akvo_ecosia_nursery_monitoring TO kenya_mkec;
-# GRANT SELECT ON TABLE error_partner_report_on_site_registration TO kenya_mkec;
-# GRANT SELECT ON TABLE error_partner_report_on_nursery_registration TO kenya_mkec;
-# GRANT SELECT ON TABLE akvo_ecosia_contract_overview TO kenya_mkec;
-# GRANT SELECT ON TABLE akvo_ecosia_tree_photo_registration TO kenya_mkec;
-#
-#
-# DROP POLICY IF EXISTS mkec_policy ON akvo_tree_registration_areas_updated;
-# DROP POLICY IF EXISTS mkec_policy ON akvo_tree_monitoring_areas_geom;
-# DROP POLICY IF EXISTS mkec_policy ON akvo_nursery_registration;
-# DROP POLICY IF EXISTS mkec_policy ON akvo_nursery_monitoring_geom;
-# DROP POLICY IF EXISTS mkec_policy ON CALC_TAB_Error_partner_report_on_site_registration;
-# DROP POLICY IF EXISTS mkec_policy ON CALC_TAB_Error_partner_report_on_nursery_registration;
-# DROP POLICY IF EXISTS mkec_policy ON calc_tab_tree_submissions_per_contract;
-#
-# DROP POLICY IF EXISTS mkec_policy ON akvo_ecosia_tree_area_registration;
-# DROP POLICY IF EXISTS mkec_policy ON akvo_ecosia_tree_area_monitoring;
-# DROP POLICY IF EXISTS mkec_policy ON akvo_ecosia_nursery_registration;
-# DROP POLICY IF EXISTS mkec_policy ON akvo_ecosia_nursery_monitoring;
-# DROP POLICY IF EXISTS mkec_policy ON error_partner_report_on_site_registration;
-# DROP POLICY IF EXISTS mkec_policy ON error_partner_report_on_nursery_registration;
-# DROP POLICY IF EXISTS mkec_policy ON akvo_ecosia_contract_overview;
-# DROP POLICY IF EXISTS mkec_policy ON akvo_ecosia_tree_photo_registration;
-#
-# ALTER TABLE akvo_ecosia_tree_area_registration enable ROW LEVEL SECURITY;
-# ALTER TABLE akvo_ecosia_tree_area_monitoring enable ROW LEVEL SECURITY;
-# ALTER TABLE akvo_ecosia_nursery_registration enable ROW LEVEL SECURITY;
-# ALTER TABLE akvo_ecosia_nursery_monitoring enable ROW LEVEL SECURITY;
-# ALTER TABLE error_partner_report_on_site_registration enable ROW LEVEL SECURITY;
-# ALTER TABLE error_partner_report_on_nursery_registration enable ROW LEVEL SECURITY;
-# ALTER TABLE akvo_ecosia_contract_overview enable ROW LEVEL SECURITY;
-# ALTER TABLE akvo_ecosia_tree_photo_registration enable ROW LEVEL SECURITY;
-#
-# CREATE POLICY mkec_policy ON akvo_ecosia_tree_area_registration TO kenya_mkec USING (organisation = 'mount kenya environmental conservation');
-# CREATE POLICY mkec_policy ON akvo_ecosia_tree_area_monitoring TO kenya_mkec USING (EXISTS (SELECT * FROM akvo_ecosia_tree_area_registration
-# WHERE akvo_ecosia_tree_area_registration.organisation = 'mount kenya environmental conservation'
-# AND akvo_ecosia_tree_area_monitoring.identifier_akvo = akvo_ecosia_tree_area_registration.identifier_akvo));
-# CREATE POLICY mkec_policy ON akvo_ecosia_nursery_registration TO kenya_mkec USING (organisation = 'mount kenya environmental conservation');
-# CREATE POLICY mkec_policy ON akvo_ecosia_nursery_monitoring TO kenya_mkec USING (EXISTS (SELECT * FROM akvo_ecosia_nursery_registration
-# WHERE akvo_ecosia_nursery_registration.organisation = 'mount kenya environmental conservation'
-# AND akvo_ecosia_nursery_monitoring.identifier_akvo = akvo_ecosia_nursery_registration.identifier_akvo));
-# CREATE POLICY mkec_policy ON error_partner_report_on_site_registration TO kenya_mkec USING (error_partner_report_on_site_registration.organisation = 'mount kenya environmental conservation');
-# CREATE POLICY mkec_policy ON error_partner_report_on_nursery_registration TO kenya_mkec USING (error_partner_report_on_nursery_registration.organisation = 'mount kenya environmental conservation');
-# CREATE POLICY mkec_policy ON akvo_ecosia_contract_overview TO kenya_mkec USING (akvo_ecosia_contract_overview.organisation = 'mount kenya environmental conservation');
-# CREATE POLICY mkec_policy ON akvo_ecosia_tree_photo_registration TO kenya_mkec USING (akvo_ecosia_tree_photo_registration.organisation = 'mount kenya environmental conservation');'''
-#
-#
-# conn.commit()
-
-# create_a18_fdia = '''
-# REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA public FROM nicaragua_fdia;
-#
-# GRANT USAGE ON SCHEMA PUBLIC TO nicaragua_fdia;
-# GRANT USAGE ON SCHEMA HEROKU_EXT TO nicaragua_fdia;
-#
-# GRANT SELECT ON TABLE akvo_ecosia_tree_area_registration TO nicaragua_fdia;
-# GRANT SELECT ON TABLE akvo_ecosia_tree_area_monitoring TO nicaragua_fdia;
-# GRANT SELECT ON TABLE akvo_ecosia_nursery_registration TO nicaragua_fdia;
-# GRANT SELECT ON TABLE akvo_ecosia_nursery_monitoring TO nicaragua_fdia;
-# GRANT SELECT ON TABLE error_partner_report_on_site_registration TO nicaragua_fdia;
-# GRANT SELECT ON TABLE error_partner_report_on_nursery_registration TO nicaragua_fdia;
-# GRANT SELECT ON TABLE akvo_ecosia_contract_overview TO nicaragua_fdia;
-# GRANT SELECT ON TABLE akvo_ecosia_tree_photo_registration TO nicaragua_fdia;
-#
-#
-# DROP POLICY IF EXISTS fdia_policy ON akvo_tree_registration_areas_updated;
-# DROP POLICY IF EXISTS fdia_policy ON akvo_tree_registration_areas;
-# DROP POLICY IF EXISTS fdia_policy ON akvo_tree_monitoring_areas_geom;
-# DROP POLICY IF EXISTS fdia_policy ON akvo_nursery_registration;
-# DROP POLICY IF EXISTS fdia_policy ON akvo_nursery_monitoring_geom;
-# DROP POLICY IF EXISTS fdia_policy ON CALC_TAB_Error_partner_report_on_site_registration;
-# DROP POLICY IF EXISTS fdia_policy ON CALC_TAB_Error_partner_report_on_nursery_registration;
-# DROP POLICY IF EXISTS fdia_policy ON calc_tab_tree_submissions_per_contract;
-#
-#
-# DROP POLICY IF EXISTS fdia_policy ON akvo_ecosia_tree_area_registration;
-# DROP POLICY IF EXISTS fdia_policy ON akvo_ecosia_tree_area_monitoring;
-# DROP POLICY IF EXISTS fdia_policy ON akvo_ecosia_nursery_registration;
-# DROP POLICY IF EXISTS fdia_policy ON akvo_ecosia_nursery_monitoring;
-# DROP POLICY IF EXISTS fdia_policy ON error_partner_report_on_site_registration;
-# DROP POLICY IF EXISTS fdia_policy ON error_partner_report_on_nursery_registration;
-# DROP POLICY IF EXISTS fdia_policy ON akvo_ecosia_contract_overview;
-# DROP POLICY IF EXISTS fdia_policy ON akvo_ecosia_tree_photo_registration;
-#
-# ALTER TABLE akvo_ecosia_tree_area_registration enable ROW LEVEL SECURITY;
-# ALTER TABLE akvo_ecosia_tree_area_monitoring enable ROW LEVEL SECURITY;
-# ALTER TABLE akvo_ecosia_nursery_registration enable ROW LEVEL SECURITY;
-# ALTER TABLE akvo_ecosia_nursery_monitoring enable ROW LEVEL SECURITY;
-# ALTER TABLE error_partner_report_on_site_registration enable ROW LEVEL SECURITY;
-# ALTER TABLE error_partner_report_on_nursery_registration enable ROW LEVEL SECURITY;
-# ALTER TABLE akvo_ecosia_contract_overview enable ROW LEVEL SECURITY;
-# ALTER TABLE akvo_ecosia_tree_photo_registration enable ROW LEVEL SECURITY;
-#
-# CREATE POLICY fdia_policy ON akvo_ecosia_tree_area_registration TO nicaragua_fdia USING (organisation = 'fundacion dia');
-# CREATE POLICY fdia_policy ON akvo_ecosia_tree_area_monitoring TO nicaragua_fdia USING (EXISTS (SELECT * FROM akvo_ecosia_tree_area_registration
-# WHERE akvo_ecosia_tree_area_registration.organisation = 'fundacion dia'
-# AND akvo_ecosia_tree_area_monitoring.identifier_akvo = akvo_ecosia_tree_area_registration.identifier_akvo));
-# CREATE POLICY fdia_policy ON akvo_ecosia_nursery_registration TO nicaragua_fdia USING (organisation = 'fundacion dia');
-# CREATE POLICY fdia_policy ON akvo_ecosia_nursery_monitoring TO nicaragua_fdia USING (EXISTS (SELECT * FROM akvo_ecosia_nursery_registration
-# WHERE akvo_ecosia_nursery_registration.organisation = 'fundacion dia'
-# AND akvo_ecosia_nursery_monitoring.identifier_akvo = akvo_ecosia_nursery_registration.identifier_akvo));
-# CREATE POLICY fdia_policy ON error_partner_report_on_site_registration TO nicaragua_fdia USING (error_partner_report_on_site_registration.organisation = 'fundacion dia');
-# CREATE POLICY fdia_policy ON error_partner_report_on_nursery_registration TO nicaragua_fdia USING (error_partner_report_on_nursery_registration.organisation = 'fundacion dia');
-# CREATE POLICY fdia_policy ON akvo_ecosia_contract_overview TO nicaragua_fdia USING (akvo_ecosia_contract_overview.organisation = 'fundacion dia');
-# CREATE POLICY fdia_policy ON akvo_ecosia_tree_photo_registration TO nicaragua_fdia USING (akvo_ecosia_tree_photo_registration.organisation = 'fundacion dia');'''
-#
-# conn.commit()
-
-# create_a19_haf = '''
-# REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA public FROM morocco_haf;
-#
-# GRANT USAGE ON SCHEMA PUBLIC TO morocco_haf;
-# GRANT USAGE ON SCHEMA HEROKU_EXT TO morocco_haf;
-#
-# GRANT SELECT ON TABLE akvo_ecosia_tree_area_registration TO morocco_haf;
-# GRANT SELECT ON TABLE akvo_ecosia_tree_area_monitoring TO morocco_haf;
-# GRANT SELECT ON TABLE akvo_ecosia_nursery_registration TO morocco_haf;
-# GRANT SELECT ON TABLE akvo_ecosia_nursery_monitoring TO morocco_haf;
-# GRANT SELECT ON TABLE error_partner_report_on_site_registration TO morocco_haf;
-# GRANT SELECT ON TABLE error_partner_report_on_nursery_registration TO morocco_haf;
-# GRANT SELECT ON TABLE akvo_ecosia_contract_overview TO morocco_haf;
-# GRANT SELECT ON TABLE akvo_ecosia_tree_photo_registration TO morocco_haf;
-#
-# DROP POLICY IF EXISTS haf_policy ON akvo_tree_registration_areas_updated;
-# DROP POLICY IF EXISTS haf_policy ON akvo_tree_registration_areas;
-# DROP POLICY IF EXISTS haf_policy ON akvo_tree_monitoring_areas_geom;
-# DROP POLICY IF EXISTS haf_policy ON akvo_nursery_registration;
-# DROP POLICY IF EXISTS haf_policy ON akvo_nursery_monitoring_geom;
-# DROP POLICY IF EXISTS haf_policy ON CALC_TAB_Error_partner_report_on_site_registration;
-# DROP POLICY IF EXISTS haf_policy ON CALC_TAB_Error_partner_report_on_nursery_registration;
-# DROP POLICY IF EXISTS haf_policy ON calc_tab_tree_submissions_per_contract;
-#
-# DROP POLICY IF EXISTS haf_policy ON akvo_ecosia_tree_area_registration;
-# DROP POLICY IF EXISTS haf_policy ON akvo_ecosia_tree_area_monitoring;
-# DROP POLICY IF EXISTS haf_policy ON akvo_ecosia_nursery_registration;
-# DROP POLICY IF EXISTS haf_policy ON akvo_ecosia_nursery_monitoring;
-# DROP POLICY IF EXISTS haf_policy ON error_partner_report_on_site_registration;
-# DROP POLICY IF EXISTS haf_policy ON error_partner_report_on_nursery_registration;
-# DROP POLICY IF EXISTS haf_policy ON akvo_ecosia_contract_overview;
-# DROP POLICY IF EXISTS haf_policy ON akvo_ecosia_tree_photo_registration;
-#
-# ALTER TABLE akvo_ecosia_tree_area_registration enable ROW LEVEL SECURITY;
-# ALTER TABLE akvo_ecosia_tree_area_monitoring enable ROW LEVEL SECURITY;
-# ALTER TABLE akvo_ecosia_nursery_registration enable ROW LEVEL SECURITY;
-# ALTER TABLE akvo_ecosia_nursery_monitoring enable ROW LEVEL SECURITY;
-# ALTER TABLE error_partner_report_on_site_registration enable ROW LEVEL SECURITY;
-# ALTER TABLE error_partner_report_on_nursery_registration enable ROW LEVEL SECURITY;
-# ALTER TABLE akvo_ecosia_contract_overview enable ROW LEVEL SECURITY;
-# ALTER TABLE akvo_ecosia_tree_photo_registration enable ROW LEVEL SECURITY;
-#
-# CREATE POLICY haf_policy ON akvo_ecosia_tree_area_registration TO morocco_haf USING (organisation = 'high atlas foundation');
-# CREATE POLICY haf_policy ON akvo_ecosia_tree_area_monitoring TO morocco_haf USING (EXISTS (SELECT * FROM akvo_ecosia_tree_area_registration
-# WHERE akvo_ecosia_tree_area_registration.organisation = 'high atlas foundation'
-# AND akvo_ecosia_tree_area_monitoring.identifier_akvo = akvo_ecosia_tree_area_registration.identifier_akvo));
-# CREATE POLICY haf_policy ON akvo_ecosia_nursery_registration TO morocco_haf USING (organisation = 'high atlas foundation');
-# CREATE POLICY haf_policy ON akvo_ecosia_nursery_monitoring TO morocco_haf USING (EXISTS (SELECT * FROM akvo_ecosia_nursery_registration
-# WHERE akvo_ecosia_nursery_registration.organisation = 'high atlas foundation'
-# AND akvo_ecosia_nursery_monitoring.identifier_akvo = akvo_ecosia_nursery_registration.identifier_akvo));
-# CREATE POLICY haf_policy ON error_partner_report_on_site_registration TO morocco_haf USING (error_partner_report_on_site_registration.organisation = 'high atlas foundation');
-# CREATE POLICY haf_policy ON error_partner_report_on_nursery_registration TO morocco_haf USING (error_partner_report_on_nursery_registration.organisation = 'high atlas foundation');
-# CREATE POLICY haf_policy ON akvo_ecosia_contract_overview TO morocco_haf USING (akvo_ecosia_contract_overview.organisation = 'high atlas foundation');
-# CREATE POLICY haf_policy ON akvo_ecosia_tree_photo_registration TO morocco_haf USING (akvo_ecosia_tree_photo_registration.organisation = 'high atlas foundation');'''
-#
-# conn.commit()
-
 create_a20_ecosia_superset = '''
 REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA public FROM ecosia_superset;
+
+--GRANT ALL ON SCHEMA conservation TO anne;
+--GRANT SELECT ON ALL TABLES IN SCHEMA conservation TO anne;
+--GRANT ALL PRIVILEGES ON conservation.conservation_areas TO anne;
+--GRANT UPDATE ON conservation.conservation_areas_gid_seq TO anne;
+
 
 GRANT USAGE ON SCHEMA PUBLIC TO ecosia_superset;
 GRANT USAGE ON SCHEMA HEROKU_EXT TO ecosia_superset;
 
 GRANT SELECT ON TABLE superset_ecosia_nursery_registration TO ecosia_superset;
+GRANT UPDATE ON TABLE superset_ecosia_nursery_registration TO ecosia_superset
 GRANT SELECT ON TABLE superset_ecosia_tree_registration TO ecosia_superset;
 GRANT SELECT ON TABLE superset_ecosia_tree_monitoring TO ecosia_superset;
 GRANT SELECT ON TABLE superset_ecosia_s4g_site_health TO ecosia_superset;
@@ -5327,11 +5159,9 @@ GRANT SELECT ON TABLE superset_ecosia_geolocations TO ecosia_superset;
 GRANT SELECT ON TABLE superset_ecosia_tree_registration_light TO ecosia_superset;
 GRANT SELECT ON TABLE superset_ecosia_tree_monitoring_photos TO ecosia_superset;
 GRANT SELECT ON TABLE superset_ecosia_tree_distribution_unregistered_farmers TO ecosia_superset;
---GRANT SELECT ON TABLE superset_ecosia_site_registration_unregistered_farmers TO ecosia_superset;
 GRANT SELECT ON TABLE superset_ecosia_contract_overview TO ecosia_superset;
 GRANT SELECT ON TABLE superset_ecosia_new_devices TO ecosia_superset;
 GRANT SELECT ON TABLE superset_ecosia_firms_historic_fires TO ecosia_superset;
---GRANT SELECT ON TABLE superset_ecosia_global_tree_species_distribution TO ecosia_superset;
 
 DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_nursery_registration;
 DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_tree_registration;
@@ -5349,11 +5179,9 @@ DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_geolocations;
 DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_tree_registration_light;
 DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_tree_monitoring_photos;
 DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_tree_distribution_unregistered_farmers;
---DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_site_registration_unregistered_farmers;
 DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_contract_overview;
 DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_new_devices;
 DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_firms_historic_fires;
---DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_global_tree_species_distribution;
 
 ALTER TABLE superset_ecosia_nursery_registration enable ROW LEVEL SECURITY;
 ALTER TABLE superset_ecosia_tree_registration enable ROW LEVEL SECURITY;
@@ -5371,11 +5199,9 @@ ALTER TABLE superset_ecosia_geolocations enable ROW LEVEL SECURITY;
 ALTER TABLE superset_ecosia_tree_registration_light enable ROW LEVEL SECURITY;
 ALTER TABLE superset_ecosia_tree_monitoring_photos enable ROW LEVEL SECURITY;
 ALTER TABLE superset_ecosia_tree_distribution_unregistered_farmers enable ROW LEVEL SECURITY;
---ALTER TABLE superset_ecosia_site_registration_unregistered_farmers enable ROW LEVEL SECURITY;
 ALTER TABLE superset_ecosia_contract_overview enable ROW LEVEL SECURITY;
 ALTER TABLE superset_ecosia_new_devices enable ROW LEVEL SECURITY;
 ALTER TABLE superset_ecosia_firms_historic_fires enable ROW LEVEL SECURITY;
---ALTER TABLE superset_ecosia_global_tree_species_distribution enable ROW LEVEL SECURITY;
 
 CREATE POLICY ecosia_superset_policy ON superset_ecosia_nursery_registration TO ecosia_superset USING (true);
 CREATE POLICY ecosia_superset_policy ON superset_ecosia_tree_registration TO ecosia_superset USING (true);
@@ -5393,53 +5219,11 @@ CREATE POLICY ecosia_superset_policy ON superset_ecosia_geolocations TO ecosia_s
 CREATE POLICY ecosia_superset_policy ON superset_ecosia_tree_registration_light TO ecosia_superset USING (true);
 CREATE POLICY ecosia_superset_policy ON superset_ecosia_tree_monitoring_photos TO ecosia_superset USING (true);
 CREATE POLICY ecosia_superset_policy ON superset_ecosia_tree_distribution_unregistered_farmers TO ecosia_superset USING (true);
---CREATE POLICY ecosia_superset_policy ON superset_ecosia_site_registration_unregistered_farmers TO ecosia_superset USING (true);
 CREATE POLICY ecosia_superset_policy ON superset_ecosia_contract_overview TO ecosia_superset USING (true);
 CREATE POLICY ecosia_superset_policy ON superset_ecosia_new_devices TO ecosia_superset USING (true);
-CREATE POLICY ecosia_superset_policy ON superset_ecosia_firms_historic_fires TO ecosia_superset USING (true);
---CREATE POLICY ecosia_superset_policy ON superset_ecosia_global_tree_species_distribution TO ecosia_superset USING (true);'''
+CREATE POLICY ecosia_superset_policy ON superset_ecosia_firms_historic_fires TO ecosia_superset USING (true);'''
 
 conn.commit()
-
-# create_a21_s4g = '''
-# REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA public FROM netherlands_s4g;
-#
-# GRANT USAGE ON SCHEMA PUBLIC TO netherlands_s4g;
-# GRANT USAGE ON SCHEMA HEROKU_EXT TO netherlands_s4g;
-#
-# GRANT SELECT ON TABLE akvo_tree_registration_areas_updated TO netherlands_s4g;
-# GRANT SELECT ON TABLE CALC_TAB_monitoring_calculations_per_site TO netherlands_s4g;
-# GRANT SELECT ON TABLE CALC_TAB_linear_regression_results_satellite_validation TO netherlands_s4g;
-#
-# DROP POLICY IF EXISTS s4g_ecosia_policy ON akvo_tree_registration_areas_updated;
-# DROP POLICY IF EXISTS s4g_ecosia_policy ON CALC_TAB_monitoring_calculations_per_site;
-# DROP POLICY IF EXISTS s4g_ecosia_policy ON CALC_TAB_linear_regression_results_satellite_validation;
-#
-# ALTER TABLE akvo_tree_registration_areas_updated enable ROW LEVEL SECURITY;
-# ALTER TABLE CALC_TAB_monitoring_calculations_per_site enable ROW LEVEL SECURITY;
-# ALTER TABLE CALC_TAB_linear_regression_results_satellite_validation enable ROW LEVEL SECURITY;
-#
-# CREATE POLICY s4g_ecosia_policy ON akvo_tree_registration_areas_updated TO netherlands_s4g USING (true);
-# CREATE POLICY s4g_ecosia_policy ON CALC_TAB_monitoring_calculations_per_site TO netherlands_s4g USING (true);
-# CREATE POLICY s4g_ecosia_policy ON CALC_TAB_linear_regression_results_satellite_validation TO netherlands_s4g USING (true);'''
-#
-# conn.commit()
-
-# create_a22_ecosia_viewing = '''
-# REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA public FROM ecosia;
-#
-# GRANT USAGE ON SCHEMA PUBLIC TO ecosia;
-# GRANT USAGE ON SCHEMA HEROKU_EXT TO ecosia;
-#
-# GRANT SELECT ON TABLE akvo_tree_registration_areas_updated TO ecosia;
-#
-# DROP POLICY IF EXISTS ecosia_policy ON akvo_tree_registration_areas_updated;
-#
-# ALTER TABLE akvo_tree_registration_areas_updated enable ROW LEVEL SECURITY;
-#
-# CREATE POLICY ecosia_policy ON akvo_tree_registration_areas_updated TO ecosia USING (true);'''
-#
-# conn.commit()
 
 
 # Execute drop tables
@@ -5451,53 +5235,25 @@ conn.commit()
 cur.execute(create_a1)
 cur.execute(create_a2)
 cur.execute(create_a3)
-#cur.execute(create_a4)
-#cur.execute(create_a5)
 cur.execute(create_a6)
-#cur.execute(create_a7)
-#cur.execute(create_a8)
-#cur.execute(create_a9)
-#cur.execute(create_a10)
-#cur.execute(create_a11)
-#cur.execute(create_a12)
-#cur.execute(create_a13)
 cur.execute(create_a14)
 cur.execute(create_a15)
 cur.execute(create_a16)
 cur.execute(create_a17)
-# cur.execute(create_a18)
-# cur.execute(create_a19)
-# cur.execute(create_a20)
-# cur.execute(create_a21)
-# cur.execute(create_a22)
-# cur.execute(create_a23)
-# cur.execute(create_a24)
-# cur.execute(create_a25)
-# cur.execute(create_a26)
-# cur.execute(create_a27)
-# cur.execute(create_a28)
-# cur.execute(create_a29)
-# cur.execute(create_a30)
 cur.execute(create_a31)
 cur.execute(create_a32)
 cur.execute(create_a33)
-#cur.execute(create_a34)
-#cur.execute(create_a35)
 cur.execute(create_a36)
 cur.execute(create_a37)
 cur.execute(create_a38)
 cur.execute(create_a39)
 cur.execute(create_a40)
 cur.execute(create_a41)
-#cur.execute(create_a42)
-#cur.execute(create_a43)
 cur.execute(create_a44)
 cur.execute(create_a45)
 cur.execute(create_a46)
 cur.execute(create_a47)
-#cur.execute(create_a48)
 cur.execute(create_a49)
-#cur.execute(create_a50)
 cur.execute(create_a51)
 
 cur.execute(create_a20_ecosia_superset)
