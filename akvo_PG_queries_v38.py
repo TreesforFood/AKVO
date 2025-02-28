@@ -5143,7 +5143,7 @@ GRANT USAGE ON SCHEMA PUBLIC TO ecosia_superset;
 GRANT USAGE ON SCHEMA HEROKU_EXT TO ecosia_superset;
 
 GRANT SELECT ON TABLE superset_ecosia_nursery_registration TO ecosia_superset;
-GRANT UPDATE ON TABLE superset_ecosia_nursery_registration TO ecosia_superset
+GRANT UPDATE ON TABLE superset_ecosia_nursery_registration TO ecosia_superset;
 GRANT SELECT ON TABLE superset_ecosia_tree_registration TO ecosia_superset;
 GRANT SELECT ON TABLE superset_ecosia_tree_monitoring TO ecosia_superset;
 GRANT SELECT ON TABLE superset_ecosia_s4g_site_health TO ecosia_superset;
