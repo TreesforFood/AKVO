@@ -6054,6 +6054,8 @@ GRANT USAGE ON SCHEMA PUBLIC TO ecosia_superset;
 GRANT USAGE ON SCHEMA HEROKU_EXT TO ecosia_superset;
 
 GRANT SELECT ON TABLE superset_ecosia_nursery_registration TO ecosia_superset;
+GRANT UPDATE ON TABLE superset_ecosia_nursery_registration TO ecosia_superset;
+
 GRANT SELECT ON TABLE superset_ecosia_tree_registration TO ecosia_superset;
 GRANT SELECT ON TABLE superset_ecosia_tree_monitoring TO ecosia_superset;
 GRANT SELECT ON TABLE superset_ecosia_s4g_site_health TO ecosia_superset;
@@ -6069,11 +6071,9 @@ GRANT SELECT ON TABLE superset_ecosia_geolocations TO ecosia_superset;
 GRANT SELECT ON TABLE superset_ecosia_tree_registration_light TO ecosia_superset;
 GRANT SELECT ON TABLE superset_ecosia_tree_monitoring_photos TO ecosia_superset;
 GRANT SELECT ON TABLE superset_ecosia_tree_distribution_unregistered_farmers TO ecosia_superset;
---GRANT SELECT ON TABLE superset_ecosia_site_registration_unregistered_farmers TO ecosia_superset;
 GRANT SELECT ON TABLE superset_ecosia_contract_overview TO ecosia_superset;
 GRANT SELECT ON TABLE superset_ecosia_new_devices TO ecosia_superset;
 GRANT SELECT ON TABLE superset_ecosia_firms_historic_fires TO ecosia_superset;
-GRANT SELECT ON TABLE superset_ecosia_global_tree_species_distribution TO ecosia_superset;
 
 DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_nursery_registration;
 DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_tree_registration;
@@ -6091,11 +6091,9 @@ DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_geolocations;
 DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_tree_registration_light;
 DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_tree_monitoring_photos;
 DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_tree_distribution_unregistered_farmers;
---DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_site_registration_unregistered_farmers;
 DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_contract_overview;
 DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_new_devices;
 DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_firms_historic_fires;
-DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_global_tree_species_distribution;
 
 ALTER TABLE superset_ecosia_nursery_registration enable ROW LEVEL SECURITY;
 ALTER TABLE superset_ecosia_tree_registration enable ROW LEVEL SECURITY;
@@ -6113,11 +6111,9 @@ ALTER TABLE superset_ecosia_geolocations enable ROW LEVEL SECURITY;
 ALTER TABLE superset_ecosia_tree_registration_light enable ROW LEVEL SECURITY;
 ALTER TABLE superset_ecosia_tree_monitoring_photos enable ROW LEVEL SECURITY;
 ALTER TABLE superset_ecosia_tree_distribution_unregistered_farmers enable ROW LEVEL SECURITY;
---ALTER TABLE superset_ecosia_site_registration_unregistered_farmers enable ROW LEVEL SECURITY;
 ALTER TABLE superset_ecosia_contract_overview enable ROW LEVEL SECURITY;
 ALTER TABLE superset_ecosia_new_devices enable ROW LEVEL SECURITY;
 ALTER TABLE superset_ecosia_firms_historic_fires enable ROW LEVEL SECURITY;
-ALTER TABLE superset_ecosia_global_tree_species_distribution enable ROW LEVEL SECURITY;
 
 CREATE POLICY ecosia_superset_policy ON superset_ecosia_nursery_registration TO ecosia_superset USING (true);
 CREATE POLICY ecosia_superset_policy ON superset_ecosia_tree_registration TO ecosia_superset USING (true);
@@ -6135,46 +6131,27 @@ CREATE POLICY ecosia_superset_policy ON superset_ecosia_geolocations TO ecosia_s
 CREATE POLICY ecosia_superset_policy ON superset_ecosia_tree_registration_light TO ecosia_superset USING (true);
 CREATE POLICY ecosia_superset_policy ON superset_ecosia_tree_monitoring_photos TO ecosia_superset USING (true);
 CREATE POLICY ecosia_superset_policy ON superset_ecosia_tree_distribution_unregistered_farmers TO ecosia_superset USING (true);
---CREATE POLICY ecosia_superset_policy ON superset_ecosia_site_registration_unregistered_farmers TO ecosia_superset USING (true);
 CREATE POLICY ecosia_superset_policy ON superset_ecosia_contract_overview TO ecosia_superset USING (true);
 CREATE POLICY ecosia_superset_policy ON superset_ecosia_new_devices TO ecosia_superset USING (true);
-CREATE POLICY ecosia_superset_policy ON superset_ecosia_firms_historic_fires TO ecosia_superset USING (true);
-CREATE POLICY ecosia_superset_policy ON superset_ecosia_global_tree_species_distribution TO ecosia_superset USING (true);'''
-
-
-conn.commit()
-
-
-create_a22_ecosia_viewing = '''
-REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA public FROM ecosia;
-
-GRANT USAGE ON SCHEMA PUBLIC TO ecosia;
-GRANT USAGE ON SCHEMA HEROKU_EXT TO ecosia;
-
-GRANT SELECT ON TABLE akvo_tree_registration_areas_updated TO ecosia;
-
-DROP POLICY IF EXISTS ecosia_policy ON akvo_tree_registration_areas_updated;
-
-ALTER TABLE akvo_tree_registration_areas_updated enable ROW LEVEL SECURITY;
-
-CREATE POLICY ecosia_policy ON akvo_tree_registration_areas_updated TO ecosia USING (true);'''
+CREATE POLICY ecosia_superset_policy ON superset_ecosia_firms_historic_fires TO ecosia_superset USING (true);'''
 
 conn.commit()
 
 
 # Execute drop tables
 cur.execute(drop_tables)
+
 conn.commit()
 
 # Execute create tables
 cur.execute(create_a1)
-cur.execute(create_a2_akvo)
-cur.execute(create_a2_odk)
-cur.execute(create_a2_merge_akvo_odk)
+cur.execute(create_a2)
 cur.execute(create_a3)
 cur.execute(create_a6)
 cur.execute(create_a14)
 cur.execute(create_a15)
+cur.execute(create_a16)
+cur.execute(create_a17)
 cur.execute(create_a31)
 cur.execute(create_a32)
 cur.execute(create_a33)
@@ -6191,10 +6168,26 @@ cur.execute(create_a47)
 cur.execute(create_a49)
 cur.execute(create_a51)
 
-#cur.execute(create_a20_ecosia_superset) # Deze on-hold omdat hij lokaal geen role voor Ecosia superset heeft. Op Heroku wel activeren!!!
+cur.execute(create_a20_ecosia_superset)
 
 conn.commit()
 
+# cur.execute('''ALTER TABLE CALC_GEOM_locations_registration_versus_externalaudits ADD COLUMN distance_to_registration_m INTEGER;''')
+# conn.commit()
+#
+# cur.execute('''SELECT * FROM CALC_GEOM_locations_registration_versus_externalaudits;''')
+# conn.commit()
+
+# rows = cur.fetchall()
+#
+# for row in rows:
+#     instance = row[2]
+#     location_registration = (row[6:8])
+#     location_audit = (row[8:10])
+#     distance_m = (geodesic(location_registration, location_audit).m)
+#
+#     cur.execute('''UPDATE CALC_GEOM_locations_registration_versus_externalaudits SET distance_to_registration_m = %s WHERE instance = %s;''', (distance_m, instance))
+#     conn.commit()
 
 cur.close()
 
