@@ -274,7 +274,7 @@ for json_in in json_registration:
         name_region = 'still to be intergrated'
         photo_owner = json_extract(json_in, 'photo_owner')[0]
         remark = json_extract(json_in, 'remark')[0]
-        #nr_trees_option = json_extract(json_in, 'landscape_element_type')[0]
+        nr_trees_option = json_extract(json_in, 'landscape_element_type')[0]
         planting_date = json_extract(json_in, 'planting_date')[0]
 
         # Populate the tree registration table
