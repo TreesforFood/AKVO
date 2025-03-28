@@ -51,7 +51,7 @@ auth_token = os.environ["TOKEN_AIRTABLE"]
 headers = {"Authorization": f"Bearer {auth_token}"}
 url_contracts = os.environ["URL_AIRTABLE_CONTRACTS"]
 response = requests.get(url_contracts, headers=headers)
-data_contracts = response.json()
+data_subcontracts = response.json()
 
 
 list_offsets_subcontracts = []
