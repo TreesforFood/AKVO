@@ -49,9 +49,9 @@ conn.commit()
 # Connect to Airtable
 auth_token = os.environ["TOKEN_AIRTABLE"]
 headers = {"Authorization": f"Bearer {auth_token}"}
-url_contracts = os.environ["URL_AIRTABLE_CONTRACTS"]
-response = requests.get(url_contracts, headers=headers)
-data_contracts = response.json()
+url_species = os.environ["URL_AIRTABLE_SPECIES"]
+response = requests.get(url_species, headers=headers)
+data_url_species = response.json()
 
 
 #Create empty contract list to collect all activated contracts for monitoring
@@ -224,8 +224,8 @@ for row in rows_dict:
     entities_list.append(entities.copy())
 
 
-#Connect to ODK central server and use the merge command
-client = Client(config_path="config.toml", cache_path="pyodk_cache.toml")
+# Connect to ODK central server and use the merge command
+client = Client(config_path="/app/tmp/pyodk_config.ini", cache_path="/app/tmp/pyodk_cache.ini")
 
 client.open()
 
