@@ -384,9 +384,8 @@ for row in rows_dict:
     print('FREEK:', entities)
     entities_list.append(entities.copy())
 
-#Connect to ODK central server and use the merge command
-client = Client(config_path="config.toml", cache_path="pyodk_cache.toml")
-
+# Connect to ODK central server and use the merge command
+client = Client(config_path="/app/tmp/pyodk_config.ini", cache_path="/app/tmp/pyodk_cache.ini")
 client.open()
 
 client.entities.merge(entities_list, entity_list_name='monitoring_trees', project_id=1, match_keys=None, add_new_properties=True, update_matched=True, delete_not_matched=True, source_label_key='label', source_keys=None,create_source=None, source_size=None)
