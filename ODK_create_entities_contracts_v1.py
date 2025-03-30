@@ -49,7 +49,7 @@ conn.commit()
 # Connect to Airtable
 auth_token = os.environ["TOKEN_AIRTABLE"]
 headers = {"Authorization": f"Bearer {auth_token}"}
-url_subcontracts = os.environ["URL_AIRTABLE_CONTRACTS"]
+url_subcontracts = os.environ["URL_AIRTABLE_SUBCONTRACTS"]
 response_subcontracts = requests.get(url_subcontracts, headers=headers)
 data_subcontracts = response_subcontracts.json()
 
