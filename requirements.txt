@@ -5,7 +5,7 @@ geodaisy
 area
 cloudpickle
 geopy
-gdal == 3.10.3
+gdal == 3.9.0
 nasa_wildfires
 geopandas
 shapely
