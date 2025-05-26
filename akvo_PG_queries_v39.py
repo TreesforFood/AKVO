@@ -2808,10 +2808,15 @@ LOWER(akvo_nursery_registration.country) AS country,
 akvo_nursery_registration.test,
 
 -- Create a unique code for filtering in superset, based on main organisation name
+CASE
+WHEN akvo_nursery_registration.organisation != ''
+THEN
 CAST(CONCAT(
 	POWER(ASCII(LEFT(LOWER(akvo_nursery_registration.organisation),1)),3),
 	POWER(ASCII(LEFT(LOWER(akvo_nursery_registration.organisation),2)),2),
-	SQRT(POWER(ASCII(LEFT(LOWER(akvo_nursery_registration.organisation),3)),4))) AS NUMERIC) AS partnercode_main,
+	SQRT(POWER(ASCII(LEFT(LOWER(akvo_nursery_registration.organisation),3)),4))) AS NUMERIC)
+ELSE 0
+END AS partnercode_main,
 
 -- Create a unique code for filtering in superset, based on main sub-organisation name
 CASE
@@ -2881,10 +2886,17 @@ THEN 'This is a test, this record can be deleted.'
 END AS test,
 
 -- Create a unique code for filtering in superset, based on main organisation name
+CASE
+WHEN odk_nursery_registration_main.organisation != ''
+THEN
 CAST(CONCAT(
-	POWER(ASCII(LEFT(LOWER(odk_nursery_registration_main.organisation),1)),3),
+	POWER(ASCII(LEFT(LOWER(CASE
+	WHEN akvo_nursery_registration.organisation != ''
+	THEN),1)),3),
 	POWER(ASCII(LEFT(LOWER(odk_nursery_registration_main.organisation),2)),2),
-	SQRT(POWER(ASCII(LEFT(LOWER(odk_nursery_registration_main.organisation),3)),4))) AS NUMERIC) AS partnercode_main,
+	SQRT(POWER(ASCII(LEFT(LOWER(odk_nursery_registration_main.organisation),3)),4))) AS NUMERIC)
+ELSE 0
+END AS partnercode_main,
 
 -- Create a unique code for filtering in superset, based on main sub-organisation name
 CASE
