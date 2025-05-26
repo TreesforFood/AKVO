@@ -2890,9 +2890,7 @@ CASE
 WHEN odk_nursery_registration_main.organisation != ''
 THEN
 CAST(CONCAT(
-	POWER(ASCII(LEFT(LOWER(CASE
-	WHEN akvo_nursery_registration.organisation != ''
-	THEN),1)),3),
+	POWER(ASCII(LEFT(LOWER(odk_nursery_registration_main.organisation),1)),3),
 	POWER(ASCII(LEFT(LOWER(odk_nursery_registration_main.organisation),2)),2),
 	SQRT(POWER(ASCII(LEFT(LOWER(odk_nursery_registration_main.organisation),3)),4))) AS NUMERIC)
 ELSE 0
