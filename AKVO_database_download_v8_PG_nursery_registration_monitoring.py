@@ -335,7 +335,7 @@ else:
             submission_date = level1_m['submissionDate']
 
             try:
-                submission_time = mid(submissiondate, 11,19)
+                submission_time = mid(submission_date, 11,19)
             except (KeyError, IndexError):
                 submission_time = ''
 
