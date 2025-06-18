@@ -230,7 +230,7 @@ ELSE 'submitter unknown'
 END AS user_name_enumerator
 
 FROM akvo_tree_registration_areas_updated
-WHERE polygon NOTNULL
+WHERE polygon NOTNULL AND contract_number < 1000
 
 
 UNION -- Union sites with Polygons and sites with Points into 1 table
@@ -310,7 +310,8 @@ ELSE 'submitter unknown'
 END AS user_name_enumerator
 
 FROM akvo_tree_registration_areas_updated
-WHERE polygon ISNULL AND centroid_coord NOTNULL)
+WHERE polygon ISNULL AND centroid_coord NOTNULL
+AND contract_number < 1000)
 
 SELECT
 label,
