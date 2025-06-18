@@ -204,7 +204,7 @@ identifier_akvo AS ecosia_site_id,
 
 CASE -- Fields can not be empty when uploaded to the entity list of ODK. If so, ODK gives a 'no string' error
 WHEN calc_area > 0 and calc_area < 1000000
-THEN calc_area
+THEN CAST(calc_area AS text)
 ELSE '0'
 END AS area_ha,
 
@@ -284,7 +284,7 @@ identifier_akvo AS ecosia_site_id,
 
 CASE -- Fields can not be empty when uploaded to the entity list of ODK. If so, ODK gives a 'no string' error
 WHEN calc_area > 0 and calc_area < 1000000
-THEN calc_area
+THEN CAST(calc_area AS text)
 ELSE '0'
 END AS area_ha,
 
