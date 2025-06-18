@@ -149,7 +149,7 @@ for i in list_identifiers:
 tuple_identifiers = tuple(list_identifiers_clean)
 
 print(tuple_identifiers)
-print(list_contracts)
+print(tuple_contracts)
 
 
 # Select entities to upload to GetODK. Note that the label column of the ODK entities table does not accept strange characters. So these are removed in this sql
@@ -203,7 +203,7 @@ ST_AsText(polygon) AS new_polygon,
 identifier_akvo AS ecosia_site_id,
 
 CASE -- Fields can not be empty when uploaded to the entity list of ODK. If so, ODK gives a 'no string' error
-WHEN calc_area > 0
+WHEN calc_area > 0 and calc_area < 1000000
 THEN calc_area
 ELSE '0'
 END AS area_ha,
@@ -283,7 +283,7 @@ ST_AsText(centroid_coord) AS new_polygon,
 identifier_akvo AS ecosia_site_id,
 
 CASE -- Fields can not be empty when uploaded to the entity list of ODK. If so, ODK gives a 'no string' error
-WHEN calc_area > 0
+WHEN calc_area > 0 and calc_area < 1000000
 THEN calc_area
 ELSE '0'
 END AS area_ha,
@@ -403,7 +403,7 @@ for row in rows_dict:
         entities[columns[i]] = row[i]
         if isinstance(row[i], str):
             entities[columns[i]] = row[i].strip()
-    print('FREEK:', entities)
+    print('CHECK:', entities)
     entities_list.append(entities.copy())
 
 # Connect to ODK central server and use the merge command
