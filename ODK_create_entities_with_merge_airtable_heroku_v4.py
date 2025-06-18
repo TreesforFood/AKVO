@@ -178,8 +178,19 @@ id_planting_site,
 '' AS polygon,
 '' AS geometry_point,
 '' AS odk_entity_geometry,
-CONCAT(contract_number::INTEGER::varchar(10),'.00') AS contract_number_match_airtable,
-contract_number::varchar(10),
+
+CASE
+WHEN contract_number NOTNULL
+THEN CONCAT(contract_number::INTEGER::varchar(10),'.00')
+ELSE '0.00'
+END AS contract_number_match_airtable,
+
+CASE
+WHEN contract_number NOTNULL
+THEN contract_number::varchar(10)
+ELSE '0.00'
+END AS contract_number,
+
 '' AS identifier_akvo,
 
 CASE -- Fields can not be empty when uploaded to the entity list of ODK. If so, ODK gives a 'no string' error
@@ -247,8 +258,19 @@ id_planting_site,
 '' AS polygon,
 '' AS geometry_point,
 '' AS odk_entity_geometry,
-CONCAT(contract_number::INTEGER::varchar(10),'.00') AS contract_number_match_airtable,
-contract_number::varchar(10),
+
+CASE
+WHEN contract_number NOTNULL
+THEN CONCAT(contract_number::INTEGER::varchar(10),'.00')
+ELSE '0.00'
+END AS contract_number_match_airtable,
+
+CASE
+WHEN contract_number NOTNULL
+THEN contract_number::varchar(10)
+ELSE '0.00'
+END AS contract_number,
+
 '' AS identifier_akvo,
 
 CASE -- Fields can not be empty when uploaded to the entity list of ODK. If so, ODK gives a 'no string' error
