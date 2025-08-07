@@ -6268,7 +6268,7 @@ cur.execute(create_a49)
 cur.execute(create_a51)
 
 cur.execute(create_a20_ecosia_superset)
-cur.execute(create_a21_ecosia)
+#cur.execute(create_a21_ecosia)
 
 conn.commit()
 
