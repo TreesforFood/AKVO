@@ -312,7 +312,8 @@ SET species_latin = t.species_list
 FROM t
 WHERE t.identifier_akvo = akvo_tree_registration_areas_updated.identifier_akvo;
 
-WITH updates_polygon AS (SELECT identifier_akvo, polygon_remapped
+-- Below we check if a new polygon was submitted. If multiple submissions of new polygons were done, the latest submission will be selected
+WITH updates_polygon_akvo AS (SELECT identifier_akvo, polygon_remapped
 FROM akvo_tree_monitoring_remapped_areas
 WHERE polygon_remapped NOTNULL
 order by submission DESC
@@ -320,9 +321,22 @@ LIMIT 1)
 
 UPDATE akvo_tree_registration_areas_updated
 SET
-polygon = updates_polygon.polygon_remapped
-FROM updates_polygon
-WHERE akvo_tree_registration_areas_updated.identifier_akvo = updates_polygon.identifier_akvo;
+polygon = updates_polygon_akvo.polygon_remapped
+FROM updates_polygon_akvo
+WHERE akvo_tree_registration_areas_updated.identifier_akvo = updates_polygon_akvo.identifier_akvo;
+
+-- Below we check if a new polygon was submitted. If multiple submissions of new polygons were done, the latest submission will be selected
+WITH updates_polygon_odk AS (SELECT ecosia_site_id, remaped_polygon_planting_site
+FROM odk_tree_monitoring_main
+WHERE remaped_polygon_planting_site NOTNULL
+order by submission_date DESC
+LIMIT 1)
+
+UPDATE akvo_tree_registration_areas_updated
+SET
+polygon = updates_polygon_odk.remaped_polygon_planting_site
+FROM updates_polygon_odk
+WHERE akvo_tree_registration_areas_updated.identifier_akvo = updates_polygon_odk.ecosia_site_id;
 
 UPDATE akvo_tree_registration_areas_updated
 SET
