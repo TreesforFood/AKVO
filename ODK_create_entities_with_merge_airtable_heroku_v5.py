@@ -365,11 +365,6 @@ client = Client(config_path="config.toml", cache_path="pyodk_cache.toml")
 # client.close()
 
 conn.commit()
-cur.close()
-
-
-
-
 
 
 ###### SCRIPT TO CREATE ENTITIES FOR TREE MONITORING OF UNREGISTERED FARMERS
