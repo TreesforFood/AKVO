@@ -3178,7 +3178,7 @@ t.submitter,
 t.akvo_form_version AS form_version,
 t.country,
 t.test,
-t.source_data,
+t.data_source,
 
 -- Create a unique code for filtering in superset, based on main organisation name
 CAST(CONCAT(
