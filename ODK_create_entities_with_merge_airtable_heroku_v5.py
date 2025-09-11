@@ -375,7 +375,7 @@ cur.close()
 ###### SCRIPT TO CREATE ENTITIES FOR TREE MONITORING OF UNREGISTERED FARMERS
 
 # Pagination function to parse through all Airtable pages (Each Airtable page has 100 rows).
-global offset
+#global offset
 offset = '0'
 result = []
 desired_users = {}
