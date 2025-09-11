@@ -100,7 +100,7 @@ json_unregistered_farmers_other_recipients = client.submissions.get_table(form_i
 json_unregistered_farmers_tree_registration_species = client.submissions.get_table(form_id='tree_distribution_unregistered_farmers', table_name='Submissions.group_tree_registration.repeat_tree_number_and_species')['value']
 json_unregistered_farmers_tree_registration_photos = client.submissions.get_table(form_id='tree_distribution_unregistered_farmers', table_name='Submissions.group_tree_registration.group_tree_registration_photos.repeat_registration_photos_polygon')['value']
 json_unregistered_farmers_tree_registration_additional_area = client.submissions.get_table(form_id='tree_distribution_unregistered_farmers', table_name='Submissions.group_tree_registration.repeat_area_registration_other')['value']
-json_unregistered_farmers_tree_registration_additional_area_species = client.submissions.get_table(form_id='tree_distribution_unregistered_farmers', table_name='Submissions.group_tree_registration.repeat_tree_registration_number_and_species_other')['value']
+json_unregistered_farmers_tree_registration_additional_area_species = client.submissions.get_table(form_id='tree_distribution_unregistered_farmers', table_name='Submissions.group_tree_registration.repeat_area_registration_other.repeat_tree_registration_number_and_species_other')['value']
 json_unregistered_farmers_tree_monitoring_main = client.submissions.get_table(form_id='tree_distribution_unregistered_farmers', table_name='Submissions.group_tree_monitoring.repeat_monitoring_photos_polygon')['value']
 json_unregistered_farmers_tree_monitoring_species = client.submissions.get_table(form_id='tree_distribution_unregistered_farmers', table_name='Submissions.group_tree_monitoring.repeat_monitoring_tree_number_and_species_other')['value']
 json_unregistered_farmers_tree_monitoring_photos = client.submissions.get_table(form_id='tree_distribution_unregistered_farmers', table_name='Submissions.group_tree_monitoring.repeat_monitoring_photos_polygon')['value']
@@ -408,7 +408,7 @@ for json_in_tree_registration_additional_area in json_unregistered_farmers_tree_
 
 
 for json_in_tree_registration_additional_area_species in json_unregistered_farmers_tree_registration_additional_area_species:
-    submissionid_odk = json_extract(json_in_tree_registration_additional_area_species, '__Submissions-id')[0]
+    submissionid_odk = json_extract(json_in_tree_registration_additional_area_species, '__Submissions-group_tree_registration-repeat_area_registration_other-id')[0]
     repeatid_odk = json_extract(json_in_tree_registration_additional_area_species, '__id')[0]
     species_additional_area = json_extract(json_in_tree_registration_additional_area_species, 'registration_species_other')[0]
     number_species_additional_area = json_extract(json_in_tree_registration_additional_area_species, 'registration_tree_number_count_save_other')[0]
