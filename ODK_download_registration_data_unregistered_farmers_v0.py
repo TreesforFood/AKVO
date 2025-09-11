@@ -225,7 +225,7 @@ for json_in in json_unregistered_farmers_main:
         test = json_extract(json_in, 'test_data_yes_no')[0]
         organisation = json_extract(json_in, 'organisation')[0]
         reporting_type = json_extract(json_in, 'reporting_type')[0]
-        contract_number = json_extract(json_in, 'contract_number_save')[0]
+        contract_number = json_extract(json_in, 'contract_number')[0]
         location_type_handout_select = json_extract(json_in, 'distribution_nursery_other')[0]
         name_nursery_handout = json_extract(json_in, 'distribution_nursery_selection')[0]
         other_location_handout_name = json_extract(json_in, 'distribution_location_name')[0]
