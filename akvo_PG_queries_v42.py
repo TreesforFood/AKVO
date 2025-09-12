@@ -6070,7 +6070,7 @@ SELECT
 odk_unregistered_farmers_tree_handout_main.submissionid_odk AS identifier_akvo,
 '' AS display_name,
 odk_unregistered_farmers_tree_handout_main.device_id,
-'' AS instance,
+0 AS instance,
 odk_unregistered_farmers_tree_handout_main.submission_date AS submission,
 odk_unregistered_farmers_tree_handout_main.odk_form_version,
 '' AS country,
