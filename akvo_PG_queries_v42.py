@@ -6068,7 +6068,7 @@ UNION ALL
 SELECT
 
 odk_unregistered_farmers_tree_handout_main.submissionid_odk AS identifier_akvo,
-'' AS display_name,
+CONCAT(odk_unregistered_farmers_tree_handout_main.organisation, ' - ', odk_unregistered_farmers_tree_handout_main.contract_number, ' - ', odk_unregistered_farmers_tree_handout_main.name_location_tree_planting, ' - ', odk_unregistered_farmers_tree_handout_main.planting_site_id) AS display_name,
 odk_unregistered_farmers_tree_handout_main.device_id,
 0 AS instance,
 odk_unregistered_farmers_tree_handout_main.submission_date AS submission,
