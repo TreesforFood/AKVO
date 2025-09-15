@@ -3098,7 +3098,8 @@ UPDATE superset_ecosia_nursery_registration
 SET test = 'no'
 WHERE test = 'This is real, valid data'
 OR test = ''
-OR test = 'This is no test data';
+OR test = 'This is no test data'
+OR test = 'valid data';
 
 UPDATE superset_ecosia_nursery_registration
 SET organisation = LOWER(organisation);'''
