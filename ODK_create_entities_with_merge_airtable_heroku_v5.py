@@ -40,6 +40,8 @@ cur = conn.cursor()
 
 # Drop the latests upload table
 cur.execute('''DROP TABLE IF EXISTS getodk_entities_upload_table;''')
+cur.execute('''DROP TABLE IF EXISTS getodk_entities_upload_table_unregistered_farmers;''')
+conn.commit()
 
 #Create empty contract list to collect all activated contracts for monitoring
 list_contracts = []
