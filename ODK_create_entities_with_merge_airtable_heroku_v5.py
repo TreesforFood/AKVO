@@ -190,7 +190,8 @@ END AS user_name_enumerator
 FROM akvo_tree_registration_areas_updated
 WHERE polygon NOTNULL
 AND form_source = 'normal tree registration'
-AND test = 'This is real, valid data'
+AND (test = 'This is real, valid data'
+OR test = '')
 
 
 UNION -- Union sites with Polygons and sites with Points into 1 table
@@ -261,7 +262,8 @@ END AS user_name_enumerator
 FROM akvo_tree_registration_areas_updated
 WHERE polygon ISNULL AND centroid_coord NOTNULL
 AND form_source = 'normal tree registration'
-AND test = 'This is real, valid data')
+AND (test = 'This is real, valid data'
+OR test = ''))
 
 SELECT
 label,
