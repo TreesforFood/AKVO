@@ -65,7 +65,7 @@ a.submitter,
 a.form_version,
 'AKVO' AS source_data,
 b.country,
-b.organisation,
+LOWER(b.organisation) AS organisation,
 b.contract_number,
 a.test,
 a.name_region_village_planting_site,
@@ -121,7 +121,7 @@ END AS planting_date,
 b.submitter,
 b.odk_form_version::varchar(10),
 b.test,
-a.organisation,
+LOWER(a.organisation) AS organisation,
 a.contract_number,
 a.planting_site_id,
 a.name_location_tree_planting,
@@ -172,7 +172,7 @@ c.akvo_form_version::varchar(10),
 'normal tree registration' AS form_source,
 c.country,
 c.test,
-c.organisation,
+LOWER(c.organisation) AS organisation,
 c.contract_number,
 c.id_planting_site,
 c.land_title,
@@ -229,7 +229,7 @@ d.form_version::varchar(10),
 'unregistered_farmers' AS data_form,
 d.country,
 d.test,
-d.organisation,
+LOWER(d.organisation) AS organisation,
 d.contract_number,
 d.name_site_id_tree_planting,
 d.check_ownership_land,
@@ -295,7 +295,7 @@ WHEN h.test = 'valid_data'
 THEN 'This is real, valid data'
 END AS test,
 
-h.organisation,
+LOWER(h.organisation) AS organisation,
 h.contract_number,
 h.id_planting_site AS name_site_id_tree_planting,
 h.land_title AS check_ownership_land,
@@ -365,7 +365,7 @@ WHEN i.test = 'valid_data'
 THEN 'This is real, valid data'
 END AS test,
 
-i.organisation,
+LOWER(i.organisation) AS organisation,
 i.contract_number,
 i.planting_site_id AS name_site_id_tree_planting,
 'n/a' AS check_ownership_land,
@@ -486,6 +486,7 @@ WHERE polygon ISNULL
 ;'''
 
 conn.commit()
+
 
 
 
