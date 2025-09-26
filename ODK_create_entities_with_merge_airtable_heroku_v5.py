@@ -147,7 +147,7 @@ id_planting_site,
 '' AS polygon,
 '' AS geometry_point,
 '' AS odk_entity_geometry,
-CONCAT(contract_number::INTEGER::varchar(10),'.00') AS contract_number_match_airtable,
+CONCAT(SUBSTRING(contract_number::varchar(10) FROM 1 FOR POSITION('.' IN contract_number::varchar(10)) - 1),'.00') AS contract_number_match_airtable,
 contract_number::varchar(10),
 '' AS identifier_akvo,
 
@@ -219,7 +219,7 @@ id_planting_site,
 '' AS polygon,
 '' AS geometry_point,
 '' AS odk_entity_geometry,
-CONCAT(contract_number::INTEGER::varchar(10),'.00') AS contract_number_match_airtable,
+CONCAT(SUBSTRING(contract_number::varchar(10) FROM 1 FOR POSITION('.' IN contract_number::varchar(10)) - 1),'.00') AS contract_number_match_airtable,
 contract_number::varchar(10),
 '' AS identifier_akvo,
 
@@ -290,6 +290,7 @@ FROM temp_contract_overview
 where contract_number_match_airtable IN %s OR ecosia_site_id IN %s;''', (tuple_contracts, tuple_identifiers))
 
 conn.commit()
+
 
 cur.execute('''SELECT new_polygon, ecosia_site_id FROM getodk_entities_upload_table;''')
 
