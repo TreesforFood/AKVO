@@ -532,7 +532,7 @@ UPDATE akvo_tree_registration_areas_updated a
 SET tree_number = COALESCE(a.tree_number,0) + COALESCE(b.nr_added_trees,0)
 FROM odk_tree_monitoring_main b
 WHERE a.identifier_akvo = b.ecosia_site_id
-AND b.nr_added_trees NOTNULL
+AND b.nr_added_trees NOTNULL;
 
 -- Add GEOMETRIC CHECK columns so that they can later be populated
 ALTER TABLE akvo_tree_registration_areas_updated
