@@ -128,7 +128,7 @@ FROM ODK_unregistered_farmers_tree_registration_species
 GROUP BY ODK_unregistered_farmers_tree_registration_species.submissionid_odk),
 
 
--- This does the same as the former JOIN query with AKVO data. Now done for the ODK data.
+-- This does the same as the former JOIN query with AKVO data (see up here). Now do this also for the ODK data.
 join_tree_distribution_and_registration_ODK AS (SELECT
 a.submissionid_odk,
 b.device_id,
@@ -528,11 +528,17 @@ SELECT * FROM union_tree_registration_tree_registration_unreg_farmers
 WHERE organisation != '';
 
 -- Here we integrate the registration of additional trees (from the ODK form) into the initial registration of (the number of) trees.
+-- We need to group and SUM them first since there can be multiple 'added tree' submissions for 1 site.
+WITH added_trees_per_site AS
+(select ecosia_site_id, SUM(nr_added_trees) AS added_trees FROM odk_tree_monitoring_main
+where test = 'valid_data'
+and nr_added_trees NOTNULL
+group by ecosia_site_id)
+
 UPDATE akvo_tree_registration_areas_updated a
-SET tree_number = COALESCE(a.tree_number,0) + COALESCE(b.nr_added_trees,0)
-FROM odk_tree_monitoring_main b
-WHERE a.identifier_akvo = b.ecosia_site_id
-AND b.nr_added_trees NOTNULL;
+SET tree_number = coalesce(a.tree_number,0) + added_trees_per_site.added_trees
+FROM added_trees_per_site
+WHERE a.identifier_akvo = added_trees_per_site.ecosia_site_id;
 
 -- Add GEOMETRIC CHECK columns so that they can later be populated
 ALTER TABLE akvo_tree_registration_areas_updated
