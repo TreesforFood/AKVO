@@ -52,9 +52,10 @@ create_a1 = '''
 CREATE TABLE akvo_tree_registration_areas_updated
 AS
 
---THIS QUERY IS A JOIN of the ODK registration table, the AKVO registration table and the AKVO + ODK tree distribution table (of unregistered farmers). Include all columns for the registration update table.
+-- THIS QUERY IS A JOIN of the ODK registration table, the AKVO registration table and the AKVO + ODK tree distribution table (of unregistered farmers). Include all columns for the registration update table.
 
--- First we prepare the tree registration of unregistered farmers. A join is needed for this query
+-- Here we prepare the AKVO tree registration of unregistered farmers. A join is needed for this query
+
 WITH join_tree_distribution_and_registration_AKVO AS (SELECT
 a.identifier_akvo,
 a.displayname,
@@ -127,8 +128,7 @@ odk_tree_count_unregistered_farmers AS (SELECT submissionid_odk, SUM(tree_specie
 FROM ODK_unregistered_farmers_tree_registration_species
 GROUP BY ODK_unregistered_farmers_tree_registration_species.submissionid_odk),
 
-
--- This does the same as the former JOIN query with AKVO data (see up here). Now do this also for the ODK data.
+-- Here we prepare the ODK tree registration of unregistered farmers. A join is needed for this query
 join_tree_distribution_and_registration_ODK AS (SELECT
 a.submissionid_odk,
 b.device_id,
@@ -197,11 +197,88 @@ JOIN odk_tree_count_unregistered_farmers c
 ON b.submissionid_odk = c.submissionid_odk),
 
 
--- Merge (UNION) all data from the AKVO tree registration form with the data from the AKVO tree registration of unregistered farmers
--- Many columns are listed here to align all column data and make sure the table remains as input for following queries
+
+--------------
+
+-- Here we prepare the AKVO-ODK tree registration of unregistered farmers.
+-- Instances of listed farmers were once collected with the AKVO form and (could) later on having been registered with the ODK form (ODK registration of unregistered farmers)
+-- A join is needed for this query.
+
+join_tree_distribution_and_registration_AKVO_vs_ODK AS (SELECT
+a.identifier_akvo,
+b.device_id,
+b.submission_date,
+a.instance,
+b.field_date,
+'AKVO-ODK' AS source_data,
+'unregistered_farmers' AS data_form,
+
+CASE
+WHEN b.planting_date NOTNULL
+THEN b.planting_date
+ELSE b.field_date::TEXT
+END AS planting_date,
+
+b.submitter,
+b.odk_form_version::varchar(10),
+
+CASE
+WHEN b.test = 'test_data'
+THEN 'This is a test, this record can be deleted.'
+WHEN b.test = 'This is a test, this record can be deleted.'
+THEN 'This is a test, this record can be deleted.'
+WHEN b.test = 'This is a test, this record can be deleted'
+THEN 'This is a test, this record can be deleted.'
+WHEN b.test = 'xxxxx'
+THEN 'This is a test, this record can be deleted.'
+WHEN b.test = ''
+THEN 'This is real, valid data'
+WHEN b.test = 'This is real, valid data\r'
+THEN 'This is real, valid data'
+WHEN b.test = 'valid_data'
+THEN 'This is real, valid data'
+WHEN b.test = 'Valid data'
+THEN 'This is real, valid data'
+WHEN b.test = 'This is real, valid data'
+THEN 'This is real, valid data'
+END AS test,
+
+LOWER(a.organisation) AS organisation,
+a.contract_number,
+a.name_site_id_tree_planting AS planting_site_id,
+a.location_house_tree_receiver AS name_location_tree_planting,
+a.confirm_planting_location AS registration_multiple_locations,
+a.name_tree_receiver AS recipient_full_name,
+a.url_photo_receiver_trees AS recipient_photo,
+a.gender_tree_receiver AS recipient_gender,
+a.total_number_trees_received AS total_tree_nr_handed_out,
+b.comment_planting_site,
+b.planting_system_used,
+
+CASE
+WHEN b.polygon NOTNULL
+THEN NULL
+WHEN b.line NOTNULL
+THEN NULL
+WHEN b.point NOTNULL
+THEN b.point
+END AS geometry,
+
+c.total_registered_tree_number
+
+FROM akvo_tree_distribution_unregistered_farmers a
+JOIN odk_unregistered_farmers_tree_registration_main b
+ON a.identifier_akvo = b.ecosia_site_id_dist
+JOIN odk_tree_count_unregistered_farmers c
+ON b.submissionid_odk = c.submissionid_odk),
 
 
---- UNION all data together into 1 table (ODK tree registration (normal) + AKVO tree registration (normal) + ODK unregistered farmers + AKVO unregistered farmers)
+---------------
+---------------
+
+
+--- UNION of all data together into 1 table (ODK tree registration (normal) + AKVO tree registration (normal) + ODK unregistered farmers + AKVO unregistered farmers)
+
 union_tree_registration_tree_registration_unreg_farmers AS (
 SELECT
 c.identifier_akvo,
@@ -280,7 +357,8 @@ FROM akvo_tree_registration_areas AS c
 
 	UNION ALL
 
---- Add data from AKVO tree registrations of unregistered farmers to the table
+--- UNION with data from AKVO tree registrations of unregistered farmers
+
 SELECT
 d.identifier_akvo,
 d.displayname,
@@ -360,7 +438,7 @@ FROM join_tree_distribution_and_registration_AKVO AS d
 
 UNION ALL
 
---- Add data from ODK tree registrations (normal tree registration) to the table
+--- UNION with data from ODK tree registrations
 
 SELECT
 h.submissionid_odk as identifier_akvo,
@@ -444,7 +522,8 @@ FROM odk_tree_registration_main AS h
 UNION ALL
 
 
---- Add data from ODK tree registration of unregistered farmers to the table
+--- UNION with data from ODK tree registrations of unregistered farmers
+
 SELECT
 i.submissionid_odk AS identifier_akvo,
 CONCAT(i.contract_number,' - ', i.planting_site_id, ' - ', i.recipient_full_name) AS displayname,
@@ -520,12 +599,96 @@ i.total_tree_nr_handed_out AS total_number_trees_received,
 'n/a' AS gender_tree_receiver,
 'n/a' AS name_tree_receiver
 
-FROM join_tree_distribution_and_registration_ODK AS i)
+FROM join_tree_distribution_and_registration_ODK AS i
 
--------------
 
+UNION ALL
+
+--- UNION with data from the AKVO listing of unregistered farmers and the area registration of those listed farmers with the ODK registration form
+
+SELECT
+j.identifier_akvo,
+CONCAT(j.contract_number,' - ', j.planting_site_id, ' - ', j.recipient_full_name) AS displayname,
+
+j.device_id,
+j.instance,
+j.submission_date,
+NULL AS submission_year,
+'n/a' AS submissiontime,
+j.submitter,
+'n/a' AS modifiedat,
+j.odk_form_version::varchar(10),
+'AKVO-ODK' AS data_source,
+'unregistered_farmers' AS form_source,
+'' AS country,
+
+CASE
+WHEN j.test = 'test_data'
+THEN 'This is a test, this record can be deleted.'
+WHEN j.test = 'This is a test, this record can be deleted.'
+THEN 'This is a test, this record can be deleted.'
+WHEN j.test = 'This is a test, this record can be deleted'
+THEN 'This is a test, this record can be deleted.'
+WHEN j.test = 'xxxxx'
+THEN 'This is a test, this record can be deleted.'
+WHEN j.test = ''
+THEN 'This is real, valid data'
+WHEN j.test = 'This is real, valid data\r'
+THEN 'This is real, valid data'
+WHEN j.test = 'valid_data'
+THEN 'This is real, valid data'
+WHEN j.test = 'Valid data'
+THEN 'This is real, valid data'
+WHEN j.test = 'This is real, valid data'
+THEN 'This is real, valid data'
+END AS test,
+
+LOWER(j.organisation) AS organisation,
+j.contract_number,
+j.planting_site_id AS name_site_id_tree_planting,
+'n/a' AS check_ownership_land,
+'n/a' AS name_region_village_planting_site,
+'n/a' AS name_region,
+j.recipient_full_name AS name_owner_planting_site,
+j.recipient_photo AS photo_owner_planting_site,
+j.recipient_gender AS gender_owner_planting_site,
+'n/a' AS objective_site,
+'n/a' AS site_preparation,
+j.planting_system_used AS planting_technique,
+'n/a' AS planting_system,
+j.comment_planting_site AS comment_enumerator,
+j.planting_system_used AS landscape_element_type,
+j.planting_date AS planting_date,
+j.total_registered_tree_number AS tree_number,
+NULL AS estimated_area,
+NULL AS area_ha,
+NULL AS lat_y,
+NULL AS lon_x,
+0 AS number_coord_pol,
+j.geometry AS centroid_coord,
+NULL AS polygon,
+NULL AS multipoint,
+j.registration_multiple_locations AS confirm_plant_location_own_land,
+'n/a' AS one_multiple_planting_sites,
+0 AS nr_trees_given_away,
+j.total_tree_nr_handed_out AS nr_trees_received,
+'n/a' AS url_photo_receiver_trees,
+'n/a' AS location_house_tree_receiver,
+'n/a' AS confirm_planting_location,
+'n/a' AS url_signature_tree_receiver,
+j.total_tree_nr_handed_out AS total_number_trees_received,
+'n/a' AS check_ownership_trees,
+'n/a' AS gender_tree_receiver,
+'n/a' AS name_tree_receiver
+
+FROM join_tree_distribution_and_registration_AKVO_vs_ODK AS j)
+
+------------- END OF UNIONS
+
+-- Create the total UNION table called 'akvo_tree_registration_areas_updated'
 SELECT * FROM union_tree_registration_tree_registration_unreg_farmers
 WHERE organisation != '';
+
 
 -- Here we integrate the registration of additional trees (from the ODK form) into the initial registration of (the number of) trees.
 -- We need to group and SUM them first since there can be multiple 'added tree' submissions for 1 site.
@@ -540,10 +703,10 @@ SET tree_number = coalesce(a.tree_number,0) + added_trees_per_site.added_trees
 FROM added_trees_per_site
 WHERE a.identifier_akvo = added_trees_per_site.ecosia_site_id;
 
+
 -- Add GEOMETRIC CHECK columns so that they can later be populated
 ALTER TABLE akvo_tree_registration_areas_updated
 ADD species_latin text,
-
 --The columns below are UPDATED with the geometric error script (AKVO_database_PG_queries_v1_sql_geometric_error_detection.py)
 ADD self_intersection BOOLEAN,
 ADD overlap TEXT,
