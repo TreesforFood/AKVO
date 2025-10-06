@@ -7,7 +7,7 @@ import json
 
 # NOTE: BEORE RUNNING THIS SCRIPT, THE DATA NEEDS TO BE PROCESSED AND GEOMETRIC ERROR DETECTION/CORRECTION MUST BE DONE!!!
 
-refresh_tokenD = os.environ["refresh_token_chloris"]
+refresh_token = os.environ["refresh_token_chloris"]
 organisation_id = os.environ["organisation_id_chloris"]
 
 ################################## connect to Postgresql database
