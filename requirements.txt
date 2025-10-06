@@ -18,3 +18,4 @@ pyodk
 segno @ git+https://github.com/heuer/segno.git
 typing
 boto3==1.35.72
+chloris_app_sdk
