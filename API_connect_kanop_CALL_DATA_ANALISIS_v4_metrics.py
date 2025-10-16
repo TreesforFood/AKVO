@@ -4,6 +4,7 @@ import psycopg2
 import re
 import geojson
 import os
+from datetime import datetime
 
 
 #connect to Heroku Postgresql database
