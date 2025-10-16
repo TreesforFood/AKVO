@@ -34,6 +34,7 @@ name_project TEXT,
 processing_status_site_year TEXT,
 processing_status_site_overall TEXT,
 request_measurement_date DATE,
+year_of_analisis INTEGER,
 kanop_project_id TEXT,
 forestCover_present NUMERIC(20,1),
 forestCover_previous NUMERIC(20,1),
@@ -99,9 +100,14 @@ conn.commit()
 # Projects meta: List all your projects
 project_list_overview = projects_dict['projects'] # Generates a list with dictionaries of projects. Print(project_list_overview) # Output: {'projectId': 1880, 'customerId': 254, 'name': 'APAF', 'description': '','country': 'Ivory Coast', 'projectType': 'climate', 'startDate': '2018-01-01','status': 'CREATED', 'area': 51.89, 'duration': 20, 'polygonCount': 7, 'createdAt': '2023-10-02 18:31:34.556883','updatedAt': '2023-10-02 18:32:02.459363'}
 
+# # Get the metadata for a project. Gives a list of configurations/settings used by KANOP. Consider if this is interesting to have
+# meta_data_of_project = requests.get(f"{root}/projects/references",headers=headers)
+# project_meta_data = meta_data_of_project.json()
+# print(project_meta_data)
+
+
 for project_list in project_list_overview:
     # Get details for a project
-    #print('Details of project: ', project_list)
     project_id = str(project_list['projectId'])
     contract_number = project_list['name']
     country = project_list['country']
@@ -115,6 +121,7 @@ for project_list in project_list_overview:
     metrics = project_details['metrics']
     name_project = project_details.get('name')
     indicators = ','.join(metrics)
+    print("indicators: ", indicators)
     #print('Metrics of a project: ', metrics) # Output: Metrics of a project:  ['forestCover', 'canopyCover', 'canopyHeightMean', 'treeHeightMean', 'livingAbovegroundBiomass', 'livingAbovegroundBiomassPerHa', 'livingBelowgroundBiomass', 'livingBelowgroundBiomassPerHa', 'livingBiomass', 'livingBiomassPerHa', 'carbon', 'carbonPerHa', 'co2eq', 'co2eqPerHa']
 
     # Get the aggregation levels for your project
@@ -136,6 +143,8 @@ for project_list in project_list_overview:
     # Get data on requests level (on PRODUCT AND DATE LEVEL)
     response_project_level = requests.get(f"{root}/projects/{project_id}/requests", headers=headers)
     requests_projects = response_project_level.json()
+    #print('requests_projects: ',requests_projects)
+
 
     try:
         requests_projects['dataRequests'][0] #  'dataRequests' has empty list in case no processing status was provided (cancelling or completed)
@@ -148,6 +157,7 @@ for project_list in project_list_overview:
             product = data_requests['product']
             methodology = data_requests['methodology']
             request_measurement_date = data_requests['requestMeasurementDate']
+
 
             # List of the project request details. No results in here yet, only metrics/units. Consider if this is interesting to use.
             details_data_requests = requests.get(f"{root}/projects/{project_id}/requests/{request_id}",headers=headers)
@@ -169,12 +179,14 @@ for project_list in project_list_overview:
                     name_project = name_project
                     status_project = status_project
                     request_measurement_date = request_measurement_date
+                    dt = datetime.strptime(request_measurement_date, '%Y-%m-%d')
+                    year_of_analisis = dt.year
                     kanop_project_id = project_id
                     #print(project_id, name_project, status_project)
                     cur.execute('''INSERT INTO superset_ecosia_KANOP_polygon_level_1_moment (
-                    identifier_akvo, name_project, processing_status_site_year, request_measurement_date, kanop_project_id)
-                    VALUES (%s,%s,%s,%s,%s)''',
-                    (identifier_akvo, name_project, status_project, request_measurement_date, kanop_project_id))
+                    identifier_akvo, name_project, processing_status_site_year, request_measurement_date, year_of_analisis, kanop_project_id)
+                    VALUES (%s,%s,%s,%s,%s,%s)''',
+                    (identifier_akvo, name_project, status_project, request_measurement_date, year_of_analisis, kanop_project_id))
 
                     conn.commit()
 
@@ -190,6 +202,7 @@ for project_list in project_list_overview:
             # Get metrics' on POLYGON LEVEL. Here the polygon ID's can be linked with the results (results on polygon level)
             metrics_polygon_level = requests.get(f"{root}/projects/{project_id}/requests/{request_id}/metrics/{indicators}",headers=headers)
             metrics_polygon_level = metrics_polygon_level.json()
+            print("metrics_polygon_level: ", metrics_polygon_level)
             #print('metrics_polygon_level: ', name_project, status_project, project_id, request_measurement_date, metrics_polygon_level)
             metrics_polygon_level = metrics_polygon_level['results']
 
@@ -199,6 +212,10 @@ for project_list in project_list_overview:
                 for k,v in metrics_polygon_level.items():
                     identifier_akvo = polygon_id
                     request_measurement_date = request_measurement_date
+                    # print('TYPE: ', type(request_measurement_date))
+                    # year_of_analisis = request_measurement_date.year
+                    dt = datetime.strptime(request_measurement_date, '%Y-%m-%d')
+                    year_of_analisis = dt.year
                     kanop_project_id = project_id
 
                     if k == 'canopyCover':
@@ -347,11 +364,11 @@ for project_list in project_list_overview:
 
                 # Populate the KANOP table
                 cur.execute('''INSERT INTO superset_ecosia_KANOP_polygon_level_1_moment (
-                identifier_akvo, name_project, processing_status_site_year, request_measurement_date, kanop_project_id, forestCover_present, canopyCover_present, canopyHeightMean_present, treeHeightMean_present,
+                identifier_akvo, name_project, processing_status_site_year, request_measurement_date, year_of_analisis, kanop_project_id, forestCover_present, canopyCover_present, canopyHeightMean_present, treeHeightMean_present,
                 livingAbovegroundBiomass_present,livingAbovegroundBiomassPerHa_present,livingBelowgroundBiomass_present,livingBelowgroundBiomassPerHa_present,
                 livingBiomass_present,livingBiomassPerHa_present,carbon_present,carbonPerHa_present,co2eq_present,co2eqPerHa_present)
-                VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)''',
-                (identifier_akvo, name_project, status_project, request_measurement_date, kanop_project_id, forestCover, canopyCover, canopyHeightMean, treeHeightMean,
+                VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)''',
+                (identifier_akvo, name_project, status_project, request_measurement_date, year_of_analisis, kanop_project_id, forestCover, canopyCover, canopyHeightMean, treeHeightMean,
                 livingAbovegroundBiomass,livingAbovegroundBiomassPerHa,livingBelowgroundBiomass,livingBelowgroundBiomassPerHa,
                 livingBiomass,livingBiomassPerHa,carbon,carbonPerHa,co2eq,co2eqPerHa))
 
@@ -381,6 +398,27 @@ for project_list in project_list_overview:
         list_change_gis_files = list_change_gis_files.json()  #[0].get('name')
 
         list_gis_indicators = ['forest_cover', 'canopy_height_mean', 'tree_height_mean', 'living_aboveground_biomass_per_ha', 'living_belowground_biomass_per_ha', 'living_biomass_per_ha', 'living_biomass_carbon_stock_per_ha', 'living_biomass_CO2eq_per_ha']
+
+        # variationGisFilesByRequest = requests.get(f"{root}/projects/{project_id}/requests/{request_id}/variationGisFilesByRequest",headers=headers)
+        # variationGisFilesByRequest = variationGisFilesByRequest.json()
+        # #print(project_id, variationGisFilesByRequest)
+        # for variation_indicator in variationGisFilesByRequest['variationGISFilesByRequest']:
+        #     for gis_indicator in list_gis_indicators:
+        #         if variation_indicator['name'] == gis_indicator:
+        #             variationGisFileName = variation_indicator['name']
+        #             compareToRequestID = variation_indicator['compareToRequestId']
+        #             compareToYear = variation_indicator['compareToYear']
+                    #print('TEST: ', variationGisFileName, compareToRequestID, compareToYear)
+
+
+                    # response = requests.get(f"{root}/projects/{project_id}/requests/{request_id}/variationGisFilesByRequest/{variationGisFileName}?compareToRequestId={compareToRequestID}", headers=headers)
+                    # #print(type(change_gis_files)) # gives back a class 'requests.models.Response'. Check how to read this...
+                    # print(response.status_code)
+                    # #print(response.headers)
+                    # value, params = cgi.parse_header(response.headers['content-disposition'])
+                    # with open(f"{params['filename']}", "wb") as raster:
+                    #     raster.write(response.content)
+                    #     #raster2pgsql -s 4326 -I -C -M C:\temp\test_1.tif -t 100x100 myschema.mytable > out.sql
 
 
 cur.execute('''
