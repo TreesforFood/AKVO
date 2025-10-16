@@ -6624,7 +6624,6 @@ GRANT SELECT ON TABLE superset_ecosia_tree_distribution_unregistered_farmers TO 
 GRANT SELECT ON TABLE superset_ecosia_contract_overview TO ecosia_superset;
 GRANT SELECT ON TABLE superset_ecosia_new_devices TO ecosia_superset;
 GRANT SELECT ON TABLE superset_ecosia_firms_historic_fires TO ecosia_superset;
-GRANT SELECT ON TABLE superset_ecosia_global_tree_species_distribution TO ecosia_superset;
 GRANT SELECT ON TABLE superset_ecosia_kanop_chloris_results TO ecosia_superset;
 
 DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_nursery_registration;
@@ -6647,7 +6646,6 @@ DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_tree_distributio
 DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_contract_overview;
 DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_new_devices;
 DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_firms_historic_fires;
-DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_global_tree_species_distribution;
 DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_kanop_chloris_results;
 
 ALTER TABLE superset_ecosia_nursery_registration enable ROW LEVEL SECURITY;
@@ -6670,7 +6668,6 @@ ALTER TABLE superset_ecosia_tree_distribution_unregistered_farmers enable ROW LE
 ALTER TABLE superset_ecosia_contract_overview enable ROW LEVEL SECURITY;
 ALTER TABLE superset_ecosia_new_devices enable ROW LEVEL SECURITY;
 ALTER TABLE superset_ecosia_firms_historic_fires enable ROW LEVEL SECURITY;
-ALTER TABLE superset_ecosia_global_tree_species_distribution enable ROW LEVEL SECURITY;
 ALTER TABLE superset_ecosia_kanop_chloris_results enable ROW LEVEL SECURITY;
 
 CREATE POLICY ecosia_superset_policy ON superset_ecosia_nursery_registration TO ecosia_superset USING (true);
@@ -6693,7 +6690,6 @@ CREATE POLICY ecosia_superset_policy ON superset_ecosia_tree_distribution_unregi
 CREATE POLICY ecosia_superset_policy ON superset_ecosia_contract_overview TO ecosia_superset USING (true);
 CREATE POLICY ecosia_superset_policy ON superset_ecosia_new_devices TO ecosia_superset USING (true);
 CREATE POLICY ecosia_superset_policy ON superset_ecosia_firms_historic_fires TO ecosia_superset USING (true);
-CREATE POLICY ecosia_superset_policy ON superset_ecosia_global_tree_species_distribution TO ecosia_superset USING (true);
 CREATE POLICY ecosia_superset_policy ON superset_ecosia_kanop_chloris_results TO ecosia_superset USING (true);'''
 
 conn.commit()
