@@ -31,7 +31,7 @@ organisation TEXT,
 id_planting_site TEXT,
 area_site_km2 DECIMAL,
 resolution INTEGER,
-contract_number NUMERIC(20,4),
+contract_number NUMERIC(20,2),
 year_of_analisis INTEGER,
 forest_area_per_year_km2 DECIMAL,
 forest_agb_stock_per_year_mt NUMERIC(20,4),
@@ -107,15 +107,10 @@ for unit_id in reporting_units:
             for match in re.finditer(' :-: ', description):
                 truncate_contract_end = match.end()-5
 
-
-
-            contract_number_test = float(description[truncate_contract_begin:truncate_contract_end])
-            if contract_number_test.isnumeric() == True:
-                contract_number = description[truncate_contract_begin:truncate_contract_end]
-            if contract_number_test.isnumeric() == False:
+            try:
+                contract_number = float(description[truncate_contract_begin:truncate_contract_end])
+            except ValueError:
                 contract_number = None
-
-            #print('Contract number: ', contract_number)
 
 
         # Get planting site id from description label
