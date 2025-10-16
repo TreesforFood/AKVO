@@ -6817,7 +6817,8 @@ cur.execute(create_a45)
 cur.execute(create_a46)
 cur.execute(create_a47)
 cur.execute(create_a49)
-cur.execute(create_a51)
+#cur.execute(create_a51)
+cur.execute(create_a52)
 
 cur.execute(create_a20_ecosia_superset) # This gives grand access to QGIS users. With this login (inside QGIS) they will only see the superset tables
 #cur.execute(create_a21_ecosia) # Used by the Preset dashboard. No grand limitation. As such it is de-activated
