@@ -1,6 +1,5 @@
 from chloris_app_sdk import ChlorisAppClient
 import requests
-from akvo_api_config import Config
 import psycopg2
 import os
 import json
