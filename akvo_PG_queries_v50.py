@@ -6565,9 +6565,7 @@ conn.commit()
 #
 # conn.commit()
 
-create_a52 = '''CREATE TABLE superset_ecosia_kanop_chloris_results AS (
-
-SELECT
+create_a52 = '''CREATE TABLE superset_ecosia_kanop_chloris_results AS (SELECT
 t1.identifier_akvo,
 t1.id_planting_site,
 t1.contract_number,
@@ -6580,7 +6578,7 @@ identifier_akvo,
 contract_number AS contract_number,
 id_planting_site,
 year_of_analisis AS year_of_analisis,
-total_stock_end_year_mt AS chloris_above_ground_carbon
+forest_agb_stock_per_year_mt AS chloris_above_ground_carbon
 FROM superset_ecosia_CHLORIS_polygon_results) t1
 
 JOIN
@@ -6589,12 +6587,12 @@ JOIN
 identifier_akvo,
 name_project AS contract_number,
 'unknown' AS id_planting_site,
+year_of_analisis AS year_of_analisis,
 request_measurement_date AS year_analysis,
 carbon_present AS kanop_above_ground_carbon
 FROM superset_ecosia_kanop_polygon_level_1_moment) t2
 ON t1.identifier_akvo = t2.identifier_akvo
-and t1.year_of_analisis = t2.year_of_analisis
-;'''
+and t1.year_of_analisis = t2.year_of_analisis);'''
 
 conn.commit()
 
