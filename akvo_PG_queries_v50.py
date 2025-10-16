@@ -46,7 +46,9 @@ DROP TABLE IF EXISTS superset_ecosia_tree_distribution_unregistered_farmers;
 DROP TABLE IF EXISTS superset_ecosia_site_registration_unregistered_farmers;
 DROP TABLE IF EXISTS superset_ecosia_contract_overview;
 DROP TABLE IF EXISTS AKVO_tree_registration_areas_updated_KANOP;
-DROP TABLE IF EXISTS akvo_tree_registration_areas_updated_remotesensing;'''
+DROP TABLE IF EXISTS akvo_tree_registration_areas_updated_remotesensing;
+DROP TABLE IF EXISTS superset_ecosia_kanop_chloris_results;'''
+
 conn.commit()
 
 create_a1 = '''
@@ -6563,7 +6565,7 @@ conn.commit()
 #
 # conn.commit()
 
-create_a52 = '''CREATE TABLE IF EXISTS superset_ecosia_kanop_chloris_results AS (
+create_a52 = '''CREATE TABLE superset_ecosia_kanop_chloris_results AS (
 
 SELECT
 t1.identifier_akvo,
