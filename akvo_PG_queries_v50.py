@@ -6570,15 +6570,15 @@ t1.identifier_akvo,
 t1.id_planting_site,
 t1.contract_number,
 t1.year_of_analisis,
-t1.chloris_above_ground_carbon,
-t2.kanop_above_ground_carbon
+t1.chloris_above_ground_dry_biomass,
+t2.kanop_above_ground_living_biomass * 0.5 AS kanop_above_ground_dry_biomass
 
 FROM (SELECT
 identifier_akvo,
 contract_number AS contract_number,
 id_planting_site,
 year_of_analisis AS year_of_analisis,
-forest_agb_stock_per_year_mt AS chloris_above_ground_carbon
+forest_agb_stock_per_year_mt AS chloris_above_ground_dry_biomass
 FROM superset_ecosia_CHLORIS_polygon_results) t1
 
 JOIN
@@ -6589,7 +6589,7 @@ name_project AS contract_number,
 'unknown' AS id_planting_site,
 year_of_analisis AS year_of_analisis,
 request_measurement_date AS year_analysis,
-carbon_present AS kanop_above_ground_carbon
+livingabovegroundbiomass_present AS kanop_above_ground_living_biomass
 FROM superset_ecosia_kanop_polygon_level_1_moment) t2
 ON t1.identifier_akvo = t2.identifier_akvo
 and t1.year_of_analisis = t2.year_of_analisis);'''
