@@ -6571,7 +6571,7 @@ t1.id_planting_site,
 t1.contract_number,
 t1.year_of_analisis,
 t1.chloris_above_ground_dry_biomass,
-t2.kanop_above_ground_living_biomass * 0.5 AS kanop_above_ground_dry_biomass
+t2.kanop_above_ground_living_biomass AS kanop_above_ground_dry_biomass
 
 FROM (SELECT
 identifier_akvo,
