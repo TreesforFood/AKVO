@@ -6826,8 +6826,8 @@ conn.commit()
 
 # Execute create tables
 cur.execute(create_a1)
-cur.execute(create_a1_integrate_new_data)
 cur.execute(create_a1_edit)
+cur.execute(create_a1_integrate_new_data)
 cur.execute(create_a1_edit_integration)
 cur.execute(create_a2_akvo)
 cur.execute(create_a2_odk)
