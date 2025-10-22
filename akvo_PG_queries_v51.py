@@ -797,10 +797,10 @@ conn.commit()
 
 create_a1_edit_integration = '''UPDATE akvo_tree_registration_areas_updated
 SET
-contract_number = t1.contract_number,
-organisation = t1.organisation,
-polygon = t1.polygon
-FROM UPDATE akvo_tree_registration_areas_edits t1
+contract_number = akvo_tree_registration_areas_edits.contract_number,
+organisation = akvo_tree_registration_areas_edits.organisation,
+polygon = akvo_tree_registration_areas_edits.polygon
+FROM akvo_tree_registration_areas_edits
 WHERE akvo_tree_registration_areas_updated.identifier_akvo = akvo_tree_registration_areas_edits.identifier_akvo;'''
 
 conn.commit()
