@@ -59,8 +59,9 @@ for unit_id in reporting_units:
     label_identifier = unit_id['label']
     #print('Identifier: ', label_identifier)
 
-
     reporting_unit_id = unit_id['reportingUnitId']
+    stats = client.get_reporting_unit(reporting_unit_id, include_stats=True, include_downloads=False)
+
     try:
         stats["annualYears"]
         #print('THROUGH: ', stats["annualYears"])
