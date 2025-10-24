@@ -61,13 +61,15 @@ for unit_id in reporting_units:
 
 
     reporting_unit_id = unit_id['reportingUnitId']
-    #print('ReportingUniT: ', reporting_unit_id)
-    stats = client.get_reporting_unit(reporting_unit_id, include_stats=True, include_downloads=False)
-    print('STATS: ',stats)
-    # for x in stats:
-    #     print('STATS B: ',x)
-    for i, values in enumerate(stats["annualYears"]):
-        year = stats["annualYears"][i]
+    try:
+        stats["annualYears"]
+        #print('THROUGH: ', stats["annualYears"])
+    except KeyError:
+        continue
+    else:
+        for i, values in enumerate(stats["annualYears"]):
+            year = stats["annualYears"][i]
+            #print('YEAR: ', year)
         # print(f"Area of the site ({label_identifier}): {stats['areaKm2']} km²")
         # print(f"Forest area for {label_identifier} ({year}): {stats['forest']['annualAreaKm2'][i]} km²")
         # print(f"Forest stock for {label_identifier} ({year}): {stats['forest']['annualStock'][i]} MT")
