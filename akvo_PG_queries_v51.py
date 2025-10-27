@@ -6888,6 +6888,7 @@ REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA public FROM ecosia_editing;
 
 GRANT USAGE ON SCHEMA PUBLIC TO ecosia_editing;
 GRANT USAGE ON SCHEMA HEROKU_EXT TO ecosia_editing;
+GRANT SELECT ON ALL TABLES IN SCHEMA PUBLIC, HEROKU_EXT TO ecosia_editing;
 
 GRANT SELECT ON TABLE akvo_tree_registration_areas_edits TO ecosia_editing;
 
