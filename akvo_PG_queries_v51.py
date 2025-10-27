@@ -14,7 +14,7 @@ conn = psycopg2.connect(os.environ["DATABASE_URL"], sslmode='require')
 cur = conn.cursor()
 
 drop_tables = '''
-DROP TABLE IF EXISTS AKVO_tree_registration_areas_updated;
+DROP TABLE IF EXISTS AKVO_tree_registration_areas_integrated;
 DROP TABLE IF EXISTS calc_tab_monitoring_calculations_per_site_merged_by_partner;
 DROP TABLE IF EXISTS calc_tab_monitoring_calculations_per_site_merged_akvo;
 DROP TABLE IF EXISTS calc_tab_monitoring_calculations_per_site_merged_odk;
@@ -6755,6 +6755,7 @@ conn.commit()
 
 create_a52 = '''CREATE TABLE superset_ecosia_kanop_chloris_results AS (SELECT
 t1.identifier_akvo,
+t1.organisation,
 t1.id_planting_site,
 t1.contract_number,
 t1.year_of_analisis,
@@ -6763,6 +6764,7 @@ t2.kanop_above_ground_living_biomass AS kanop_above_ground_dry_biomass
 
 FROM (SELECT
 identifier_akvo,
+organisation,
 contract_number AS contract_number,
 id_planting_site,
 year_of_analisis AS year_of_analisis,
