@@ -6884,14 +6884,16 @@ conn.commit()
 
 #This login (see below) and the associated grands is being used by the superset dashboard!! AS such this query is de-activated.
 create_a21_ecosia_editing = '''
+REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA public FROM ecosia_editing;
+
 GRANT USAGE ON SCHEMA PUBLIC TO ecosia_editing;
 GRANT USAGE ON SCHEMA HEROKU_EXT TO ecosia_editing;
 
 GRANT SELECT ON TABLE akvo_tree_registration_areas_edits TO ecosia_editing;
 
-ALTER TABLE akvo_tree_registration_areas_edits enable ROW LEVEL SECURITY;
-
 DROP POLICY IF EXISTS ecosia_superset_editing ON akvo_tree_registration_areas_edits;
+
+ALTER TABLE akvo_tree_registration_areas_edits enable ROW LEVEL SECURITY;
 
 CREATE POLICY ecosia_superset_editing ON akvo_tree_registration_areas_edits
 FOR SELECT TO ecosia_editing
