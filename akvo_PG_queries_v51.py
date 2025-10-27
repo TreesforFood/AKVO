@@ -6891,6 +6891,8 @@ GRANT SELECT ON TABLE akvo_tree_registration_areas_edits TO ecosia_editing;
 
 ALTER TABLE akvo_tree_registration_areas_edits enable ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS ecosia_superset_editing ON akvo_tree_registration_areas_edits;
+
 CREATE POLICY ecosia_superset_editing ON akvo_tree_registration_areas_edits
 FOR SELECT TO ecosia_editing
 USING (true);
