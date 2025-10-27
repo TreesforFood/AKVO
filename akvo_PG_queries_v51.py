@@ -51,8 +51,8 @@ DROP TABLE IF EXISTS superset_ecosia_kanop_chloris_results;'''
 
 conn.commit()
 
-create_a1 = '''
-CREATE TABLE akvo_tree_registration_areas_updated
+create_a1_integrated = '''
+CREATE TABLE akvo_tree_registration_areas_integrated
 AS
 
 -- THIS QUERY IS A JOIN of the ODK registration table, the AKVO registration table and the AKVO + ODK tree distribution table (of unregistered farmers). Include all columns for the registration update table.
@@ -688,7 +688,7 @@ FROM join_tree_distribution_and_registration_AKVO_vs_ODK AS j)
 
 ------------- END OF UNIONS
 
--- Create the total UNION table called 'akvo_tree_registration_areas_updated'
+-- Create the total UNION table called 'akvo_tree_registration_areas_integrated'
 SELECT * FROM union_tree_registration_tree_registration_unreg_farmers
 WHERE organisation != '';
 
@@ -701,14 +701,14 @@ where test = 'valid_data'
 and nr_added_trees NOTNULL
 group by ecosia_site_id)
 
-UPDATE akvo_tree_registration_areas_updated a
+UPDATE akvo_tree_registration_areas_integrated a
 SET tree_number = coalesce(a.tree_number,0) + added_trees_per_site.added_trees
 FROM added_trees_per_site
 WHERE a.identifier_akvo = added_trees_per_site.ecosia_site_id;
 
 
 -- Add GEOMETRIC CHECK columns so that they can later be populated
-ALTER TABLE akvo_tree_registration_areas_updated
+ALTER TABLE akvo_tree_registration_areas_integrated
 ADD species_latin text,
 --The columns below are UPDATED with the geometric error script (AKVO_database_PG_queries_v1_sql_geometric_error_detection.py)
 ADD self_intersection BOOLEAN,
@@ -726,14 +726,14 @@ WITH t as
 	STRING_AGG(akvo_tree_registration_species.lat_name_species,' | ')
  species_list
 	  FROM akvo_tree_registration_species
- JOIN akvo_tree_registration_areas_updated
- ON akvo_tree_registration_species.identifier_akvo = akvo_tree_registration_areas_updated.identifier_akvo
+ JOIN akvo_tree_registration_areas_integrated
+ ON akvo_tree_registration_species.identifier_akvo = akvo_tree_registration_areas_integrated.identifier_akvo
  GROUP BY akvo_tree_registration_species.identifier_akvo)
 
-UPDATE akvo_tree_registration_areas_updated
+UPDATE akvo_tree_registration_areas_integrated
 SET species_latin = t.species_list
 FROM t
-WHERE t.identifier_akvo = akvo_tree_registration_areas_updated.identifier_akvo;
+WHERE t.identifier_akvo = akvo_tree_registration_areas_integrated.identifier_akvo;
 
 -- Below we check if a new polygon was submitted. If multiple submissions of new polygons were done, the latest submission will be selected
 WITH updates_polygon_akvo AS (SELECT identifier_akvo, polygon_remapped
@@ -742,11 +742,11 @@ WHERE polygon_remapped NOTNULL
 order by submission DESC
 LIMIT 1)
 
-UPDATE akvo_tree_registration_areas_updated
+UPDATE akvo_tree_registration_areas_integrated
 SET
 polygon = updates_polygon_akvo.polygon_remapped
 FROM updates_polygon_akvo
-WHERE akvo_tree_registration_areas_updated.identifier_akvo = updates_polygon_akvo.identifier_akvo;
+WHERE akvo_tree_registration_areas_integrated.identifier_akvo = updates_polygon_akvo.identifier_akvo;
 
 -- Below we check if a new polygon was submitted. If multiple submissions of new polygons were done, the latest submission will be selected
 WITH updates_polygon_odk AS (SELECT ecosia_site_id, remaped_polygon_planting_site
@@ -755,34 +755,178 @@ WHERE remaped_polygon_planting_site NOTNULL
 order by submission_date DESC
 LIMIT 1)
 
-UPDATE akvo_tree_registration_areas_updated
+UPDATE akvo_tree_registration_areas_integrated
 SET
 polygon = updates_polygon_odk.remaped_polygon_planting_site
 FROM updates_polygon_odk
-WHERE akvo_tree_registration_areas_updated.identifier_akvo = updates_polygon_odk.ecosia_site_id;
+WHERE akvo_tree_registration_areas_integrated.identifier_akvo = updates_polygon_odk.ecosia_site_id;
 
-UPDATE akvo_tree_registration_areas_updated
+UPDATE akvo_tree_registration_areas_integrated
 SET
 number_coord_polygon = akvo_tree_monitoring_remapped_areas.number_coord_polygon_remapped
 FROM akvo_tree_monitoring_remapped_areas
-WHERE akvo_tree_registration_areas_updated.identifier_akvo
+WHERE akvo_tree_registration_areas_integrated.identifier_akvo
 = akvo_tree_monitoring_remapped_areas.identifier_akvo
 AND akvo_tree_monitoring_remapped_areas.polygon_remapped NOTNULL;
 
-UPDATE akvo_tree_registration_areas_updated
+UPDATE akvo_tree_registration_areas_integrated
 SET calc_area = 0.2
 WHERE polygon ISNULL;'''
 
 conn.commit()
 
 
-create_a1_edit = '''CREATE TABLE IF NOT EXISTS akvo_tree_registration_areas_edits AS (SELECT * FROM akvo_tree_registration_areas_updated);
+# A copy is made from the INTEGRATED TABLE and called UPDATED table. This is done only once!
+create_a1_updated = '''CREATE TABLE IF NOT EXISTS akvo_tree_registration_areas_updated
+AS (SELECT * FROM akvo_tree_registration_areas_integrated);'''
+conn.commit()
 
-ALTER TABLE akvo_tree_registration_areas_edits ADD COLUMN IF NOT EXISTS fid SERIAL PRIMARY KEY;'''
+
+# The UPDATED table is maintained (not deleted) and only updated with new downloads (from the INTERATED table). The UPDATED table will contain (and maintain)
+# all edits from the EDITS table
+create_a1_insertion = '''INSERT INTO akvo_tree_registration_areas_updated
+(
+identifier_akvo,
+display_name,
+device_id,
+instance,
+submission,
+submission_year,
+submissiontime,
+submitter,
+modifiedat,
+akvo_form_version,
+data_source,
+form_source,
+country,
+test,
+organisation,
+contract_number,
+id_planting_site,
+land_title,
+name_village,
+name_region,
+name_owner,
+photo_owner,
+gender_owner,
+objective_site,
+site_preparation,
+planting_technique,
+planting_system,
+remark,
+nr_trees_option,
+planting_date,
+tree_number,
+estimated_area,
+calc_area,
+lat_y,
+lon_x,
+number_coord_polygon,
+centroid_coord,
+polygon,
+multipoint,
+confirm_plant_location_own_land,
+one_multiple_planting_sites,
+nr_trees_given_away,
+nr_trees_received,
+url_photo_receiver_trees,
+location_house_tree_receiver,
+confirm_planting_location,
+url_signature_tree_receiver,
+total_number_trees_received,
+check_ownership_trees,
+gender_tree_receiver,
+name_tree_receiver,
+
+species_latin,
+self_intersection,
+overlap,
+outside_country,
+check_200_trees,
+check_duplicate_polygons,
+needle_shape,
+total_nr_geometric_errors)
+
+SELECT
+identifier_akvo,
+display_name,
+device_id,
+instance,
+submission,
+submission_year,
+submissiontime,
+submitter,
+modifiedat,
+akvo_form_version,
+data_source,
+form_source,
+country,
+test,
+organisation,
+contract_number,
+id_planting_site,
+land_title,
+name_village,
+name_region,
+name_owner,
+photo_owner,
+gender_owner,
+objective_site,
+site_preparation,
+planting_technique,
+planting_system,
+remark,
+nr_trees_option,
+planting_date,
+tree_number,
+estimated_area,
+calc_area,
+lat_y,
+lon_x,
+number_coord_polygon,
+centroid_coord,
+polygon,
+multipoint,
+confirm_plant_location_own_land,
+one_multiple_planting_sites,
+nr_trees_given_away,
+nr_trees_received,
+url_photo_receiver_trees,
+location_house_tree_receiver,
+confirm_planting_location,
+url_signature_tree_receiver,
+total_number_trees_received,
+check_ownership_trees,
+gender_tree_receiver,
+name_tree_receiver,
+
+species_latin,
+self_intersection,
+overlap,
+outside_country,
+check_200_trees,
+check_duplicate_polygons,
+needle_shape,
+total_nr_geometric_errors
+
+FROM akvo_tree_registration_areas_integrated
+WHERE NOT EXISTS (SELECT identifier_akvo FROM akvo_tree_registration_areas_updated
+WHERE akvo_tree_registration_areas_updated.identifier_akvo = akvo_tree_registration_areas_integrated.identifier_akvo);'''
 
 conn.commit()
 
 
+#  Make a copy of the table UPDATES to create a seperate table to do the editing (only need to do this once! Once this is done, the table will only be updated)
+create_a1_edit = '''CREATE TABLE IF NOT EXISTS akvo_tree_registration_areas_edits AS (SELECT * FROM akvo_tree_registration_areas_updated);
+ALTER TABLE akvo_tree_registration_areas_edits
+ADD COLUMN IF NOT EXISTS fid SERIAL PRIMARY KEY,
+ADD COLUMN IF NOT EXISTS edit_confirmation INTEGER,
+ADD COLUMN IF NOT EXISTS chloris_uploaded INTEGER,
+ADD COLUMN IF NOT EXISTS kanop_uploaded INTEGER;'''
+conn.commit()
+
+
+# Insert new rows from the UPDATE table into the EDIT table. We don't want to delete the edits by a full refresh, so an insert is needed.
 create_a1_integrate_new_data = '''
 INSERT INTO akvo_tree_registration_areas_edits (contract_number, organisation, polygon)
 SELECT
@@ -795,13 +939,27 @@ WHERE akvo_tree_registration_areas_updated.identifier_akvo = akvo_tree_registrat
 
 conn.commit()
 
+
+# Insert the edits in the again UPDATE TABLE so that they become visible for the dashboard and also available for prosessing by KANOP AND CHLORIS
 create_a1_edit_integration = '''UPDATE akvo_tree_registration_areas_updated
 SET
 contract_number = akvo_tree_registration_areas_edits.contract_number,
 organisation = akvo_tree_registration_areas_edits.organisation,
 polygon = akvo_tree_registration_areas_edits.polygon
 FROM akvo_tree_registration_areas_edits
-WHERE akvo_tree_registration_areas_updated.identifier_akvo = akvo_tree_registration_areas_edits.identifier_akvo;'''
+WHERE akvo_tree_registration_areas_updated.identifier_akvo = akvo_tree_registration_areas_edits.identifier_akvo
+AND akvo_tree_registration_areas_edits.edit_confirmation NOTNULL;'''
+
+conn.commit()
+
+# Update the EDITS table with KANOP AND CHLORIS analysis so that we know which sites were already processed by KANOP AND CHLORIS (and don't need to be edited or uploaded again)
+create_a1_remote_sensing = '''UPDATE akvo_tree_registration_areas_edits
+SET
+chloris_uploaded = 1,
+kanop_uploaded = 1
+
+FROM superset_ecosia_kanop_chloris_results
+WHERE akvo_tree_registration_areas_edits.identifier_akvo = superset_ecosia_kanop_chloris_results.identifier_akvo;'''
 
 conn.commit()
 
@@ -6825,9 +6983,11 @@ cur.execute(drop_tables)
 conn.commit()
 
 # Execute create tables
-cur.execute(create_a1)
-cur.execute(create_a1_edit)
+cur.execute(create_a1_integrated)
+cur.execute(create_a1_updated)
+cur.execute(create_a1_insertion)
 cur.execute(create_a1_integrate_new_data)
+cur.execute(create_a1_edit)
 cur.execute(create_a1_edit_integration)
 cur.execute(create_a2_akvo)
 cur.execute(create_a2_odk)
