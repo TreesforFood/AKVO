@@ -6808,7 +6808,6 @@ GRANT SELECT ON TABLE superset_ecosia_geolocations TO ecosia_superset;
 GRANT SELECT ON TABLE superset_ecosia_tree_registration_light TO ecosia_superset;
 GRANT SELECT ON TABLE superset_ecosia_tree_monitoring_photos TO ecosia_superset;
 GRANT SELECT ON TABLE superset_ecosia_tree_distribution_unregistered_farmers TO ecosia_superset;
---GRANT SELECT ON TABLE superset_ecosia_site_registration_unregistered_farmers TO ecosia_superset;
 GRANT SELECT ON TABLE superset_ecosia_contract_overview TO ecosia_superset;
 GRANT SELECT ON TABLE superset_ecosia_new_devices TO ecosia_superset;
 GRANT SELECT ON TABLE superset_ecosia_firms_historic_fires TO ecosia_superset;
@@ -6831,7 +6830,6 @@ DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_geolocations;
 DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_tree_registration_light;
 DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_tree_monitoring_photos;
 DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_tree_distribution_unregistered_farmers;
---DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_site_registration_unregistered_farmers;
 DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_contract_overview;
 DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_new_devices;
 DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_firms_historic_fires;
@@ -6854,7 +6852,6 @@ ALTER TABLE superset_ecosia_geolocations enable ROW LEVEL SECURITY;
 ALTER TABLE superset_ecosia_tree_registration_light enable ROW LEVEL SECURITY;
 ALTER TABLE superset_ecosia_tree_monitoring_photos enable ROW LEVEL SECURITY;
 ALTER TABLE superset_ecosia_tree_distribution_unregistered_farmers enable ROW LEVEL SECURITY;
---ALTER TABLE superset_ecosia_site_registration_unregistered_farmers enable ROW LEVEL SECURITY;
 ALTER TABLE superset_ecosia_contract_overview enable ROW LEVEL SECURITY;
 ALTER TABLE superset_ecosia_new_devices enable ROW LEVEL SECURITY;
 ALTER TABLE superset_ecosia_firms_historic_fires enable ROW LEVEL SECURITY;
@@ -6877,7 +6874,6 @@ CREATE POLICY ecosia_superset_policy ON superset_ecosia_geolocations TO ecosia_s
 CREATE POLICY ecosia_superset_policy ON superset_ecosia_tree_registration_light TO ecosia_superset USING (true);
 CREATE POLICY ecosia_superset_policy ON superset_ecosia_tree_monitoring_photos TO ecosia_superset USING (true);
 CREATE POLICY ecosia_superset_policy ON superset_ecosia_tree_distribution_unregistered_farmers TO ecosia_superset USING (true);
---CREATE POLICY ecosia_superset_policy ON superset_ecosia_site_registration_unregistered_farmers TO ecosia_superset USING (true);
 CREATE POLICY ecosia_superset_policy ON superset_ecosia_contract_overview TO ecosia_superset USING (true);
 CREATE POLICY ecosia_superset_policy ON superset_ecosia_new_devices TO ecosia_superset USING (true);
 CREATE POLICY ecosia_superset_policy ON superset_ecosia_firms_historic_fires TO ecosia_superset USING (true);
@@ -6886,95 +6882,21 @@ CREATE POLICY ecosia_superset_policy ON akvo_tree_registration_areas_edits TO ec
 
 conn.commit()
 
-# This login (see below) and the associated grands is being used by the superset dashboard!! AS such this query is de-activated.
-# create_a21_ecosia = '''
-# REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA public FROM ecosia;
-#
-# GRANT USAGE ON SCHEMA PUBLIC TO ecosia;
-# GRANT USAGE ON SCHEMA HEROKU_EXT TO ecosia;
-#
-# GRANT SELECT ON TABLE superset_ecosia_nursery_registration TO ecosia;
-# GRANT UPDATE ON TABLE superset_ecosia_nursery_registration TO ecosia;
-# GRANT SELECT ON TABLE superset_ecosia_tree_registration TO ecosia;
-# GRANT SELECT ON TABLE superset_ecosia_tree_monitoring TO ecosia;
-# GRANT SELECT ON TABLE superset_ecosia_s4g_site_health TO ecosia;
-# GRANT SELECT ON TABLE superset_ecosia_nursery_monitoring TO ecosia;
-# GRANT SELECT ON TABLE superset_ecosia_nursery_monitoring_species TO ecosia;
-# GRANT SELECT ON TABLE superset_ecosia_nursery_registration_photos TO ecosia;
-# GRANT SELECT ON TABLE superset_ecosia_nursery_monitoring_photos TO ecosia;
-# GRANT SELECT ON TABLE superset_ecosia_tree_registration_photos TO ecosia;
-# GRANT SELECT ON TABLE superset_ecosia_tree_registration_species TO ecosia;
-# GRANT SELECT ON TABLE superset_ecosia_s4g_fires TO ecosia;
-# GRANT SELECT ON TABLE superset_ecosia_s4g_deforestation TO ecosia;
-# GRANT SELECT ON TABLE superset_ecosia_geolocations TO ecosia;
-# GRANT SELECT ON TABLE superset_ecosia_tree_registration_light TO ecosia;
-# GRANT SELECT ON TABLE superset_ecosia_tree_monitoring_photos TO ecosia;
-# GRANT SELECT ON TABLE superset_ecosia_tree_distribution_unregistered_farmers TO ecosia;
-# GRANT SELECT ON TABLE superset_ecosia_contract_overview TO ecosia;
-# GRANT SELECT ON TABLE superset_ecosia_new_devices TO ecosia;
-# GRANT SELECT ON TABLE superset_ecosia_firms_historic_fires TO ecosia;
-#
-# DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_nursery_registration;
-# DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_tree_registration;
-# DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_tree_monitoring;
-# DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_s4g_site_health;
-# DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_nursery_monitoring;
-# DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_nursery_monitoring_species;
-# DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_nursery_registration_photos;
-# DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_nursery_monitoring_photos;
-# DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_tree_registration_photos;
-# DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_tree_registration_species;
-# DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_s4g_fires;
-# DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_s4g_deforestation;
-# DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_geolocations;
-# DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_tree_registration_light;
-# DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_tree_monitoring_photos;
-# DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_tree_distribution_unregistered_farmers;
-# DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_contract_overview;
-# DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_new_devices;
-# DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_firms_historic_fires;
-#
-# ALTER TABLE superset_ecosia_nursery_registration enable ROW LEVEL SECURITY;
-# ALTER TABLE superset_ecosia_tree_registration enable ROW LEVEL SECURITY;
-# ALTER TABLE superset_ecosia_tree_monitoring enable ROW LEVEL SECURITY;
-# ALTER TABLE superset_ecosia_s4g_site_health enable ROW LEVEL SECURITY;
-# ALTER TABLE superset_ecosia_nursery_monitoring enable ROW LEVEL SECURITY;
-# ALTER TABLE superset_ecosia_nursery_monitoring_species enable ROW LEVEL SECURITY;
-# ALTER TABLE superset_ecosia_nursery_registration_photos enable ROW LEVEL SECURITY;
-# ALTER TABLE superset_ecosia_nursery_monitoring_photos enable ROW LEVEL SECURITY;
-# ALTER TABLE superset_ecosia_tree_registration_photos enable ROW LEVEL SECURITY;
-# ALTER TABLE superset_ecosia_tree_registration_species enable ROW LEVEL SECURITY;
-# ALTER TABLE superset_ecosia_s4g_fires enable ROW LEVEL SECURITY;
-# ALTER TABLE superset_ecosia_s4g_deforestation enable ROW LEVEL SECURITY;
-# ALTER TABLE superset_ecosia_geolocations enable ROW LEVEL SECURITY;
-# ALTER TABLE superset_ecosia_tree_registration_light enable ROW LEVEL SECURITY;
-# ALTER TABLE superset_ecosia_tree_monitoring_photos enable ROW LEVEL SECURITY;
-# ALTER TABLE superset_ecosia_tree_distribution_unregistered_farmers enable ROW LEVEL SECURITY;
-# ALTER TABLE superset_ecosia_contract_overview enable ROW LEVEL SECURITY;
-# ALTER TABLE superset_ecosia_new_devices enable ROW LEVEL SECURITY;
-# ALTER TABLE superset_ecosia_firms_historic_fires enable ROW LEVEL SECURITY;
-#
-# CREATE POLICY ecosia_superset_policy ON superset_ecosia_nursery_registration TO ecosia USING (true);
-# CREATE POLICY ecosia_superset_policy ON superset_ecosia_tree_registration TO ecosia USING (true);
-# CREATE POLICY ecosia_superset_policy ON superset_ecosia_tree_monitoring TO ecosia USING (true);
-# CREATE POLICY ecosia_superset_policy ON superset_ecosia_s4g_site_health TO ecosia USING (true);
-# CREATE POLICY ecosia_superset_policy ON superset_ecosia_nursery_monitoring TO ecosia USING (true);
-# CREATE POLICY ecosia_superset_policy ON superset_ecosia_nursery_monitoring_species TO ecosia USING (true);
-# CREATE POLICY ecosia_superset_policy ON superset_ecosia_nursery_registration_photos TO ecosia USING (true);
-# CREATE POLICY ecosia_superset_policy ON superset_ecosia_nursery_monitoring_photos TO ecosia USING (true);
-# CREATE POLICY ecosia_superset_policy ON superset_ecosia_tree_registration_photos TO ecosia USING (true);
-# CREATE POLICY ecosia_superset_policy ON superset_ecosia_tree_registration_species TO ecosia USING (true);
-# CREATE POLICY ecosia_superset_policy ON superset_ecosia_s4g_fires TO ecosia USING (true);
-# CREATE POLICY ecosia_superset_policy ON superset_ecosia_s4g_deforestation TO ecosia USING (true);
-# CREATE POLICY ecosia_superset_policy ON superset_ecosia_geolocations TO ecosia USING (true);
-# CREATE POLICY ecosia_superset_policy ON superset_ecosia_tree_registration_light TO ecosia USING (true);
-# CREATE POLICY ecosia_superset_policy ON superset_ecosia_tree_monitoring_photos TO ecosia USING (true);
-# CREATE POLICY ecosia_superset_policy ON superset_ecosia_tree_distribution_unregistered_farmers TO ecosia USING (true);
-# CREATE POLICY ecosia_superset_policy ON superset_ecosia_contract_overview TO ecosia USING (true);
-# CREATE POLICY ecosia_superset_policy ON superset_ecosia_new_devices TO ecosia USING (true);
-# CREATE POLICY ecosia_superset_policy ON superset_ecosia_firms_historic_fires TO ecosia USING (true);'''
-#
-# conn.commit()
+#This login (see below) and the associated grands is being used by the superset dashboard!! AS such this query is de-activated.
+create_a21_ecosia_editing = '''
+GRANT USAGE ON SCHEMA PUBLIC TO ecosia_editing;
+GRANT USAGE ON SCHEMA HEROKU_EXT TO ecosia_editing;
+
+GRANT SELECT ON TABLE akvo_tree_registration_areas_edits TO ecosia_editing;
+
+ALTER TABLE akvo_tree_registration_areas_edits enable ROW LEVEL SECURITY;
+
+CREATE POLICY ecosia_superset_editing ON akvo_tree_registration_areas_edits TO ecosia_editing
+FOR SELECT, UPDATE
+USING (true)
+;'''
+
+conn.commit()
 
 
 # Execute drop tables
@@ -7014,7 +6936,7 @@ cur.execute(create_a49)
 cur.execute(create_a52)
 
 cur.execute(create_a20_ecosia_superset) # This gives grand access to QGIS users. With this login (inside QGIS) they will only see the superset tables
-#cur.execute(create_a21_ecosia) # Used by the Preset dashboard. No grand limitation. As such it is de-activated
+cur.execute(create_a21_ecosia_editing) # Used by the Preset dashboard. No grand limitation. As such it is de-activated
 
 conn.commit()
 
