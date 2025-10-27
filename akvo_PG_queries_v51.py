@@ -6891,10 +6891,14 @@ GRANT SELECT ON TABLE akvo_tree_registration_areas_edits TO ecosia_editing;
 
 ALTER TABLE akvo_tree_registration_areas_edits enable ROW LEVEL SECURITY;
 
-CREATE POLICY ecosia_superset_editing ON akvo_tree_registration_areas_edits TO ecosia_editing
-FOR SELECT, UPDATE
-USING (true)
-;'''
+CREATE POLICY ecosia_superset_editing ON akvo_tree_registration_areas_edits
+FOR SELECT TO ecosia_editing
+USING (true);
+
+CREATE POLICY ecosia_superset_editing ON akvo_tree_registration_areas_edits
+FOR UPDATE TO ecosia_editing
+USING (true);'''
+
 
 conn.commit()
 
@@ -6939,23 +6943,6 @@ cur.execute(create_a20_ecosia_superset) # This gives grand access to QGIS users.
 cur.execute(create_a21_ecosia_editing) # Used by the Preset dashboard. No grand limitation. As such it is de-activated
 
 conn.commit()
-
-# cur.execute('''ALTER TABLE CALC_GEOM_locations_registration_versus_externalaudits ADD COLUMN distance_to_registration_m INTEGER;''')
-# conn.commit()
-#
-# cur.execute('''SELECT * FROM CALC_GEOM_locations_registration_versus_externalaudits;''')
-# conn.commit()
-
-# rows = cur.fetchall()
-#
-# for row in rows:
-#     instance = row[2]
-#     location_registration = (row[6:8])
-#     location_audit = (row[8:10])
-#     distance_m = (geodesic(location_registration, location_audit).m)
-#
-#     cur.execute('''UPDATE CALC_GEOM_locations_registration_versus_externalaudits SET distance_to_registration_m = %s WHERE instance = %s;''', (distance_m, instance))
-#     conn.commit()
 
 cur.close()
 
