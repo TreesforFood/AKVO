@@ -6507,6 +6507,8 @@ akvo_tree_registration_areas_updated.country)
 
 SELECT * FROM wkt_polygons_to_geojson
 UNION ALL
+SELECT * FROM buffer_around_200_trees_centroids
+UNION ALL
 SELECT * FROM wkt_buffer_200_trees_areas_to_geojson
 UNION ALL
 SELECT * FROM wkt_pcq_samples_akvo_monitoring_to_geojson
