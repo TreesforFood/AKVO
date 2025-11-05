@@ -5466,6 +5466,8 @@ WHEN t.test = 'Valid data'
 THEN 'no'
 WHEN t.test = 'This is real, valid data'
 THEN 'no'
+WHEN t.test ISNULL
+THEN 'no'
 END AS test,
 
 
@@ -5563,6 +5565,8 @@ WHEN t.test = 'Valid data'
 THEN 'no'
 WHEN t.test = 'This is real, valid data'
 THEN 'no'
+WHEN t.test ISNULL
+THEN 'no'
 END AS test,
 
 LOWER(t.country) AS country,
@@ -5647,6 +5651,8 @@ THEN 'no'
 WHEN t.test = 'Valid data'
 THEN 'no'
 WHEN t.test = 'This is real, valid data'
+THEN 'no'
+WHEN t.test ISNULL
 THEN 'no'
 END AS test,
 
@@ -5746,6 +5752,8 @@ THEN 'no'
 WHEN akvo_tree_monitoring_areas.test = 'Valid data'
 THEN 'no'
 WHEN akvo_tree_monitoring_areas.test = 'This is real, valid data'
+THEN 'no'
+WHEN akvo_tree_monitoring_areas.test ISNULL
 THEN 'no'
 END AS test,
 
@@ -5854,6 +5862,8 @@ THEN 'no'
 WHEN akvo_tree_monitoring_areas.test = 'Valid data'
 THEN 'no'
 WHEN akvo_tree_monitoring_areas.test = 'This is real, valid data'
+THEN 'no'
+WHEN akvo_tree_monitoring_areas.test ISNULL
 THEN 'no'
 END AS test,
 
@@ -5969,6 +5979,8 @@ WHEN odk_tree_monitoring_main.test = 'Valid data'
 THEN 'no'
 WHEN odk_tree_monitoring_main.test = 'This is real, valid data'
 THEN 'no'
+WHEN odk_tree_monitoring_main.test ISNULL
+THEN 'no'
 END AS test,
 
 LOWER(akvo_tree_registration_areas_updated.country) AS country,
@@ -6079,6 +6091,8 @@ WHEN akvo_tree_monitoring_areas.test = 'Valid data'
 THEN 'no'
 WHEN akvo_tree_monitoring_areas.test = 'This is real, valid data'
 THEN 'no'
+WHEN akvo_tree_monitoring_areas.test ISNULL
+THEN 'no'
 END AS test,
 
 LOWER(akvo_tree_registration_areas_updated.country) AS country,
@@ -6186,6 +6200,8 @@ THEN 'no'
 WHEN akvo_tree_monitoring_areas.test = 'Valid data'
 THEN 'no'
 WHEN akvo_tree_monitoring_areas.test = 'This is real, valid data'
+THEN 'no'
+WHEN akvo_tree_monitoring_areas.test ISNULL
 THEN 'no'
 END AS test,
 
@@ -6297,6 +6313,8 @@ WHEN count_samples_monitoring.test = 'Valid data'
 THEN 'no'
 WHEN count_samples_monitoring.test = 'This is real, valid data'
 THEN 'no'
+WHEN count_samples_monitoring.test ISNULL
+THEN 'no'
 END AS test,
 
 LOWER(akvo_tree_registration_areas_updated.country) AS country,
@@ -6402,6 +6420,8 @@ THEN 'no'
 WHEN akvo_tree_monitoring_areas.test = 'Valid data'
 THEN 'no'
 WHEN akvo_tree_monitoring_areas.test = 'This is real, valid data'
+THEN 'no'
+WHEN akvo_tree_monitoring_areas.test ISNULL
 THEN 'no'
 END AS test,
 
