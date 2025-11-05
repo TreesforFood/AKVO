@@ -5446,7 +5446,29 @@ SELECT
 t.identifier_akvo,
 t.instance::TEXT,
 t.submission,
-t.test,
+
+CASE
+WHEN t.test = 'test_data'
+THEN 'This is a test, this record can be deleted.'
+WHEN t.test = 'This is a test, this record can be deleted.'
+THEN 'This is a test, this record can be deleted.'
+WHEN t.test = 'This is a test, this record can be deleted'
+THEN 'This is a test, this record can be deleted.'
+WHEN t.test = 'xxxxx'
+THEN 'This is a test, this record can be deleted.'
+WHEN t.test = ''
+THEN 'This is real, valid data'
+WHEN t.test = 'This is real, valid data\r'
+THEN 'This is real, valid data'
+WHEN t.test = 'valid_data'
+THEN 'This is real, valid data'
+WHEN t.test = 'Valid data'
+THEN 'This is real, valid data'
+WHEN t.test = 'This is real, valid data'
+THEN 'This is real, valid data'
+END AS test,
+
+
 LOWER(t.country) AS country,
 
 -- Create a unique code for filtering in superset, based on main organisation name
@@ -5521,7 +5543,28 @@ buffer_around_200_trees_centroids AS (SELECT
 identifier_akvo,
 t.instance::TEXT,
 t.submission,
-t.test,
+
+CASE
+WHEN t.test = 'test_data'
+THEN 'This is a test, this record can be deleted.'
+WHEN t.test = 'This is a test, this record can be deleted.'
+THEN 'This is a test, this record can be deleted.'
+WHEN t.test = 'This is a test, this record can be deleted'
+THEN 'This is a test, this record can be deleted.'
+WHEN t.test = 'xxxxx'
+THEN 'This is a test, this record can be deleted.'
+WHEN t.test = ''
+THEN 'This is real, valid data'
+WHEN t.test = 'This is real, valid data\r'
+THEN 'This is real, valid data'
+WHEN t.test = 'valid_data'
+THEN 'This is real, valid data'
+WHEN t.test = 'Valid data'
+THEN 'This is real, valid data'
+WHEN t.test = 'This is real, valid data'
+THEN 'This is real, valid data'
+END AS test,
+
 LOWER(t.country) AS country,
 
 -- Create a unique code for filtering in superset, based on main organisation name
@@ -5585,7 +5628,29 @@ SELECT
 t.identifier_akvo,
 t.instance::TEXT,
 t.submission,
-t.test,
+
+CASE
+WHEN t.test = 'test_data'
+THEN 'This is a test, this record can be deleted.'
+WHEN t.test = 'This is a test, this record can be deleted.'
+THEN 'This is a test, this record can be deleted.'
+WHEN t.test = 'This is a test, this record can be deleted'
+THEN 'This is a test, this record can be deleted.'
+WHEN t.test = 'xxxxx'
+THEN 'This is a test, this record can be deleted.'
+WHEN t.test = ''
+THEN 'This is real, valid data'
+WHEN t.test = 'This is real, valid data\r'
+THEN 'This is real, valid data'
+WHEN t.test = 'valid_data'
+THEN 'This is real, valid data'
+WHEN t.test = 'Valid data'
+THEN 'This is real, valid data'
+WHEN t.test = 'This is real, valid data'
+THEN 'This is real, valid data'
+END AS test,
+
+
 LOWER(t.country) AS country,
 
 -- Create a unique code for filtering in superset, based on main organisation name
@@ -5662,7 +5727,29 @@ wkt_pcq_samples_akvo_monitoring_to_geojson AS
 pcq_samples_monitorings.identifier_akvo,
 akvo_tree_monitoring_areas.instance::TEXT,
 akvo_tree_registration_areas_updated.submission,
-akvo_tree_monitoring_areas.test,
+
+CASE
+WHEN akvo_tree_monitoring_areas.test = 'test_data'
+THEN 'This is a test, this record can be deleted.'
+WHEN akvo_tree_monitoring_areas.test = 'This is a test, this record can be deleted.'
+THEN 'This is a test, this record can be deleted.'
+WHEN akvo_tree_monitoring_areas.test = 'This is a test, this record can be deleted'
+THEN 'This is a test, this record can be deleted.'
+WHEN akvo_tree_monitoring_areas.test = 'xxxxx'
+THEN 'This is a test, this record can be deleted.'
+WHEN akvo_tree_monitoring_areas.test = ''
+THEN 'This is real, valid data'
+WHEN akvo_tree_monitoring_areas.test = 'This is real, valid data\r'
+THEN 'This is real, valid data'
+WHEN akvo_tree_monitoring_areas.test = 'valid_data'
+THEN 'This is real, valid data'
+WHEN akvo_tree_monitoring_areas.test = 'Valid data'
+THEN 'This is real, valid data'
+WHEN akvo_tree_monitoring_areas.test = 'This is real, valid data'
+THEN 'This is real, valid data'
+END AS test,
+
+
 LOWER(akvo_tree_registration_areas_updated.country) AS country,
 
 -- Create a unique code for filtering in superset, based on main organisation name
@@ -5748,7 +5835,29 @@ wkt_photo_registration_geotag_to_geojson AS
 tree_registration_photos_geotag.identifier_akvo,
 akvo_tree_monitoring_areas.instance::TEXT,
 akvo_tree_registration_areas_updated.submission,
-akvo_tree_monitoring_areas.test,
+
+CASE
+WHEN akvo_tree_monitoring_areas.test = 'test_data'
+THEN 'This is a test, this record can be deleted.'
+WHEN akvo_tree_monitoring_areas.test = 'This is a test, this record can be deleted.'
+THEN 'This is a test, this record can be deleted.'
+WHEN akvo_tree_monitoring_areas.test = 'This is a test, this record can be deleted'
+THEN 'This is a test, this record can be deleted.'
+WHEN akvo_tree_monitoring_areas.test = 'xxxxx'
+THEN 'This is a test, this record can be deleted.'
+WHEN akvo_tree_monitoring_areas.test = ''
+THEN 'This is real, valid data'
+WHEN akvo_tree_monitoring_areas.test = 'This is real, valid data\r'
+THEN 'This is real, valid data'
+WHEN akvo_tree_monitoring_areas.test = 'valid_data'
+THEN 'This is real, valid data'
+WHEN akvo_tree_monitoring_areas.test = 'Valid data'
+THEN 'This is real, valid data'
+WHEN akvo_tree_monitoring_areas.test = 'This is real, valid data'
+THEN 'This is real, valid data'
+END AS test,
+
+
 LOWER(akvo_tree_registration_areas_updated.country) AS country,
 
 -- Create a unique code for filtering in superset, based on main organisation name
@@ -5840,7 +5949,28 @@ wkt_pcq_samples_akvo_odk_monitoring_to_geojson AS
 odk_tree_monitoring_main.ecosia_site_id AS identifier_akvo,
 odk_tree_monitoring_pcq.submissionid_odk AS instance,
 akvo_tree_registration_areas_updated.submission,
-odk_tree_monitoring_main.test,
+
+CASE
+WHEN odk_tree_monitoring_main.test = 'test_data'
+THEN 'This is a test, this record can be deleted.'
+WHEN odk_tree_monitoring_main.test = 'This is a test, this record can be deleted.'
+THEN 'This is a test, this record can be deleted.'
+WHEN odk_tree_monitoring_main.test = 'This is a test, this record can be deleted'
+THEN 'This is a test, this record can be deleted.'
+WHEN odk_tree_monitoring_main.test = 'xxxxx'
+THEN 'This is a test, this record can be deleted.'
+WHEN odk_tree_monitoring_main.test = ''
+THEN 'This is real, valid data'
+WHEN odk_tree_monitoring_main.test = 'This is real, valid data\r'
+THEN 'This is real, valid data'
+WHEN odk_tree_monitoring_main.test = 'valid_data'
+THEN 'This is real, valid data'
+WHEN odk_tree_monitoring_main.test = 'Valid data'
+THEN 'This is real, valid data'
+WHEN odk_tree_monitoring_main.test = 'This is real, valid data'
+THEN 'This is real, valid data'
+END AS test,
+
 LOWER(akvo_tree_registration_areas_updated.country) AS country,
 
 -- Create a unique code for filtering in superset, based on main organisation name
@@ -5914,7 +6044,28 @@ ON odk_tree_monitoring_main.submissionid_odk = odk_tree_monitoring_pcq.submissio
 
 GROUP BY odk_tree_monitoring_pcq.submissionid_odk,
 odk_tree_monitoring_main.ecosia_site_id,
-odk_tree_monitoring_main.test,
+
+CASE
+WHEN odk_tree_monitoring_main.test = 'test_data'
+THEN 'This is a test, this record can be deleted.'
+WHEN odk_tree_monitoring_main.test = 'This is a test, this record can be deleted.'
+THEN 'This is a test, this record can be deleted.'
+WHEN odk_tree_monitoring_main.test = 'This is a test, this record can be deleted'
+THEN 'This is a test, this record can be deleted.'
+WHEN odk_tree_monitoring_main.test = 'xxxxx'
+THEN 'This is a test, this record can be deleted.'
+WHEN odk_tree_monitoring_main.test = ''
+THEN 'This is real, valid data'
+WHEN odk_tree_monitoring_main.test = 'This is real, valid data\r'
+THEN 'This is real, valid data'
+WHEN odk_tree_monitoring_main.test = 'valid_data'
+THEN 'This is real, valid data'
+WHEN odk_tree_monitoring_main.test = 'Valid data'
+THEN 'This is real, valid data'
+WHEN odk_tree_monitoring_main.test = 'This is real, valid data'
+THEN 'This is real, valid data'
+END AS test,
+
 akvo_tree_registration_areas_updated.organisation,
 akvo_tree_registration_areas_updated.contract_number,
 akvo_tree_registration_areas_updated.id_planting_site,
@@ -5929,7 +6080,28 @@ wkt_photo_registration_gps_to_geojson AS
 tree_registration_photos_gps.identifier_akvo,
 akvo_tree_monitoring_areas.instance::TEXT,
 akvo_tree_registration_areas_updated.submission,
-akvo_tree_monitoring_areas.test,
+
+CASE
+WHEN akvo_tree_monitoring_areas.test = 'test_data'
+THEN 'This is a test, this record can be deleted.'
+WHEN akvo_tree_monitoring_areas.test = 'This is a test, this record can be deleted.'
+THEN 'This is a test, this record can be deleted.'
+WHEN akvo_tree_monitoring_areas.test = 'This is a test, this record can be deleted'
+THEN 'This is a test, this record can be deleted.'
+WHEN akvo_tree_monitoring_areas.test = 'xxxxx'
+THEN 'This is a test, this record can be deleted.'
+WHEN akvo_tree_monitoring_areas.test = ''
+THEN 'This is real, valid data'
+WHEN akvo_tree_monitoring_areas.test = 'This is real, valid data\r'
+THEN 'This is real, valid data'
+WHEN akvo_tree_monitoring_areas.test = 'valid_data'
+THEN 'This is real, valid data'
+WHEN akvo_tree_monitoring_areas.test = 'Valid data'
+THEN 'This is real, valid data'
+WHEN akvo_tree_monitoring_areas.test = 'This is real, valid data'
+THEN 'This is real, valid data'
+END AS test,
+
 LOWER(akvo_tree_registration_areas_updated.country) AS country,
 
 -- Create a unique code for filtering in superset, based on main organisation name
@@ -6016,7 +6188,29 @@ wkt_pcq_samples_audit_to_geojson AS
 pcq_samples_audits.identifier_akvo,
 akvo_tree_monitoring_areas.instance::TEXT,
 akvo_tree_registration_areas_updated.submission,
-akvo_tree_monitoring_areas.test,
+
+CASE
+WHEN akvo_tree_monitoring_areas.test = 'test_data'
+THEN 'This is a test, this record can be deleted.'
+WHEN akvo_tree_monitoring_areas.test = 'This is a test, this record can be deleted.'
+THEN 'This is a test, this record can be deleted.'
+WHEN akvo_tree_monitoring_areas.test = 'This is a test, this record can be deleted'
+THEN 'This is a test, this record can be deleted.'
+WHEN akvo_tree_monitoring_areas.test = 'xxxxx'
+THEN 'This is a test, this record can be deleted.'
+WHEN akvo_tree_monitoring_areas.test = ''
+THEN 'This is real, valid data'
+WHEN akvo_tree_monitoring_areas.test = 'This is real, valid data\r'
+THEN 'This is real, valid data'
+WHEN akvo_tree_monitoring_areas.test = 'valid_data'
+THEN 'This is real, valid data'
+WHEN akvo_tree_monitoring_areas.test = 'Valid data'
+THEN 'This is real, valid data'
+WHEN akvo_tree_monitoring_areas.test = 'This is real, valid data'
+THEN 'This is real, valid data'
+END AS test,
+
+
 LOWER(akvo_tree_registration_areas_updated.country) AS country,
 
 -- Create a unique code for filtering in superset, based on main organisation name
@@ -6104,7 +6298,28 @@ wkt_count_samples_monitoring_to_geojson AS
 count_samples_monitoring.identifier_akvo,
 count_samples_monitoring.instance::TEXT,
 akvo_tree_registration_areas_updated.submission,
-count_samples_monitoring.test,
+
+CASE
+WHEN count_samples_monitoring.test = 'test_data'
+THEN 'This is a test, this record can be deleted.'
+WHEN count_samples_monitoring.test = 'This is a test, this record can be deleted.'
+THEN 'This is a test, this record can be deleted.'
+WHEN count_samples_monitoring.test = 'This is a test, this record can be deleted'
+THEN 'This is a test, this record can be deleted.'
+WHEN count_samples_monitoring.test = 'xxxxx'
+THEN 'This is a test, this record can be deleted.'
+WHEN count_samples_monitoring.test = ''
+THEN 'This is real, valid data'
+WHEN count_samples_monitoring.test = 'This is real, valid data\r'
+THEN 'This is real, valid data'
+WHEN count_samples_monitoring.test = 'valid_data'
+THEN 'This is real, valid data'
+WHEN count_samples_monitoring.test = 'Valid data'
+THEN 'This is real, valid data'
+WHEN count_samples_monitoring.test = 'This is real, valid data'
+THEN 'This is real, valid data'
+END AS test,
+
 LOWER(akvo_tree_registration_areas_updated.country) AS country,
 
 -- Create a unique code for filtering in superset, based on main organisation name
@@ -6189,7 +6404,28 @@ wkt_count_samples_audit_to_geojson AS
 count_samples_audit.identifier_akvo,
 akvo_tree_monitoring_areas.instance::TEXT,
 akvo_tree_registration_areas_updated.submission,
-akvo_tree_monitoring_areas.test,
+
+CASE
+WHEN akvo_tree_monitoring_areas.test = 'test_data'
+THEN 'This is a test, this record can be deleted.'
+WHEN akvo_tree_monitoring_areas.test = 'This is a test, this record can be deleted.'
+THEN 'This is a test, this record can be deleted.'
+WHEN akvo_tree_monitoring_areas.test = 'This is a test, this record can be deleted'
+THEN 'This is a test, this record can be deleted.'
+WHEN akvo_tree_monitoring_areas.test = 'xxxxx'
+THEN 'This is a test, this record can be deleted.'
+WHEN akvo_tree_monitoring_areas.test = ''
+THEN 'This is real, valid data'
+WHEN akvo_tree_monitoring_areas.test = 'This is real, valid data\r'
+THEN 'This is real, valid data'
+WHEN akvo_tree_monitoring_areas.test = 'valid_data'
+THEN 'This is real, valid data'
+WHEN akvo_tree_monitoring_areas.test = 'Valid data'
+THEN 'This is real, valid data'
+WHEN akvo_tree_monitoring_areas.test = 'This is real, valid data'
+THEN 'This is real, valid data'
+END AS test,
+
 LOWER(akvo_tree_registration_areas_updated.country) AS country,
 
 -- Create a unique code for filtering in superset, based on main organisation name
@@ -6296,7 +6532,6 @@ UPDATE superset_ecosia_geolocations
 SET contract = TRUNC(sub_contract);'''
 
 conn.commit()
-
 
 
 create_a45 = '''CREATE TABLE superset_ecosia_tree_monitoring_photos
