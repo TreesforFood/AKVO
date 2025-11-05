@@ -6044,28 +6044,7 @@ ON odk_tree_monitoring_main.submissionid_odk = odk_tree_monitoring_pcq.submissio
 
 GROUP BY odk_tree_monitoring_pcq.submissionid_odk,
 odk_tree_monitoring_main.ecosia_site_id,
-
-CASE
-WHEN odk_tree_monitoring_main.test = 'test_data'
-THEN 'This is a test, this record can be deleted.'
-WHEN odk_tree_monitoring_main.test = 'This is a test, this record can be deleted.'
-THEN 'This is a test, this record can be deleted.'
-WHEN odk_tree_monitoring_main.test = 'This is a test, this record can be deleted'
-THEN 'This is a test, this record can be deleted.'
-WHEN odk_tree_monitoring_main.test = 'xxxxx'
-THEN 'This is a test, this record can be deleted.'
-WHEN odk_tree_monitoring_main.test = ''
-THEN 'This is real, valid data'
-WHEN odk_tree_monitoring_main.test = 'This is real, valid data\r'
-THEN 'This is real, valid data'
-WHEN odk_tree_monitoring_main.test = 'valid_data'
-THEN 'This is real, valid data'
-WHEN odk_tree_monitoring_main.test = 'Valid data'
-THEN 'This is real, valid data'
-WHEN odk_tree_monitoring_main.test = 'This is real, valid data'
-THEN 'This is real, valid data'
-END AS test,
-
+odk_tree_monitoring_main.test,
 akvo_tree_registration_areas_updated.organisation,
 akvo_tree_registration_areas_updated.contract_number,
 akvo_tree_registration_areas_updated.id_planting_site,
