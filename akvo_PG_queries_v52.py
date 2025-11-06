@@ -5541,33 +5541,12 @@ t.submission, t.country),
 
 
 -- Here we convert the centroid-point locations from WKT format to geojson string format that can be read by superset
+-- THIS IS A CTE TABLE THAT DOES NOT NEED TO BE IN THE FINAL UNION BECAUSE THE FOLLOWING CTE TABLE (wkt_buffer_200_trees_areas_to_geojson) WILL BE.
 buffer_around_200_trees_centroids AS (SELECT
 identifier_akvo,
 t.instance::TEXT,
 t.submission,
-
-CASE
-WHEN t.test = 'test_data'
-THEN 'yes'
-WHEN t.test = 'This is a test, this record can be deleted.'
-THEN 'yes'
-WHEN t.test = 'This is a test, this record can be deleted'
-THEN 'yes'
-WHEN t.test = 'xxxxx'
-THEN 'yes'
-WHEN t.test = ''
-THEN 'no'
-WHEN t.test = 'This is real, valid data\r'
-THEN 'no'
-WHEN t.test = 'valid_data'
-THEN 'no'
-WHEN t.test = 'Valid data'
-THEN 'no'
-WHEN t.test = 'This is real, valid data'
-THEN 'no'
-WHEN t.test ISNULL
-THEN 'no'
-END AS test,
+t.test,
 
 LOWER(t.country) AS country,
 
@@ -5622,9 +5601,13 @@ t.contract_number AS sub_contract,
 t.id_planting_site,
 t.display_name,
 'tree registration' AS procedure,
-ST_Buffer(t.centroid_coord,25) as buffer
+ST_Buffer(t.centroid_coord,25) AS buffer
+
+
 FROM akvo_tree_registration_areas_updated AS t
 WHERE t.polygon ISNULL),
+
+
 
 -- Here we convert the buffer polygon areas (WKT format) to geojson string format that can be read by superset
 wkt_buffer_200_trees_areas_to_geojson AS (
@@ -6507,8 +6490,6 @@ akvo_tree_registration_areas_updated.country)
 
 SELECT * FROM wkt_polygons_to_geojson
 UNION ALL
-SELECT * FROM buffer_around_200_trees_centroids
-UNION ALL
 SELECT * FROM wkt_buffer_200_trees_areas_to_geojson
 UNION ALL
 SELECT * FROM wkt_pcq_samples_akvo_monitoring_to_geojson
@@ -6533,6 +6514,7 @@ UPDATE superset_ecosia_geolocations
 SET contract = TRUNC(sub_contract);'''
 
 conn.commit()
+
 
 
 create_a45 = '''CREATE TABLE superset_ecosia_tree_monitoring_photos
