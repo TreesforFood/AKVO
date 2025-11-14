@@ -7104,7 +7104,10 @@ CALC_TAB_tree_submissions_per_contract."weighted avg perc tree_survival in t=>3"
 CALC_TAB_tree_submissions_per_contract."total tree number in t=>3",
 CALC_TAB_tree_submissions_per_contract."weighted avg tree_height in t=>3",
 CALC_TAB_tree_submissions_per_contract."Total number of sites monitored/audited at least 1 time",
-CALC_TAB_tree_submissions_per_contract."Number of tree species registered"
+CALC_TAB_tree_submissions_per_contract."Number of tree species registered",
+CALC_TAB_tree_submissions_per_contract.percentage_native,
+CALC_TAB_tree_submissions_per_contract.percentage_exotic,
+CALC_TAB_tree_submissions_per_contract.percentage_unknown
 
 FROM CALC_TAB_tree_submissions_per_contract;
 
