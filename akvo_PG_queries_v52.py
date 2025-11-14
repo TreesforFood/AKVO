@@ -3476,7 +3476,6 @@ ON CTE_results_percentages_exotic_native.contract_number = CTE_total_tree_regist
 
 conn.commit()
 
-
 create_a31 = '''CREATE TABLE superset_ecosia_nursery_registration
 AS WITH akvo_nursery_registrations AS (SELECT
 akvo_nursery_registration.identifier_akvo,
