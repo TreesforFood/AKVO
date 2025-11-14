@@ -2950,6 +2950,57 @@ akvo_tree_registration_areas_updated.contract_number,
 name_country,
 organisation),
 
+-- Prepare the calculation of the percentages of native versus exotic species on contract level
+CTE_percentage_exotic_native AS (
+SELECT
+b.contract_number,
+'ODK' AS source_data,
+'Registration' AS methodology,
+a.species_name_latin,
+a.native_exotic AS native_exotic,
+a.nr_trees_per_species
+FROM ODK_Tree_registration_tree_species a
+JOIN odk_tree_registration_main b
+ON a.submissionid_odk = b.submissionid_odk
+
+UNION ALL
+
+SELECT
+d.contract_number AS contract_number,
+'AKVO' AS source_data,
+'Registration' AS methodology,
+c.lat_name_species AS species_name_latin,
+CASE
+        WHEN SUBSTRING(c.lat_name_species, LENGTH(c.lat_name_species) - 2, 1) = 'E' THEN 'exotic'
+        WHEN SUBSTRING(c.lat_name_species, LENGTH(c.lat_name_species) - 2, 1) = 'N' THEN 'native'
+        ELSE 'unknown'
+END AS native_exotic,
+
+c.number_species AS nr_trees_per_species
+
+FROM akvo_tree_registration_species c
+JOIN akvo_tree_registration_areas d
+ON c.identifier_akvo = d.identifier_akvo),
+
+-- Calculate the percentages of native versus exotic species on contract level
+total_trees AS (
+    SELECT
+        contract_number,
+        SUM(nr_trees_per_species) AS total_nr_trees
+    FROM CTE_percentage_exotic_native
+    GROUP BY contract_number),
+
+CTE_results_percentages_exotic_native AS (
+    SELECT
+        c.contract_number,
+        ROUND(SUM(CASE WHEN native_exotic = 'native' THEN nr_trees_per_species ELSE 0 END) * 100.0 / NULLIF(t.total_nr_trees, 0), 1) AS percentage_native,
+        ROUND(SUM(CASE WHEN native_exotic = 'exotic' THEN nr_trees_per_species ELSE 0 END) * 100.0 / NULLIF(t.total_nr_trees, 0), 1) AS percentage_exotic,
+		ROUND(SUM(CASE WHEN native_exotic = 'unknown' THEN nr_trees_per_species ELSE 0 END) * 100.0 / NULLIF(t.total_nr_trees, 0), 1) AS percentage_unknown
+    FROM CTE_percentage_exotic_native c
+    JOIN total_trees t ON c.contract_number = t.contract_number
+    GROUP BY c.contract_number,t.total_nr_trees),
+
+
 -- This table unifies all submissions from audits and monitorings on instance level.
 -- This is a preperatory table to label all instances with a label_strata
 CTE_union_monitorings_audits AS (SELECT
@@ -2979,11 +3030,12 @@ FROM odk_tree_monitoring_main),
 CTE_tree_monitoring AS (
 SELECT
 
-CASE
-WHEN akvo_tree_registration_areas_updated.contract_number NOTNULL
-THEN akvo_tree_registration_areas_updated.contract_number
-ELSE odk_tree_registration_main.contract_number
-END AS contract_number,
+--WHEN akvo_tree_registration_areas_updated.contract_number NOTNULL
+--THEN akvo_tree_registration_areas_updated.contract_number
+--ELSE odk_tree_registration_main.contract_number
+--END AS contract_number,
+
+akvo_tree_registration_areas_updated.contract_number,
 
 COUNT(DISTINCT CTE_union_monitorings_audits.identifier_akvo) as nr_sites_monitored_audited,
 COUNT(DISTINCT CTE_union_monitorings_audits.instance) as total_nr_monitorings_audits,
@@ -2993,26 +3045,30 @@ LEFT JOIN CTE_union_monitorings_audits
 ON akvo_tree_registration_areas_updated.identifier_akvo = CTE_union_monitorings_audits.identifier_akvo
 LEFT JOIN odk_tree_registration_main
 ON akvo_tree_registration_areas_updated.identifier_akvo = odk_tree_registration_main.ecosia_site_id
-GROUP BY akvo_tree_registration_areas_updated.contract_number,
-odk_tree_registration_main.contract_number),
+GROUP BY akvo_tree_registration_areas_updated.contract_number),
 
 
 -- This table lists all tree species on contract level that were reported during the registration
 CTE_tree_species AS (
 SELECT
 akvo_tree_registration_areas_updated.contract_number,
-COUNT(DISTINCT akvo_tree_registration_species.lat_name_species) as "Number of tree species registered"
+akvo_tree_registration_species.lat_name_species AS "Number of tree species registered"
 FROM akvo_tree_registration_areas_updated
 LEFT JOIN akvo_tree_registration_species
-ON akvo_tree_registration_areas_updated.identifier_akvo	= akvo_tree_registration_species.identifier_akvo
-GROUP BY akvo_tree_registration_areas_updated.contract_number
+ON akvo_tree_registration_areas_updated.identifier_akvo = akvo_tree_registration_species.identifier_akvo
 
 UNION ALL
 
-SELECT odk_tree_registration_main.contract_number,
-COUNT(DISTINCT odk_tree_registration_main.tree_species) as "Number of tree species registered"
-FROM odk_tree_registration_main
-GROUP BY odk_tree_registration_main.contract_number),
+SELECT
+odk_tree_registration_main.contract_number,
+odk_tree_registration_main.tree_species AS "Number of tree species registered"
+FROM odk_tree_registration_main),
+
+CTE_count_species AS (SELECT
+contract_number,
+COUNT(DISTINCT "Number of tree species registered") AS "Number of tree species registered"
+FROM CTE_tree_species
+GROUP BY contract_number),
 
 
 -- This table calculates results on contract for T=1
@@ -3391,13 +3447,18 @@ ELSE NULL
 END AS "weighted avg tree_height in t=>3",
 
 CTE_tree_monitoring.nr_sites_monitored_audited AS "Total number of sites monitored/audited at least 1 time",
-CTE_tree_species."Number of tree species registered"
+CTE_count_species."Number of tree species registered",
+
+CTE_results_percentages_exotic_native.percentage_native,
+CTE_results_percentages_exotic_native.percentage_exotic,
+CTE_results_percentages_exotic_native.percentage_unknown
+
 
 FROM CTE_total_tree_registrations
 LEFT JOIN CTE_tree_monitoring
 ON CTE_tree_monitoring.contract_number = CTE_total_tree_registrations.contract_number
-LEFT JOIN CTE_tree_species
-ON CTE_tree_species.contract_number = CTE_total_tree_registrations.contract_number
+LEFT JOIN CTE_count_species
+ON CTE_count_species.contract_number = CTE_total_tree_registrations.contract_number
 LEFT JOIN CTE_contract_level_monitoring_audit_results_t1
 ON CTE_contract_level_monitoring_audit_results_t1.contract_number = CTE_total_tree_registrations.contract_number
 LEFT JOIN CTE_contract_level_monitoring_audit_results_t2
@@ -3409,7 +3470,9 @@ ON CTE_calculate_extrapolated_tree_number_contract_level_t1.contract_number = CT
 LEFT JOIN CTE_calculate_extrapolated_tree_number_contract_level_t2
 ON CTE_calculate_extrapolated_tree_number_contract_level_t2.contract_number = CTE_total_tree_registrations.contract_number
 LEFT JOIN CTE_calculate_extrapolated_tree_number_contract_level_t3
-ON CTE_calculate_extrapolated_tree_number_contract_level_t3.contract_number = CTE_total_tree_registrations.contract_number;'''
+ON CTE_calculate_extrapolated_tree_number_contract_level_t3.contract_number = CTE_total_tree_registrations.contract_number
+LEFT JOIN CTE_results_percentages_exotic_native
+ON CTE_results_percentages_exotic_native.contract_number = CTE_total_tree_registrations.contract_number;'''
 
 conn.commit()
 
@@ -6514,7 +6577,6 @@ UPDATE superset_ecosia_geolocations
 SET contract = TRUNC(sub_contract);'''
 
 conn.commit()
-
 
 
 create_a45 = '''CREATE TABLE superset_ecosia_tree_monitoring_photos
