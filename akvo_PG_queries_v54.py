@@ -1007,7 +1007,10 @@ conn.commit()
 
 # A copy is made from the INTEGRATED TABLE and named UPDATED table. This is done only once (see script "create_a1_insertion" below)!
 create_a1_updated = '''CREATE TABLE IF NOT EXISTS akvo_tree_registration_areas_updated
-AS (SELECT * FROM akvo_tree_registration_areas_integrated);'''
+AS (SELECT * FROM akvo_tree_registration_areas_integrated);
+
+ALTER TABLE akvo_tree_registration_areas_updated
+ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ;'''
 conn.commit()
 
 
