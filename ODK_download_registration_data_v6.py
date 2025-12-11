@@ -202,167 +202,167 @@ def json_extract(obj, key):
     return values
 
 
-count = 0
-for json_in in json_registration:
-    #print(json_in)
-    if json_extract(json_in, 'reporting_type')[0] == 'new_site':
-        count = count+1
+# count = 0
+# for json_in in json_registration:
+#     #print(json_in)
+#     if json_extract(json_in, 'reporting_type')[0] == 'new_site':
+#         count = count+1
+#
+#         submissionid_odk = json_extract(json_in, 'instanceID')[0]
+#         ecosia_site_id = json_extract(json_in, 'instanceid')[0]
+#
+#         start = json_extract(json_in, 'start')[0]
+#         end = json_extract(json_in, 'end')[0]
+#         updated_at = json_extract(json_in, 'updatedAt')[0]
+#         submission_date = json_extract(json_in, 'submissionDate')[0]
+#         today = json_extract(json_in, 'today')[0]
+#         print('id:', ecosia_site_id, 'updatedAt:', updated_at, 'submission_date:', submission_date, 'Start:', start, 'End:', end)
+#
+#         device_id = json_extract(json_in, 'device_id')[0]
+#         submitter = json_extract(json_in, 'username')[0]
+#
+#         odk_form_version = json_extract(json_in, 'formVersion')[0]
+#
+#         country = json_extract(json_in, 'country_registration_save')[0]
+#         test_data_yes_no = json_extract(json_in, 'test_data_yes_no')[0]
+#         land_title = json_extract(json_in, 'landuse_title')[0]
+#         name_owner_individual = json_extract(json_in, 'name_owner_individual')[0]
+#         gender_owner = json_extract(json_in, 'gender_owner')[0]
+#         name_owner_communal = json_extract(json_in, 'name_owner_communal')[0]
+#         planting_technique = json_extract(json_in, 'planting_technique')[0]
+#         test = json_extract(json_in, 'test_data_yes_no')[0]
+#         reporting_type = json_extract(json_in, 'reporting_type')[0]
+#         reporting_activity_new_site = json_extract(json_in, 'reporting_activity_new_site')[0]
+#         area_calculation_round_decimal = json_extract(json_in, 'area_calculation_round_decimal')[0]
+#         baseline_mature_trees = json_extract(json_in, 'baseline_mature_trees')[0]
+#         id_planting_site = json_extract(json_in, 'id_planting_site')[0]
+#         landscape_element_new_site = json_extract(json_in, 'landscape_element_type')[0]
+#
+#         if json_in['group_new_site']['group_map_new_site']['gps_center_planting_site'] != None:
+#             return_list = convert_point_wkt(json_in['group_new_site']['group_map_new_site']['gps_center_planting_site']['coordinates'])
+#             geometry_planting_point = return_list[0]
+#             lon_x = return_list[1]
+#             lat_y = return_list[2]
+#         else:
+#             geometry_planting_point = None
+#             lon_x = None
+#             lat_y = None
+#
+#
+#         #if landscape_element_new_site == 'line_planting':
+#         if json_in['group_new_site']['group_map_new_site']['line_planting_site'] != None:
+#             geometry_planting_line = convert_line_wkt(json_in['group_new_site']['group_map_new_site']['line_planting_site']['coordinates'])
+#             #print('LINESTRING:', geometry_planting_line)
+#         else:
+#             geometry_planting_line = None
+#
+#         #if landscape_element_new_site == 'area_planting':
+#         if json_in['group_new_site']['group_map_new_site']['polygon_planting_site'] != None:
+#             geometry_planting_polygon = convert_polygon_wkt(json_in['group_new_site']['group_map_new_site']['polygon_planting_site']['coordinates'][0])
+#             #print('POLYGON: ',geometry_planting_polygon)
+#         else:
+#             geometry_planting_polygon = None
+#
+#         contract_number = json_extract(json_in, 'contract_number')[0]
+#         tree_species = json_extract(json_in, 'tree_species_registered')[0]
+#         organisation = json_extract(json_in, 'organisation')[0]
+#         tree_number = json_extract(json_in, 'tree_number')[0]
+#         audit = json_extract(json_in, 'audit')[0]
+#         meta_instanceID = json_extract(json_in, 'instanceID')[0] # be carefull: the variable in this json is instanceID NOT instanceId!
+#         name_region = 'still to be intergrated'
+#         photo_owner = json_extract(json_in, 'photo_owner')[0]
+#         remark = json_extract(json_in, 'remark')[0]
+#         #nr_trees_option = json_extract(json_in, 'landscape_element_type')[0]
+#         planting_date = json_extract(json_in, 'planting_date')[0]
+#
+#         # Create a temp CTE table to download all main registration data from ODK
+#         cur.execute('''INSERT INTO ODK_Tree_registration_main (submissionid_odk, ecosia_site_id, device_id, updated_at, field_date, submission_date, submission_date_time_start, start, ends, submitter, odk_form_version, test, reporting_type, reporting_activity_new_site, country, organisation, contract_number, id_planting_site, land_title, name_owner, landscape_element_type, photo_owner, gender_owner, planting_technique, remark, planting_date, tree_number, tree_species, calc_area, lat_y, lon_x, centroid_coord, polygon, line)
+#         VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)''', (submissionid_odk, ecosia_site_id, device_id, updated_at, today, submission_date, submission_date, start, end, submitter, odk_form_version, test, reporting_type, reporting_activity_new_site, country, organisation, contract_number, id_planting_site, land_title, name_owner_individual, landscape_element_new_site, photo_owner, gender_owner, planting_technique, remark, planting_date, tree_number, tree_species, area_calculation_round_decimal, lat_y, lon_x, geometry_planting_point, geometry_planting_polygon, geometry_planting_line))
+#
+#         conn.commit()
 
-        submissionid_odk = json_extract(json_in, 'instanceID')[0]
-        ecosia_site_id = json_extract(json_in, 'instanceid')[0]
 
-        start = json_extract(json_in, 'start')[0]
-        end = json_extract(json_in, 'end')[0]
-        updated_at = json_extract(json_in, 'updatedAt')[0]
-        submission_date = json_extract(json_in, 'submissionDate')[0]
-        today = json_extract(json_in, 'today')[0]
-        print('id:', ecosia_site_id, 'updatedAt:', updated_at, 'submission_date:', submission_date, 'Start:', start, 'End:', end)
-
-        device_id = json_extract(json_in, 'device_id')[0]
-        submitter = json_extract(json_in, 'username')[0]
-
-        odk_form_version = json_extract(json_in, 'formVersion')[0]
-
-        country = json_extract(json_in, 'country_registration_save')[0]
-        test_data_yes_no = json_extract(json_in, 'test_data_yes_no')[0]
-        land_title = json_extract(json_in, 'landuse_title')[0]
-        name_owner_individual = json_extract(json_in, 'name_owner_individual')[0]
-        gender_owner = json_extract(json_in, 'gender_owner')[0]
-        name_owner_communal = json_extract(json_in, 'name_owner_communal')[0]
-        planting_technique = json_extract(json_in, 'planting_technique')[0]
-        test = json_extract(json_in, 'test_data_yes_no')[0]
-        reporting_type = json_extract(json_in, 'reporting_type')[0]
-        reporting_activity_new_site = json_extract(json_in, 'reporting_activity_new_site')[0]
-        area_calculation_round_decimal = json_extract(json_in, 'area_calculation_round_decimal')[0]
-        baseline_mature_trees = json_extract(json_in, 'baseline_mature_trees')[0]
-        id_planting_site = json_extract(json_in, 'id_planting_site')[0]
-        landscape_element_new_site = json_extract(json_in, 'landscape_element_type')[0]
-
-        if json_in['group_new_site']['group_map_new_site']['gps_center_planting_site'] != None:
-            return_list = convert_point_wkt(json_in['group_new_site']['group_map_new_site']['gps_center_planting_site']['coordinates'])
-            geometry_planting_point = return_list[0]
-            lon_x = return_list[1]
-            lat_y = return_list[2]
-        else:
-            geometry_planting_point = None
-            lon_x = None
-            lat_y = None
+for json_in_tree_species in json_nr_per_tree_species:
+    #print(json_in_tree_species)
+    submissionid_odk = json_extract(json_in_tree_species, '__Submissions-id')[0]
+    species_name_latin = json_extract(json_in_tree_species, 'calculate_species_position')[0]
+    nr_trees_per_species = json_extract(json_in_tree_species, 'nr_trees_per_species_registered')[0]
+    iucn_code = truncate_from_right(str(species_name_latin),-3)
+    native_exotic = truncate_middle(str(species_name_latin),-3, -2)
+    #print(submissionid_odk, species_name_latin, nr_trees_per_species)
 
 
-        #if landscape_element_new_site == 'line_planting':
-        if json_in['group_new_site']['group_map_new_site']['line_planting_site'] != None:
-            geometry_planting_line = convert_line_wkt(json_in['group_new_site']['group_map_new_site']['line_planting_site']['coordinates'])
-            #print('LINESTRING:', geometry_planting_line)
-        else:
-            geometry_planting_line = None
+    # Create a temp CTE table to download all main registration data from ODK
+    cur.execute('''INSERT INTO ODK_Tree_registration_tree_species (submissionid_odk, species_name_latin, iucn_code, native_exotic, nr_trees_per_species)
+    VALUES (%s,%s,%s,%s,%s)''', (submissionid_odk, species_name_latin, iucn_code, native_exotic, nr_trees_per_species))
 
-        #if landscape_element_new_site == 'area_planting':
-        if json_in['group_new_site']['group_map_new_site']['polygon_planting_site'] != None:
-            geometry_planting_polygon = convert_polygon_wkt(json_in['group_new_site']['group_map_new_site']['polygon_planting_site']['coordinates'][0])
-            #print('POLYGON: ',geometry_planting_polygon)
-        else:
-            geometry_planting_polygon = None
-
-        contract_number = json_extract(json_in, 'contract_number')[0]
-        tree_species = json_extract(json_in, 'tree_species_registered')[0]
-        organisation = json_extract(json_in, 'organisation')[0]
-        tree_number = json_extract(json_in, 'tree_number')[0]
-        audit = json_extract(json_in, 'audit')[0]
-        meta_instanceID = json_extract(json_in, 'instanceID')[0] # be carefull: the variable in this json is instanceID NOT instanceId!
-        name_region = 'still to be intergrated'
-        photo_owner = json_extract(json_in, 'photo_owner')[0]
-        remark = json_extract(json_in, 'remark')[0]
-        #nr_trees_option = json_extract(json_in, 'landscape_element_type')[0]
-        planting_date = json_extract(json_in, 'planting_date')[0]
-
-        # Create a temp CTE table to download all main registration data from ODK
-        cur.execute('''INSERT INTO ODK_Tree_registration_main (submissionid_odk, ecosia_site_id, device_id, updated_at, field_date, submission_date, submission_date_time_start, start, ends, submitter, odk_form_version, test, reporting_type, reporting_activity_new_site, country, organisation, contract_number, id_planting_site, land_title, name_owner, landscape_element_type, photo_owner, gender_owner, planting_technique, remark, planting_date, tree_number, tree_species, calc_area, lat_y, lon_x, centroid_coord, polygon, line)
-        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)''', (submissionid_odk, ecosia_site_id, device_id, updated_at, today, submission_date, submission_date, start, end, submitter, odk_form_version, test, reporting_type, reporting_activity_new_site, country, organisation, contract_number, id_planting_site, land_title, name_owner_individual, landscape_element_new_site, photo_owner, gender_owner, planting_technique, remark, planting_date, tree_number, tree_species, area_calculation_round_decimal, lat_y, lon_x, geometry_planting_point, geometry_planting_polygon, geometry_planting_line))
-
-        conn.commit()
+    conn.commit()
 
 
-# for json_in_tree_species in json_nr_per_tree_species:
-#     #print(json_in_tree_species)
-#     submissionid_odk = json_extract(json_in_tree_species, '__Submissions-id')[0]
-#     species_name_latin = json_extract(json_in_tree_species, 'calculate_species_position')[0]
-#     nr_trees_per_species = json_extract(json_in_tree_species, 'nr_trees_per_species_registered')[0]
-#     iucn_code = truncate_from_right(str(species_name_latin),-3)
-#     native_exotic = truncate_middle(str(species_name_latin),-3, -2)
-#     #print(submissionid_odk, species_name_latin, nr_trees_per_species)
-#
-#
-#     # Create a temp CTE table to download all main registration data from ODK
-#     cur.execute('''INSERT INTO ODK_Tree_registration_tree_species (submissionid_odk, species_name_latin, iucn_code, native_exotic, nr_trees_per_species)
-#     VALUES (%s,%s,%s,%s,%s)''', (submissionid_odk, species_name_latin, iucn_code, native_exotic, nr_trees_per_species))
-#
-#     conn.commit()
-#
-#
-# # After the insert of new manual submissions into the main table, the table content with manual submissions can be deleted
-# cur.execute('''TRUNCATE tree_registration_main_manual_submissions''')
-#
-#
-# # In order to update/modify data in QGIS we need an FID serial column. Since this was already made, we first have to drop this old column and then create a new FID column with serial numbers. This is the most secure approach compared to updating the FID.
-# cur.execute('''
-# ALTER TABLE ODK_Tree_registration_main
-# DROP COLUMN IF EXISTS FID;''')
-# conn.commit()
-#
-# # Add the FID column in order to be able to edit the data in QGIS (without the FID column editing is not possible in QGIS)
-# cur.execute('''ALTER TABLE ODK_Tree_registration_main ADD column FID SERIAL PRIMARY KEY''')
-# conn.commit()
-#
-#
-# # We first create the pgcrypto extension to enable the generation of new uuid's. THis is for new submissions made in QGIS (manual uploads)
-# cur.execute('''CREATE EXTENSION IF NOT EXISTS pgcrypto;''')
-# conn.commit()
-#
-# # Update the uuid's for new records that were added to the database (e.g. by manual upload) in QGIS. Add the 'uuid:' so that this matches the typo comming from ODK submissions.
-# cur.execute('''UPDATE ODK_Tree_registration_main
-# SET submissionid_odk = gen_random_uuid()
-# WHERE submissionid_odk IS NULL;''')
-# conn.commit()
-#
-#
-# for json_in in json_photos_planting_site:
-#     print(json_in)
-#     submissionid_odk = json_extract(json_in, '__Submissions-id')[0]
-#     repeatid_odk = json_extract(json_in, '__id')[0]
-#     if json_in['group_photos']['gps_photo_polygon'] != None:
-#         return_list = convert_point_wkt(json_in['group_photos']['gps_photo_polygon']['coordinates'])
-#         gps_photo_polygon = return_list[0]
-#
-#     instanceID = json_extract(json_in, '__Submissions-id')[0]
-#
-#     if json_extract(json_in, 'photo_tree_polygon_1')[0] is not None:
-#         #photo_1 = "https://ecosia.getodk.cloud"+"/projects/"+str(1)+"/forms/"+str('planting_site_reporting')+"/submissions/"+str(instanceID)+"/attachments/"+json_extract(json_in, 'photo_tree_polygon_1')[0]
-#         photo_1 = 'https://ecosia.getodk.cloud/v1/projects/1/forms/planting_site_reporting/submissions/'+instanceID+'/attachments/'+json_extract(json_in, 'photo_tree_polygon_1')[0];
-#     else:
-#         photo_1 = ''
-#
-#     if json_extract(json_in, 'photo_tree_polygon_2')[0] is not None:
-#         #photo_1 = "https://ecosia.getodk.cloud"+"/projects/"+str(1)+"/forms/"+str('planting_site_reporting')+"/submissions/"+str(instanceID)+"/attachments/"+json_extract(json_in, 'photo_tree_polygon_1')[0]
-#         photo_2 = 'https://ecosia.getodk.cloud/v1/projects/1/forms/planting_site_reporting/submissions/'+instanceID+'/attachments/'+json_extract(json_in, 'photo_tree_polygon_2')[0];
-#     else:
-#         photo_2 = ''
-#
-#     if json_extract(json_in, 'photo_tree_polygon_3')[0] is not None:
-#         #photo_1 = "https://ecosia.getodk.cloud"+"/projects/"+str(1)+"/forms/"+str('planting_site_reporting')+"/submissions/"+str(instanceID)+"/attachments/"+json_extract(json_in, 'photo_tree_polygon_1')[0]
-#         photo_3 = 'https://ecosia.getodk.cloud/v1/projects/1/forms/planting_site_reporting/submissions/'+instanceID+'/attachments/'+json_extract(json_in, 'photo_tree_polygon_3')[0];
-#     else:
-#         photo_3 = ''
-#
-#     if json_extract(json_in, 'photo_tree_polygon_4')[0] is not None:
-#         #photo_1 = "https://ecosia.getodk.cloud"+"/projects/"+str(1)+"/forms/"+str('planting_site_reporting')+"/submissions/"+str(instanceID)+"/attachments/"+json_extract(json_in, 'photo_tree_polygon_1')[0]
-#         photo_4 = 'https://ecosia.getodk.cloud/v1/projects/1/forms/planting_site_reporting/submissions/'+instanceID+'/attachments/'+json_extract(json_in, 'photo_tree_polygon_4')[0];
-#     else:
-#         photo_4 = ''
-#
-#     # Populate the photo registration table
-#     cur.execute('''INSERT INTO ODK_Tree_registration_photos (submissionid_odk, repeatid_odk, photo_name_1, photo_name_2, photo_name_3, photo_name_4, photo_gps_location)
-#     VALUES (%s,%s,%s,%s,%s,%s,%s)''', (submissionid_odk, repeatid_odk, photo_1, photo_2, photo_3, photo_4, gps_photo_polygon))
-#
-#     conn.commit()
+# After the insert of new manual submissions into the main table, the table content with manual submissions can be deleted
+cur.execute('''TRUNCATE tree_registration_main_manual_submissions''')
+
+
+# In order to update/modify data in QGIS we need an FID serial column. Since this was already made, we first have to drop this old column and then create a new FID column with serial numbers. This is the most secure approach compared to updating the FID.
+cur.execute('''
+ALTER TABLE ODK_Tree_registration_main
+DROP COLUMN IF EXISTS FID;''')
+conn.commit()
+
+# Add the FID column in order to be able to edit the data in QGIS (without the FID column editing is not possible in QGIS)
+cur.execute('''ALTER TABLE ODK_Tree_registration_main ADD column FID SERIAL PRIMARY KEY''')
+conn.commit()
+
+
+# We first create the pgcrypto extension to enable the generation of new uuid's. THis is for new submissions made in QGIS (manual uploads)
+cur.execute('''CREATE EXTENSION IF NOT EXISTS pgcrypto;''')
+conn.commit()
+
+# Update the uuid's for new records that were added to the database (e.g. by manual upload) in QGIS. Add the 'uuid:' so that this matches the typo comming from ODK submissions.
+cur.execute('''UPDATE ODK_Tree_registration_main
+SET submissionid_odk = gen_random_uuid()
+WHERE submissionid_odk IS NULL;''')
+conn.commit()
+
+
+for json_in in json_photos_planting_site:
+    print(json_in)
+    submissionid_odk = json_extract(json_in, '__Submissions-id')[0]
+    repeatid_odk = json_extract(json_in, '__id')[0]
+    if json_in['group_photos']['gps_photo_polygon'] != None:
+        return_list = convert_point_wkt(json_in['group_photos']['gps_photo_polygon']['coordinates'])
+        gps_photo_polygon = return_list[0]
+
+    instanceID = json_extract(json_in, '__Submissions-id')[0]
+
+    if json_extract(json_in, 'photo_tree_polygon_1')[0] is not None:
+        #photo_1 = "https://ecosia.getodk.cloud"+"/projects/"+str(1)+"/forms/"+str('planting_site_reporting')+"/submissions/"+str(instanceID)+"/attachments/"+json_extract(json_in, 'photo_tree_polygon_1')[0]
+        photo_1 = 'https://ecosia.getodk.cloud/v1/projects/1/forms/planting_site_reporting/submissions/'+instanceID+'/attachments/'+json_extract(json_in, 'photo_tree_polygon_1')[0];
+    else:
+        photo_1 = ''
+
+    if json_extract(json_in, 'photo_tree_polygon_2')[0] is not None:
+        #photo_1 = "https://ecosia.getodk.cloud"+"/projects/"+str(1)+"/forms/"+str('planting_site_reporting')+"/submissions/"+str(instanceID)+"/attachments/"+json_extract(json_in, 'photo_tree_polygon_1')[0]
+        photo_2 = 'https://ecosia.getodk.cloud/v1/projects/1/forms/planting_site_reporting/submissions/'+instanceID+'/attachments/'+json_extract(json_in, 'photo_tree_polygon_2')[0];
+    else:
+        photo_2 = ''
+
+    if json_extract(json_in, 'photo_tree_polygon_3')[0] is not None:
+        #photo_1 = "https://ecosia.getodk.cloud"+"/projects/"+str(1)+"/forms/"+str('planting_site_reporting')+"/submissions/"+str(instanceID)+"/attachments/"+json_extract(json_in, 'photo_tree_polygon_1')[0]
+        photo_3 = 'https://ecosia.getodk.cloud/v1/projects/1/forms/planting_site_reporting/submissions/'+instanceID+'/attachments/'+json_extract(json_in, 'photo_tree_polygon_3')[0];
+    else:
+        photo_3 = ''
+
+    if json_extract(json_in, 'photo_tree_polygon_4')[0] is not None:
+        #photo_1 = "https://ecosia.getodk.cloud"+"/projects/"+str(1)+"/forms/"+str('planting_site_reporting')+"/submissions/"+str(instanceID)+"/attachments/"+json_extract(json_in, 'photo_tree_polygon_1')[0]
+        photo_4 = 'https://ecosia.getodk.cloud/v1/projects/1/forms/planting_site_reporting/submissions/'+instanceID+'/attachments/'+json_extract(json_in, 'photo_tree_polygon_4')[0];
+    else:
+        photo_4 = ''
+
+    # Populate the photo registration table
+    cur.execute('''INSERT INTO ODK_Tree_registration_photos (submissionid_odk, repeatid_odk, photo_name_1, photo_name_2, photo_name_3, photo_name_4, photo_gps_location)
+    VALUES (%s,%s,%s,%s,%s,%s,%s)''', (submissionid_odk, repeatid_odk, photo_1, photo_2, photo_3, photo_4, gps_photo_polygon))
+
+    conn.commit()
 
 client.close()
