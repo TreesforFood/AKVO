@@ -4,10 +4,10 @@ import requests
 import re
 import json
 import psycopg2
-from shapely.ops import transform
-from shapely.geometry import Polygon
-from shapely.geometry import Point
-from shapely.geometry import LineString
+# from shapely.ops import transform
+# from shapely.geometry import Polygon
+# from shapely.geometry import Point
+# from shapely.geometry import LineString
 import os
 import sys
 
@@ -77,12 +77,12 @@ json_nr_per_tree_species = client.submissions.get_table(form_id='planting_site_r
 
 
 
-# check for audit requests: https://docs.getodk.org/central-api-system-endpoints/#server-audit-logs
-audit_report_soft_deleted_submissions = client.get('audits?action=submission.delete', headers={'X-Extended-Metadata': 'true'}).json()
-#print(audit_report_soft_deleted_submissions)
-audit_report_modified_submissions = client.get('audits?action=submission.update.version', headers={'X-Extended-Metadata': 'true'}).json()
-#print(audit_report_modified_submissions)
-audit_report_created_submissions = client.get('audits?action=submission.create', headers={'X-Extended-Metadata': 'true'}).json()
+# # check for audit requests: https://docs.getodk.org/central-api-system-endpoints/#server-audit-logs
+# audit_report_soft_deleted_submissions = client.get('audits?action=submission.delete', headers={'X-Extended-Metadata': 'true'}).json()
+# #print(audit_report_soft_deleted_submissions)
+# audit_report_modified_submissions = client.get('audits?action=submission.update.version', headers={'X-Extended-Metadata': 'true'}).json()
+# #print(audit_report_modified_submissions)
+# audit_report_created_submissions = client.get('audits?action=submission.create', headers={'X-Extended-Metadata': 'true'}).json()
 
 """truncate from right to keep last characters"""
 def truncate_from_right(s, begin):
@@ -201,31 +201,31 @@ def json_extract(obj, key):
     values = extract(obj, arr, key)
     return values
 
-count = 0
-
-for json_in in audit_report_created_submissions:
-    #print(json_in)
-    count = count + 1
-    instanceId = json_extract(json_in, 'instanceId')[0]
-    createdAt = json_extract(json_in, 'createdAt')
-    loggedAt = json_extract(json_in, 'loggedAt')
-    #print('CREATED SUBMISSIONS: ', count, instanceId, createdAt, loggedAt)
-
-
-for json_in in audit_report_modified_submissions:
-    acteeId = json_extract(json_in, 'acteeId')[0]
-    created_at = json_extract(json_in, 'updatedAt')[0]
-    meta_instanceID = json_extract(json_in, 'instanceId')[0] # be carefull: the variable in this json is instanceId NOT instanceID!
-    #key = json_extract(json_in, '__id')[0] # bestaat niet in deze json...?
-    updated_at = json_extract(json_in, 'loggedAt')[0] # As is seems, the 'loggedAt' key represent the modification date
-    #print('UPDATED: ',updatedAt, loggedAt, meta_instanceID)
-
-
-for json_in in audit_report_soft_deleted_submissions:
-    acteeId = json_extract(json_in, 'acteeId')[0]
-    updatedAt = json_extract(json_in, 'updatedAt')[0]
-    instanceId = json_extract(json_in, 'instanceId')[0] # be carefull: the variable in this json is instanceId NOT instanceID!
-    #print('DELETED: ',updatedAt, instanceId)
+# count = 0
+#
+# for json_in in audit_report_created_submissions:
+#     #print(json_in)
+#     count = count + 1
+#     instanceId = json_extract(json_in, 'instanceId')[0]
+#     createdAt = json_extract(json_in, 'createdAt')
+#     loggedAt = json_extract(json_in, 'loggedAt')
+#     #print('CREATED SUBMISSIONS: ', count, instanceId, createdAt, loggedAt)
+#
+#
+# for json_in in audit_report_modified_submissions:
+#     acteeId = json_extract(json_in, 'acteeId')[0]
+#     created_at = json_extract(json_in, 'updatedAt')[0]
+#     meta_instanceID = json_extract(json_in, 'instanceId')[0] # be carefull: the variable in this json is instanceId NOT instanceID!
+#     #key = json_extract(json_in, '__id')[0] # bestaat niet in deze json...?
+#     updated_at = json_extract(json_in, 'loggedAt')[0] # As is seems, the 'loggedAt' key represent the modification date
+#     #print('UPDATED: ',updatedAt, loggedAt, meta_instanceID)
+#
+#
+# for json_in in audit_report_soft_deleted_submissions:
+#     acteeId = json_extract(json_in, 'acteeId')[0]
+#     updatedAt = json_extract(json_in, 'updatedAt')[0]
+#     instanceId = json_extract(json_in, 'instanceId')[0] # be carefull: the variable in this json is instanceId NOT instanceID!
+#     #print('DELETED: ',updatedAt, instanceId)
 
 count = 0
 for json_in in json_registration:
@@ -357,10 +357,7 @@ for json_in in json_photos_planting_site:
     if json_in['group_photos']['gps_photo_polygon'] != None:
         return_list = convert_point_wkt(json_in['group_photos']['gps_photo_polygon']['coordinates'])
         gps_photo_polygon = return_list[0]
-    #photo_1 = json_extract(json_in, 'photo_tree_polygon_1')[0]
-    #photo_2 = json_extract(json_in, 'photo_tree_polygon_2')[0]
-    #photo_3 = json_extract(json_in, 'photo_tree_polygon_3')[0]
-    #photo_4 = json_extract(json_in, 'photo_tree_polygon_4')[0]
+
     instanceID = json_extract(json_in, '__Submissions-id')[0]
 
     if json_extract(json_in, 'photo_tree_polygon_1')[0] is not None:
