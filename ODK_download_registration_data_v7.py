@@ -262,6 +262,9 @@ for json_in in json_registration:
         remark = data['remark']
         planting_date = data['planting_date']
 
+        print(submissionid_odk, ecosia_site_id, device_id, updated_at, today, submission_date, submission_date, start, end, submitter, odk_form_version, test, reporting_type, reporting_activity_new_site, country, organisation, contract_number, id_planting_site, land_title, name_owner_individual, landscape_element_new_site, photo_owner, gender_owner, planting_technique, remark, planting_date, tree_number, tree_species, area_calculation_round_decimal, lat_y, lon_x, geometry_planting_point, geometry_planting_polygon, geometry_planting_line)
+
+
         # cur.execute('''INSERT INTO ODK_Tree_registration_main (submissionid_odk, ecosia_site_id, device_id, updated_at, field_date, submission_date, submission_date_time_start, start, ends, submitter, odk_form_version, test, reporting_type, reporting_activity_new_site, country, organisation, contract_number, id_planting_site, land_title, name_owner, landscape_element_type, photo_owner, gender_owner, planting_technique, remark, planting_date, tree_number, tree_species, calc_area, lat_y, lon_x, centroid_coord, polygon, line)
         # VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)''', (submissionid_odk, ecosia_site_id, device_id, updated_at, today, submission_date, submission_date, start, end, submitter, odk_form_version, test, reporting_type, reporting_activity_new_site, country, organisation, contract_number, id_planting_site, land_title, name_owner_individual, landscape_element_new_site, photo_owner, gender_owner, planting_technique, remark, planting_date, tree_number, tree_species, area_calculation_round_decimal, lat_y, lon_x, geometry_planting_point, geometry_planting_polygon, geometry_planting_line))
 
