@@ -194,7 +194,7 @@ keys_to_extract = [
     'landuse_title', 'name_owner_individual', 'gender_owner', 'name_owner_communal', 'planting_technique',
     'reporting_activity_new_site', 'area_calculation_round_decimal', 'baseline_mature_trees', 'id_planting_site',
     'landscape_element_type', 'contract_number', 'tree_species_registered', 'organisation', 'tree_number',
-    'audit', 'photo_owner', 'remark', 'planting_date'
+    'audit', 'photo_owner', 'remark', 'planting_date', 'gps_center_planting_site', 'line_planting_site', 'polygon_planting_site'
 ]
 
 for json_in in json_registration:
@@ -224,9 +224,10 @@ for json_in in json_registration:
         baseline_mature_trees = data['baseline_mature_trees']
         id_planting_site = data['id_planting_site']
         landscape_element_new_site = data['landscape_element_type']
+        print(data)
 
-        if json_in['group_new_site']['group_map_new_site']['gps_center_planting_site'] != None:
-            return_list = convert_point_wkt(json_in['group_new_site']['group_map_new_site']['gps_center_planting_site']['coordinates'])
+        if data['gps_center_planting_site'] != None:
+            return_list = convert_point_wkt(data['gps_center_planting_site']['coordinates'])
             geometry_planting_point = return_list[0]
             lon_x = return_list[1]
             lat_y = return_list[2]
@@ -237,15 +238,15 @@ for json_in in json_registration:
 
 
         #if landscape_element_new_site == 'line_planting':
-        if json_in['group_new_site']['group_map_new_site']['line_planting_site'] != None:
-            geometry_planting_line = convert_line_wkt(json_in['group_new_site']['group_map_new_site']['line_planting_site']['coordinates'])
+        if data['line_planting_site'] != None:
+            geometry_planting_line = convert_line_wkt(data['line_planting_site']['coordinates'])
             #print('LINESTRING:', geometry_planting_line)
         else:
             geometry_planting_line = None
 
         #if landscape_element_new_site == 'area_planting':
-        if json_in['group_new_site']['group_map_new_site']['polygon_planting_site'] != None:
-            geometry_planting_polygon = convert_polygon_wkt(json_in['group_new_site']['group_map_new_site']['polygon_planting_site']['coordinates'][0])
+        if data['polygon_planting_site'] != None:
+            geometry_planting_polygon = convert_polygon_wkt(data['polygon_planting_site']['coordinates'][0])
             #print('POLYGON: ',geometry_planting_polygon)
         else:
             geometry_planting_polygon = None
@@ -265,6 +266,7 @@ for json_in in json_registration:
         VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)''', (submissionid_odk, ecosia_site_id, device_id, updated_at, today, submission_date, submission_date, start, end, submitter, odk_form_version, test, reporting_type, reporting_activity_new_site, country, organisation, contract_number, id_planting_site, land_title, name_owner_individual, landscape_element_new_site, photo_owner, gender_owner, planting_technique, remark, planting_date, tree_number, tree_species, area_calculation_round_decimal, lat_y, lon_x, geometry_planting_point, geometry_planting_polygon, geometry_planting_line))
 
         conn.commit()
+
 
 
 # for json_in_tree_species in json_nr_per_tree_species:
