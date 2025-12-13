@@ -190,6 +190,8 @@ def extract_keys_once(obj, keys):
 batch_size = 100
 count = 0
 
+print('start processing the registration data')
+
 for json_in in json_registration:
     data = extract_keys_once(json_in, keys_to_extract)
     if data['reporting_type'] == 'new_site':
@@ -219,30 +221,34 @@ for json_in in json_registration:
         landscape_element_new_site = data['landscape_element_type']
         print(data)
 
-        if data['gps_center_planting_site'] != None:
-            return_list = convert_point_wkt(data['gps_center_planting_site']['coordinates'])
-            geometry_planting_point = return_list[0]
-            lon_x = return_list[1]
-            lat_y = return_list[2]
-        else:
-            geometry_planting_point = None
-            lon_x = None
-            lat_y = None
+        # if data['gps_center_planting_site'] != None:
+        #     return_list = convert_point_wkt(data['gps_center_planting_site']['coordinates'])
+        #     geometry_planting_point = return_list[0]
+        #     lon_x = return_list[1]
+        #     lat_y = return_list[2]
+        # else:
+        #     geometry_planting_point = None
+        #     lon_x = None
+        #     lat_y = None
 
+        lon_x = None
+        lat_y = None
+        geometry_planting_line = None
+        geometry_planting_polygon = None
 
-        #if landscape_element_new_site == 'line_planting':
-        if data['line_planting_site'] != None:
-            geometry_planting_line = convert_line_wkt(data['line_planting_site']['coordinates'])
-            #print('LINESTRING:', geometry_planting_line)
-        else:
-            geometry_planting_line = None
-
-        #if landscape_element_new_site == 'area_planting':
-        if data['polygon_planting_site'] != None:
-            geometry_planting_polygon = convert_polygon_wkt(data['polygon_planting_site']['coordinates'][0])
-            #print('POLYGON: ',geometry_planting_polygon)
-        else:
-            geometry_planting_polygon = None
+        # #if landscape_element_new_site == 'line_planting':
+        # if data['line_planting_site'] != None:
+        #     geometry_planting_line = convert_line_wkt(data['line_planting_site']['coordinates'])
+        #     #print('LINESTRING:', geometry_planting_line)
+        # else:
+        #     geometry_planting_line = None
+        #
+        # #if landscape_element_new_site == 'area_planting':
+        # if data['polygon_planting_site'] != None:
+        #     geometry_planting_polygon = convert_polygon_wkt(data['polygon_planting_site']['coordinates'][0])
+        #     #print('POLYGON: ',geometry_planting_polygon)
+        # else:
+        #     geometry_planting_polygon = None
 
         contract_number = data['contract_number']
         tree_species = data['tree_species_registered']
