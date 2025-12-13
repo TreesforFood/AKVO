@@ -14,13 +14,13 @@ print('start deleting and building the tables')
 conn = psycopg2.connect(os.environ["DATABASE_URL"], sslmode='require')
 cur = conn.cursor()
 
-cur.execute('''
-DROP TABLE IF EXISTS ODK_Tree_registration_photos;
-DROP TABLE IF EXISTS ODK_Tree_registration_areas;
-DROP TABLE IF EXISTS ODK_Tree_registration_main;
-DROP TABLE IF EXISTS ODK_Tree_registration_tree_species;''')
-
-conn.commit()
+# cur.execute('''
+# DROP TABLE IF EXISTS ODK_Tree_registration_photos;
+# DROP TABLE IF EXISTS ODK_Tree_registration_areas;
+# DROP TABLE IF EXISTS ODK_Tree_registration_main;
+# DROP TABLE IF EXISTS ODK_Tree_registration_tree_species;''')
+#
+# conn.commit()
 
 
 cur.execute('''CREATE TABLE IF NOT EXISTS ODK_Tree_registration_main (FID SERIAL PRIMARY KEY, submissionid_odk TEXT, ecosia_site_id TEXT, device_id TEXT, updated_at TIMESTAMPTZ,
@@ -40,6 +40,7 @@ CREATE TABLE IF NOT EXISTS ODK_Tree_registration_photos (submissionid_odk TEXT, 
 CREATE TABLE IF NOT EXISTS ODK_Tree_registration_tree_species (submissionid_odk TEXT, species_name_latin TEXT, iucn_code TEXT, native_exotic TEXT, nr_trees_per_species INTEGER);''')
 
 conn.commit()
+cur.close()
 
 # Retrieve environment variables
 base_url = "https://ecosia.getodk.cloud"
@@ -194,6 +195,8 @@ count = 0
 
 print('start processing the registration data')
 
+cur = conn.cursor()
+
 for json_in in json_registration:
     data = extract_keys_once(json_in, keys_to_extract)
     if data['reporting_type'] == 'new_site':
@@ -272,7 +275,7 @@ for json_in in json_registration:
             gc.collect()
 
 conn.commit()
-
+conn.close()
 
 
 # for json_in_tree_species in json_nr_per_tree_species:
