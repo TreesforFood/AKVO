@@ -74,6 +74,7 @@ json_registration = client.submissions.get_table(form_id='planting_site_reportin
 #json_photos_planting_site = client.submissions.get_table(form_id='planting_site_reporting', table_name='Submissions.group_new_site.group_tree_photos.repeat_photos_polygon')['value']
 #json_nr_per_tree_species = client.submissions.get_table(form_id='planting_site_reporting', table_name='Submissions.group_new_site.group_tree_registration.repeat_registration_nr_species')['value']
 
+print('start creating the functions')
 
 """truncate from right to keep last characters"""
 def truncate_from_right(s, begin):
