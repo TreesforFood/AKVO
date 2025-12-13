@@ -187,15 +187,8 @@ def extract_keys_once(obj, keys):
     # For keys expected to have a single value, get first or None
     return {k: (v[0] if v else None) for k, v in results.items()}
 
-# Usage inside your loop
-keys_to_extract = [
-    'reporting_type', 'instanceID', 'instanceid', 'start', 'end', 'updatedAt', 'submissionDate',
-    'today', 'device_id', 'username', 'formVersion', 'country_registration_save', 'test_data_yes_no',
-    'landuse_title', 'name_owner_individual', 'gender_owner', 'name_owner_communal', 'planting_technique',
-    'reporting_activity_new_site', 'area_calculation_round_decimal', 'baseline_mature_trees', 'id_planting_site',
-    'landscape_element_type', 'contract_number', 'tree_species_registered', 'organisation', 'tree_number',
-    'audit', 'photo_owner', 'remark', 'planting_date', 'gps_center_planting_site', 'line_planting_site', 'polygon_planting_site'
-]
+batch_size = 100
+count = 0
 
 for json_in in json_registration:
     data = extract_keys_once(json_in, keys_to_extract)
@@ -226,30 +219,30 @@ for json_in in json_registration:
         landscape_element_new_site = data['landscape_element_type']
         print(data)
 
-        # if data['gps_center_planting_site'] != None:
-        #     return_list = convert_point_wkt(data['gps_center_planting_site']['coordinates'])
-        #     geometry_planting_point = return_list[0]
-        #     lon_x = return_list[1]
-        #     lat_y = return_list[2]
-        # else:
-        #     geometry_planting_point = None
-        #     lon_x = None
-        #     lat_y = None
-        #
-        #
-        # #if landscape_element_new_site == 'line_planting':
-        # if data['line_planting_site'] != None:
-        #     geometry_planting_line = convert_line_wkt(data['line_planting_site']['coordinates'])
-        #     #print('LINESTRING:', geometry_planting_line)
-        # else:
-        #     geometry_planting_line = None
-        #
-        # #if landscape_element_new_site == 'area_planting':
-        # if data['polygon_planting_site'] != None:
-        #     geometry_planting_polygon = convert_polygon_wkt(data['polygon_planting_site']['coordinates'][0])
-        #     #print('POLYGON: ',geometry_planting_polygon)
-        # else:
-        #     geometry_planting_polygon = None
+        if data['gps_center_planting_site'] != None:
+            return_list = convert_point_wkt(data['gps_center_planting_site']['coordinates'])
+            geometry_planting_point = return_list[0]
+            lon_x = return_list[1]
+            lat_y = return_list[2]
+        else:
+            geometry_planting_point = None
+            lon_x = None
+            lat_y = None
+
+
+        #if landscape_element_new_site == 'line_planting':
+        if data['line_planting_site'] != None:
+            geometry_planting_line = convert_line_wkt(data['line_planting_site']['coordinates'])
+            #print('LINESTRING:', geometry_planting_line)
+        else:
+            geometry_planting_line = None
+
+        #if landscape_element_new_site == 'area_planting':
+        if data['polygon_planting_site'] != None:
+            geometry_planting_polygon = convert_polygon_wkt(data['polygon_planting_site']['coordinates'][0])
+            #print('POLYGON: ',geometry_planting_polygon)
+        else:
+            geometry_planting_polygon = None
 
         contract_number = data['contract_number']
         tree_species = data['tree_species_registered']
@@ -262,13 +255,15 @@ for json_in in json_registration:
         remark = data['remark']
         planting_date = data['planting_date']
 
-        # print(submissionid_odk, ecosia_site_id, device_id, updated_at, today, submission_date, submission_date, start, end, submitter, odk_form_version, test, reporting_type, reporting_activity_new_site, country, organisation, contract_number, id_planting_site, land_title, name_owner_individual, landscape_element_new_site, photo_owner, gender_owner, planting_technique, remark, planting_date, tree_number, tree_species, area_calculation_round_decimal, lat_y, lon_x, geometry_planting_point, geometry_planting_polygon, geometry_planting_line)
+        cur.execute('''INSERT INTO ODK_Tree_registration_main (submissionid_odk, ecosia_site_id, device_id, updated_at, field_date, submission_date, submission_date_time_start, start, ends, submitter, odk_form_version, test, reporting_type, reporting_activity_new_site, country, organisation, contract_number, id_planting_site, land_title, name_owner, landscape_element_type, photo_owner, gender_owner, planting_technique, remark, planting_date, tree_number, tree_species, calc_area, lat_y, lon_x, centroid_coord, polygon, line)
+        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)''', (submissionid_odk, ecosia_site_id, device_id, updated_at, today, submission_date, submission_date, start, end, submitter, odk_form_version, test, reporting_type, reporting_activity_new_site, country, organisation, contract_number, id_planting_site, land_title, name_owner_individual, landscape_element_new_site, photo_owner, gender_owner, planting_technique, remark, planting_date, tree_number, tree_species, area_calculation_round_decimal, lat_y, lon_x, geometry_planting_point, geometry_planting_polygon, geometry_planting_line))
 
+        count += 1
+        if count % batch_size == 0:
+            conn.commit()
+            gc.collect()
 
-        # cur.execute('''INSERT INTO ODK_Tree_registration_main (submissionid_odk, ecosia_site_id, device_id, updated_at, field_date, submission_date, submission_date_time_start, start, ends, submitter, odk_form_version, test, reporting_type, reporting_activity_new_site, country, organisation, contract_number, id_planting_site, land_title, name_owner, landscape_element_type, photo_owner, gender_owner, planting_technique, remark, planting_date, tree_number, tree_species, calc_area, lat_y, lon_x, centroid_coord, polygon, line)
-        # VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)''', (submissionid_odk, ecosia_site_id, device_id, updated_at, today, submission_date, submission_date, start, end, submitter, odk_form_version, test, reporting_type, reporting_activity_new_site, country, organisation, contract_number, id_planting_site, land_title, name_owner_individual, landscape_element_new_site, photo_owner, gender_owner, planting_technique, remark, planting_date, tree_number, tree_species, area_calculation_round_decimal, lat_y, lon_x, geometry_planting_point, geometry_planting_polygon, geometry_planting_line))
-
-        conn.commit()
+conn.commit()
 
 
 
