@@ -42,6 +42,8 @@ CREATE TABLE IF NOT EXISTS ODK_Tree_registration_tree_species (submissionid_odk 
 conn.commit()
 cur.close()
 
+print('tables are created')
+
 # Retrieve environment variables
 base_url = "https://ecosia.getodk.cloud"
 username = os.environ["ODK_CENTRAL_USERNAME"]
