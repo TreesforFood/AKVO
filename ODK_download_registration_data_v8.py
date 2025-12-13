@@ -50,6 +50,8 @@ username = os.environ["ODK_CENTRAL_USERNAME"]
 password = os.environ["ODK_CENTRAL_PASSWORD"]
 default_project_id = 1
 
+print('environmental variables are established')
+
 # Define the file content
 file_content = f"""[central]
 base_url = "{base_url}"
@@ -58,19 +60,29 @@ password = "{password}"
 default_project_id = {default_project_id}
 """
 
+print('file content is defined')
+
 # Define a writable path (/app/tmp is a writable directory on Heroku)
 file_path = "/app/tmp/pyodk_config.ini"
 
+print('filepath is defined')
+
 # Create the directory if it doesn't exist
 os.makedirs(os.path.dirname(file_path), exist_ok=True)
+
+print('directory is created')
 
 # Write the configuration to the file
 with open(file_path, "w") as file:
     file.write(file_content)
 
+print('configuration is written to file')
+
 # Connect to ODK central server and use the merge command
 client = Client(config_path="/app/tmp/pyodk_config.ini", cache_path="/app/tmp/pyodk_cache.ini")
 client.open()
+
+print('connection to odk is made')
 
 json_registration = client.submissions.get_table(form_id='planting_site_reporting')['value']
 #json_photos_planting_site = client.submissions.get_table(form_id='planting_site_reporting', table_name='Submissions.group_new_site.group_tree_photos.repeat_photos_polygon')['value']
