@@ -3,13 +3,11 @@ import requests
 import re
 import json
 import psycopg2
-from dotenv import load_dotenv, find_dotenv
 from shapely.ops import transform
 from shapely.geometry import Polygon
 from shapely.geometry import Point
 from shapely.geometry import LineString
 import os
-from akvo_api_config import Config
 import sys
 from requests.auth import HTTPBasicAuth
 
