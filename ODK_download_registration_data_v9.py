@@ -18,7 +18,7 @@ username = os.environ["ODK_CENTRAL_USERNAME"]
 password = os.environ["ODK_CENTRAL_PASSWORD"]
 form_id = "planting_site_reporting"
 default_project_id = 1
-page_size = 1000
+page_size = 5000
 auth = HTTPBasicAuth(username, password)
 
 
@@ -443,3 +443,5 @@ for json_in in json_photos_planting_site:
     VALUES (%s,%s,%s,%s,%s,%s,%s)''', (submissionid_odk, repeatid_odk, photo_1, photo_2, photo_3, photo_4, gps_photo_polygon))
 
     conn.commit()
+
+conn.close()
