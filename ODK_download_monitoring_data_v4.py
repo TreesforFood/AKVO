@@ -13,6 +13,16 @@ import sys
 from requests.auth import HTTPBasicAuth
 
 
+# Retrieve environment variables from Heroku
+base_url = "https://ecosia.getodk.cloud"
+username = os.environ["ODK_CENTRAL_USERNAME"]
+password = os.environ["ODK_CENTRAL_PASSWORD"]
+form_id = "planting_site_reporting"
+default_project_id = 1
+page_size = 5000
+auth = HTTPBasicAuth(username, password)
+
+
 # Connect to the Postgresql database on Heroku
 conn = psycopg2.connect(os.environ["DATABASE_URL"], sslmode='require')
 cur = conn.cursor()
