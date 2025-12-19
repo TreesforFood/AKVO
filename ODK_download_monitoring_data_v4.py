@@ -63,11 +63,14 @@ tree_number_own_method INTEGER, tree_height_own_method NUMERIC(20,2));''')
 
 conn.commit()
 
-# Retrieve environment variables
+# Retrieve environment variables from Heroku
 base_url = "https://ecosia.getodk.cloud"
 username = os.environ["ODK_CENTRAL_USERNAME"]
 password = os.environ["ODK_CENTRAL_PASSWORD"]
+form_id = "planting_site_reporting"
 default_project_id = 1
+page_size = 5000
+auth = HTTPBasicAuth(username, password)
 
 # Define the file content
 file_content = f"""[central]
@@ -235,6 +238,14 @@ def json_extract(obj, key):
     return values
 
 
+# Retrieve environment variables from Heroku
+base_url = "https://ecosia.getodk.cloud"
+username = os.environ["ODK_CENTRAL_USERNAME"]
+password = os.environ["ODK_CENTRAL_PASSWORD"]
+form_id = "planting_site_reporting"
+default_project_id = 1
+page_size = 5000
+auth = HTTPBasicAuth(username, password)
 
 # Instantiate config and client
 table_name = "Submissions"
@@ -316,6 +327,14 @@ for json_in_main in json_monitoring_main:
 
         conn.commit()
 
+# Retrieve environment variables from Heroku
+base_url = "https://ecosia.getodk.cloud"
+username = os.environ["ODK_CENTRAL_USERNAME"]
+password = os.environ["ODK_CENTRAL_PASSWORD"]
+form_id = "planting_site_reporting"
+default_project_id = 1
+page_size = 5000
+auth = HTTPBasicAuth(username, password)
 
 table_name = "Submissions.group_existing_site.group_add_photos.repeat_additional_photos"
 count = 0
@@ -354,6 +373,15 @@ for json_in_photos in json_additional_photos:
 
     conn.commit()
 
+
+# Retrieve environment variables from Heroku
+base_url = "https://ecosia.getodk.cloud"
+username = os.environ["ODK_CENTRAL_USERNAME"]
+password = os.environ["ODK_CENTRAL_PASSWORD"]
+form_id = "planting_site_reporting"
+default_project_id = 1
+page_size = 5000
+auth = HTTPBasicAuth(username, password)
 
 table_name = "Submissions.group_existing_site.group_tree_survival.group_pcq_tree_number.pcq_method_repeat"
 count = 0
@@ -414,6 +442,14 @@ for json_in_pcq in json_pcq_method:
 
     conn.commit()
 
+# Retrieve environment variables from Heroku
+base_url = "https://ecosia.getodk.cloud"
+username = os.environ["ODK_CENTRAL_USERNAME"]
+password = os.environ["ODK_CENTRAL_PASSWORD"]
+form_id = "planting_site_reporting"
+default_project_id = 1
+page_size = 5000
+auth = HTTPBasicAuth(username, password)
 
 table_name = "Submissions.group_existing_site.group_tree_survival.group_count_tree_number.repeat_tree_count_per_species"
 count = 0
@@ -436,6 +472,14 @@ for json_in_count_trees in json_count_trees:
     conn.commit()
 
 
+# Retrieve environment variables from Heroku
+base_url = "https://ecosia.getodk.cloud"
+username = os.environ["ODK_CENTRAL_USERNAME"]
+password = os.environ["ODK_CENTRAL_PASSWORD"]
+form_id = "planting_site_reporting"
+default_project_id = 1
+page_size = 5000
+auth = HTTPBasicAuth(username, password)
 
 table_name = "Submissions.group_existing_site.group_tree_survival.repeat_tree_count_photos"
 count = 0
@@ -460,6 +504,15 @@ for json_in_count_photos in json_count_tree_photos:
 
     conn.commit()
 
+
+# Retrieve environment variables from Heroku
+base_url = "https://ecosia.getodk.cloud"
+username = os.environ["ODK_CENTRAL_USERNAME"]
+password = os.environ["ODK_CENTRAL_PASSWORD"]
+form_id = "planting_site_reporting"
+default_project_id = 1
+page_size = 5000
+auth = HTTPBasicAuth(username, password)
 
 table_name = "Submissions.group_existing_site.group_tree_survival.group_own_method.own_method_survived_trees_repeat"
 count = 0
