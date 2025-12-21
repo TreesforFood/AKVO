@@ -407,7 +407,7 @@ for row in rows_dict:
     entities_list.append(entities.copy())
 
 #Connect to ODK central server and use the merge command
-client = Client(config_path="config.toml", cache_path="pyodk_cache.toml")
+client = Client(config_path="/app/tmp/pyodk_config.ini", cache_path="/app/tmp/pyodk_cache.ini")
 
 client.open()
 
