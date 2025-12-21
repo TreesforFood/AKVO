@@ -131,8 +131,6 @@ for contracts in tuple_contracts:
     print(count_contracts, contracts)
 
 
-# Select entities to upload to GetODK. Note that the label column of the ODK entities table does not accept strange characters. So these are removed in this sql
-# Also duplicate labels should be avoided!
 cur.execute(
 '''CREATE TABLE getodk_entities_upload_table AS
 
@@ -298,6 +296,7 @@ AND (test = 'This is real, valid data'
 OR test = ''))
 
 SELECT
+ROW_NUMBER()OVER(PARTITION BY label ORDER BY label) AS row_number, --Give duplicates a number higher than 1
 label,
 LOWER(country) AS country,
 LOWER(organisation) AS organisation,
@@ -322,14 +321,13 @@ landscape_element
 FROM temp_contract_overview
 
 where contract_number_match_airtable IN %s OR ecosia_site_id IN %s;''', (tuple_contracts, tuple_identifiers))
+conn.commit()
 
-#where contract_number_match_airtable IN ('147.00', '179.00');''')
-
-
+# Remove the duplicate labels
+cur.execute('''DELETE FROM getodk_entities_upload_table WHERE row_number > 1;''')
 conn.commit()
 
 cur.execute('''SELECT new_polygon, ecosia_site_id FROM getodk_entities_upload_table;''')
-
 conn.commit()
 
 rows = cur.fetchall()
@@ -376,6 +374,18 @@ SET geometry = REPLACE(RTRIM(LTRIM(geometry,'POINT (('),'))'),',',';')::varchar(
 WHERE geometry LIKE 'POINT%';''')
 conn.commit()
 
+# We need to set the column RN to text ttype because this is the only data type alowed by ODK entities. However, before we can change to text we first need to define is=t as bigint
+cur.execute('''UPDATE getodk_entities_upload_table
+SET row_number = row_number::bigint;''')
+conn.commit()
+
+cur.execute('''ALTER TABLE getodk_entities_upload_table ALTER COLUMN row_number TYPE text USING row_number::text;''')
+
+# Set the RN column to string because that is the only type allowed by ODK entitities
+cur.execute('''UPDATE getodk_entities_upload_table
+SET row_number = row_number::text;''')
+conn.commit()
+
 # Select all rows and fetch them all
 cur.execute('''SELECT * FROM getodk_entities_upload_table''')
 conn.commit()
@@ -396,12 +406,12 @@ for row in rows_dict:
     #print('FREEK:', entities)
     entities_list.append(entities.copy())
 
+#Connect to ODK central server and use the merge command
+client = Client(config_path="config.toml", cache_path="pyodk_cache.toml")
 
-# Connect to ODK central server and use the merge command
-client = Client(config_path="/app/tmp/pyodk_config.ini", cache_path="/app/tmp/pyodk_cache.ini")
 client.open()
 
-client.entities.merge(entities_list, entity_list_name='monitoring_trees', project_id=1, match_keys=None, add_new_properties=True, update_matched=False, delete_not_matched=False, source_label_key='label', source_keys=None,create_source=None, source_size=None)
+client.entities.merge(entities_list, entity_list_name='monitoring_trees', project_id=1, match_keys=None, add_new_properties=True, update_matched=False, delete_not_matched=True, source_label_key='label', source_keys=None,create_source=None, source_size=None)
 
 client.close()
 
