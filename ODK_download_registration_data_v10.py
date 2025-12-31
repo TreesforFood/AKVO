@@ -445,3 +445,4 @@ for json_in in json_photos_planting_site:
     conn.commit()
 
 conn.close()
+client.close()
