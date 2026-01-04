@@ -18,7 +18,7 @@ username = os.environ["ODK_CENTRAL_USERNAME"]
 password = os.environ["ODK_CENTRAL_PASSWORD"]
 form_id = "planting_site_reporting"
 default_project_id = 1
-page_size = 1000
+page_size = 5000
 auth = HTTPBasicAuth(username, password)
 
 
@@ -341,9 +341,10 @@ def process_page(json_registration):
             conn.commit()
 
 # call the submissions
-client = ODKCentralClient(base_url, default_project_id, table_name, username, password, page_size=200)
-json_registration = client.get_all_submissions(form_id, process_page_callback = process_page)
 print('processing the main data...')
+client = ODKCentralClient(base_url, default_project_id, table_name, username, password, page_size)
+json_registration = client.get_all_submissions(form_id, process_page_callback = process_page)
+
 
 
 
@@ -370,9 +371,10 @@ def process_page(json_nr_per_tree_species):
 
 
 # call the submissions
-client = ODKCentralClient(base_url, default_project_id, table_name, username, password, page_size=200)
-json_nr_per_tree_species = client.get_all_submissions(form_id, process_page_callback = process_page)
 print('processing the tree species...')
+client = ODKCentralClient(base_url, default_project_id, table_name, username, password, page_size)
+json_nr_per_tree_species = client.get_all_submissions(form_id, process_page_callback = process_page)
+
 
 # After the insert of new manual submissions into the main table, the table content with manual submissions can be deleted
 cur.execute('''TRUNCATE tree_registration_main_manual_submissions''')
@@ -448,8 +450,9 @@ def process_page(json_photos_planting_site):
 
 
 # call the submissions
-client = ODKCentralClient(base_url, default_project_id, table_name, username, password, page_size=200)
-json_photos_planting_site = client.get_all_submissions(form_id, process_page_callback = process_page)
 print('processing the fotos...')
+client = ODKCentralClient(base_url, default_project_id, table_name, username, password, page_size)
+json_photos_planting_site = client.get_all_submissions(form_id, process_page_callback = process_page)
+
 
 conn.close()
