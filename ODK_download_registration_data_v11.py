@@ -358,8 +358,8 @@ def process_page(json_nr_per_tree_species):
         submissionid_odk = json_extract(json_in_tree_species, '__Submissions-id')[0]
         species_name_latin = json_extract(json_in_tree_species, 'calculate_species_position')[0]
         nr_trees_per_species = json_extract(json_in_tree_species, 'nr_trees_per_species_registered')[0]
-        iucn_code = truncate_from_right(str(species_name_latin),-3)
-        native_exotic = truncate_middle(str(species_name_latin),-3, -2)
+        iucn_code = species_name_latin
+        native_exotic = species_name_latin
         #print(submissionid_odk, species_name_latin, nr_trees_per_species)
 
 
@@ -374,6 +374,15 @@ def process_page(json_nr_per_tree_species):
 print('processing the tree species...')
 client = ODKCentralClient(base_url, default_project_id, table_name, username, password, page_size)
 json_nr_per_tree_species = client.get_all_submissions(form_id, process_page_callback = process_page)
+
+
+cur.execute('''UPDATE ODK_Tree_registration_tree_species
+SET iucn_code = RIGHT(species_name_latin,3)
+WHERE LENGTH(species_name_latin) > 3;''')
+
+cur.execute('''UPDATE ODK_Tree_registration_tree_species
+SET native_exotic = SUBSTRING(species_name_latin, LENGTH(species_name_latin) - 2, 1)
+WHERE LENGTH(species_name_latin) > 4;''')
 
 
 # After the insert of new manual submissions into the main table, the table content with manual submissions can be deleted
