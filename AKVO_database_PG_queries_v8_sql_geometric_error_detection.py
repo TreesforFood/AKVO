@@ -13,11 +13,6 @@ cur.execute('''CREATE INDEX IF NOT EXISTS indexpol ON akvo_tree_registration_are
 
 conn.commit()
 
-#Check reasons for being invalid polygon:
-#ST_IsValidReason(geometry)
-
-#Check self-intersections
-
 ## Find size of self intersections by an esxplode and then area calculation for all
 ## AKVO identifiers. Then check the ratio between the smallest and lagest area.
 ## Then classify then into SMALL and BIG self intersections

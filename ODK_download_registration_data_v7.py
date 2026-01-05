@@ -8,6 +8,8 @@ import sys
 import gc
 
 
+print('start deleting and building the tables')
+
 # Connect to the Postgresql database on Heroku
 conn = psycopg2.connect(os.environ["DATABASE_URL"], sslmode='require')
 cur = conn.cursor()

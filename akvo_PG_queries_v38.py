@@ -5133,17 +5133,12 @@ conn.commit()
 create_a20_ecosia_superset = '''
 REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA public FROM ecosia_superset;
 
---GRANT ALL ON SCHEMA conservation TO anne;
---GRANT SELECT ON ALL TABLES IN SCHEMA conservation TO anne;
---GRANT ALL PRIVILEGES ON conservation.conservation_areas TO anne;
---GRANT UPDATE ON conservation.conservation_areas_gid_seq TO anne;
-
-
 GRANT USAGE ON SCHEMA PUBLIC TO ecosia_superset;
 GRANT USAGE ON SCHEMA HEROKU_EXT TO ecosia_superset;
 
 GRANT SELECT ON TABLE superset_ecosia_nursery_registration TO ecosia_superset;
 GRANT UPDATE ON TABLE superset_ecosia_nursery_registration TO ecosia_superset;
+
 GRANT SELECT ON TABLE superset_ecosia_tree_registration TO ecosia_superset;
 GRANT SELECT ON TABLE superset_ecosia_tree_monitoring TO ecosia_superset;
 GRANT SELECT ON TABLE superset_ecosia_s4g_site_health TO ecosia_superset;

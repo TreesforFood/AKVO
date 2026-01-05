@@ -26,79 +26,88 @@ import requests
 import re
 import json
 import psycopg2
+from dotenv import load_dotenv, find_dotenv
 import os
+from akvo_api_config import Config
 import sys
 import boto3
 from io import BytesIO
 import io
 
-# Retrieve environment variables from GetODK
-base_url = "https://ecosia.getodk.cloud"
-username = os.environ["ODK_CENTRAL_USERNAME"]
-password = os.environ["ODK_CENTRAL_PASSWORD"]
-default_project_id = 1
+print(boto3.__version__)
+print(dir(boto3))
 
-# Define the GetODK file content
-file_content = f"""[central]
-base_url = "{base_url}"
-username = "{username}"
-password = "{password}"
-default_project_id = {default_project_id}
-"""
+config = Config()
 
-# Define a writable path for GetODK (/app/tmp is a writable directory on Heroku)
-file_path = "/app/tmp/pyodk_config.ini"
+# Connect to Postgresql database
+conn = psycopg2.connect(host= config.CONF["HOST_PSTGRS"],database= config.CONF["DATABASE_PSTGRS"],user= config.CONF["USER_PSTGRS"],password= config.CONF["PASSWORD_PSTGRS"])
+cur = conn.cursor()
 
-# Create the GetODK directory if it doesn't exist
-os.makedirs(os.path.dirname(file_path), exist_ok=True)
+cur.execute('''DROP TABLE IF EXISTS GetODK_QR_codes;''')
 
-# Write the GetODK configuration to the file
-with open(file_path, "w") as file:
-    file.write(file_content)
+cur.execute('''CREATE TABLE GetODK_QR_codes (organisation_name TEXT, QR_code BYTEA);''')
+conn.commit()
 
-# Retrieve environment variables from Airtable
-auth_token = os.environ["TOKEN_AIRTABLE"]
+
+# Connect to Airtable
+auth_token = "patSIiImh5J6aEMSX.5ab8f3d1764644d2e7ec6fb37ef5903840d70b9e1a79730668a51b1c0ab94cf0"
 headers = {"Authorization": f"Bearer {auth_token}"}
-url_odk_users_table = os.environ["URL_AIRTABLE_USERNAMES"]
-response = requests.get(url_odk_users_table, headers=headers)
-data_contracts = response.json()
 
-# Retrieve environment variables from Amazone S3
-AWS_ACCESS_KEY_ID = os.environ["AWS_ACCESS_KEY_ID"]
-AWS_SECRET_ACCESS_KEY = os.environ["AWS_SECRET_ACCESS_KEY"]
-S3_BUCKET = os.environ["S3_BUCKET"]
 
-# Settings for QR code
-PROJECT_ID = 1
-FORMS_TO_ACCESS = ['planting_site_reporting']
-PROJECT_NAME = 'ecosia'
-#ADMIN_PASSWORD = "D*#maZ7*QW8Nfj6%"
-ADMIN_PASSWORD = "ecosia_change_settings"
-
+# define the needed AWS credentials and bucket name
+AWS_ACCESS_KEY_ID = "AKIAY6QVY5ISOXJBAKNW"
+AWS_SECRET_ACCESS_KEY = "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"
+S3_BUCKET = 'getodk-qr-codes'
 
 # establish the AWS client connection to the the S3 service of AWS
 s3_client = boto3.client(service_name="s3", region_name="eu-north-1", aws_access_key_id=AWS_ACCESS_KEY_ID, aws_secret_access_key=AWS_SECRET_ACCESS_KEY)
 print(s3_client)
 
-#desired_users = []
+
+# Settings for QR code
+PROJECT_ID = 1
+FORMS_TO_ACCESS = ['planting_site_reporting', 'nursery_reporting']
+PROJECT_NAME = 'ecosia'
+ADMIN_PASSWORD = "ecosia_change_settings"
+
+
+# Pagination function to parse through all Airtable pages (Each Airtable page has 100 rows).
+global offset
+offset = '0'
+result = []
 desired_users = {}
 
-# Get the usernames from Airtable.
-for username in data_contracts['records']:
-    #print(username)
-    try:
-        if username['fields']['Username'] is not None:
-            users = username['fields']['Username']
-            users = users.lower()
-            id_airtable = username['id']
-            #desired_users.append(users)
-            desired_users[id_airtable] = users
-            #print(desired_users)
+while True :
+    url = "https://api.airtable.com/v0/appkx2PPsqz3axWDy/ODK users"
 
-        else:
-            continue
-    except KeyError:
-        continue
+    try :
+        response= requests.get(url +'?offset=' + offset, headers=headers)
+        response_Table = response.json()
+        records = list(response_Table['records'])
+        result.append(records)
+        #print(records[0]['fields']['Username'] , len(records))
+
+        try :
+            offset = response_Table['offset']
+
+        except Exception as ex:
+            break
+
+    except error as e:
+        print(e)
+
+count = 0
+
+# Get the results from the pagination function
+for x in result:
+    for y in x:
+        users = y['fields']['Username']
+        count += 1
+        print(count, users)
+        users = users.lower()
+        id_airtable = y['id']
+        desired_users[id_airtable] = users
+
 
 def get_settings(server_url: str, project_name: str, username: str) -> dict[str, Any]:
     """Template for the settings to encode in the QR image. Customise as needed."""
@@ -118,13 +127,21 @@ def get_settings(server_url: str, project_name: str, username: str) -> dict[str,
             "change_autosend": False,
         },
 
-        "project": {"name": project_name, "color": "#ffffff", "icon": "✅"}, # icon is emoji symbol
-        }
-#ffeb3b
+        "project": {"name": project_name, "color": "#ffffff", "icon": "✅"},} # icon is emoji symbol } #ffeb3b
+
+# Check that the Roboto font used for the QR images is available (e.g. on Linux / Win).
+try:
+    ImageFont.truetype("Roboto-Regular.ttf", 24)
+except OSError:
+    print(
+        "Font file 'Roboto-Regular.ttf' not found. This can be downloaded "
+        "from Google, or copied from the Examples directory. "
+        "Source: https://fonts.google.com/specimen/Roboto/about"
+    )
 
 
-# Connect to ODK central server and use the merge command
-client = Client(config_path="/app/tmp/pyodk_config.ini", cache_path="/app/tmp/pyodk_cache.ini")
+#Connect to ODK central server and use the merge command
+client = Client(config_path="config.toml", cache_path="pyodk_cache.toml")
 client.open()
 
 def create_url_friendly_filename(filename):
@@ -136,12 +153,11 @@ def create_url_friendly_filename(filename):
 for key, value in desired_users.items():
     # Create an Airtable username list here so that through very loop iteration,
     # the list is empty again. So there will be 1 username in each iteration,
-    #that is connected with the specific Airtable ID
+    # that is connected with the specific Airtable ID
     list_user_name_airtable = []
     id_airtable = key
     list_user_name_airtable.append(value)
     provisioned_users = client.projects.create_app_users(display_names=list_user_name_airtable, forms=FORMS_TO_ACCESS, project_id=PROJECT_ID)
-    #print(id_airtable, provisioned_users)
 
     ## Generate the QR codes.
     for user in provisioned_users:
@@ -162,22 +178,14 @@ for key, value in desired_users.items():
         text_anchor = png.height
         png = ImageOps.expand(png, border=(10, 10, 10, 60), fill=(255, 255, 255))
         draw = ImageDraw.Draw(png)
-        #font = ImageFont.truetype("Roboto-Regular.ttf", 24)
-        #draw.text((20, text_anchor - 10), "GetODK QR code for:\n" + user.displayName, font=font, fill=(0, 0, 0))
-        draw.text((20, text_anchor - 10), "GetODK QR code for:\n" + user.displayName, fill=(0, 0, 0))
+        font = ImageFont.truetype("Roboto-Regular.ttf", 24)
+        draw.text((20, text_anchor - 10), "GetODK QR code for:\n" + user.displayName, font=font, fill=(0, 0, 0))
         in_mem_file = io.BytesIO()
         png.save(in_mem_file, "PNG")
 
-        #png.save(f"settings-{user.displayName}.png", format="PNG")
-        #png.save(byte_io, 'PNG')
-        #png = img_byte_arr.getvalue()
         in_mem_file.seek(0)
-        #file_name = '/Users/edmond/Documents/Python_scripts/GetODK/settings-veritree_melissa hartog.png'
-        #response = s3_client.upload_file(Filename=png, Bucket=S3_BUCKET,Key=f"settings-{user.displayName}.png")
-        #response = s3_client.put_object(Filename=img_byte_arr, Bucket=S3_BUCKET,Key=f"settings-{user.displayName}.png")
-        #response = s3_client.put_object(Filename=img_byte_arr, Bucket=S3_BUCKET,Key=f"settings-{user.displayName}.png")
 
-        # DEZE WERK! response = s3_client.upload_fileobj(in_mem_file, 'getodk-qr-codes','test.png')
+        # THIS ONE WORKS! response = s3_client.upload_fileobj(in_mem_file, 'getodk-qr-codes','test.png')
         response = s3_client.upload_fileobj(in_mem_file, 'getodk-qr-codes',f"settings-{user.displayName}.png")
 
         get_bucket_location = s3_client.get_bucket_location(Bucket=S3_BUCKET)['LocationConstraint']
@@ -188,19 +196,15 @@ for key, value in desired_users.items():
 
         url_s3 = create_url_friendly_filename(url_s3)
         #https://getodk-qr-codes.s3.eu-north-1.amazonaws.com/settings-fundacion+dia_user_12.png
-        print(url_s3)
-
-        # get_url = s3_client.get_object_url('getodk-qr-codes', f"settings-{user.displayName}.png")
-        # print(get_url)
+        #print(url_s3)
 
         # Upload url to Airtable
         row_airtable_to_update = f"https://api.airtable.com/v0/appkx2PPsqz3axWDy/ODK users/{id_airtable}"
 
         # Set the new field values for the record
         update_fields_airtable = {'fields':{'QR code': url_s3}}
-        #data_airtable = {'fields': update_fields_airtable}
 
         # Send your request to update the record and parse the response
         response_airtable = requests.patch(row_airtable_to_update, headers=headers, json=update_fields_airtable)
         data = json.loads(response_airtable.text)
-        print(data)
+        #print(data)

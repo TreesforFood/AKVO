@@ -59,12 +59,13 @@ AS
 
 -- Here we prepare the AKVO tree registration of unregistered farmers. A join is needed for this query
 
-WITH join_tree_distribution_and_registration_AKVO AS (SELECT
+WITH CTE_join_tree_distribution_and_registration_AKVO AS (SELECT
 a.identifier_akvo,
 a.displayname,
 a.device_id,
 a.instance,
 a.submission_date,
+a.submission_date AS updated_at,
 a.submitter,
 a.form_version,
 'AKVO' AS source_data,
@@ -127,15 +128,23 @@ INNER JOIN akvo_tree_distribution_unregistered_farmers AS b
 ON a.identifier_akvo = b.identifier_akvo),
 
 -- Make a CTE table to do a count for unregistered farmers with the ODK form
-odk_tree_count_unregistered_farmers AS (SELECT submissionid_odk, SUM(tree_species_number_registered) total_registered_tree_number
+CTE_odk_tree_count_unregistered_farmers AS (SELECT submissionid_odk, SUM(tree_species_number_registered) total_registered_tree_number
 FROM ODK_unregistered_farmers_tree_registration_species
 GROUP BY ODK_unregistered_farmers_tree_registration_species.submissionid_odk),
 
 -- Here we prepare the ODK tree registration of unregistered farmers. A join is needed for this query
-join_tree_distribution_and_registration_ODK AS (SELECT
+CTE_join_tree_distribution_and_registration_ODK AS (SELECT
 a.submissionid_odk,
 b.device_id,
 b.submission_date,
+
+CASE
+WHEN b.updated_at NOTNULL
+THEN b.updated_at
+WHEN b.updated_at ISNULL
+THEN b.submission_date
+END AS updated_at,
+
 b.field_date,
 'ODK' AS source_data,
 'unregistered_farmers' AS data_form,
@@ -196,7 +205,7 @@ c.total_registered_tree_number
 FROM odk_unregistered_farmers_tree_handout_main a
 JOIN odk_unregistered_farmers_tree_registration_main b
 ON a.ecosia_site_id_dist = b.ecosia_site_id_dist
-JOIN odk_tree_count_unregistered_farmers c
+JOIN CTE_odk_tree_count_unregistered_farmers c
 ON b.submissionid_odk = c.submissionid_odk),
 
 
@@ -207,10 +216,18 @@ ON b.submissionid_odk = c.submissionid_odk),
 -- Instances of listed farmers were once collected with the AKVO form and (could) later on having been registered with the ODK form (ODK registration of unregistered farmers)
 -- A join is needed for this query.
 
-join_tree_distribution_and_registration_AKVO_vs_ODK AS (SELECT
+CTE_join_tree_distribution_and_registration_AKVO_vs_ODK AS (SELECT
 a.identifier_akvo,
 b.device_id,
 b.submission_date,
+
+CASE
+WHEN b.updated_at NOTNULL
+THEN b.updated_at
+WHEN b.updated_at ISNULL
+THEN b.submission_date
+END AS updated_at,
+
 a.instance,
 b.field_date,
 'AKVO-ODK' AS source_data,
@@ -272,12 +289,8 @@ c.total_registered_tree_number
 FROM akvo_tree_distribution_unregistered_farmers a
 JOIN odk_unregistered_farmers_tree_registration_main b
 ON a.identifier_akvo = b.ecosia_site_id_dist
-JOIN odk_tree_count_unregistered_farmers c
+JOIN CTE_odk_tree_count_unregistered_farmers c
 ON b.submissionid_odk = c.submissionid_odk),
-
-
----------------
----------------
 
 
 --- UNION of all data together into 1 table (ODK tree registration (normal) + AKVO tree registration (normal) + ODK unregistered farmers + AKVO unregistered farmers)
@@ -291,6 +304,14 @@ c.instance,
 c.submission,
 c.submission_year,
 c.submissiontime,
+
+CASE
+WHEN c.modifiedat NOTNULL
+THEN c.modifiedat
+WHEN c.modifiedat ISNULL
+THEN b.submission
+END AS updated_at,
+
 c.submitter,
 c.modifiedat,
 c.akvo_form_version::varchar(10),
@@ -370,6 +391,14 @@ d.instance,
 d.submission_date,
 NULL AS submission_year,
 'n/a' AS submissiontime,
+
+CASE
+WHEN d.updated_at NOTNULL
+THEN d.updated_at
+WHEN d.updated_at ISNULL
+THEN d.submission_date
+END AS updated_at,
+
 d.submitter,
 'n/a' AS modifiedat,
 d.form_version::varchar(10),
@@ -437,7 +466,7 @@ d.check_ownership_trees,
 d.gender_tree_receiver,
 d.name_tree_receiver
 
-FROM join_tree_distribution_and_registration_AKVO AS d
+FROM CTE_join_tree_distribution_and_registration_AKVO AS d
 
 UNION ALL
 
@@ -451,6 +480,14 @@ h.device_id,
 h.submission_date,
 NULL AS submission_year,
 'n/a' AS submissiontime,
+
+CASE
+WHEN h.updated_at NOTNULL
+THEN h.updated_at
+WHEN h.updated_at ISNULL
+THEN h.submission_date
+END AS updated_at,
+
 h.submitter,
 'n/a' AS modifiedat,
 h.odk_form_version AS form_version,
@@ -536,6 +573,14 @@ i.device_id,
 i.submission_date,
 NULL AS submission_year,
 'n/a' AS submissiontime,
+
+CASE
+WHEN i.updated_at NOTNULL
+THEN i.updated_at
+WHEN i.updated_at ISNULL
+THEN i.submission_date
+END AS updated_at,
+
 i.submitter,
 'n/a' AS modifiedat,
 i.odk_form_version::varchar(10),
@@ -602,7 +647,7 @@ i.total_tree_nr_handed_out AS total_number_trees_received,
 'n/a' AS gender_tree_receiver,
 'n/a' AS name_tree_receiver
 
-FROM join_tree_distribution_and_registration_ODK AS i
+FROM CTE_join_tree_distribution_and_registration_ODK AS i
 
 
 UNION ALL
@@ -618,6 +663,15 @@ j.instance,
 j.submission_date,
 NULL AS submission_year,
 'n/a' AS submissiontime,
+
+CASE
+WHEN j.updated_at NOTNULL
+THEN j.updated_at
+WHEN j.updated_at ISNULL
+THEN j.submission_date
+END AS updated_at,
+
+
 j.submitter,
 'n/a' AS modifiedat,
 j.odk_form_version::varchar(10),
@@ -684,16 +738,17 @@ j.total_tree_nr_handed_out AS total_number_trees_received,
 'n/a' AS gender_tree_receiver,
 'n/a' AS name_tree_receiver
 
-FROM join_tree_distribution_and_registration_AKVO_vs_ODK AS j)
+FROM CTE_join_tree_distribution_and_registration_AKVO_vs_ODK AS j)
 
-------------- END OF UNIONS
-
--- Create the total UNION table called 'akvo_tree_registration_areas_integrated'
 SELECT * FROM union_tree_registration_tree_registration_unreg_farmers
 WHERE organisation != '';
 
+------------- END OF ALL UNIONS. In the last statement the UNION table called 'akvo_tree_registration_areas_integrated' is created by: SELECT * FROM union_tree_registration_tree_registration_unreg_farmers.
 
--- Here we integrate the registration of additional trees (from the ODK form) into the initial registration of (the number of) trees.
+
+
+
+-- Below we integrate the registration of additional trees (from the ODK form) into the initial registration of (the number of) trees.
 -- We need to group and SUM them first since there can be multiple 'added tree' submissions for 1 site.
 WITH added_trees_per_site AS
 (select ecosia_site_id, SUM(nr_added_trees) AS added_trees FROM odk_tree_monitoring_main
@@ -707,7 +762,7 @@ FROM added_trees_per_site
 WHERE a.identifier_akvo = added_trees_per_site.ecosia_site_id;
 
 
--- Add GEOMETRIC CHECK columns so that they can later be populated
+-- Add GEOMETRIC CHECK columns so that they can later be populated with the geometric correction script
 ALTER TABLE akvo_tree_registration_areas_integrated
 ADD species_latin text,
 --The columns below are UPDATED with the geometric error script (AKVO_database_PG_queries_v1_sql_geometric_error_detection.py)
@@ -720,7 +775,7 @@ ADD needle_shape BOOLEAN,
 ADD total_nr_geometric_errors INTEGER;
 
 
--- Transpose all species from multiple rows into 1 row
+-- Below we transpose all species from multiple rows into 1 row
 WITH t as
 (SELECT akvo_tree_registration_species.identifier_akvo,
 	STRING_AGG(akvo_tree_registration_species.lat_name_species,' | ')
@@ -735,7 +790,8 @@ SET species_latin = t.species_list
 FROM t
 WHERE t.identifier_akvo = akvo_tree_registration_areas_integrated.identifier_akvo;
 
--- Below we check if a new polygon was submitted. If multiple submissions of new polygons were done, the latest submission will be selected
+
+-- Below we check if a new polygon was submitted by AKVO collect. If multiple submissions of new polygons were done, the latest submission will be selected
 WITH updates_polygon_akvo AS (SELECT identifier_akvo, polygon_remapped
 FROM akvo_tree_monitoring_remapped_areas
 WHERE polygon_remapped NOTNULL
@@ -748,26 +804,30 @@ polygon = updates_polygon_akvo.polygon_remapped
 FROM updates_polygon_akvo
 WHERE akvo_tree_registration_areas_integrated.identifier_akvo = updates_polygon_akvo.identifier_akvo;
 
--- Below we check if a new polygon was submitted. If multiple submissions of new polygons were done, the latest submission will be selected
-WITH updates_polygon_odk AS (SELECT ecosia_site_id, remaped_polygon_planting_site
+--UPDATE akvo_tree_registration_areas_integrated
+--SET
+--number_coord_polygon = akvo_tree_monitoring_remapped_areas.number_coord_polygon_remapped
+--FROM akvo_tree_monitoring_remapped_areas
+--WHERE akvo_tree_registration_areas_integrated.identifier_akvo
+--= akvo_tree_monitoring_remapped_areas.identifier_akvo
+--AND akvo_tree_monitoring_remapped_areas.polygon_remapped NOTNULL;
+
+
+
+-- Below we check if a new polygon was submitted by ODK collect. If multiple submissions of new polygons were done, the latest submission will be selected
+WITH updates_polygon_odk AS (SELECT ecosia_site_id, remaped_polygon_planting_site, updated_at
 FROM odk_tree_monitoring_main
 WHERE remaped_polygon_planting_site NOTNULL
 order by submission_date DESC
 LIMIT 1)
 
+-- Updates from the ODK collect (remapped sites with monitoring) are integrated
 UPDATE akvo_tree_registration_areas_integrated
 SET
 polygon = updates_polygon_odk.remaped_polygon_planting_site
 FROM updates_polygon_odk
-WHERE akvo_tree_registration_areas_integrated.identifier_akvo = updates_polygon_odk.ecosia_site_id;
-
-UPDATE akvo_tree_registration_areas_integrated
-SET
-number_coord_polygon = akvo_tree_monitoring_remapped_areas.number_coord_polygon_remapped
-FROM akvo_tree_monitoring_remapped_areas
-WHERE akvo_tree_registration_areas_integrated.identifier_akvo
-= akvo_tree_monitoring_remapped_areas.identifier_akvo
-AND akvo_tree_monitoring_remapped_areas.polygon_remapped NOTNULL;
+WHERE akvo_tree_registration_areas_integrated.identifier_akvo = updates_polygon_odk.ecosia_site_id
+and updates_polygon_odk.updated_at > akvo_tree_registration_areas_integrated.updated_at;
 
 UPDATE akvo_tree_registration_areas_integrated
 SET calc_area = 0.2
@@ -793,6 +853,7 @@ instance,
 submission,
 submission_year,
 submissiontime,
+modified_at,
 submitter,
 modifiedat,
 akvo_form_version,
@@ -855,6 +916,7 @@ instance,
 submission,
 submission_year,
 submissiontime,
+modified_at,
 submitter,
 modifiedat,
 akvo_form_version,
@@ -917,7 +979,8 @@ conn.commit()
 
 
 #  Make a copy of the table UPDATES to create a seperate table to do the editing (only need to do this once! Once this is done, the table will only be updated)
-create_a1_edit = '''CREATE TABLE IF NOT EXISTS akvo_tree_registration_areas_edits AS (SELECT * FROM akvo_tree_registration_areas_updated);
+create_a1_edit = '''CREATE TABLE IF NOT EXISTS akvo_tree_registration_areas_edits AS
+(SELECT * FROM akvo_tree_registration_areas_updated);
 ALTER TABLE akvo_tree_registration_areas_edits
 ADD COLUMN IF NOT EXISTS fid SERIAL PRIMARY KEY,
 ADD COLUMN IF NOT EXISTS edit_confirmation INTEGER,

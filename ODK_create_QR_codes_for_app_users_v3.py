@@ -72,7 +72,6 @@ S3_BUCKET = os.environ["S3_BUCKET"]
 PROJECT_ID = 1
 FORMS_TO_ACCESS = ['planting_site_reporting']
 PROJECT_NAME = 'ecosia'
-#ADMIN_PASSWORD = "D*#maZ7*QW8Nfj6%"
 ADMIN_PASSWORD = "ecosia_change_settings"
 
 
@@ -118,8 +117,8 @@ def get_settings(server_url: str, project_name: str, username: str) -> dict[str,
             "change_autosend": False,
         },
 
-        "project": {"name": project_name, "color": "#ffffff", "icon": "✅"}, # icon is emoji symbol
-        }
+        "project": {"name": project_name, "color": "#ffffff", "icon": "✅"},} # icon is emoji symbol
+
 #ffeb3b
 
 
@@ -162,22 +161,12 @@ for key, value in desired_users.items():
         text_anchor = png.height
         png = ImageOps.expand(png, border=(10, 10, 10, 60), fill=(255, 255, 255))
         draw = ImageDraw.Draw(png)
-        #font = ImageFont.truetype("Roboto-Regular.ttf", 24)
-        #draw.text((20, text_anchor - 10), "GetODK QR code for:\n" + user.displayName, font=font, fill=(0, 0, 0))
         draw.text((20, text_anchor - 10), "GetODK QR code for:\n" + user.displayName, fill=(0, 0, 0))
         in_mem_file = io.BytesIO()
         png.save(in_mem_file, "PNG")
 
-        #png.save(f"settings-{user.displayName}.png", format="PNG")
-        #png.save(byte_io, 'PNG')
-        #png = img_byte_arr.getvalue()
         in_mem_file.seek(0)
-        #file_name = '/Users/edmond/Documents/Python_scripts/GetODK/settings-veritree_melissa hartog.png'
-        #response = s3_client.upload_file(Filename=png, Bucket=S3_BUCKET,Key=f"settings-{user.displayName}.png")
-        #response = s3_client.put_object(Filename=img_byte_arr, Bucket=S3_BUCKET,Key=f"settings-{user.displayName}.png")
-        #response = s3_client.put_object(Filename=img_byte_arr, Bucket=S3_BUCKET,Key=f"settings-{user.displayName}.png")
 
-        # DEZE WERK! response = s3_client.upload_fileobj(in_mem_file, 'getodk-qr-codes','test.png')
         response = s3_client.upload_fileobj(in_mem_file, 'getodk-qr-codes',f"settings-{user.displayName}.png")
 
         get_bucket_location = s3_client.get_bucket_location(Bucket=S3_BUCKET)['LocationConstraint']

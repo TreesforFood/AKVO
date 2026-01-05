@@ -297,7 +297,14 @@ for json_in_tree_registration in json_unregistered_farmers_main:
     if json_extract(json_in_tree_registration, 'reporting_type')[0] == 'tree_registration':
 
         submissionid_odk = json_extract(json_in_tree_registration, 'instanceID')[0]
-        ecosia_site_id_dist = json_extract(json_in_tree_registration, 'get_ecosia_site_id_dist')[0]
+
+        if json_extract(json_in_tree_registration, 'get_ecosia_site_id_dist')[0]:
+            ecosia_site_id_dist = json_extract(json_in_tree_registration, 'get_ecosia_site_id_dist')[0]
+        elif json_extract(json_in_tree_registration, 'tree_registration_name_recipient')[0]:
+            ecosia_site_id_dist = json_extract(json_in_tree_registration, 'tree_registration_name_recipient')[0]
+        else:
+            ecosia_site_id_dist = ''
+
         id_planting_site = json_extract(json_in_tree_registration, 'get_id_planting_site')[0]
         name_owner = json_extract(json_in_tree_registration, 'get_name_recipient')[0]
         submitter = json_extract(json_in_tree_registration, 'username')[0]

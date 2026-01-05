@@ -95,23 +95,7 @@ co2eqPerHa_change NUMERIC(20,1)
 
 conn.commit()
 
-# cur.execute('''CREATE TABLE IF NOT EXISTS KANOP_analysis_polygon_rasterfiles (
-# project,
-# metrics,
-# change_date,
-# raster_file
-#
-# ;''')
-#
-# conn.commit()
-
-# Projects meta: List all your projects
 project_list_overview = projects_dict['projects'] # Generates a list with dictionaries of projects. Print(project_list_overview) # Output: {'projectId': 1880, 'customerId': 254, 'name': 'APAF', 'description': '','country': 'Ivory Coast', 'projectType': 'climate', 'startDate': '2018-01-01','status': 'CREATED', 'area': 51.89, 'duration': 20, 'polygonCount': 7, 'createdAt': '2023-10-02 18:31:34.556883','updatedAt': '2023-10-02 18:32:02.459363'}
-
-# # Get the metadata for a project. Gives a list of configurations/settings used by KANOP. Consider if this is interesting to have
-# meta_data_of_project = requests.get(f"{root}/projects/references",headers=headers)
-# project_meta_data = meta_data_of_project.json()
-# print(project_meta_data)
 
 
 for project_list in project_list_overview:
@@ -130,28 +114,25 @@ for project_list in project_list_overview:
     metrics = project_details['metrics']
     name_project = project_details.get('name')
     indicators = ','.join(metrics)
-    #print('Metrics of a project: ', metrics) # Output: Metrics of a project:  ['forestCover', 'canopyCover', 'canopyHeightMean', 'treeHeightMean', 'livingAbovegroundBiomass', 'livingAbovegroundBiomassPerHa', 'livingBelowgroundBiomass', 'livingBelowgroundBiomassPerHa', 'livingBiomass', 'livingBiomassPerHa', 'carbon', 'carbonPerHa', 'co2eq', 'co2eqPerHa']
 
     # Get the aggregation levels for your project
     get_aggregation_levels = requests.get(f"{root}/projects/{project_id}/aggregationLevels",headers=headers)
     aggregation_level = get_aggregation_levels.json().get('aggregationLevels')
-    #print('Aggregation levels: ', aggregation_level)
 
     list_of_polygon_ids = requests.get(f"{root}/projects/{project_id}/aggregationLevels/polygons",headers=headers)
     polygon_id_list = list_of_polygon_ids.json()
     polygon_id_list = polygon_id_list['polygons']
-    #print(polygon_id_list)
-    #print('Project ID: ', project_id, contract_number, 'Polygon ID:', polygon_id_list)
 
     # Get project configuration details. Nice to have. Not important for default values.
     configuration_details = requests.get(f"{root}/projects/{project_id}/configurations", headers=headers)
     project_configuration_details = configuration_details.json()
-    #print(project_id, contract_number, request_id, project_configuration_details)
 
     # Get data on requests level (on PRODUCT AND DATE LEVEL)
     response_project_level = requests.get(f"{root}/projects/{project_id}/requests", headers=headers)
     requests_projects = response_project_level.json()
     #print('requests_projects: ',requests_projects)
+
+
     try:
         requests_projects['dataRequests'][0] #  'dataRequests' has empty list in case no processing status was provided (cancelling or completed)
     except IndexError:
@@ -168,7 +149,6 @@ for project_list in project_list_overview:
             details_data_requests = requests.get(f"{root}/projects/{project_id}/requests/{request_id}",headers=headers)
             details_data_request = details_data_requests.json()
             status_project = details_data_request.get('status')
-            #print(name_project, request_measurement_date, status_project)
 
             # Get metrics results on PROJECT LEVEL (PER PRODUCT AND PER YEAR/DATE)
             response_project_level_metrics = requests.get(f"{root}/projects/{project_id}/requests/{request_id}/metrics",headers=headers)
@@ -207,6 +187,7 @@ for project_list in project_list_overview:
             metrics_polygon_level = metrics_polygon_level.json()
             #print('metrics_polygon_level: ', name_project, status_project, project_id, request_measurement_date, metrics_polygon_level)
             metrics_polygon_level = metrics_polygon_level['results']
+
 
             for polygon_id in polygon_id_list:
                 #print(project_id, name_project, status_project, request_measurement_date, polygon_id)
@@ -377,6 +358,7 @@ for project_list in project_list_overview:
         evolution_metrics_over_time = requests.get(f"{root}/projects/{project_id}/evolution/{indicators}",headers=headers)
         evolution_metrics_over_time = evolution_metrics_over_time.json()
         #print('evolution_metrics_over_time: ' , country, contract_number, evolution_metrics_over_time) # Output: evolution_metrics_over_time:  Ivory Coast APAF {'meta': {}, 'context': {'projectId': 1880, 'indicators': ['carbon'], 'aggregationLevel': 'polygons', 'aggregationLevelValues': ['1', '2', '3', '4', '5', '6', '7'], 'timeseries': 'evolution', 'timeseriesValues': ['2019-07-01', '2022-07-01']}, 'results': {'carbon': {'averageDistribution': [{'aggregate': '2019-07-01', 'value': 2359.7, 'confidenceLowerBound': 1875.7, 'confidenceUpperBound': 2815.6}, {'aggregate': '2022-07-01', 'value': 2038.9, 'confidenceLowerBound': 1621.0, 'confidenceUpperBound': 2438.2}]}}}
+
 
         # Get the net change (variation) of an indicator over time.
         # This endpoint shows the delta (change) between 2 requested years for a specific indicator. So it shows the difference between the values of the 'evolution_metrics_over_time' variable (see end-point above)

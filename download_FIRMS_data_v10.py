@@ -199,7 +199,12 @@ SELECT identifier_akvo, partnercode_main, partnercode_sub, organisation, partner
 fire_radiative_power_megawatt, perc_firepixel_covered_by_overlap, xcenter, ycenter, fire_polygon_format_geography
 FROM AKVO_tree_registration_areas_updated_new_24h_fires;
 
---ALTER TABLE superset_ecosia_firms_historic_fires ADD COLUMN id SERIAL PRIMARY KEY;
+-- The geojson strings for Pereset cannot be generated on row level. We get an aggregate error when we want to convert
+-- each row to geojson. Thhis is why we did it with a CTE. However, in order to JOIN the CTE results
+-- with the main table again, a key is needed. Since a planting site can have
+-- multiple fire polygons on 1 day, the identifier_akvo is not a unique key for JOINING.
+-- THis is why we created a SERIAL id with:
+-- ALTER TABLE superset_ecosia_firms_historic_fires ADD COLUMN id SERIAL PRIMARY KEY;
 
 UPDATE superset_ecosia_firms_historic_fires AS ta
 SET

@@ -153,7 +153,7 @@ client = Client(config_path="/app/tmp/pyodk_config.ini", cache_path="/app/tmp/py
 
 client.open()
 
-client.entities.merge(entities_list, entity_list_name='monitoring_nurseries', project_id=1, match_keys=None, add_new_properties=True, update_matched=False, delete_not_matched=True, source_label_key='label', source_keys=None,create_source=None, source_size=None)
+client.entities.merge(entities_list, entity_list_name='monitoring_nurseries', project_id=1, match_keys=None, add_new_properties=True, update_matched=False, delete_not_matched=False, source_label_key='label', source_keys=None,create_source=None, source_size=None)
 
 client.close()
 

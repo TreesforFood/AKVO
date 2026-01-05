@@ -375,6 +375,10 @@ conn.commit()
 
 ###### SCRIPT TO CREATE ENTITIES FOR TREE MONITORING OF UNREGISTERED FARMERS
 
+## IMPORTANT NOTE: The script below is creating a list of unregistered farmers (AKVO) of whom their site has been mapped (registered) with AKVO.
+## The script below DOES NOT integrate the list uf unregistered farmers of which their sites have NOT BEEN mapped yet (As these farmers are not integrated in the table 'akvo_tree_registration_areas_updated'). Hence, this script probably needs to be adapted by adding also the AKVO list of farmers that are only listed and of whom their sites have not been registered yet!
+## The script below DOES NOT list unregistered farmers (listed with ODK), as their instances are uploaded to the entity list automatically with the ODK (tree distribution) form. MAybe at a later stage we can still integrate this so that the list is entirely refreshed with this scipt.
+
 # Pagination function to parse through all Airtable pages (Each Airtable page has 100 rows).
 #global offset
 offset = '0'

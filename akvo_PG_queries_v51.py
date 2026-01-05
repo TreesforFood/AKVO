@@ -945,6 +945,7 @@ create_a1_edit_integration = '''UPDATE akvo_tree_registration_areas_updated
 SET
 contract_number = akvo_tree_registration_areas_edits.contract_number,
 organisation = akvo_tree_registration_areas_edits.organisation,
+tree_number = akvo_tree_registration_areas_edits.tree_number,
 polygon = akvo_tree_registration_areas_edits.polygon
 FROM akvo_tree_registration_areas_edits
 WHERE akvo_tree_registration_areas_updated.identifier_akvo = akvo_tree_registration_areas_edits.identifier_akvo
@@ -5443,9 +5444,33 @@ AS WITH
 wkt_polygons_to_geojson AS (
 SELECT
 t.identifier_akvo,
-t.instance,
+t.instance::TEXT,
 t.submission,
-t.test,
+
+CASE
+WHEN t.test = 'test_data'
+THEN 'yes'
+WHEN t.test = 'This is a test, this record can be deleted.'
+THEN 'yes'
+WHEN t.test = 'This is a test, this record can be deleted'
+THEN 'yes'
+WHEN t.test = 'xxxxx'
+THEN 'yes'
+WHEN t.test = ''
+THEN 'no'
+WHEN t.test = 'This is real, valid data\r'
+THEN 'no'
+WHEN t.test = 'valid_data'
+THEN 'no'
+WHEN t.test = 'Valid data'
+THEN 'no'
+WHEN t.test = 'This is real, valid data'
+THEN 'no'
+WHEN t.test ISNULL
+THEN 'no'
+END AS test,
+
+
 LOWER(t.country) AS country,
 
 -- Create a unique code for filtering in superset, based on main organisation name
@@ -5496,6 +5521,7 @@ ElSE
 END AS sub_partner,
 
 t.contract_number AS sub_contract,
+t.id_planting_site,
 t.display_name,
 'tree registration' AS procedure,
 'locations_more_200_trees' AS geolocation_type,
@@ -5510,16 +5536,39 @@ jsonb_build_object(
     ))::text AS superset_geojson
 FROM akvo_tree_registration_areas_updated AS t
 where t.polygon NOTNULL
-GROUP BY t.identifier_akvo, t.instance, t.test, t.organisation, t.contract_number, t.display_name,
+GROUP BY t.identifier_akvo, t.instance, t.test, t.organisation, t.contract_number, t.display_name, t.id_planting_site,
 t.submission, t.country),
 
 
 -- Here we convert the centroid-point locations from WKT format to geojson string format that can be read by superset
 buffer_around_200_trees_centroids AS (SELECT
 identifier_akvo,
-t.instance,
+t.instance::TEXT,
 t.submission,
-t.test,
+
+CASE
+WHEN t.test = 'test_data'
+THEN 'yes'
+WHEN t.test = 'This is a test, this record can be deleted.'
+THEN 'yes'
+WHEN t.test = 'This is a test, this record can be deleted'
+THEN 'yes'
+WHEN t.test = 'xxxxx'
+THEN 'yes'
+WHEN t.test = ''
+THEN 'no'
+WHEN t.test = 'This is real, valid data\r'
+THEN 'no'
+WHEN t.test = 'valid_data'
+THEN 'no'
+WHEN t.test = 'Valid data'
+THEN 'no'
+WHEN t.test = 'This is real, valid data'
+THEN 'no'
+WHEN t.test ISNULL
+THEN 'no'
+END AS test,
+
 LOWER(t.country) AS country,
 
 -- Create a unique code for filtering in superset, based on main organisation name
@@ -5570,6 +5619,7 @@ ElSE
 END AS sub_partner,
 
 t.contract_number AS sub_contract,
+t.id_planting_site,
 t.display_name,
 'tree registration' AS procedure,
 ST_Buffer(t.centroid_coord,25) as buffer
@@ -5580,9 +5630,33 @@ WHERE t.polygon ISNULL),
 wkt_buffer_200_trees_areas_to_geojson AS (
 SELECT
 t.identifier_akvo,
-t.instance,
+t.instance::TEXT,
 t.submission,
-t.test,
+
+CASE
+WHEN t.test = 'test_data'
+THEN 'yes'
+WHEN t.test = 'This is a test, this record can be deleted.'
+THEN 'yes'
+WHEN t.test = 'This is a test, this record can be deleted'
+THEN 'yes'
+WHEN t.test = 'xxxxx'
+THEN 'yes'
+WHEN t.test = ''
+THEN 'no'
+WHEN t.test = 'This is real, valid data\r'
+THEN 'no'
+WHEN t.test = 'valid_data'
+THEN 'no'
+WHEN t.test = 'Valid data'
+THEN 'no'
+WHEN t.test = 'This is real, valid data'
+THEN 'no'
+WHEN t.test ISNULL
+THEN 'no'
+END AS test,
+
+
 LOWER(t.country) AS country,
 
 -- Create a unique code for filtering in superset, based on main organisation name
@@ -5633,6 +5707,7 @@ ElSE
 END AS sub_partner,
 
 t.sub_contract,
+t.id_planting_site,
 t.display_name,
 'tree registration' AS procedure,
 'locations_less_200_trees' AS geolocation_type,
@@ -5647,18 +5722,42 @@ jsonb_build_object(
     ))::text AS superset_geojson
 
 FROM buffer_around_200_trees_centroids AS t
-group by t.identifier_akvo, t.instance, t.test, t.organisation, t.sub_contract, t.display_name,
+group by t.identifier_akvo, t.instance, t.test, t.organisation, t.sub_contract, t.id_planting_site, t.display_name,
 t.submission, t.country),
 
 
-
--- Here we convert the PCQ MONITORING sample point locations from WKT format to geojson string format that can be read by superset
-wkt_pcq_samples_monitoring_to_geojson AS
+-- Here we convert the PCQ MONITORING sample point locations from WKT format to geojson string format that can be read by superset.
+-- HERE THIS IS DONE FOR THE AKVO DATA SET.
+wkt_pcq_samples_akvo_monitoring_to_geojson AS
 (SELECT
 pcq_samples_monitorings.identifier_akvo,
-akvo_tree_monitoring_areas.instance,
+akvo_tree_monitoring_areas.instance::TEXT,
 akvo_tree_registration_areas_updated.submission,
-akvo_tree_monitoring_areas.test,
+
+CASE
+WHEN akvo_tree_monitoring_areas.test = 'test_data'
+THEN 'yes'
+WHEN akvo_tree_monitoring_areas.test = 'This is a test, this record can be deleted.'
+THEN 'yes'
+WHEN akvo_tree_monitoring_areas.test = 'This is a test, this record can be deleted'
+THEN 'yes'
+WHEN akvo_tree_monitoring_areas.test = 'xxxxx'
+THEN 'yes'
+WHEN akvo_tree_monitoring_areas.test = ''
+THEN 'no'
+WHEN akvo_tree_monitoring_areas.test = 'This is real, valid data\r'
+THEN 'no'
+WHEN akvo_tree_monitoring_areas.test = 'valid_data'
+THEN 'no'
+WHEN akvo_tree_monitoring_areas.test = 'Valid data'
+THEN 'no'
+WHEN akvo_tree_monitoring_areas.test = 'This is real, valid data'
+THEN 'no'
+WHEN akvo_tree_monitoring_areas.test ISNULL
+THEN 'no'
+END AS test,
+
+
 LOWER(akvo_tree_registration_areas_updated.country) AS country,
 
 -- Create a unique code for filtering in superset, based on main organisation name
@@ -5709,6 +5808,7 @@ ElSE
 END AS sub_partner,
 
 akvo_tree_registration_areas_updated.contract_number AS sub_contract,
+akvo_tree_registration_areas_updated.id_planting_site,
 akvo_tree_registration_areas_updated.display_name,
 'PCQ sample location monitoring' AS procedure,
 
@@ -5732,6 +5832,7 @@ akvo_tree_monitoring_areas.instance,
 akvo_tree_monitoring_areas.test,
 akvo_tree_registration_areas_updated.organisation,
 akvo_tree_registration_areas_updated.contract_number,
+akvo_tree_registration_areas_updated.id_planting_site,
 akvo_tree_registration_areas_updated.display_name,
 akvo_tree_registration_areas_updated.submission,
 akvo_tree_registration_areas_updated.country),
@@ -5740,9 +5841,33 @@ akvo_tree_registration_areas_updated.country),
 wkt_photo_registration_geotag_to_geojson AS
 (SELECT
 tree_registration_photos_geotag.identifier_akvo,
-akvo_tree_monitoring_areas.instance,
+akvo_tree_monitoring_areas.instance::TEXT,
 akvo_tree_registration_areas_updated.submission,
-akvo_tree_monitoring_areas.test,
+
+CASE
+WHEN akvo_tree_monitoring_areas.test = 'test_data'
+THEN 'yes'
+WHEN akvo_tree_monitoring_areas.test = 'This is a test, this record can be deleted.'
+THEN 'yes'
+WHEN akvo_tree_monitoring_areas.test = 'This is a test, this record can be deleted'
+THEN 'yes'
+WHEN akvo_tree_monitoring_areas.test = 'xxxxx'
+THEN 'yes'
+WHEN akvo_tree_monitoring_areas.test = ''
+THEN 'no'
+WHEN akvo_tree_monitoring_areas.test = 'This is real, valid data\r'
+THEN 'no'
+WHEN akvo_tree_monitoring_areas.test = 'valid_data'
+THEN 'no'
+WHEN akvo_tree_monitoring_areas.test = 'Valid data'
+THEN 'no'
+WHEN akvo_tree_monitoring_areas.test = 'This is real, valid data'
+THEN 'no'
+WHEN akvo_tree_monitoring_areas.test ISNULL
+THEN 'no'
+END AS test,
+
+
 LOWER(akvo_tree_registration_areas_updated.country) AS country,
 
 -- Create a unique code for filtering in superset, based on main organisation name
@@ -5793,6 +5918,7 @@ ElSE
 END AS sub_partner,
 
 akvo_tree_registration_areas_updated.contract_number AS sub_contract,
+akvo_tree_registration_areas_updated.id_planting_site,
 akvo_tree_registration_areas_updated.display_name,
 'Photo registration' AS procedure,
 
@@ -5819,17 +5945,44 @@ akvo_tree_monitoring_areas.instance,
 akvo_tree_registration_areas_updated.organisation,
 akvo_tree_monitoring_areas.test,
 akvo_tree_registration_areas_updated.contract_number,
+akvo_tree_registration_areas_updated.id_planting_site,
 akvo_tree_registration_areas_updated.display_name,
 akvo_tree_registration_areas_updated.submission,
 akvo_tree_registration_areas_updated.country),
 
--- Here we convert the photo (GPS) locations (TREE REGISTRATION) from WKT format to geojson string format that can be read by superset
-wkt_photo_registration_gps_to_geojson AS
+
+
+-- Here we convert the PCQ MONITORING sample point locations from WKT format to geojson string format that can be read by superset.
+-- HERE THIS IS DONE FOR THE AKVO-ODK DATA SET. So this is the data what was registered with AKVO/ODK (all registrations from AKVO and ODK are in the updated table) but monitored with ODK.
+wkt_pcq_samples_akvo_odk_monitoring_to_geojson AS
 (SELECT
-tree_registration_photos_gps.identifier_akvo,
-akvo_tree_monitoring_areas.instance,
+odk_tree_monitoring_main.ecosia_site_id AS identifier_akvo,
+odk_tree_monitoring_pcq.submissionid_odk AS instance,
 akvo_tree_registration_areas_updated.submission,
-akvo_tree_monitoring_areas.test,
+
+CASE
+WHEN odk_tree_monitoring_main.test = 'test_data'
+THEN 'yes'
+WHEN odk_tree_monitoring_main.test = 'This is a test, this record can be deleted.'
+THEN 'yes'
+WHEN odk_tree_monitoring_main.test = 'This is a test, this record can be deleted'
+THEN 'yes'
+WHEN odk_tree_monitoring_main.test = 'xxxxx'
+THEN 'yes'
+WHEN odk_tree_monitoring_main.test = ''
+THEN 'no'
+WHEN odk_tree_monitoring_main.test = 'This is real, valid data\r'
+THEN 'no'
+WHEN odk_tree_monitoring_main.test = 'valid_data'
+THEN 'no'
+WHEN odk_tree_monitoring_main.test = 'Valid data'
+THEN 'no'
+WHEN odk_tree_monitoring_main.test = 'This is real, valid data'
+THEN 'no'
+WHEN odk_tree_monitoring_main.test ISNULL
+THEN 'no'
+END AS test,
+
 LOWER(akvo_tree_registration_areas_updated.country) AS country,
 
 -- Create a unique code for filtering in superset, based on main organisation name
@@ -5880,6 +6033,119 @@ ElSE
 END AS sub_partner,
 
 akvo_tree_registration_areas_updated.contract_number AS sub_contract,
+akvo_tree_registration_areas_updated.id_planting_site,
+akvo_tree_registration_areas_updated.display_name,
+'PCQ sample location monitoring' AS procedure,
+
+'PCQ sample location' AS geolocation_type,
+
+jsonb_build_object(
+    'type',       'FeatureCollection',
+    'features',   json_agg(json_build_object(
+        'type',       'Feature',
+		'properties', 'PCQ sample locations monitoring',
+        'geometry',   ST_AsGeoJSON(odk_tree_monitoring_pcq.gps_pcq_sample)::json)
+
+    ))::text AS superset_geojson
+
+from akvo_tree_registration_areas_updated
+JOIN odk_tree_monitoring_main
+ON odk_tree_monitoring_main.ecosia_site_id = akvo_tree_registration_areas_updated.identifier_akvo
+JOIN odk_tree_monitoring_pcq
+ON odk_tree_monitoring_main.submissionid_odk = odk_tree_monitoring_pcq.submissionid_odk
+
+GROUP BY odk_tree_monitoring_pcq.submissionid_odk,
+odk_tree_monitoring_main.ecosia_site_id,
+odk_tree_monitoring_main.test,
+akvo_tree_registration_areas_updated.organisation,
+akvo_tree_registration_areas_updated.contract_number,
+akvo_tree_registration_areas_updated.id_planting_site,
+akvo_tree_registration_areas_updated.display_name,
+akvo_tree_registration_areas_updated.submission,
+akvo_tree_registration_areas_updated.country),
+
+
+-- Here we convert the photo (GPS) locations (TREE REGISTRATION) from WKT format to geojson string format that can be read by superset
+wkt_photo_registration_gps_to_geojson AS
+(SELECT
+tree_registration_photos_gps.identifier_akvo,
+akvo_tree_monitoring_areas.instance::TEXT,
+akvo_tree_registration_areas_updated.submission,
+
+CASE
+WHEN akvo_tree_monitoring_areas.test = 'test_data'
+THEN 'yes'
+WHEN akvo_tree_monitoring_areas.test = 'This is a test, this record can be deleted.'
+THEN 'yes'
+WHEN akvo_tree_monitoring_areas.test = 'This is a test, this record can be deleted'
+THEN 'yes'
+WHEN akvo_tree_monitoring_areas.test = 'xxxxx'
+THEN 'yes'
+WHEN akvo_tree_monitoring_areas.test = ''
+THEN 'no'
+WHEN akvo_tree_monitoring_areas.test = 'This is real, valid data\r'
+THEN 'no'
+WHEN akvo_tree_monitoring_areas.test = 'valid_data'
+THEN 'no'
+WHEN akvo_tree_monitoring_areas.test = 'Valid data'
+THEN 'no'
+WHEN akvo_tree_monitoring_areas.test = 'This is real, valid data'
+THEN 'no'
+WHEN akvo_tree_monitoring_areas.test ISNULL
+THEN 'no'
+END AS test,
+
+LOWER(akvo_tree_registration_areas_updated.country) AS country,
+
+-- Create a unique code for filtering in superset, based on main organisation name
+CAST(CONCAT(
+	POWER(ASCII(LEFT(LOWER(akvo_tree_registration_areas_updated.organisation),1)),3),
+	POWER(ASCII(LEFT(LOWER(akvo_tree_registration_areas_updated.organisation),2)),2),
+	SQRT(POWER(ASCII(LEFT(LOWER(akvo_tree_registration_areas_updated.organisation),3)),4))) AS NUMERIC) AS partnercode_main,
+
+-- Create a unique code for filtering in superset, based on main sub-organisation name
+CASE
+WHEN POSITION('-' IN akvo_tree_registration_areas_updated.organisation) > 0
+THEN CAST(CONCAT(POWER(ASCII(RIGHT((LOWER(akvo_tree_registration_areas_updated.organisation)),
+			LENGTH(akvo_tree_registration_areas_updated.organisation) - POSITION('-' IN akvo_tree_registration_areas_updated.organisation) - 1)),3),
+		    POWER(ASCII(RIGHT((LOWER(akvo_tree_registration_areas_updated.organisation)),
+			LENGTH(akvo_tree_registration_areas_updated.organisation) - POSITION('-' IN akvo_tree_registration_areas_updated.organisation) - 2)),2),
+		   	POWER(ASCII(RIGHT((LOWER(akvo_tree_registration_areas_updated.organisation)),
+			LENGTH(akvo_tree_registration_areas_updated.organisation) - POSITION('-' IN akvo_tree_registration_areas_updated.organisation) - 3)),2)) AS NUMERIC)
+ELSE
+0
+END AS partnercode_sub,
+
+LOWER(akvo_tree_registration_areas_updated.organisation) AS organisation,
+
+CASE
+WHEN POSITION('-' IN akvo_tree_registration_areas_updated.organisation) > 0
+THEN LOWER(left(akvo_tree_registration_areas_updated.organisation, strpos(akvo_tree_registration_areas_updated.organisation, '-') - 2))
+WHEN POSITION(' -' IN akvo_tree_registration_areas_updated.organisation) > 0
+THEN LOWER(left(akvo_tree_registration_areas_updated.organisation, strpos(akvo_tree_registration_areas_updated.organisation, '-')))
+WHEN POSITION('/' IN akvo_tree_registration_areas_updated.organisation) > 0
+THEN LOWER(left(akvo_tree_registration_areas_updated.organisation, strpos(akvo_tree_registration_areas_updated.organisation, '/') - 1))
+WHEN POSITION(' /' IN akvo_tree_registration_areas_updated.organisation) > 0
+THEN LOWER(left(akvo_tree_registration_areas_updated.organisation, strpos(akvo_tree_registration_areas_updated.organisation, '/')))
+ElSE
+LOWER(akvo_tree_registration_areas_updated.organisation)
+END AS partner,
+
+CASE
+WHEN POSITION('- ' IN akvo_tree_registration_areas_updated.organisation) > 0
+THEN LOWER(right(akvo_tree_registration_areas_updated.organisation, (LENGTH(akvo_tree_registration_areas_updated.organisation) - strpos(akvo_tree_registration_areas_updated.organisation, '-')-1)))
+WHEN POSITION('-' IN akvo_tree_registration_areas_updated.organisation) > 0
+THEN LOWER(right(akvo_tree_registration_areas_updated.organisation, (LENGTH(akvo_tree_registration_areas_updated.organisation) - strpos(akvo_tree_registration_areas_updated.organisation, '-'))))
+WHEN POSITION('/' IN akvo_tree_registration_areas_updated.organisation) > 0
+THEN LOWER(right(akvo_tree_registration_areas_updated.organisation, (LENGTH(akvo_tree_registration_areas_updated.organisation) - strpos(akvo_tree_registration_areas_updated.organisation, '/'))))
+WHEN POSITION('/ ' IN akvo_tree_registration_areas_updated.organisation) > 0
+THEN LOWER(right(akvo_tree_registration_areas_updated.organisation, (LENGTH(akvo_tree_registration_areas_updated.organisation) - strpos(akvo_tree_registration_areas_updated.organisation, '/')-1)))
+ElSE
+''
+END AS sub_partner,
+
+akvo_tree_registration_areas_updated.contract_number AS sub_contract,
+akvo_tree_registration_areas_updated.id_planting_site,
 akvo_tree_registration_areas_updated.display_name,
 'Photo registration' AS procedure,
 
@@ -5904,6 +6170,7 @@ akvo_tree_monitoring_areas.instance,
 akvo_tree_registration_areas_updated.organisation,
 akvo_tree_monitoring_areas.test,
 akvo_tree_registration_areas_updated.contract_number,
+akvo_tree_registration_areas_updated.id_planting_site,
 akvo_tree_registration_areas_updated.display_name,
 akvo_tree_registration_areas_updated.submission,
 akvo_tree_registration_areas_updated.country),
@@ -5912,9 +6179,33 @@ akvo_tree_registration_areas_updated.country),
 wkt_pcq_samples_audit_to_geojson AS
 (SELECT
 pcq_samples_audits.identifier_akvo,
-akvo_tree_monitoring_areas.instance,
+akvo_tree_monitoring_areas.instance::TEXT,
 akvo_tree_registration_areas_updated.submission,
-akvo_tree_monitoring_areas.test,
+
+CASE
+WHEN akvo_tree_monitoring_areas.test = 'test_data'
+THEN 'yes'
+WHEN akvo_tree_monitoring_areas.test = 'This is a test, this record can be deleted.'
+THEN 'yes'
+WHEN akvo_tree_monitoring_areas.test = 'This is a test, this record can be deleted'
+THEN 'yes'
+WHEN akvo_tree_monitoring_areas.test = 'xxxxx'
+THEN 'yes'
+WHEN akvo_tree_monitoring_areas.test = ''
+THEN 'no'
+WHEN akvo_tree_monitoring_areas.test = 'This is real, valid data\r'
+THEN 'no'
+WHEN akvo_tree_monitoring_areas.test = 'valid_data'
+THEN 'no'
+WHEN akvo_tree_monitoring_areas.test = 'Valid data'
+THEN 'no'
+WHEN akvo_tree_monitoring_areas.test = 'This is real, valid data'
+THEN 'no'
+WHEN akvo_tree_monitoring_areas.test ISNULL
+THEN 'no'
+END AS test,
+
+
 LOWER(akvo_tree_registration_areas_updated.country) AS country,
 
 -- Create a unique code for filtering in superset, based on main organisation name
@@ -5966,6 +6257,7 @@ END AS sub_partner,
 
 
 akvo_tree_registration_areas_updated.contract_number AS sub_contract,
+akvo_tree_registration_areas_updated.id_planting_site,
 akvo_tree_registration_areas_updated.display_name,
 'PCQ sample location monitoring' AS procedure,
 
@@ -5989,6 +6281,7 @@ akvo_tree_monitoring_areas.instance,
 akvo_tree_registration_areas_updated.organisation,
 akvo_tree_monitoring_areas.test,
 akvo_tree_registration_areas_updated.contract_number,
+akvo_tree_registration_areas_updated.id_planting_site,
 akvo_tree_registration_areas_updated.display_name,
 akvo_tree_registration_areas_updated.submission,
 akvo_tree_registration_areas_updated.country),
@@ -5998,9 +6291,32 @@ akvo_tree_registration_areas_updated.country),
 wkt_count_samples_monitoring_to_geojson AS
 (SELECT
 count_samples_monitoring.identifier_akvo,
-count_samples_monitoring.instance,
+count_samples_monitoring.instance::TEXT,
 akvo_tree_registration_areas_updated.submission,
-count_samples_monitoring.test,
+
+CASE
+WHEN count_samples_monitoring.test = 'test_data'
+THEN 'yes'
+WHEN count_samples_monitoring.test = 'This is a test, this record can be deleted.'
+THEN 'yes'
+WHEN count_samples_monitoring.test = 'This is a test, this record can be deleted'
+THEN 'yes'
+WHEN count_samples_monitoring.test = 'xxxxx'
+THEN 'yes'
+WHEN count_samples_monitoring.test = ''
+THEN 'no'
+WHEN count_samples_monitoring.test = 'This is real, valid data\r'
+THEN 'no'
+WHEN count_samples_monitoring.test = 'valid_data'
+THEN 'no'
+WHEN count_samples_monitoring.test = 'Valid data'
+THEN 'no'
+WHEN count_samples_monitoring.test = 'This is real, valid data'
+THEN 'no'
+WHEN count_samples_monitoring.test ISNULL
+THEN 'no'
+END AS test,
+
 LOWER(akvo_tree_registration_areas_updated.country) AS country,
 
 -- Create a unique code for filtering in superset, based on main organisation name
@@ -6051,6 +6367,7 @@ ElSE
 END AS sub_partner,
 
 akvo_tree_registration_areas_updated.contract_number AS sub_contract,
+akvo_tree_registration_areas_updated.id_planting_site,
 akvo_tree_registration_areas_updated.display_name,
 'COUNT sample location monitoring' AS procedure,
 
@@ -6072,6 +6389,7 @@ count_samples_monitoring.instance,
 akvo_tree_registration_areas_updated.organisation,
 count_samples_monitoring.test,
 akvo_tree_registration_areas_updated.contract_number,
+akvo_tree_registration_areas_updated.id_planting_site,
 akvo_tree_registration_areas_updated.display_name,
 akvo_tree_registration_areas_updated.submission,
 akvo_tree_registration_areas_updated.country),
@@ -6081,9 +6399,32 @@ akvo_tree_registration_areas_updated.country),
 wkt_count_samples_audit_to_geojson AS
 (SELECT
 count_samples_audit.identifier_akvo,
-akvo_tree_monitoring_areas.instance,
+akvo_tree_monitoring_areas.instance::TEXT,
 akvo_tree_registration_areas_updated.submission,
-akvo_tree_monitoring_areas.test,
+
+CASE
+WHEN akvo_tree_monitoring_areas.test = 'test_data'
+THEN 'yes'
+WHEN akvo_tree_monitoring_areas.test = 'This is a test, this record can be deleted.'
+THEN 'yes'
+WHEN akvo_tree_monitoring_areas.test = 'This is a test, this record can be deleted'
+THEN 'yes'
+WHEN akvo_tree_monitoring_areas.test = 'xxxxx'
+THEN 'yes'
+WHEN akvo_tree_monitoring_areas.test = ''
+THEN 'no'
+WHEN akvo_tree_monitoring_areas.test = 'This is real, valid data\r'
+THEN 'no'
+WHEN akvo_tree_monitoring_areas.test = 'valid_data'
+THEN 'no'
+WHEN akvo_tree_monitoring_areas.test = 'Valid data'
+THEN 'no'
+WHEN akvo_tree_monitoring_areas.test = 'This is real, valid data'
+THEN 'no'
+WHEN akvo_tree_monitoring_areas.test ISNULL
+THEN 'no'
+END AS test,
+
 LOWER(akvo_tree_registration_areas_updated.country) AS country,
 
 -- Create a unique code for filtering in superset, based on main organisation name
@@ -6134,6 +6475,7 @@ ElSE
 END AS sub_partner,
 
 akvo_tree_registration_areas_updated.contract_number AS sub_contract,
+akvo_tree_registration_areas_updated.id_planting_site,
 akvo_tree_registration_areas_updated.display_name,
 'COUNT sample location audit' AS procedure,
 
@@ -6157,6 +6499,7 @@ akvo_tree_monitoring_areas.instance,
 akvo_tree_registration_areas_updated.organisation,
 akvo_tree_monitoring_areas.test,
 akvo_tree_registration_areas_updated.contract_number,
+akvo_tree_registration_areas_updated.id_planting_site,
 akvo_tree_registration_areas_updated.display_name,
 akvo_tree_registration_areas_updated.submission,
 akvo_tree_registration_areas_updated.country)
@@ -6164,9 +6507,13 @@ akvo_tree_registration_areas_updated.country)
 
 SELECT * FROM wkt_polygons_to_geojson
 UNION ALL
+SELECT * FROM buffer_around_200_trees_centroids
+UNION ALL
 SELECT * FROM wkt_buffer_200_trees_areas_to_geojson
 UNION ALL
-SELECT * FROM wkt_pcq_samples_monitoring_to_geojson
+SELECT * FROM wkt_pcq_samples_akvo_monitoring_to_geojson
+UNION ALL
+SELECT * FROM wkt_pcq_samples_akvo_odk_monitoring_to_geojson
 UNION ALL
 SELECT * FROM wkt_photo_registration_geotag_to_geojson
 UNION ALL

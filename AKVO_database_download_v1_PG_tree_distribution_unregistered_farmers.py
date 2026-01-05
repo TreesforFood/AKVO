@@ -7,7 +7,6 @@ import geodaisy.converters as convert
 from area import area
 import os
 
-#config = Config()
 
 # get the token from AKVO
 data = {"client_id": os.environ["CLIENT_ID"], "username" : os.environ["USERNAME"], "password": os.environ["PASSWORD"], "grant_type": os.environ["GRANT_TYPE"], "scope": os.environ["SCOPE"]}

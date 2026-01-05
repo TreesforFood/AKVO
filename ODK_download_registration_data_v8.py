@@ -84,7 +84,21 @@ client.open()
 
 print('connection to odk is made')
 
-json_registration = client.submissions.get_table(form_id='planting_site_reporting')['value']
+all_submissions = []
+page = 1
+page_size = 100  # or any number the API supports
+
+while True:
+    response = client.submissions.get_table(form_id='planting_site_reporting', page=page, page_size=page_size)
+    submissions = response.get('value', [])
+    all_submissions.extend(submissions)
+
+    # If fewer results than page_size, we reached the last page
+    if len(submissions) < page_size:
+        break
+
+    page += 1
+#json_registration = client.submissions.get_table(form_id='planting_site_reporting')['value']
 #json_photos_planting_site = client.submissions.get_table(form_id='planting_site_reporting', table_name='Submissions.group_new_site.group_tree_photos.repeat_photos_polygon')['value']
 #json_nr_per_tree_species = client.submissions.get_table(form_id='planting_site_reporting', table_name='Submissions.group_new_site.group_tree_registration.repeat_registration_nr_species')['value']
 

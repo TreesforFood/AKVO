@@ -116,8 +116,7 @@ for contracts_uploaded in list_contracts:
 cur.execute(
 '''CREATE TABLE getodk_entities_upload_table AS
 
-WITH temp_contract_overview AS (SELECT DISTINCT(CONCAT('Country: ', country, ' | Organisation: ', LOWER(organisation), ' | Contract number: ', contract_number, ' | Site ID: ', REGEXP_REPLACE(id_planting_site, '[^a-zA-Z0-9 ]', '', 'g'), ' | Ecosia site id:', identifier_akvo)) AS label,
-country,
+WITH temp_contract_overview AS (SELECT DISTINCT(CONCAT('Organisation: ', LOWER(organisation), ' | Contract number: ', contract_number, ' | Site ID: ', REGEXP_REPLACE(id_planting_site, '[^a-zA-Z0-9 ]', '', 'g'), ' | Ecosia site id:', identifier_akvo)) AS label,
 LOWER(organisation) as organisation,
 id_planting_site, '' AS location_area,
 '' AS geometry,
@@ -127,9 +126,12 @@ id_planting_site, '' AS location_area,
 CONCAT(contract_number::INTEGER::varchar(10),'.00') AS contract_number_match_airtable,
 contract_number::varchar(10),
 '' AS identifier_akvo,
+TO_CHAR(submission, 'YYYY-MM-DD') AS submission,
 ST_AsText(polygon) AS new_polygon,
 identifier_akvo AS ecosia_site_id,
 calc_area::varchar(10) AS area_ha,
+planting_date,
+'planting_site' AS landscape_element,
 
 CASE
 WHEN tree_number NOTNULL
@@ -145,8 +147,7 @@ WHERE polygon NOTNULL
 UNION -- Union sites with Polygons and sites with Points into 1 table
 
 SELECT
-DISTINCT(CONCAT('Country: ', country, ' | Organisation: ', LOWER(organisation), ' | Contract number: ', contract_number, ' | Site ID: ', REGEXP_REPLACE(id_planting_site, '[^a-zA-Z0-9 ]', '', 'g'), ' | Ecosia site id:', identifier_akvo)) AS label,
-country,
+DISTINCT(CONCAT('Organisation: ', LOWER(organisation), ' | Contract number: ', contract_number, ' | Site ID: ', REGEXP_REPLACE(id_planting_site, '[^a-zA-Z0-9 ]', '', 'g'), ' | Ecosia site id:', identifier_akvo)) AS label,
 LOWER(organisation) as organisation,
 id_planting_site, '' AS location_area,
 '' AS geometry,
@@ -156,9 +157,12 @@ id_planting_site, '' AS location_area,
 CONCAT(contract_number::INTEGER::varchar(10),'.00') AS contract_number_match_airtable,
 contract_number::varchar(10),
 '' AS identifier_akvo,
+TO_CHAR(submission, 'YYYY-MM-DD') AS submission,
 ST_AsText(centroid_coord) AS new_polygon,
 identifier_akvo AS ecosia_site_id,
 calc_area::varchar(10) AS area_ha,
+planting_date,
+'planting_site' AS landscape_element,
 
 CASE
 WHEN tree_number NOTNULL
@@ -173,7 +177,6 @@ WHERE polygon ISNULL AND centroid_coord NOTNULL)
 
 SELECT
 label,
-country,
 organisation,
 location_area,
 geometry,
@@ -186,13 +189,18 @@ new_polygon,
 ecosia_site_id,
 area_ha,
 tree_number,
-user_name_enumerator
+user_name_enumerator,
+submission AS site_registration_date,
+planting_date,
+landscape_element
+
 FROM temp_contract_overview
 where contract_number_match_airtable IN %s;''', (tuple_contracts_to_monitor,))
 
 conn.commit()
 
 cur.execute('''SELECT new_polygon, ecosia_site_id FROM getodk_entities_upload_table;''')
+
 conn.commit()
 
 rows = cur.fetchall()
