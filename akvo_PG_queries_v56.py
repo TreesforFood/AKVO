@@ -1382,7 +1382,7 @@ tree_number = akvo_tree_registration_areas_edits.tree_number
 
 FROM akvo_tree_registration_areas_edits
 WHERE akvo_tree_registration_areas_updated.identifier_akvo = akvo_tree_registration_areas_edits.identifier_akvo
-AND akvo_tree_registration_areas_edits.edit_confirmation = True;
+AND akvo_tree_registration_areas_edits.edit_confirmation::boolean = TRUE;
 
 -- Delete rows that were removed in the EDIT table also from the UPDATE table.
 DELETE FROM akvo_tree_registration_areas_updated
