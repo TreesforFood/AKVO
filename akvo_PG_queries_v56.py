@@ -968,6 +968,17 @@ WHERE polygon ISNULL;'''
 conn.commit()
 
 
+# A copy is made from the INTEGRATED TABLE and named UPDATED table. This is done only once (see script "create_a1_insertion" below)!
+create_a1_updated = '''CREATE TABLE IF NOT EXISTS akvo_tree_registration_areas_updated
+AS (SELECT * FROM akvo_tree_registration_areas_integrated);
+
+ALTER TABLE akvo_tree_registration_areas_updated
+ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ,
+ADD COLUMN IF NOT EXISTS re_mapped_by_partner TEXT;'''
+
+conn.commit()
+
+
 create_a1_updates_from_odk_akvo_server_side = '''
 -- Below we check if a new polygon (re-mapped polygon) was submitted by AKVO collect. If multiple submissions of new polygons were done, the latest submission will be selected
 WITH updates_polygon_akvo AS (SELECT identifier_akvo, polygon_remapped, submission
@@ -1015,16 +1026,6 @@ and updates_polygon_odk.updated_at > akvo_tree_registration_areas_updated.update
 
 conn.commit()
 
-
-# A copy is made from the INTEGRATED TABLE and named UPDATED table. This is done only once (see script "create_a1_insertion" below)!
-create_a1_updated = '''CREATE TABLE IF NOT EXISTS akvo_tree_registration_areas_updated
-AS (SELECT * FROM akvo_tree_registration_areas_integrated);
-
-ALTER TABLE akvo_tree_registration_areas_updated
-ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ,
-ADD COLUMN IF NOT EXISTS re_mapped_by_partner TEXT;'''
-
-conn.commit()
 
 
 # The UPDATED table is maintained (not deleted) and only updated with NEW intances (downloads) from the INTEGRATED table
@@ -7780,8 +7781,8 @@ conn.commit()
 
 # Execute create tables
 cur.execute(create_a1_integrated)
-cur.execute(create_a1_updates_from_odk_akvo_server_side)
 cur.execute(create_a1_updated)
+cur.execute(create_a1_updates_from_odk_akvo_server_side)
 cur.execute(create_a1_insertion)
 cur.execute(create_a1_updates)
 cur.execute(create_a1_edit)
