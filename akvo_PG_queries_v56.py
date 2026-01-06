@@ -1260,7 +1260,7 @@ ALTER TABLE akvo_tree_registration_areas_edits
 ADD COLUMN IF NOT EXISTS fid SERIAL PRIMARY KEY, -- Needed in order to be able to edit in QGIS
 ADD COLUMN IF NOT EXISTS edit_confirmation BOOLEAN, -- QGIS confirmation to process the edits
 ADD COLUMN IF NOT EXISTS chloris_uploaded BOOLEAN, -- Confirmation that the polygons are uploaded to Chloris
-ADD COLUMN IF NOT EXISTS kanop_uploaded BOOLEAN -- Confirmation that the polygons are uploaded to Kanop
+ADD COLUMN IF NOT EXISTS kanop_uploaded BOOLEAN, -- Confirmation that the polygons are uploaded to Kanop
 ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ; -- Add colum if not exits (in case table was already created)'''
 
 conn.commit()
