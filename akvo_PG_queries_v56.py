@@ -1382,7 +1382,7 @@ tree_number = akvo_tree_registration_areas_edits.tree_number
 
 FROM akvo_tree_registration_areas_edits
 WHERE akvo_tree_registration_areas_updated.identifier_akvo = akvo_tree_registration_areas_edits.identifier_akvo
-AND akvo_tree_registration_areas_edits.edit_confirmation::boolean = TRUE;
+AND akvo_tree_registration_areas_edits.edit_confirmation = TRUE;
 
 -- Delete rows that were removed in the EDIT table also from the UPDATE table.
 DELETE FROM akvo_tree_registration_areas_updated
@@ -7618,7 +7618,7 @@ conn.commit()
 #
 # conn.commit()
 
-create_a52 = '''CREATE TABLE superset_ecosia_kanop_chloris_results AS (SELECT
+create_a52 = '''CREATE TABLE IF NOT EXISTS superset_ecosia_kanop_chloris_results AS (SELECT
 t1.identifier_akvo,
 t1.organisation,
 t1.id_planting_site,
