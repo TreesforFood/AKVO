@@ -974,12 +974,14 @@ AS (SELECT * FROM akvo_tree_registration_areas_integrated);
 
 ALTER TABLE akvo_tree_registration_areas_updated
 ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ,
-ADD COLUMN IF NOT EXISTS re_mapped_by_partner TEXT;'''
+ADD COLUMN IF NOT EXISTS re_mapped_by_partner TEXT DEFAULT 'no',
+ADD COLUMN IF NOT EXISTS edit_confirmation BOOLEAN DEFAULT False;'''
 
 conn.commit()
 
-
-create_a1_updates_from_odk_akvo_server_side = '''
+# If an instance (identifier) already exists then the instance will be UPDATED for the polygon column (see script below).
+# By doing so, polygon updates made on the ODK/AKVO platform (by the re-map option) will be processed
+create_a1_updates_from_odk_akvo_server_side_updated = '''
 -- Below we check if a new polygon (re-mapped polygon) was submitted by AKVO collect. If multiple submissions of new polygons were done, the latest submission will be selected
 WITH updates_polygon_akvo AS (SELECT identifier_akvo, polygon_remapped, submission
 FROM (SELECT
@@ -992,37 +994,38 @@ WHERE polygon_remapped NOTNULL) sub
 WHERE most_recent_akvo = 1)
 
 -- No 'updated_at' criteria used here because AKVO does not have a column for that in their API...(?)
+-- Updates from the AKVO collect (remapped sites with monitoring) are integrated in UPDATED TABLE
 UPDATE akvo_tree_registration_areas_updated
 SET
 polygon = updates_polygon_akvo.polygon_remapped,
 re_mapped_by_partner = 'yes'
 FROM updates_polygon_akvo
 WHERE akvo_tree_registration_areas_updated.identifier_akvo = updates_polygon_akvo.identifier_akvo
-AND updates_polygon_akvo.submission > akvo_tree_registration_areas_updated.submission;
+AND akvo_tree_registration_areas_updated.edit_confirmation = False;
 
 
 -- Below we check if a new polygon was submitted by ODK collect. If multiple submissions of new polygons were done, the latest submission will be selected
-WITH updates_polygon_odk AS (SELECT ecosia_site_id, remaped_polygon_planting_site, updated_at, submission_date
+WITH updates_polygon_odk AS (SELECT ecosia_site_id, remaped_polygon_planting_site, submission_date
 FROM (
     SELECT
         ecosia_site_id,
         remaped_polygon_planting_site,
-        updated_at,
         submission_date,
         ROW_NUMBER() OVER (PARTITION BY ecosia_site_id ORDER BY submission_date DESC) as most_recent_odk
     FROM odk_tree_monitoring_main
-    WHERE remaped_polygon_planting_site IS NOT NULL
+    WHERE remaped_polygon_planting_site NOTNULL
 ) sub
 WHERE most_recent_odk = 1)
 
--- Updates from the ODK collect (remapped sites with monitoring) are integrated
+-- Updates from the ODK collect (remapped sites with monitoring) are integrated in UPDATED TABLE
 UPDATE akvo_tree_registration_areas_updated
 SET
 polygon = updates_polygon_odk.remaped_polygon_planting_site,
-re_mapped_by_partner = 'yes'
+re_mapped_by_partner = 'yes',
+updated_at = updates_polygon_odk.submission_date
 FROM updates_polygon_odk
 WHERE akvo_tree_registration_areas_updated.identifier_akvo = updates_polygon_odk.ecosia_site_id
-and updates_polygon_odk.updated_at > akvo_tree_registration_areas_updated.updated_at;'''
+AND akvo_tree_registration_areas_updated.edit_confirmation = False;'''
 
 conn.commit()
 
@@ -1094,7 +1097,6 @@ needle_shape,
 total_nr_geometric_errors)
 
 
-
 SELECT
 identifier_akvo,
 display_name,
@@ -1160,31 +1162,18 @@ total_nr_geometric_errors
 
 FROM akvo_tree_registration_areas_integrated
 WHERE
-submission >= CURRENT_DATE - INTERVAL '2 day'  -- Only recent submissions
+akvo_tree_registration_areas_integrated.submission >= CURRENT_DATE - INTERVAL '2 day'  -- Only recent submissions
 AND NOT EXISTS (
 SELECT 1
 FROM akvo_tree_registration_areas_updated
-WHERE akvo_tree_registration_areas_updated.identifier_akvo = akvo_tree_registration_areas_integrated.identifier_akvo);
+WHERE akvo_tree_registration_areas_updated.identifier_akvo = akvo_tree_registration_areas_integrated.identifier_akvo
+AND akvo_tree_registration_areas_updated.edit_confirmation = False);
 
 -- Delete rows that were removed from the INTEGRATED table.
 DELETE FROM akvo_tree_registration_areas_updated
 WHERE NOT EXISTS (SELECT 1 FROM akvo_tree_registration_areas_integrated
 WHERE akvo_tree_registration_areas_updated.identifier_akvo = akvo_tree_registration_areas_integrated.identifier_akvo);'''
 
-
-# The UPDATED table is maintained (not deleted) and only updated with NEW intances (downloads) from the INTEGRATED table (see script above)
-# If an instance (identifier) already exists then the instance will be UPDATED for the polygon column (see script below).
-# By doing so, polygon updates made on the ODK/AKVO platform (by the re-map option) will be processed
-create_a1_updates = '''
-UPDATE akvo_tree_registration_areas_updated
-SET
-polygon = akvo_tree_registration_areas_integrated.polygon,
-updated_at = akvo_tree_registration_areas_integrated.updated_at
-FROM akvo_tree_registration_areas_integrated
-WHERE akvo_tree_registration_areas_updated.identifier_akvo = akvo_tree_registration_areas_integrated.identifier_akvo
-AND akvo_tree_registration_areas_integrated.updated_at > akvo_tree_registration_areas_updated.updated_at;'''
-
-conn.commit()
 
 
 # Make a copy of the table UPDATES to create a seperate EDIT table to do the editing (only need to do this once!
@@ -1267,7 +1256,6 @@ ADD COLUMN IF NOT EXISTS re_mapped_by_partner TEXT; -- Add colum if not exits (i
 conn.commit()
 
 
-
 #  Insert new rows from the UPDATE table into the EDIT table. We DO NOT want to delete the EDITS by a full refresh, so only insertions and updated (and deletes) are allowed.
 create_a1_integrate_new_data = '''
 INSERT INTO akvo_tree_registration_areas_edits (identifier_akvo, display_name, device_id, instance, submission, submission_year, submissiontime, updated_at, submitter, modifiedat, akvo_form_version, data_source, form_source, country, test, organisation, contract_number, id_planting_site, land_title, name_village, name_region, name_owner, photo_owner, gender_owner, objective_site, site_preparation, planting_technique, planting_system, remark, nr_trees_option, planting_date, tree_number, estimated_area, calc_area, lat_y, lon_x, number_coord_polygon, centroid_coord, polygon, re_mapped_by_partner, multipoint, confirm_plant_location_own_land, one_multiple_planting_sites, nr_trees_given_away, nr_trees_received, url_photo_receiver_trees, location_house_tree_receiver, confirm_planting_location, url_signature_tree_receiver, total_number_trees_received, check_ownership_trees, gender_tree_receiver, name_tree_receiver, species_latin, self_intersection, overlap, outside_country, check_200_trees, check_duplicate_polygons, needle_shape, total_nr_geometric_errors)
@@ -1336,21 +1324,10 @@ needle_shape,
 total_nr_geometric_errors
 
 FROM akvo_tree_registration_areas_updated
-WHERE akvo_tree_registration_areas_updated.submission >= CURRENT_DATE - INTERVAL '1 day'  -- Only recent submissions
+WHERE akvo_tree_registration_areas_updated.submission >= CURRENT_DATE - INTERVAL '2 day'  -- Only recent submissions
 AND NOT EXISTS (SELECT identifier_akvo FROM akvo_tree_registration_areas_edits
-WHERE akvo_tree_registration_areas_updated.identifier_akvo = akvo_tree_registration_areas_edits.identifier_akvo);
-
-
---The script below is needed to overwrite the polygons (by a re-map by the partner throught the APP) again from the UPLOAD table.
-UPDATE akvo_tree_registration_areas_edits
-SET
-polygon = akvo_tree_registration_areas_integrated.polygon,
-re_mapped_by_partner = akvo_tree_registration_areas_integrated.re_mapped_by_partner,
-updated_at = akvo_tree_registration_areas_integrated.updated_at
-FROM akvo_tree_registration_areas_integrated
-WHERE akvo_tree_registration_areas_edits.identifier_akvo = akvo_tree_registration_areas_integrated.identifier_akvo
-AND akvo_tree_registration_areas_integrated.updated_at > akvo_tree_registration_areas_edits.updated_at;
-
+WHERE akvo_tree_registration_areas_updated.identifier_akvo = akvo_tree_registration_areas_edits.identifier_akvo
+AND akvo_tree_registration_areas_updated.edit_confirmation = False);
 
 -- Delete rows that were removed from the UPDATE table.
 DELETE FROM akvo_tree_registration_areas_edits
@@ -1358,6 +1335,91 @@ WHERE NOT EXISTS (SELECT 1 FROM akvo_tree_registration_areas_updated
 WHERE akvo_tree_registration_areas_updated.identifier_akvo = akvo_tree_registration_areas_edits.identifier_akvo);'''
 
 conn.commit()
+
+
+# Update EDITS table with geometric error detection results. This is done from the UPDATED table.
+# The geometric analysis is done AFTER the run of the (this) dashboard script.
+# Needs to be done aditional to previous update of edits table because that one updates only the NEW submissions.
+# This table is updated after a second run of the DAshboard script: In the frist run, the resultss from EDITS are tranfered to the UPDATED table.
+# Then the GEOMETRIC ERROR SCRIPT runs over the UPDATED table and analysis the results.
+# Afther this run of the GEOMETRIC ERROR SCRIPT, a second run of the DASHBOARD script is needed to transfer the results of the GEOMETRIC ERROR SCRIPT from the UPDATED table into the EDIT table (see below)
+create_a1_updates_from_updated_to_edits_geometric_corr = '''
+--First set all the former values to NULL because -if not- the former values will remain.
+UPDATE akvo_tree_registration_areas_edits
+SET
+self_intersection = NULL,
+overlap = NULL,
+outside_country = NULL,
+check_200_trees = NULL,
+check_duplicate_polygons = NULL,
+needle_shape = NULL,
+total_nr_geometric_errors = NULL;
+
+UPDATE akvo_tree_registration_areas_edits
+SET
+self_intersection = akvo_tree_registration_areas_updated.self_intersection,
+overlap = akvo_tree_registration_areas_updated.overlap,
+outside_country = akvo_tree_registration_areas_updated.outside_country,
+check_200_trees = akvo_tree_registration_areas_updated.check_200_trees,
+check_duplicate_polygons = akvo_tree_registration_areas_updated.check_duplicate_polygons,
+needle_shape = akvo_tree_registration_areas_updated.needle_shape,
+total_nr_geometric_errors = akvo_tree_registration_areas_updated.total_nr_geometric_errors
+FROM akvo_tree_registration_areas_updated
+WHERE akvo_tree_registration_areas_edits.identifier_akvo = akvo_tree_registration_areas_updated.identifier_akvo;'''
+
+conn.commit()
+
+
+# Update also the EDITS table with polygon corrections uploaded by the partner (with AKVO and ODK app)
+create_a1_updates_from_odk_akvo_server_side_edits = '''
+-- Below we check if a new polygon (re-mapped polygon) was submitted by AKVO collect. If multiple submissions of new polygons were done, the latest submission will be selected
+WITH updates_polygon_akvo AS (SELECT identifier_akvo, polygon_remapped, submission
+FROM (SELECT
+identifier_akvo,
+polygon_remapped,
+submission,
+ROW_NUMBER() OVER (PARTITION BY identifier_akvo ORDER BY submission DESC) AS most_recent_akvo
+FROM akvo_tree_monitoring_remapped_areas
+WHERE polygon_remapped NOTNULL) sub
+WHERE most_recent_akvo = 1)
+
+-- No 'updated_at' criteria used here because AKVO does not have a column for that in their API...(?)
+-- Updates from the AKVO collect (remapped sites with monitoring) are integrated in EDITS TABLE
+UPDATE akvo_tree_registration_areas_edits
+SET
+polygon = updates_polygon_akvo.polygon_remapped,
+re_mapped_by_partner = 'yes'
+FROM updates_polygon_akvo
+WHERE akvo_tree_registration_areas_edits.identifier_akvo = updates_polygon_akvo.identifier_akvo
+AND akvo_tree_registration_areas_edits.edit_confirmation = False;
+
+
+-- Below we check if a new polygon was submitted by ODK collect. If multiple submissions of new polygons were done, the latest submission will be selected
+WITH updates_polygon_odk AS (SELECT ecosia_site_id, remaped_polygon_planting_site, submission_date
+FROM (
+    SELECT
+        ecosia_site_id,
+        remaped_polygon_planting_site,
+        submission_date,
+        ROW_NUMBER() OVER (PARTITION BY ecosia_site_id ORDER BY submission_date DESC) as most_recent_odk
+    FROM odk_tree_monitoring_main
+    WHERE remaped_polygon_planting_site NOTNULL
+) sub
+WHERE most_recent_odk = 1)
+
+-- Updates from the ODK collect (remapped sites with monitoring) are integrated in EDITS TABLE
+UPDATE akvo_tree_registration_areas_edits
+SET
+polygon = updates_polygon_odk.remaped_polygon_planting_site,
+re_mapped_by_partner = 'yes',
+updated_at = updates_polygon_odk.submission_date
+FROM updates_polygon_odk
+WHERE akvo_tree_registration_areas_edits.identifier_akvo = updates_polygon_odk.ecosia_site_id
+AND akvo_tree_registration_areas_edits.edit_confirmation = False;'''
+
+conn.commit()
+
+
 
 # Insert the edits back again in the UPDATE TABLE so that they become visible for the dashboard and also available for prosessing by KANOP AND CHLORIS
 create_a1_edit_integration = '''UPDATE akvo_tree_registration_areas_updated
@@ -1378,11 +1440,30 @@ site_preparation = akvo_tree_registration_areas_edits.site_preparation,
 planting_technique = akvo_tree_registration_areas_edits.planting_technique,
 planting_system = akvo_tree_registration_areas_edits.planting_system,
 planting_date = akvo_tree_registration_areas_edits.planting_date,
-tree_number = akvo_tree_registration_areas_edits.tree_number
+tree_number = akvo_tree_registration_areas_edits.tree_number,
+remark = akvo_tree_registration_areas_edits.remark,
+nr_trees_option = akvo_tree_registration_areas_edits.nr_trees_option,
+centroid_coord = akvo_tree_registration_areas_edits.centroid_coord,
+confirm_plant_location_own_land = akvo_tree_registration_areas_edits.confirm_plant_location_own_land,
+one_multiple_planting_sites = akvo_tree_registration_areas_edits.one_multiple_planting_sites,
+nr_trees_given_away = akvo_tree_registration_areas_edits.nr_trees_given_away,
+nr_trees_received = akvo_tree_registration_areas_edits.nr_trees_received,
+url_photo_receiver_trees = akvo_tree_registration_areas_edits.url_photo_receiver_trees,
+location_house_tree_receiver = akvo_tree_registration_areas_edits.location_house_tree_receiver,
+confirm_planting_location = akvo_tree_registration_areas_edits.confirm_planting_location,
+url_signature_tree_receiver = akvo_tree_registration_areas_edits.url_signature_tree_receiver,
+total_number_trees_received = akvo_tree_registration_areas_edits.total_number_trees_received,
+check_ownership_trees = akvo_tree_registration_areas_edits.check_ownership_trees,
+gender_tree_receiver = akvo_tree_registration_areas_edits.gender_tree_receiver,
+name_tree_receiver = akvo_tree_registration_areas_edits.name_tree_receiver,
+species_latin = akvo_tree_registration_areas_edits.species_latin,
+edit_confirmation = akvo_tree_registration_areas_edits.edit_confirmation
 
 FROM akvo_tree_registration_areas_edits
 WHERE akvo_tree_registration_areas_updated.identifier_akvo = akvo_tree_registration_areas_edits.identifier_akvo
 AND akvo_tree_registration_areas_edits.edit_confirmation = TRUE;
+--(AND NOT chloris_uploaded = TRUE
+--OR kanop_uploaded = TRUE);
 
 -- Delete rows that were removed in the EDIT table also from the UPDATE table.
 DELETE FROM akvo_tree_registration_areas_updated
@@ -7781,16 +7862,17 @@ cur.execute(drop_tables)
 
 conn.commit()
 
-
+kkkk
 # Execute create tables
 cur.execute(create_a1_integrated)
 cur.execute(create_a1_updated)
-cur.execute(create_a1_updates_from_odk_akvo_server_side)
+cur.execute(create_a1_updates_from_odk_akvo_server_side_updated)
 cur.execute(create_a1_insertion)
-cur.execute(create_a1_updates)
 cur.execute(create_a1_edit)
 cur.execute(create_a1_integrate_new_data)
+cur.execute(create_a1_updates_from_odk_akvo_server_side_edits)
 cur.execute(create_a1_edit_integration)
+cur.execute(create_a1_updates_from_updated_to_edits_geometric_corr)
 cur.execute(create_a1_remote_sensing_results)
 cur.execute(create_a1_remote_sensing_update)
 cur.execute(create_a2_akvo)
