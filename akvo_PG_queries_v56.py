@@ -7862,7 +7862,6 @@ cur.execute(drop_tables)
 
 conn.commit()
 
-kkkk
 # Execute create tables
 cur.execute(create_a1_integrated)
 cur.execute(create_a1_updated)
