@@ -981,7 +981,7 @@ conn.commit()
 
 # If an instance (identifier) already exists then the instance will be UPDATED for the polygon column (see script below).
 # By doing so, polygon updates made on the ODK/AKVO platform (by the re-map option) will be processed
-create_a1_updates_from_odk_akvo_server_side_updated = '''
+create_a1_updates_from_odk_akvo_server_side = '''
 -- Below we check if a new polygon (re-mapped polygon) was submitted by AKVO collect. If multiple submissions of new polygons were done, the latest submission will be selected
 WITH updates_polygon_akvo AS (SELECT identifier_akvo, polygon_remapped, submission
 FROM (SELECT
@@ -994,14 +994,13 @@ WHERE polygon_remapped NOTNULL) sub
 WHERE most_recent_akvo = 1)
 
 -- No 'updated_at' criteria used here because AKVO does not have a column for that in their API...(?)
--- Updates from the AKVO collect (remapped sites with monitoring) are integrated in UPDATED TABLE
 UPDATE akvo_tree_registration_areas_updated
 SET
 polygon = updates_polygon_akvo.polygon_remapped,
 re_mapped_by_partner = 'yes'
 FROM updates_polygon_akvo
 WHERE akvo_tree_registration_areas_updated.identifier_akvo = updates_polygon_akvo.identifier_akvo
-AND akvo_tree_registration_areas_updated.edit_confirmation = False;
+AND updates_polygon_akvo.submission > akvo_tree_registration_areas_updated.submission;
 
 
 -- Below we check if a new polygon was submitted by ODK collect. If multiple submissions of new polygons were done, the latest submission will be selected
@@ -1017,7 +1016,7 @@ FROM (
 ) sub
 WHERE most_recent_odk = 1)
 
--- Updates from the ODK collect (remapped sites with monitoring) are integrated in UPDATED TABLE
+-- Updates from the ODK collect (remapped sites with monitoring) are integrated
 UPDATE akvo_tree_registration_areas_updated
 SET
 polygon = updates_polygon_odk.remaped_polygon_planting_site,
@@ -1028,7 +1027,6 @@ WHERE akvo_tree_registration_areas_updated.identifier_akvo = updates_polygon_odk
 AND akvo_tree_registration_areas_updated.edit_confirmation = False;'''
 
 conn.commit()
-
 
 
 # The UPDATED table is maintained (not deleted) and only updated with NEW intances (downloads) from the INTEGRATED table
