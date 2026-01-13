@@ -981,7 +981,7 @@ conn.commit()
 
 # If an instance (identifier) already exists then the instance will be UPDATED for the polygon column (see script below).
 # By doing so, polygon updates made on the ODK/AKVO platform (by the re-map option) will be processed
-create_a1_updates_from_odk_akvo_server_side = '''
+create_a1_updates_from_odk_akvo_server_side_updated = '''
 -- Below we check if a new polygon (re-mapped polygon) was submitted by AKVO collect. If multiple submissions of new polygons were done, the latest submission will be selected
 WITH updates_polygon_akvo AS (SELECT identifier_akvo, polygon_remapped, submission
 FROM (SELECT
