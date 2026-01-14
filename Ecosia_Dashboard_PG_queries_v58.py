@@ -7843,7 +7843,9 @@ GRANT USAGE ON SCHEMA public TO ecosia_editing;
 GRANT USAGE ON SCHEMA heroku_ext TO ecosia_editing;
 GRANT INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO ecosia_editing;
 GRANT INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA heroku_ext TO ecosia_editing;
+
 GRANT SELECT ON TABLE akvo_tree_registration_areas_edits TO ecosia_editing;
+GRANT SELECT ON ALL TABLES IN SCHEMA heroku_ext TO ecosia_editing;
 
 --DROP POLICY IF EXISTS ecosia_superset_select ON akvo_tree_registration_areas_edits;
 --DROP POLICY IF EXISTS ecosia_superset_update ON akvo_tree_registration_areas_edits;
