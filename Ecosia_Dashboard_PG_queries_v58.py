@@ -7850,7 +7850,18 @@ GRANT SELECT ON ALL TABLES IN SCHEMA heroku_ext TO ecosia_editing;
 GRANT SELECT ON geometry_columns TO ecosia_editing;
 GRANT SELECT ON spatial_ref_sys TO ecosia_editing;
 
-GRANT CONNECT ON DATABASE d7ln221qt6944k TO ecosia_editing;
+--GRANT CONNECT ON DATABASE d7ln221qt6944k TO ecosia_editing;
+
+--GRANT SELECT ON geometry_columns TO ecosia_editing;
+--GRANT SELECT ON spatial_ref_sys TO ecosia_editing;
+--GRANT SELECT ON geography_columns TO ecosia_editing;
+
+ALTER TABLE akvo_tree_registration_areas_edits enable ROW LEVEL SECURITY;
+
+--ALTER DEFAULT PRIVILEGES IN SCHEMA heroku_ext GRANT SELECT ON TABLES TO ecosia_editing;
+
+CREATE POLICY ecosia_edit_policy ON akvo_tree_registration_areas_edits TO ecosia_editing USING (true);
+
 '''
 
 conn.commit()
