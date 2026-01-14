@@ -7847,18 +7847,10 @@ GRANT INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA heroku_ext TO ecosia_editin
 GRANT SELECT ON TABLE public.akvo_tree_registration_areas_edits TO ecosia_editing;
 GRANT SELECT ON ALL TABLES IN SCHEMA heroku_ext TO ecosia_editing;
 
---DROP POLICY IF EXISTS ecosia_superset_select ON akvo_tree_registration_areas_edits;
---DROP POLICY IF EXISTS ecosia_superset_update ON akvo_tree_registration_areas_edits;
+GRANT SELECT ON geometry_columns TO ecosia_editing;
+GRANT SELECT ON spatial_ref_sys TO ecosia_editing;
 
---ALTER TABLE akvo_tree_registration_areas_edits enable ROW LEVEL SECURITY;
-
---CREATE POLICY ecosia_superset_select ON akvo_tree_registration_areas_edits
---FOR SELECT TO ecosia_editing
---USING (true);
-
---CREATE POLICY ecosia_superset_update ON akvo_tree_registration_areas_edits
---FOR UPDATE TO ecosia_editing
---USING (true);
+GRANT CONNECT ON DATABASE d7ln221qt6944k TO ecosia_editing;
 '''
 
 conn.commit()
