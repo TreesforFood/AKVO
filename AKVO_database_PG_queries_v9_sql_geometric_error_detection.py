@@ -30,15 +30,15 @@ CASE
 WHEN ST_IsValid(polygon::geometry) = False
 THEN True
 ELSE False
-END AS self_intersect,
+END AS self_intersection,
 
 polygon::geometry AS pol
+
 FROM akvo_tree_registration_areas_updated
-WHERE polygon NOTNULL AND ST_IsValid(polygon::geometry) = False
-AND total_nr_geometric_errors ISNULL)
+WHERE polygon IS NOT NULL AND ST_IsValid(polygon::geometry) = False)
 
 UPDATE akvo_tree_registration_areas_updated
-SET self_intersection = AKVO_tree_registration_areas_updated_self_intersections.self_intersect
+SET self_intersection = AKVO_tree_registration_areas_updated_self_intersections.self_intersection
 FROM AKVO_tree_registration_areas_updated_self_intersections
 WHERE akvo_tree_registration_areas_updated.identifier_akvo = AKVO_tree_registration_areas_updated_self_intersections.identifier_akvo
 ;'''
@@ -62,9 +62,6 @@ CREATE TEMPORARY TABLE akvo_tree_registration_areas_updated_temp_table1 AS (SELE
 total_nr_geometric_errors, ST_MakeValid(polygon::geometry) AS pol, ST_Transform(polygon::geometry,4326) AS polgeo
 FROM akvo_tree_registration_areas_updated
 WHERE polygon NOTNULL);
---AND test != 'xxxxx'
---AND test != 'This is a test, this record can be deleted.'
---AND test != 'This is a test, this record can be deleted');
 
 CREATE TEMPORARY TABLE akvo_tree_registration_areas_updated_temp_table2 AS (SELECT identifier_akvo, id_planting_site, organisation, country,
 total_nr_geometric_errors, ST_Transform(polgeo::geometry,4326) AS polgeo
