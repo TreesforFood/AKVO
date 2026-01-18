@@ -46,7 +46,7 @@ DROP TABLE IF EXISTS superset_ecosia_tree_distribution_unregistered_farmers;
 DROP TABLE IF EXISTS superset_ecosia_site_registration_unregistered_farmers;
 DROP TABLE IF EXISTS superset_ecosia_contract_overview;
 DROP TABLE IF EXISTS AKVO_tree_registration_areas_updated_KANOP;
-DROP TABLE IF EXISTS akvo_tree_registration_areas_updated_remotesensing;
+--DROP TABLE IF EXISTS akvo_tree_registration_areas_updated_remotesensing;
 DROP TABLE IF EXISTS superset_ecosia_kanop_chloris_results;'''
 
 conn.commit()
@@ -1481,6 +1481,7 @@ conn.commit()
 
 create_a1_remote_sensing_results = '''CREATE TABLE superset_ecosia_kanop_chloris_results AS (SELECT
 t1.identifier_akvo,
+t1.organisation,
 t1.id_planting_site,
 t1.contract_number,
 t1.year_of_analisis,
@@ -1489,6 +1490,7 @@ t2.kanop_above_ground_living_biomass AS kanop_above_ground_dry_biomass
 
 FROM (SELECT
 identifier_akvo,
+organisation,
 contract_number AS contract_number,
 id_planting_site,
 year_of_analisis AS year_of_analisis,
@@ -1509,7 +1511,6 @@ ON t1.identifier_akvo = t2.identifier_akvo
 and t1.year_of_analisis = t2.year_of_analisis);'''
 
 conn.commit()
-
 
 # Update the EDITS table with KANOP AND CHLORIS analysis so that we know which sites were already processed by KANOP AND CHLORIS (and don't need to be edited or uploaded again)
 create_a1_remote_sensing_update = '''UPDATE akvo_tree_registration_areas_edits
