@@ -930,6 +930,26 @@ FROM added_trees_per_site
 WHERE a.identifier_akvo = added_trees_per_site.ecosia_site_id;
 
 
+-- Below we update the planting date. When during a registration, no trees were registered, but only the site was mapped, no planting date is being generated.
+-- In that case, the submission date is used in the ODK_registration download script.
+-- That date needs to be updated with the planting date during a tree monitoring, using the option ADDING of trees.
+-- Once a planting date is available (through the ADDING of trees option in monitoring), we use the EARLIEST date (using ASC instead of DESC).
+-- This to prevent that the planting date is always updated with latest ADDING of trees. We want to know when the FIRST trees were planted (for RS purposes)
+WITH planting_date_added_trees AS
+(SELECT
+ecosia_site_id,
+planting_date_added,
+ROW_NUMBER() OVER (PARTITION BY ecosia_site_id ORDER BY planting_date_added ASC) AS rn
+FROM odk_tree_monitoring_main
+WHERE planting_date_added NOTNULL)
+
+UPDATE akvo_tree_registration_areas_integrated a
+SET planting_date = p.planting_date_added
+FROM planting_date_added_trees p
+WHERE a.identifier_akvo = p.ecosia_site_id
+AND p.rn = 1;
+
+
 -- Add GEOMETRIC CHECK columns so that they can later be populated with the geometric correction script
 ALTER TABLE akvo_tree_registration_areas_integrated
 ADD species_latin text,
