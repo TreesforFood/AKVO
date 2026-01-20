@@ -46,7 +46,8 @@ DROP TABLE IF EXISTS superset_ecosia_site_registration_unregistered_farmers;
 DROP TABLE IF EXISTS superset_ecosia_contract_overview;
 DROP TABLE IF EXISTS AKVO_tree_registration_areas_updated_KANOP;
 --DROP TABLE IF EXISTS akvo_tree_registration_areas_updated_remotesensing;
-DROP TABLE IF EXISTS superset_ecosia_kanop_chloris_results;'''
+DROP TABLE IF EXISTS superset_ecosia_kanop_chloris_results;
+DROP VIEW IF EXISTS photo_locations;'''
 
 conn.commit()
 
@@ -5900,9 +5901,8 @@ conn.commit()
 # This VIEW table for photos is used as an additional layer in the EDIT login account. This will ease the editing of polygons
 # in QGIS since the photo locations provide additional information of the location and limits of the planting site.
 # The VIEW is created to make a more logica naming for the QGIS user.
-create_a40a = '''CREATE VIEW photo_locations AS
-SELECT
-select
+create_a40a = '''CREATE TABLE photo_locations AS
+(SELECT
 identifier_akvo,
 submission_date,
 photo_url,
@@ -5914,7 +5914,25 @@ sub_contract,
 organisation,
 source_data,
 country
-FROM superset_ecosia_tree_registration_photos;'''
+FROM superset_ecosia_tree_registration_photos
+WHERE photo_gps_location NOTNULL
+
+UNION All
+
+SELECT
+identifier_akvo,
+submission_date,
+photo_url,
+photo_geotag_location,
+contract,
+id_planting_site
+procedure,
+sub_contract,
+organisation,
+source_data,
+country
+FROM superset_ecosia_tree_registration_photos
+WHERE photo_geotag_location NOTNULL);'''
 
 conn.commit()
 
@@ -7890,7 +7908,7 @@ GRANT UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO ecosia_editing;
 GRANT UPDATE, DELETE ON ALL TABLES IN SCHEMA heroku_ext TO ecosia_editing;
 
 GRANT SELECT ON TABLE public.akvo_tree_registration_areas_edits TO ecosia_editing;
-GRANT SELECT ON TABLE photo_locations TO ecosia_editing;
+GRANT SELECT ON TABLE public.photo_locations TO ecosia_editing;
 --GRANT SELECT ON TABLE public.superset_ecosia_tree_registration_photos TO ecosia_editing;
 GRANT SELECT ON ALL TABLES IN SCHEMA heroku_ext TO ecosia_editing;
 
