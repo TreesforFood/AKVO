@@ -918,7 +918,8 @@ WHERE organisation != '';
 -- Below we integrate the registration of additional trees (from the ODK form) into the initial registration of (the number of) trees.
 -- We need to group and SUM them first since there can be multiple 'added tree' submissions for 1 site.
 WITH added_trees_per_site AS
-(select ecosia_site_id, SUM(nr_added_trees) AS added_trees FROM odk_tree_monitoring_main
+(select ecosia_site_id, SUM(nr_added_trees) AS added_trees
+FROM odk_tree_monitoring_main
 where test = 'valid_data'
 and nr_added_trees NOTNULL
 group by ecosia_site_id)
@@ -5902,6 +5903,7 @@ conn.commit()
 create_a40a = '''CREATE VIEW photo_locations AS
 SELECT * FROM superset_ecosia_tree_registration_photos;'''
 
+conn.commit()
 
 create_a41 = '''CREATE TABLE superset_ecosia_tree_registration_species
 AS WITH tree_registration_species_akvo AS (SELECT
@@ -7864,7 +7866,7 @@ conn.commit()
 #This login (see below) and the associated grands is being used by the superset dashboard!! AS such this query is de-activated.
 create_a21_ecosia_editing = '''
 DROP POLICY IF EXISTS ecosia_edit_policy ON akvo_tree_registration_areas_edits;
-DROP POLICY IF EXISTS ecosia_edit_policy ON photo_locations;
+DROP POLICY IF EXISTS ecosia_edit_policy ON superset_ecosia_tree_registration_photos;
 
 REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA public FROM ecosia_editing;
 
@@ -7875,18 +7877,20 @@ GRANT UPDATE, DELETE ON ALL TABLES IN SCHEMA heroku_ext TO ecosia_editing;
 
 GRANT SELECT ON TABLE public.akvo_tree_registration_areas_edits TO ecosia_editing;
 GRANT SELECT ON TABLE public.photo_locations TO ecosia_editing;
+GRANT SELECT ON TABLE public.superset_ecosia_tree_registration_photos TO ecosia_editing;
+
 GRANT SELECT ON ALL TABLES IN SCHEMA heroku_ext TO ecosia_editing;
 
 GRANT SELECT ON geometry_columns TO ecosia_editing;
 GRANT SELECT ON spatial_ref_sys TO ecosia_editing;
 
 ALTER TABLE akvo_tree_registration_areas_edits enable ROW LEVEL SECURITY;
-ALTER TABLE photo_locations enable ROW LEVEL SECURITY;
+ALTER TABLE superset_ecosia_tree_registration_photos enable ROW LEVEL SECURITY;
 
 --ALTER DEFAULT PRIVILEGES IN SCHEMA heroku_ext GRANT SELECT ON TABLES TO ecosia_editing;
 
 CREATE POLICY ecosia_edit_policy ON akvo_tree_registration_areas_edits TO ecosia_editing USING (true);
-CREATE POLICY ecosia_edit_policy ON photo_locations TO ecosia_editing USING (true);
+CREATE POLICY ecosia_edit_policy ON superset_ecosia_tree_registration_photos TO ecosia_editing USING (true);
 
 '''
 
