@@ -5901,7 +5901,20 @@ conn.commit()
 # in QGIS since the photo locations provide additional information of the location and limits of the planting site.
 # The VIEW is created to make a more logica naming for the QGIS user.
 create_a40a = '''CREATE VIEW photo_locations AS
-SELECT * FROM superset_ecosia_tree_registration_photos;'''
+SELECT
+select
+identifier_akvo,
+submission_date,
+photo_url,
+photo_gps_location,
+contract,
+id_planting_site
+procedure,
+sub_contract,
+organisation,
+source_data,
+country
+FROM superset_ecosia_tree_registration_photos;'''
 
 conn.commit()
 
@@ -7869,6 +7882,7 @@ DROP POLICY IF EXISTS ecosia_edit_policy ON akvo_tree_registration_areas_edits;
 DROP POLICY IF EXISTS ecosia_edit_policy ON superset_ecosia_tree_registration_photos;
 
 REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA public FROM ecosia_editing;
+REVOKE ALL PRIVILEGES ON TABLE superset_ecosia_tree_registration_photos FROM ecosia_editing;
 
 GRANT USAGE ON SCHEMA public TO ecosia_editing;
 GRANT USAGE ON SCHEMA heroku_ext TO ecosia_editing;
@@ -7876,9 +7890,8 @@ GRANT UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO ecosia_editing;
 GRANT UPDATE, DELETE ON ALL TABLES IN SCHEMA heroku_ext TO ecosia_editing;
 
 GRANT SELECT ON TABLE public.akvo_tree_registration_areas_edits TO ecosia_editing;
-GRANT SELECT ON TABLE public.photo_locations TO ecosia_editing;
-GRANT SELECT ON TABLE public.superset_ecosia_tree_registration_photos TO ecosia_editing;
-
+GRANT SELECT ON TABLE photo_locations TO ecosia_editing;
+--GRANT SELECT ON TABLE public.superset_ecosia_tree_registration_photos TO ecosia_editing;
 GRANT SELECT ON ALL TABLES IN SCHEMA heroku_ext TO ecosia_editing;
 
 GRANT SELECT ON geometry_columns TO ecosia_editing;
