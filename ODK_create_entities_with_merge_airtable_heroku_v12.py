@@ -191,7 +191,7 @@ END AS area_ha,
 CASE -- Fields can not be empty when uploaded to the entity list of ODK. If so, ODK gives a 'no string' error
 WHEN planting_date NOTNULL
 THEN planting_date
-ELSE NULL
+ELSE 'planting date unknown'
 END AS planting_date,
 
 'planting_site' AS landscape_element,
@@ -273,7 +273,7 @@ END AS area_ha,
 CASE -- Fields can not be empty when uploaded to the entity list of ODK. If so, ODK gives a 'no string' error
 WHEN planting_date NOTNULL
 THEN planting_date
-ELSE NULL
+ELSE 'planting date unknown'
 END AS planting_date,
 
 'planting_site' AS landscape_element,
