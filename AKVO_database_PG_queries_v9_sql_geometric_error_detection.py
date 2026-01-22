@@ -150,12 +150,12 @@ WHERE polygon NOTNULL),
 akvo_tree_registration_areas_updated_needle_polygons AS (
 SELECT t.identifier_akvo, t.country, t.id_planting_site,
 CASE
-WHEN ST_Length(ST_LongestLine(pol, pol), true) > 5000
+WHEN ST_Length(ST_LongestLine(pol, pol), true) > 6000
 THEN True
 END AS lenll_m
 FROM akvo_tree_registration_areas_updated_temp_table AS t
 WHERE
-ST_Length(ST_LongestLine(pol, pol), true) > 5000)
+ST_Length(ST_LongestLine(pol, pol), true) > 6000)
 
 UPDATE akvo_tree_registration_areas_updated
 SET needle_shape = akvo_tree_registration_areas_updated_needle_polygons.lenll_m
