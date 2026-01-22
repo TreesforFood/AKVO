@@ -47,7 +47,7 @@ DROP TABLE IF EXISTS superset_ecosia_contract_overview;
 DROP TABLE IF EXISTS AKVO_tree_registration_areas_updated_KANOP;
 --DROP TABLE IF EXISTS akvo_tree_registration_areas_updated_remotesensing;
 DROP TABLE IF EXISTS superset_ecosia_kanop_chloris_results;
-DROP VIEW IF EXISTS photo_locations;'''
+DROP TABLE IF EXISTS photo_locations;'''
 
 conn.commit()
 
