@@ -1414,6 +1414,21 @@ WHERE akvo_tree_registration_areas_updated.identifier_akvo = akvo_tree_registrat
 
 conn.commit()
 
+# This query checks whether a polygon was uploaded to KANOP or CHLORIS for analysis. When this is the case, the polygon should not be edited anymore.
+create_a1_update_chloris_uploads = '''UPDATE akvo_tree_registration_areas_edits
+SET chloris_uploaded = 'True'
+FROM chloris_uploads
+WHERE chloris_uploads.identifier_akvo = akvo_tree_registration_areas_edits.identifier_akvo;'''
+
+conn.commit()
+
+create_a1_update_kanop_uploads = '''UPDATE akvo_tree_registration_areas_edits
+SET kanop_uploaded = 'True'
+FROM kanop_uploads
+WHERE kanop_uploads.identifier_akvo = akvo_tree_registration_areas_edits.identifier_akvo;'''
+
+conn.commit()
+
 
 # Update EDITS table with geometric error detection results. This is done from the UPDATED table.
 # The geometric analysis is done AFTER the run of the (this) dashboard script.
@@ -1488,9 +1503,9 @@ edit_confirmation = akvo_tree_registration_areas_edits.edit_confirmation
 
 FROM akvo_tree_registration_areas_edits
 WHERE akvo_tree_registration_areas_updated.identifier_akvo = akvo_tree_registration_areas_edits.identifier_akvo
-AND akvo_tree_registration_areas_edits.edit_confirmation = TRUE;
---(AND NOT chloris_uploaded = TRUE
---OR kanop_uploaded = TRUE);
+AND akvo_tree_registration_areas_edits.edit_confirmation = TRUE
+AND NOT (akvo_tree_registration_areas_edits.chloris_uploaded = TRUE
+OR akvo_tree_registration_areas_edits.kanop_uploaded = TRUE);
 
 -- Delete rows that were removed in the EDIT table also from the UPDATE table.
 DELETE FROM akvo_tree_registration_areas_updated
@@ -7943,6 +7958,8 @@ cur.execute(create_a1_edit)
 cur.execute(create_a1_integrate_new_data)
 cur.execute(create_a1_updates_from_odk_akvo_server_side_edits)
 cur.execute(create_a1_edit_integration)
+cur.execute(create_a1_update_chloris_uploads)
+cur.execute(create_a1_update_kanop_uploads)
 cur.execute(create_a1_updates_from_updated_to_edits_geometric_corr)
 cur.execute(create_a1_remote_sensing_results)
 cur.execute(create_a1_remote_sensing_update)
