@@ -210,9 +210,11 @@ ELSE 'submitter unknown'
 END AS user_name_enumerator
 
 FROM akvo_tree_registration_areas_updated
-WHERE polygon NOTNULL
+--WHERE
+--polygon NOTNULL
 --AND form_source = 'normal tree registration'
-AND (test = 'This is real, valid data'
+--AND
+WHERE (test = 'This is real, valid data'
 OR test = '')
 
 
@@ -292,9 +294,11 @@ ELSE 'submitter unknown'
 END AS user_name_enumerator
 
 FROM akvo_tree_registration_areas_updated
-WHERE polygon ISNULL AND centroid_coord NOTNULL
+--WHERE
+--polygon ISNULL AND centroid_coord NOTNULL
 --AND form_source = 'normal tree registration'
-AND (test = 'This is real, valid data'
+--AND
+WHERE (test = 'This is real, valid data'
 OR test = ''))
 
 SELECT
