@@ -390,6 +390,12 @@ cur.execute('''ALTER TABLE getodk_entities_upload_table ALTER COLUMN row_number 
 
 # Set the RN column to string because that is the only type allowed by ODK entitities
 cur.execute('''UPDATE getodk_entities_upload_table
+SET new_polygon = ''
+WHERE new_polygon ISNULL;''')
+conn.commit()
+
+# Set the RN column to string because that is the only type allowed by ODK entitities
+cur.execute('''UPDATE getodk_entities_upload_table
 SET row_number = row_number::text;''')
 conn.commit()
 
