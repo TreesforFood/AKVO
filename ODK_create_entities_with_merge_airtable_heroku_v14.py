@@ -388,7 +388,7 @@ conn.commit()
 
 cur.execute('''ALTER TABLE getodk_entities_upload_table ALTER COLUMN row_number TYPE text USING row_number::text;''')
 
-# Set the RN column to string because that is the only type allowed by ODK entitities
+# Set the new_polygon column to string (text) where there is no polygon (NULL values)
 cur.execute('''UPDATE getodk_entities_upload_table
 SET new_polygon = ''
 WHERE new_polygon ISNULL;''')
