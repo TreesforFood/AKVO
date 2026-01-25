@@ -78,7 +78,7 @@ while True :
             break
 
     except error as e:
-        print(e)
+        print('Error: ', e)
 
 count = 0
 
@@ -106,7 +106,7 @@ for x in result:
                     for x in list_identifiers_specific_to_monitor:
                         list_identifiers.append(x)
                         # check number of identifiers for a certain contract
-                        if contract_id == '147.00':
+                        if contract_id == '190.00':
                             count_identifiers += 1
                             print(count_identifiers, x)
 
@@ -214,8 +214,8 @@ FROM akvo_tree_registration_areas_updated
 --polygon NOTNULL
 --AND form_source = 'normal tree registration'
 --AND
-WHERE (test = 'This is real, valid data'
-OR test = '')
+WHERE test = 'This is real, valid data'
+OR test = ''
 
 
 UNION -- Union sites with Polygons and sites with Points into 1 table
@@ -298,8 +298,8 @@ FROM akvo_tree_registration_areas_updated
 --polygon ISNULL AND centroid_coord NOTNULL
 --AND form_source = 'normal tree registration'
 --AND
-WHERE (test = 'This is real, valid data'
-OR test = ''))
+WHERE test = 'This is real, valid data'
+OR test = '')
 
 SELECT
 ROW_NUMBER()OVER(PARTITION BY label ORDER BY label) AS row_number, --Give duplicates a number higher than 1
@@ -364,10 +364,12 @@ for key in id:
 
 # Update the table with reverse coordinates
 for key,value in dict.items():
+    print(key,value)
     cur.execute('''UPDATE getodk_entities_upload_table
     SET geometry = %s
     WHERE ecosia_site_id = %s''', (value,key))
     conn.commit()
+
 
 # Remove the WKT format ('POLYGON(( etc))')
 cur.execute('''UPDATE getodk_entities_upload_table
@@ -390,8 +392,8 @@ cur.execute('''ALTER TABLE getodk_entities_upload_table ALTER COLUMN row_number 
 
 # Set the new_polygon column to string (text) where there is no polygon (NULL values)
 cur.execute('''UPDATE getodk_entities_upload_table
-SET new_polygon = ''
-WHERE new_polygon ISNULL;''')
+SET geometry = ''
+WHERE geometry ISNULL;''')
 conn.commit()
 
 # Set the RN column to string because that is the only type allowed by ODK entitities
@@ -417,8 +419,9 @@ for row in rows_dict:
         entities[columns[i]] = row[i]
         if isinstance(row[i], str):
             entities[columns[i]] = row[i].strip()
-    #print('FREEK:', entities)
     entities_list.append(entities.copy())
+    print('FREEK:', entities_list)
+
 
 #Connect to ODK central server and use the merge command
 client = Client(config_path="/app/tmp/pyodk_config.ini", cache_path="/app/tmp/pyodk_cache.ini")
@@ -429,8 +432,5 @@ client.entities.merge(entities_list, entity_list_name='monitoring_trees', projec
 
 client.close()
 
-
-#first drop the latests upload table
-#cur.execute('''DROP TABLE IF EXISTS getodk_entities_upload_table;''')
 conn.commit()
 cur.close()
