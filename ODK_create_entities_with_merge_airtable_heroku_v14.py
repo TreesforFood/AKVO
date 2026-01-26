@@ -371,6 +371,7 @@ for key,value in dict.items():
     conn.commit()
 
 
+
 # Remove the WKT format ('POLYGON(( etc))')
 cur.execute('''UPDATE getodk_entities_upload_table
 SET geometry = REPLACE(RTRIM(LTRIM(geometry,'POLYGON (('),'))'),',',';')::varchar(50000)
@@ -392,8 +393,10 @@ cur.execute('''ALTER TABLE getodk_entities_upload_table ALTER COLUMN row_number 
 
 # Set the new_polygon column to string (text) where there is no polygon (NULL values)
 cur.execute('''UPDATE getodk_entities_upload_table
-SET geometry = ''
-WHERE geometry ISNULL;''')
+SET geometry = '',
+new_polygon = ''
+WHERE geometry ISNULL
+OR new_polygon ISNULL;''')
 conn.commit()
 
 # Set the RN column to string because that is the only type allowed by ODK entitities
