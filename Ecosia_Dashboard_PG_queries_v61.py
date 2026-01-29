@@ -1565,8 +1565,8 @@ create_a1_remote_sensing_upload_chloris = '''UPDATE akvo_tree_registration_areas
 SET
 chloris_uploaded = True
 
-FROM chloris_uploaded
-WHERE akvo_tree_registration_areas_edits.identifier_akvo = chloris_uploaded.identifier_akvo;'''
+FROM chloris_uploads
+WHERE akvo_tree_registration_areas_edits.identifier_akvo = chloris_uploads.identifier_akvo;'''
 
 conn.commit()
 
@@ -1575,8 +1575,8 @@ create_a1_remote_sensing_upload_kanop = '''UPDATE akvo_tree_registration_areas_e
 SET
 kanop_uploaded = True
 
-FROM kanop_uploaded
-WHERE akvo_tree_registration_areas_edits.identifier_akvo = kanop_uploaded.identifier_akvo;'''
+FROM kanop_uploads
+WHERE akvo_tree_registration_areas_edits.identifier_akvo = kanop_uploads.identifier_akvo;'''
 
 conn.commit()
 
