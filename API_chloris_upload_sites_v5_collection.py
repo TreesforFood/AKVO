@@ -87,11 +87,23 @@ for submission in uploads_more_100ha:
     geojson_data = json.loads(polygon_geojson_string)
 
     # Specify the output file path
-    output_file = '/app/tmp/polygon.geojson'
+    output_file = "/app/tmp/polygon.geojson"
 
     # Write the GeoJSON data to a file
     with open(output_file, 'w') as f:
         json.dump(geojson_data, f, indent=2)
+
+
+# # Define a writable path for GetODK (/app/tmp is a writable directory on Heroku)
+# file_path = "/app/tmp/pyodk_config.ini"
+#
+# # Create the GetODK directory if it doesn't exist
+# os.makedirs(os.path.dirname(file_path), exist_ok=True)
+#
+# # Write the GetODK configuration to the file
+# with open(file_path, "w") as file:
+#     file.write(file_content)
+
 
 
     # submit the sites LAGER THAN 100ha to Chloris (30 meter analysis)
@@ -100,7 +112,7 @@ for submission in uploads_more_100ha:
             label=f"{identifier_akvo}",
             description=f"{description_organisation_contract_number_id_planting_site}",
             tags=["ARR"],
-            boundary_path='/app/tmp/polygon.geojson',
+            boundary_path="/app/tmp/polygon.geojson",
             period_change_start_year=2000,
             period_change_end_year=2025,
             resolution = resolution_30_more_100ha,
@@ -174,7 +186,7 @@ for submission in uploads_less_100ha:
     geojson_data = json.loads(polygon_geojson_string)
 
     # Specify the output file path
-    output_file = '/app/tmp/polygon.geojson'
+    output_file = "/app/tmp/polygon.geojson"
 
     # Write the GeoJSON data to a file
     with open(output_file, 'w') as file:
@@ -187,7 +199,7 @@ for submission in uploads_less_100ha:
             label=f"{identifier_akvo}",
             description=f"{description_organisation_contract_number_id_planting_site}",
             tags=["ARR"],
-            boundary_path='/app/tmp/polygon.geojson',
+            boundary_path="/app/tmp/polygon.geojson",
             period_change_start_year=2000,
             period_change_end_year=2025,
             resolution = resolution_10_less_100ha,
