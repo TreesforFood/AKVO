@@ -87,7 +87,7 @@ for submission in uploads_more_100ha:
     geojson_data = json.loads(polygon_geojson_string)
 
     # Specify the output file path
-    output_file = '/Users/edmond/Downloads/polygon.geojson'
+    output_file = '/app/tmp/polygon.geojson'
 
     # Write the GeoJSON data to a file
     with open(output_file, 'w') as f:
