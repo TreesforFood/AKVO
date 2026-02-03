@@ -87,7 +87,7 @@ for submission in uploads_more_100ha:
     geojson_data = json.loads(polygon_geojson_string)
 
     # Specify the output file path
-    output_file = "/app/tmp/polygon.geojson"
+    output_file = "/tmp/polygon.geojson"
 
     # Write the GeoJSON data to a file
     with open(output_file, 'w') as f:
@@ -112,7 +112,7 @@ for submission in uploads_more_100ha:
             label=f"{identifier_akvo}",
             description=f"{description_organisation_contract_number_id_planting_site}",
             tags=["ARR"],
-            boundary_path="/app/tmp/polygon.geojson",
+            boundary_path="/tmp/polygon.geojson",
             period_change_start_year=2000,
             period_change_end_year=2025,
             resolution = resolution_30_more_100ha,
@@ -186,7 +186,7 @@ for submission in uploads_less_100ha:
     geojson_data = json.loads(polygon_geojson_string)
 
     # Specify the output file path
-    output_file = "/app/tmp/polygon.geojson"
+    output_file = "/tmp/polygon.geojson"
 
     # Write the GeoJSON data to a file
     with open(output_file, 'w') as file:
@@ -199,7 +199,7 @@ for submission in uploads_less_100ha:
             label=f"{identifier_akvo}",
             description=f"{description_organisation_contract_number_id_planting_site}",
             tags=["ARR"],
-            boundary_path="/app/tmp/polygon.geojson",
+            boundary_path="/tmp/polygon.geojson",
             period_change_start_year=2000,
             period_change_end_year=2025,
             resolution = resolution_10_less_100ha,
