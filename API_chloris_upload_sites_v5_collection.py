@@ -197,7 +197,7 @@ for submission in uploads_less_100ha:
             description=f"{description_organisation_contract_number_id_planting_site}",
             tags=["ARR"],
             boundary_path="/tmp/polygon.geojson",
-            period_change_start_year=2000,
+            period_change_start_year=2017,
             period_change_end_year=None,
             resolution = resolution_10_less_100ha,
             forest_baseline_year=2000,
