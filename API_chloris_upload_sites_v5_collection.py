@@ -28,7 +28,7 @@ cur.execute('''DROP TABLE IF EXISTS CHLORIS_latest_uploads;
 CREATE TABLE CHLORIS_latest_uploads AS
 WITH CLORIS_uploads AS (SELECT
 a.identifier_akvo,
-b.identifier_akvo AS identifier_already_submitted_to_chloris,
+a.chloris_uploaded,
 'uploaded' AS tag_uploaded_chloris,
 a.calc_area AS area_ha,
 a.organisation,
@@ -40,16 +40,13 @@ TO_CHAR(NULLIF(a.planting_date, '')::date, 'yyyy') AS planting_year_uploaded
 
 FROM akvo_tree_registration_areas_updated a
 
-LEFT JOIN superset_ecosia_CHLORIS_polygon_results b
-ON a.identifier_akvo = b.identifier_akvo
-
 WHERE a.polygon NOTNULL
 AND a.total_nr_geometric_errors = 0
-AND a.planting_date <> '')
+AND a.planting_date <> ''
+AND a.chloris_uploaded = false)
 
 SELECT * FROM CLORIS_uploads
-WHERE identifier_already_submitted_to_chloris ISNULL
-AND contract_number = %s''', (contract_number,))
+WHERE contract_number = %s''', (contract_number,))
 
 conn.commit()
 
@@ -114,7 +111,7 @@ for submission in uploads_more_100ha:
             tags=["ARR"],
             boundary_path="/tmp/polygon.geojson",
             period_change_start_year=2000,
-            period_change_end_year=2025,
+            period_change_end_year=None,
             resolution = resolution_30_more_100ha,
             forest_baseline_year=2000,
             #dryrun=True ## ONLY FOR TEST SITES!! USE FALSE FOR REAL DATA
@@ -201,7 +198,7 @@ for submission in uploads_less_100ha:
             tags=["ARR"],
             boundary_path="/tmp/polygon.geojson",
             period_change_start_year=2000,
-            period_change_end_year=2025,
+            period_change_end_year=None,
             resolution = resolution_10_less_100ha,
             forest_baseline_year=2000,
             #dryrun=True ## ONLY FOR TEST SITES!! USE FALSE FOR REAL DATA
