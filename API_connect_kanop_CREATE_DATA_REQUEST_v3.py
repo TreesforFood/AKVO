@@ -1,10 +1,10 @@
 import requests
 import json
 import psycopg2
-from akvo_api_config import Config
-from io import BytesIO
-import pybase64
-import datetime
+import re
+import geojson
+import os
+from datetime import datetime
 
 
 # IMPORTANT NOTE: AFTER PROCESSING A POST AND CONFIRMING A PROJECT, YOU ALSO HAS TO RUN THIS SCRIPT FOR A DATA REQUEST.
