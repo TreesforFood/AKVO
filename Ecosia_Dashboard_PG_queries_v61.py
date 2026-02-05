@@ -1424,20 +1424,20 @@ WHERE akvo_tree_registration_areas_updated.identifier_akvo = akvo_tree_registrat
 
 conn.commit()
 
-# This query checks whether a polygon was uploaded to KANOP or CHLORIS for analysis. When this is the case, the polygon should not be edited anymore.
-create_a1_update_chloris_uploads = '''UPDATE akvo_tree_registration_areas_edits
-SET chloris_uploaded = 'True'
-FROM chloris_uploads
-WHERE chloris_uploads.identifier_akvo = akvo_tree_registration_areas_edits.identifier_akvo;'''
-
-conn.commit()
-
-create_a1_update_kanop_uploads = '''UPDATE akvo_tree_registration_areas_edits
-SET kanop_uploaded = 'True'
-FROM kanop_uploads
-WHERE kanop_uploads.identifier_akvo = akvo_tree_registration_areas_edits.identifier_akvo;'''
-
-conn.commit()
+# # This query checks whether a polygon was uploaded to KANOP or CHLORIS for analysis. When this is the case, the polygon should not be edited anymore.
+# create_a1_update_chloris_uploads = '''UPDATE akvo_tree_registration_areas_edits
+# SET chloris_uploaded = 'True'
+# FROM chloris_uploads
+# WHERE chloris_uploads.identifier_akvo = akvo_tree_registration_areas_edits.identifier_akvo;'''
+#
+# conn.commit()
+#
+# create_a1_update_kanop_uploads = '''UPDATE akvo_tree_registration_areas_edits
+# SET kanop_uploaded = 'True'
+# FROM kanop_uploads
+# WHERE kanop_uploads.identifier_akvo = akvo_tree_registration_areas_edits.identifier_akvo;'''
+#
+# conn.commit()
 
 
 # Update EDITS table with geometric error detection results. This is done from the UPDATED table.
@@ -1471,6 +1471,27 @@ FROM akvo_tree_registration_areas_updated
 WHERE akvo_tree_registration_areas_edits.identifier_akvo = akvo_tree_registration_areas_updated.identifier_akvo;'''
 
 conn.commit()
+
+# Update the EDITS table with CHLORIS analysis so that we know which sites were already processed by KANOP AND CHLORIS (and don't need to be edited or uploaded again)
+create_a1_remote_sensing_upload_chloris = '''UPDATE akvo_tree_registration_areas_edits
+SET
+chloris_uploaded = True
+
+FROM chloris_uploads
+WHERE akvo_tree_registration_areas_edits.identifier_akvo = chloris_uploads.identifier_akvo;'''
+
+conn.commit()
+
+# Update the EDITS table with KANOP analysis so that we know which sites were already processed by KANOP AND CHLORIS (and don't need to be edited or uploaded again)
+create_a1_remote_sensing_upload_kanop = '''UPDATE akvo_tree_registration_areas_edits
+SET
+kanop_uploaded = True
+
+FROM kanop_uploads
+WHERE akvo_tree_registration_areas_edits.identifier_akvo = kanop_uploads.identifier_akvo;'''
+
+conn.commit()
+
 
 
 # Insert the edits back again in the UPDATE TABLE so that they become visible for the dashboard and also available for prosessing by KANOP AND CHLORIS
@@ -1517,6 +1538,15 @@ AND akvo_tree_registration_areas_edits.edit_confirmation = TRUE
 AND NOT (akvo_tree_registration_areas_edits.chloris_uploaded = TRUE
 OR akvo_tree_registration_areas_edits.kanop_uploaded = TRUE);
 
+
+--Update (seperately) the kanop/chloris upload results. THis is sepertately needed because the update in the above SQL is restricted by the NOT true clause for kanop and chloris
+UPDATE akvo_tree_registration_areas_updated
+SET chloris_uploaded = akvo_tree_registration_areas_edits.chloris_uploaded,
+kanop_uploaded = akvo_tree_registration_areas_edits.kanop_uploaded
+WHERE akvo_tree_registration_areas_updated.identifier_akvo = akvo_tree_registration_areas_edits.identifier_akvo
+AND (akvo_tree_registration_areas_edits.chloris_uploaded = TRUE OR akvo_tree_registration_areas_edits.kanop_uploaded = TRUE)
+
+
 -- Delete rows that were removed in the EDIT table also from the UPDATE table.
 DELETE FROM akvo_tree_registration_areas_updated
 WHERE NOT EXISTS (SELECT 1 FROM akvo_tree_registration_areas_edits
@@ -1557,29 +1587,6 @@ ON t1.identifier_akvo = t2.identifier_akvo
 and t1.year_of_analisis = t2.year_of_analisis);'''
 
 conn.commit()
-
-
-
-# Update the EDITS table with CHLORIS analysis so that we know which sites were already processed by KANOP AND CHLORIS (and don't need to be edited or uploaded again)
-create_a1_remote_sensing_upload_chloris = '''UPDATE akvo_tree_registration_areas_edits
-SET
-chloris_uploaded = True
-
-FROM chloris_uploads
-WHERE akvo_tree_registration_areas_edits.identifier_akvo = chloris_uploads.identifier_akvo;'''
-
-conn.commit()
-
-# Update the EDITS table with KANOP analysis so that we know which sites were already processed by KANOP AND CHLORIS (and don't need to be edited or uploaded again)
-create_a1_remote_sensing_upload_kanop = '''UPDATE akvo_tree_registration_areas_edits
-SET
-kanop_uploaded = True
-
-FROM kanop_uploads
-WHERE akvo_tree_registration_areas_edits.identifier_akvo = kanop_uploads.identifier_akvo;'''
-
-conn.commit()
-
 
 # Works well
 create_a2_akvo = '''CREATE TABLE calc_tab_monitoring_calculations_per_site_merged_akvo AS
@@ -7979,12 +7986,10 @@ cur.execute(create_a1_edit)
 cur.execute(create_a1_integrate_new_data)
 cur.execute(create_a1_updates_from_odk_akvo_server_side_edits)
 cur.execute(create_a1_edit_integration)
-cur.execute(create_a1_update_chloris_uploads)
-cur.execute(create_a1_update_kanop_uploads)
 cur.execute(create_a1_updates_from_updated_to_edits_geometric_corr)
-cur.execute(create_a1_remote_sensing_results)
 cur.execute(create_a1_remote_sensing_upload_chloris)
 cur.execute(create_a1_remote_sensing_upload_kanop)
+cur.execute(create_a1_remote_sensing_results)
 cur.execute(create_a2_akvo)
 cur.execute(create_a2_odk)
 cur.execute(create_a2_merge_akvo_odk)
