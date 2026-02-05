@@ -1543,6 +1543,7 @@ OR akvo_tree_registration_areas_edits.kanop_uploaded = TRUE);
 UPDATE akvo_tree_registration_areas_updated
 SET chloris_uploaded = akvo_tree_registration_areas_edits.chloris_uploaded,
 kanop_uploaded = akvo_tree_registration_areas_edits.kanop_uploaded
+FROM akvo_tree_registration_areas_edits
 WHERE akvo_tree_registration_areas_updated.identifier_akvo = akvo_tree_registration_areas_edits.identifier_akvo
 AND (akvo_tree_registration_areas_edits.chloris_uploaded = TRUE OR akvo_tree_registration_areas_edits.kanop_uploaded = TRUE);
 
