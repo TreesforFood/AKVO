@@ -41,10 +41,6 @@ list_areas = []
 count_areas_total = 0
 count_areas_success = 0
 
-# ------- Create polygons for upload
-config = Config()
-conn = psycopg2.connect(host= config.CONF["HOST_PSTGRS"],database= config.CONF["DATABASE_PSTGRS"],user= config.CONF["USER_PSTGRS"],password= config.CONF["PASSWORD_PSTGRS"])
-cur = conn.cursor()
 
 cur.execute("SELECT identifier_akvo, planting_date, polygon FROM KANOP_latest_uploads")
 row = cur.fetchall() # output is list of tuples named rows
