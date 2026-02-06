@@ -1493,6 +1493,15 @@ WHERE akvo_tree_registration_areas_edits.identifier_akvo = kanop_uploads.identif
 conn.commit()
 
 
+# After a polygon modification in EDITS, the calc_area needs to be recalculated. Then this recalculated area must also enter into the UPDATED TABLE
+update_calc_area_edits = '''
+UPDATE akvo_tree_registration_areas_edits
+SET calc_area = ST_Area(polygon)
+WHERE akvo_tree_registration_areas_edits.edit_confirmation = TRUE
+AND akvo_tree_registration_areas_edits.polygon IS NOT NULL;'''
+
+conn.commit()
+
 
 # Insert the edits back again in the UPDATE TABLE so that they become visible for the dashboard and also available for prosessing by KANOP AND CHLORIS
 create_a1_edit_integration = '''UPDATE akvo_tree_registration_areas_updated
@@ -1539,7 +1548,7 @@ AND NOT (akvo_tree_registration_areas_edits.chloris_uploaded = TRUE
 OR akvo_tree_registration_areas_edits.kanop_uploaded = TRUE);
 
 
---Update (seperately) the kanop/chloris upload results. THis is sepertately needed because the update in the above SQL is restricted by the NOT true clause for kanop and chloris
+-- Update (seperately) the kanop/chloris upload results. THis is sepertately needed because the update in the above SQL is restricted by the NOT true clause for kanop and chloris
 UPDATE akvo_tree_registration_areas_updated
 SET chloris_uploaded = akvo_tree_registration_areas_edits.chloris_uploaded,
 kanop_uploaded = akvo_tree_registration_areas_edits.kanop_uploaded
@@ -7979,17 +7988,32 @@ conn.commit()
 
 
 # Execute create tables
+
+# cur.execute(create_a1_integrated)
+# cur.execute(create_a1_updated)
+# cur.execute(create_a1_updates_from_odk_akvo_server_side_updated)
+# cur.execute(create_a1_insertion)
+# cur.execute(create_a1_edit)
+# cur.execute(create_a1_integrate_new_data)
+# cur.execute(create_a1_updates_from_odk_akvo_server_side_edits)
+# cur.execute(create_a1_edit_integration)
+# cur.execute(create_a1_updates_from_updated_to_edits_geometric_corr)
+# cur.execute(create_a1_remote_sensing_upload_chloris)
+# cur.execute(create_a1_remote_sensing_upload_kanop)
+# cur.execute(create_a1_remote_sensing_results)
+
 cur.execute(create_a1_integrated)
 cur.execute(create_a1_updated)
 cur.execute(create_a1_updates_from_odk_akvo_server_side_updated)
+cur.execute(create_a1_updates_from_odk_akvo_server_side_edits)
 cur.execute(create_a1_insertion)
 cur.execute(create_a1_edit)
 cur.execute(create_a1_integrate_new_data)
-cur.execute(create_a1_updates_from_odk_akvo_server_side_edits)
-cur.execute(create_a1_edit_integration)
 cur.execute(create_a1_updates_from_updated_to_edits_geometric_corr)
 cur.execute(create_a1_remote_sensing_upload_chloris)
 cur.execute(create_a1_remote_sensing_upload_kanop)
+cur.execute(update_calc_area_edits)
+cur.execute(create_a1_edit_integration)
 cur.execute(create_a1_remote_sensing_results)
 cur.execute(create_a2_akvo)
 cur.execute(create_a2_odk)
