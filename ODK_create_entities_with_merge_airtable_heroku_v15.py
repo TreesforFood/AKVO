@@ -168,8 +168,20 @@ END AS name_id_planting_site,
 '' AS polygon,
 '' AS geometry_point,
 '' AS odk_entity_geometry,
---CONCAT(contract_number::INTEGER::varchar(10),'.00') AS contract_number_match_airtable,
-CONCAT(SUBSTRING(contract_number::varchar(10) FROM 1 FOR POSITION('.' IN contract_number::varchar(10)) - 1),'.00') AS contract_number_match_airtable,
+
+-- CONCAT(SUBSTRING(contract_number::varchar(10) FROM 1 FOR POSITION('.' IN contract_number::varchar(10)) - 1),'.00') AS contract_number_match_airtable,
+
+CONCAT(
+CASE
+    WHEN POSITION('.' IN contract_number::varchar(10)) > 0 THEN
+      SUBSTRING(contract_number::varchar(10) FROM 1 FOR POSITION('.' IN contract_number::varchar(10)) - 1)
+    ELSE
+      contract_number::varchar(10)
+  END,
+  '.00'
+) AS contract_number_match_airtable,
+
+
 contract_number::varchar(10),
 '' AS identifier_akvo,
 
@@ -249,6 +261,7 @@ FROM temp_contract_overview
 where contract_number_match_airtable IN %s OR ecosia_site_id IN %s;''', (tuple_contracts, tuple_identifiers))
 conn.commit()
 
+
 # Remove the duplicate labels
 cur.execute('''DELETE FROM getodk_entities_upload_table WHERE row_number > 1;''')
 conn.commit()
@@ -259,6 +272,7 @@ conn.commit()
 
 rows = cur.fetchall()
 
+
 # Reverse the x and y coordinates
 def flip(x, y):
     """Flips the x and y coordinate values"""
@@ -267,12 +281,14 @@ def flip(x, y):
 dict = {}
 lat_lon_coords = []
 
+
 # Create a dictionary and appending the polygons to this dictionary
 id = [row[1]for row in rows]
 
 geometries = [wkt.loads(row[0]) for row in rows]
 for lon_lat_coords in geometries:
     lat_lon_coords.append(transform(flip, lon_lat_coords).wkt)
+
 
 # Linking the polygons to their identifier
 for key in id:
@@ -282,6 +298,7 @@ for key in id:
         lat_lon_coords.remove(value)
         break
 
+
 # Update the table with reverse coordinates
 for key,value in dict.items():
     print(key,value)
@@ -289,7 +306,6 @@ for key,value in dict.items():
     SET geometry = %s
     WHERE ecosia_site_id = %s''', (value,key))
     conn.commit()
-
 
 
 # Remove the WKT format ('POLYGON(( etc))')
