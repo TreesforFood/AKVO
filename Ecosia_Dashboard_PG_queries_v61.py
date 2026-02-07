@@ -1476,7 +1476,6 @@ conn.commit()
 create_a1_remote_sensing_upload_chloris = '''UPDATE akvo_tree_registration_areas_edits
 SET
 chloris_uploaded = True
-
 FROM chloris_uploads
 WHERE akvo_tree_registration_areas_edits.identifier_akvo = chloris_uploads.identifier_akvo;'''
 
@@ -1486,7 +1485,6 @@ conn.commit()
 create_a1_remote_sensing_upload_kanop = '''UPDATE akvo_tree_registration_areas_edits
 SET
 kanop_uploaded = True
-
 FROM kanop_uploads
 WHERE akvo_tree_registration_areas_edits.identifier_akvo = kanop_uploads.identifier_akvo;'''
 
@@ -7789,66 +7787,6 @@ SET contract = TRUNC(sub_contract);'''
 
 conn.commit()
 
-# Here we create a seperate table for KANOP analysis. We first going to detect where self-intersections are located
-# Then we are going to correct the self-intersected polygons with an ST-buffer(0.0). In the geometric error detection script
-# Then we run the overlap analysis again, but with the corrected self-intersected polygons. In the geometric error detection script
-# With this, we can filter out ALL overlapping polygons, including the ones that have a self-intersection (and have an overlap)
-#create_a51 = ('''
-# CREATE TABLE akvo_tree_registration_areas_updated_remotesensing
-# AS (SELECT * FROM akvo_tree_registration_areas_updated);
-#
-# ALTER TABLE akvo_tree_registration_areas_updated_remotesensing
-# DROP COLUMN self_intersection,
-# DROP COLUMN overlap,
-# DROP COLUMN needle_shape,
-# DROP COLUMN check_duplicate_polygons;
-#
-# ALTER TABLE akvo_tree_registration_areas_updated_remotesensing
-# ADD polygon_corr_self_intersections geography (polygon, 4326),
-# ADD self_intersection_before_corr_pol BOOLEAN,
-# ADD self_intersection_after_corr_pol BOOLEAN,
-# ADD overlap_before_self_intersection_corrections BOOLEAN,
-# ADD overlap_after_self_intersection_corrections BOOLEAN,
-# ADD needle_shape_before_self_interection_corrections BOOLEAN,
-# ADD needle_shape_after_self_interection_corrections BOOLEAN,
-# ADD check_duplicate_polygons_after_self_corrections TEXT,
-# ADD check_duplicate_polygons_before_self_corrections TEXT;''')
-#
-# conn.commit()
-
-create_a52 = '''CREATE TABLE IF NOT EXISTS superset_ecosia_kanop_chloris_results AS (SELECT
-t1.identifier_akvo,
-t1.organisation,
-t1.id_planting_site,
-t1.contract_number,
-t1.year_of_analisis,
-t1.chloris_above_ground_dry_biomass,
-t2.kanop_above_ground_living_biomass AS kanop_above_ground_dry_biomass
-
-FROM (SELECT
-identifier_akvo,
-organisation,
-contract_number AS contract_number,
-id_planting_site,
-year_of_analisis AS year_of_analisis,
-forest_agb_stock_per_year_mt AS chloris_above_ground_dry_biomass
-FROM superset_ecosia_CHLORIS_polygon_results) t1
-
-JOIN
-
-(SELECT
-identifier_akvo,
-name_project AS contract_number,
-'unknown' AS id_planting_site,
-year_of_analisis AS year_of_analisis,
-request_measurement_date AS year_analysis,
-livingabovegroundbiomass_present AS kanop_above_ground_living_biomass
-FROM superset_ecosia_kanop_polygon_level_1_moment) t2
-ON t1.identifier_akvo = t2.identifier_akvo
-and t1.year_of_analisis = t2.year_of_analisis);'''
-
-conn.commit()
-
 
 # This login (see below) and the associated grands is being used by the QGIS users
 create_a20_ecosia_superset = '''
@@ -7988,20 +7926,6 @@ conn.commit()
 
 
 # Execute create tables
-
-# cur.execute(create_a1_integrated)
-# cur.execute(create_a1_updated)
-# cur.execute(create_a1_updates_from_odk_akvo_server_side_updated)
-# cur.execute(create_a1_insertion)
-# cur.execute(create_a1_edit)
-# cur.execute(create_a1_integrate_new_data)
-# cur.execute(create_a1_updates_from_odk_akvo_server_side_edits)
-# cur.execute(create_a1_edit_integration)
-# cur.execute(create_a1_updates_from_updated_to_edits_geometric_corr)
-# cur.execute(create_a1_remote_sensing_upload_chloris)
-# cur.execute(create_a1_remote_sensing_upload_kanop)
-# cur.execute(create_a1_remote_sensing_results)
-
 cur.execute(create_a1_integrated)
 cur.execute(create_a1_updated)
 cur.execute(create_a1_updates_from_odk_akvo_server_side_updated)
@@ -8038,7 +7962,7 @@ cur.execute(create_a46)
 cur.execute(create_a47)
 cur.execute(create_a49)
 #cur.execute(create_a51)
-cur.execute(create_a52)
+
 
 cur.execute(create_a20_ecosia_superset) # This gives grand access to QGIS users. With this login (inside QGIS) they will only see the superset tables
 cur.execute(create_a21_ecosia_editing) # Used by the Preset dashboard. No grand limitation. As such it is de-activated
