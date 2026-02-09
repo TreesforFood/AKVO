@@ -1598,7 +1598,7 @@ ON t1.identifier_akvo = t2.identifier_akvo
 AND t1.year_of_analisis = t2.year_of_analisis
 
 JOIN akvo_tree_registration_areas_updated t3
-on t1.identifier_akvo = t3.identifier_akvo;'''
+on t1.identifier_akvo = t3.identifier_akvo);'''
 
 conn.commit()
 
