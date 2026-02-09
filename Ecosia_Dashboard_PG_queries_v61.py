@@ -1564,35 +1564,41 @@ conn.commit()
 
 
 create_a1_remote_sensing_results = '''CREATE TABLE superset_ecosia_kanop_chloris_results AS (SELECT
-t1.identifier_akvo,
-t1.organisation,
-t1.id_planting_site,
-t1.contract_number,
-t1.year_of_analisis,
-t1.chloris_above_ground_dry_biomass,
-t2.kanop_above_ground_living_biomass AS kanop_above_ground_dry_biomass
-
-FROM (SELECT
-identifier_akvo,
-organisation,
-contract_number AS contract_number,
-id_planting_site,
-year_of_analisis AS year_of_analisis,
-forest_agb_stock_per_year_mt AS chloris_above_ground_dry_biomass
-FROM superset_ecosia_CHLORIS_polygon_results) t1
-
+  t1.identifier_akvo,
+  t1.organisation,
+  t1.id_planting_site,
+  LEFT(t3.planting_date, 4)::integer as planting_year,  -- Make sure this column exists in t1 subquery or remove it here
+  t1.contract_number,
+  t1.year_of_analisis,
+  t1.chloris_above_ground_dry_biomass,
+  t2.kanop_above_ground_living_biomass AS kanop_above_ground_dry_biomass
+FROM
+  (
+    SELECT
+      identifier_akvo,
+      organisation,
+      contract_number,
+      id_planting_site,
+      year_of_analisis,
+      forest_agb_stock_per_year_mt AS chloris_above_ground_dry_biomass
+      --planting_year  -- Add this if it exists in the source table
+    FROM superset_ecosia_CHLORIS_polygon_results
+  ) t1
 JOIN
-
-(SELECT
-identifier_akvo,
-name_project AS contract_number,
-'unknown' AS id_planting_site,
-year_of_analisis AS year_of_analisis,
-request_measurement_date AS year_analysis,
-livingabovegroundbiomass_present AS kanop_above_ground_living_biomass
-FROM superset_ecosia_kanop_polygon_level_1_moment) t2
+  (
+    SELECT
+      identifier_akvo,
+      name_project AS contract_number,
+      'unknown' AS id_planting_site,
+      year_of_analisis,
+      livingabovegroundbiomass_present AS kanop_above_ground_living_biomass
+    FROM superset_ecosia_kanop_polygon_level_1_moment
+  ) t2
 ON t1.identifier_akvo = t2.identifier_akvo
-and t1.year_of_analisis = t2.year_of_analisis);'''
+AND t1.year_of_analisis = t2.year_of_analisis
+
+JOIN akvo_tree_registration_areas_updated t3
+on t1.identifier_akvo = t3.identifier_akvo;'''
 
 conn.commit()
 
