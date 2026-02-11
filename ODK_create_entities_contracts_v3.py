@@ -89,10 +89,9 @@ for x in result:
     for y in x:
         count = count + 1
         open_for_reporting = y['fields']['Open for reporting']
-        print('all contracts', maincontractnr,':', open_for_reporting)
         maincontractnr = str(y['fields']['ID'])
         maincontractnr = str(maincontractnr + '.00')
-
+        print('all contracts', maincontractnr,':', open_for_reporting)
         if open_for_reporting is True:
 
             try:
@@ -177,7 +176,7 @@ for row in rows_dict:
         entities[columns[i]] = row[i]
         if isinstance(row[i], str):
             entities[columns[i]] = row[i].strip()
-    print('FREEK:', entities)
+    #print('FREEK:', entities)
     entities_list.append(entities.copy())
 
 # Connect to ODK central server and use the merge command
