@@ -92,17 +92,17 @@ for x in result:
         maincontractnr = str(y['fields']['ID'])
         maincontractnr = str(maincontractnr + '.00')
         print('all contracts', maincontractnr,':', open_for_reporting)
+
         if open_for_reporting is True:
 
             try:
-                y['fields']['AKVO ID (from Partner ID) (from Project)'][0]
-            except KeyError:
-                continue
-            else:
                 organisation = str(y['fields']['AKVO ID (from Partner ID) (from Project)'][0])
+                country = str(y['fields']['Country (from Project ID)'][0])
+            except (KeyError, IndexError):
+                # Skip this entry if keys or list elements are missing
+                continue
 
             label = str(maincontractnr)
-            country = str(y['fields']['Country (from Project ID)'][0])
 
             print('Only open contracts', country,':', maincontractnr, ':', open_for_reporting)
 
