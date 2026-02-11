@@ -68,16 +68,17 @@ for x in result:
 
         rows = cur.fetchall()
 
-        for row in rows:
-            # Upload url to Airtable
-            for x in row[1]:
-                print(x)
-                ss_t0 = str(x[0])
-                row_airtable_to_update = f"https://api.airtable.com/v0/appkx2PPsqz3axWDy/Contracts/{contract_id_airtable}"
+        # for row in rows:
+        #     # Upload url to Airtable
+        #     for x in row[1]:
+        #         print(x)
+        ss_t0 = str(rows[1])
 
-                # Set the new field values for the record
-                update_t0_airtable = {'fields':{'ss_t0': ss_t0}}
+        row_airtable_to_update = f"https://api.airtable.com/v0/appkx2PPsqz3axWDy/Contracts/{contract_id_airtable}"
 
-                # Send your request to update the record and parse the response
-                response_airtable = requests.patch(row_airtable_to_update, headers=headers, json=update_t0_airtable)
-                data = json.loads(response_airtable.text)
+        # Set the new field values for the record
+        update_t0_airtable = {'fields':{'ss_t0': ss_t0}}
+
+        # Send your request to update the record and parse the response
+        response_airtable = requests.patch(row_airtable_to_update, headers=headers, json=update_t0_airtable)
+        data = json.loads(response_airtable.text)
