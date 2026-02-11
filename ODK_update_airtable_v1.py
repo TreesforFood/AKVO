@@ -62,15 +62,16 @@ for x in result:
     for y in x:
         contract_id_airtable = y['fields']['ID']
 
-        cur.execute('''SELECT contract, "Total number of trees registered at t=0" FROM superset_ecosia_contract_overview
-        WHERE contract = %s''', (contract_id_airtable,))
+        cur.execute('''SELECT contract, SUM("Total number of trees registered at t=0") FROM superset_ecosia_contract_overview
+        WHERE contract = %s
+        group by contract''', (contract_id_airtable,))
 
         rows = cur.fetchall()
 
         for row in rows:
             # Upload url to Airtable
             print(row)
-            ss_t0 = str(row[1])
+            ss_t0 = str(row[1][0])
             row_airtable_to_update = f"https://api.airtable.com/v0/appkx2PPsqz3axWDy/Contracts/{contract_id_airtable}"
 
             # Set the new field values for the record
