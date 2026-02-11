@@ -88,7 +88,7 @@ count = 0
 for x in result:
     for y in x:
         count = count + 1
-        open_for_reporting = y['fields']['Open for reporting']
+        open_for_reporting = y['fields'].get('Open for reporting', False)
         maincontractnr = str(y['fields']['ID'])
         maincontractnr = str(maincontractnr + '.00')
         print('all contracts', maincontractnr,':', open_for_reporting)
@@ -141,7 +141,7 @@ count = 0
 for x in result:
     for y in x:
         count = count + 1
-        open_for_reporting = y['fields']['Open for reporting']
+        open_for_reporting = y['fields'].get('Open for reporting', False)
         if open_for_reporting is True:
             maincontract = str(y['fields']['Contractnr_odk'][0])
             organisation = str(y['fields']['Subpartner_odk'][0])
