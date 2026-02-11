@@ -69,6 +69,7 @@ for x in result:
 
         for row in rows:
             # Upload url to Airtable
+            print(row)
             ss_t0 = str(row[1])
             row_airtable_to_update = f"https://api.airtable.com/v0/appkx2PPsqz3axWDy/Contracts/{contract_id_airtable}"
 
@@ -78,4 +79,3 @@ for x in result:
             # Send your request to update the record and parse the response
             response_airtable = requests.patch(row_airtable_to_update, headers=headers, json=update_t0_airtable)
             data = json.loads(response_airtable.text)
-            #print(data)
