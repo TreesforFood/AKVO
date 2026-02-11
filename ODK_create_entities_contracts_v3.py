@@ -89,10 +89,12 @@ for x in result:
     for y in x:
         count = count + 1
         open_for_reporting = y['fields']['Open for reporting']
+        print('all contracts', maincontractnr,':', open_for_reporting)
         maincontractnr = str(y['fields']['ID'])
         maincontractnr = str(maincontractnr + '.00')
 
         if open_for_reporting is True:
+
             try:
                 y['fields']['AKVO ID (from Partner ID) (from Project)'][0]
             except KeyError:
@@ -102,6 +104,8 @@ for x in result:
 
             label = str(maincontractnr)
             country = str(y['fields']['Country (from Project ID)'][0])
+
+            print('Only open contracts', country,':', maincontractnr, ':', open_for_reporting)
 
             cur.execute('''INSERT INTO getodk_entities_contract_table (label, organisation, contract_number, country)
             VALUES (%s,%s,%s,%s)''', (label, organisation, maincontractnr, country))
