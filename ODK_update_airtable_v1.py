@@ -71,8 +71,8 @@ for x in result:
         for row in rows:
             # Upload url to Airtable
             for x in row[1]:
-                print(row)
-                ss_t0 = str(row[0])
+                print(x)
+                ss_t0 = str(x[0])
                 row_airtable_to_update = f"https://api.airtable.com/v0/appkx2PPsqz3axWDy/Contracts/{contract_id_airtable}"
 
                 # Set the new field values for the record
