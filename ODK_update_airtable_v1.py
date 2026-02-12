@@ -73,7 +73,7 @@ for x in result:
 
         for row in rows:
             print(row)
-            ss_t0 = str(row[1])
+            ss_t0 = row[1]
             print(ss_t0)
             print(contract_airtable)
 
