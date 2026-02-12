@@ -1568,7 +1568,7 @@ create_a1_remote_sensing_results = '''CREATE TABLE superset_ecosia_kanop_chloris
   t1.organisation,
   t1.id_planting_site,
   LEFT(t3.planting_date, 4)::integer as planting_year,  -- Make sure this column exists in t1 subquery or remove it here
-  t3.calc_area AS area_size_ha,
+  ROUND(t3.calc_area,1) AS area_size_ha,
   t1.contract_number,
   t1.year_of_analisis,
   t1.chloris_above_ground_dry_biomass,
@@ -1581,7 +1581,7 @@ FROM
       contract_number,
       id_planting_site,
       year_of_analisis,
-      forest_agb_stock_per_year_mt AS chloris_above_ground_dry_biomass
+      ROUND(forest_agb_stock_per_year_mt,0) AS chloris_above_ground_dry_biomass
       --planting_year  -- Add this if it exists in the source table
     FROM superset_ecosia_CHLORIS_polygon_results
   ) t1
@@ -1592,7 +1592,7 @@ JOIN
       name_project AS contract_number,
       'unknown' AS id_planting_site,
       year_of_analisis,
-      livingabovegroundbiomass_present AS kanop_above_ground_living_biomass
+      ROUND(livingabovegroundbiomass_present,0) AS kanop_above_ground_living_biomass
     FROM superset_ecosia_kanop_polygon_level_1_moment
   ) t2
 ON t1.identifier_akvo = t2.identifier_akvo
