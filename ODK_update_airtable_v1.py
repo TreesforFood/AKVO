@@ -75,7 +75,7 @@ for x in result:
             print(row)
             ss_t0 = str(row[1])
             print(ss_t0)
-            print(contract_id_airtable)
+            print(contract_airtable)
 
             row_airtable_to_update = f"https://api.airtable.com/v0/appkx2PPsqz3axWDy/Contracts/{id_airtable}"
 
