@@ -57,14 +57,17 @@ while True :
 
 count = 0
 
+
+
 # Get the results from the pagination function
 for x in result:
     for y in x:
-        contract_id_airtable = y['fields']['ID']
+        contract_airtable = y['fields']['ID']
+        id_airtable = y['id']
 
         cur.execute('''SELECT contract, SUM("Total number of trees registered at t=0") FROM superset_ecosia_contract_overview
         WHERE contract = %s
-        group by contract''', (contract_id_airtable,))
+        group by contract''', (contract_airtable,))
 
         rows = cur.fetchall()
 
@@ -74,7 +77,7 @@ for x in result:
             print(ss_t0)
             print(contract_id_airtable)
 
-            row_airtable_to_update = f"https://api.airtable.com/v0/appkx2PPsqz3axWDy/Contracts/{contract_id_airtable}"
+            row_airtable_to_update = f"https://api.airtable.com/v0/appkx2PPsqz3axWDy/Contracts/{id_airtable}"
 
             # Set the new field values for the record
             update_t0_airtable = {'fields':{'ss_t0': ss_t0}}
