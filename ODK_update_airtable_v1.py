@@ -65,7 +65,10 @@ for x in result:
         contract_airtable = y['fields']['ID']
         id_airtable = y['id']
 
-        cur.execute('''SELECT contract, SUM("Total number of trees registered at t=0") FROM superset_ecosia_contract_overview
+        cur.execute('''SELECT contract, SUM("Total number of trees registered at t=0"),
+        SUM("total tree number in t=1"),
+        SUM("total tree number in t=2"),
+        SUM("total tree number in t=3") FROM superset_ecosia_contract_overview
         WHERE contract = %s
         group by contract''', (contract_airtable,))
 
@@ -78,15 +81,33 @@ for x in result:
                 ss_t0 = int(row[1])
             except (TypeError, ValueError):
                 ss_t0 = 0  # default or fallback value
-            
-            print(ss_t0)
-            print(contract_airtable)
+
+            try:
+                ss_t1 = int(row[2])
+            except (TypeError, ValueError):
+                ss_t1 = 0  # default or fallback value
+
+            try:
+                ss_t2 = int(row[3])
+            except (TypeError, ValueError):
+                ss_t2 = 0  # default or fallback value
+
+            try:
+                ss_t3 = int(row[4])
+            except (TypeError, ValueError):
+                ss_t3 = 0  # default or fallback value
 
             row_airtable_to_update = f"https://api.airtable.com/v0/appkx2PPsqz3axWDy/Contracts/{id_airtable}"
 
             # Set the new field values for the record
             update_t0_airtable = {'fields':{'ss_t0': ss_t0}}
+            update_t1_airtable = {'fields':{'ss_t1': ss_t1}}
+            update_t2_airtable = {'fields':{'ss_t2': ss_t2}}
+            update_t3_airtable = {'fields':{'ss_t3': ss_t3}}
 
             # Send your request to update the record and parse the response
-            response_airtable = requests.patch(row_airtable_to_update, headers=headers, json=update_t0_airtable)
-            data = json.loads(response_airtable.text)
+            response_airtable_t0 = requests.patch(row_airtable_to_update, headers=headers, json=update_t0_airtable)
+            response_airtable_t1 = requests.patch(row_airtable_to_update, headers=headers, json=update_t1_airtable)
+            response_airtable_t2 = requests.patch(row_airtable_to_update, headers=headers, json=update_t2_airtable)
+            response_airtable_t3 = requests.patch(row_airtable_to_update, headers=headers, json=update_t3_airtable)
+            #data = json.loads(response_airtable.text)
