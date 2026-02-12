@@ -1568,6 +1568,7 @@ create_a1_remote_sensing_results = '''CREATE TABLE superset_ecosia_kanop_chloris
   t1.organisation,
   t1.id_planting_site,
   LEFT(t3.planting_date, 4)::integer as planting_year,  -- Make sure this column exists in t1 subquery or remove it here
+  t3.calc_area AS area_size_ha,
   t1.contract_number,
   t1.year_of_analisis,
   t1.chloris_above_ground_dry_biomass,
