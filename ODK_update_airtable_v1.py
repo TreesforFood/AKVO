@@ -68,7 +68,7 @@ for x in result:
         cur.execute('''SELECT contract, SUM("Total number of trees registered at t=0"),
         SUM("total tree number in t=1"),
         SUM("total tree number in t=2"),
-        SUM("total tree number in t=3") FROM superset_ecosia_contract_overview
+        SUM("total tree number in t=>3") FROM superset_ecosia_contract_overview
         WHERE contract = %s
         group by contract''', (contract_airtable,))
 
