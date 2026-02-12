@@ -73,7 +73,12 @@ for x in result:
 
         for row in rows:
             print(row)
-            ss_t0 = int(row[1])
+
+            try:
+                ss_t0 = int(row[1])
+            except (TypeError, ValueError):
+                ss_t0 = 0  # default or fallback value
+            
             print(ss_t0)
             print(contract_airtable)
 
