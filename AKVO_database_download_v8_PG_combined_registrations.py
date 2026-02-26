@@ -40,6 +40,12 @@ headers = {'Authorization': "Bearer {}".format(token_id), 'Accept': 'application
 initial_url_registration_data = 'https://api-auth0.akvo.org/flow/orgs/ecosia/form_instances?survey_id=31840001&form_id=48090001&page_size=200'
 initial_sync_request = 'https://api-auth0.akvo.org/flow/orgs/ecosia/sync?initial=true' # with this link, you get the first page with the NextUrl in it. This URL is being send by an api call.
 
+################################## STORE FIRST DOWNLOAD URL IN DATABASE
+#connect to Postgresql database
+conn = psycopg2.connect(os.environ["DATABASE_URL"], sslmode='require')
+cur = conn.cursor()
+
+
 cur.execute('''CREATE TABLE IF NOT EXISTS temporary_url_download_table (id SERIAL PRIMARY KEY, download_url TEXT);''')
 conn.commit()
 
