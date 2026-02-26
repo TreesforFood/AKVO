@@ -50,7 +50,6 @@ conn.commit()
 cur.execute('''CREATE TABLE IF NOT EXISTS test_number_identifiers(identifier TEXT);''')
 conn.commit()
 
-
 ################################## CHECK IF THE TABLE HAS DOWNLOAD URLS. IF THE TABLE IS EMPTY,
 ################################## IT MEANS THE DOWNLOAD HAS TO START FROM SCRATCH AND SO THE INITIAL DOWNLOAD URL IS ADDED.
 ################################## IF THE TABLE HAS AN URL, IT MEANS THAT THE FULL DOWNLOAD IS STILL IN PROGRES AND NEEDS TO CONTINUE FROM THE LATEST URL
@@ -77,7 +76,6 @@ if fetch_download_url[0][0] != True: # Output from this is Boolean! If the resul
     DROP TABLE IF EXISTS AKVO_Tree_registration_areas_baseline_pcq cascade;''')
 
     conn.commit()
-
 
     cur.execute('''CREATE TABLE AKVO_Tree_registration_areas (identifier_akvo TEXT, display_name TEXT, device_id TEXT, instance TEXT, submission DATE,
     submission_year SMALLINT, submissiontime TEXT, submitter TEXT, modifiedAt TEXT, AKVO_form_version NUMERIC(10,2), country TEXT, test TEXT,
