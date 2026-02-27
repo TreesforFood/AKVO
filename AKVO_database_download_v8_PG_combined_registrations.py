@@ -32,13 +32,17 @@ else: # in case of error from AKVO server
 
 headers = {'Authorization': "Bearer {}".format(token_id), 'Accept': 'application/vnd.akvo.flow.v2+json'}
 
-################################## STORE FIRST DOWNLOAD URL IN DATABASE
 #connect to Postgresql database
 conn = psycopg2.connect(os.environ["DATABASE_URL"], sslmode='require')
 cur = conn.cursor()
 
+########################################################################################################################################
+# TREE REGISTRATION DATA DOWNLOAD STARTS HERE
+
+################################## GET FIRST DOWNLOAD URL FROM AKVO (REGISTRATION DATA)
+
 initial_url_registration_data = 'https://api-auth0.akvo.org/flow/orgs/ecosia/form_instances?survey_id=31840001&form_id=48090001&page_size=200'
-initial_sync_request = 'https://api-auth0.akvo.org/flow/orgs/ecosia/sync?initial=true' # with this link, you get the first page with the NextUrl in it. This URL is being send by an api call.
+#initial_sync_request = 'https://api-auth0.akvo.org/flow/orgs/ecosia/sync?initial=true' # with this link, you get the first page with the NextUrl in it. This URL is being send by an api call.
 
 cur.execute('''CREATE TABLE IF NOT EXISTS temporary_url_download_table (id SERIAL PRIMARY KEY, download_url TEXT);''')
 conn.commit()
@@ -46,20 +50,24 @@ conn.commit()
 cur.execute('''CREATE TABLE IF NOT EXISTS test_number_identifiers(identifier TEXT);''')
 conn.commit()
 
+
 ################################## CHECK IF THE TABLE HAS DOWNLOAD URLS. IF THE TABLE IS EMPTY,
 ################################## IT MEANS THE DOWNLOAD HAS TO START FROM SCRATCH AND SO THE INITIAL DOWNLOAD URL IS ADDED.
 ################################## IF THE TABLE HAS AN URL, IT MEANS THAT THE FULL DOWNLOAD IS STILL IN PROGRES AND NEEDS TO CONTINUE FROM THE LATEST URL
 cur.execute('''SELECT EXISTS (SELECT * FROM temporary_url_download_table)''')
 fetch_download_url = cur.fetchall()
 if fetch_download_url[0][0] != True: # Output from this is Boolean! If the result is 'True' then the table is empty (no rows). In that case it will be populated with the initial URL download request
-    cur.execute('''INSERT INTO temporary_url_download_table(download_url) VALUES (%s)''', (initial_url_registration_data,))
+    cur.execute('''INSERT INTO temporary_url_download_table(download_url) VALUES (%s);''', (initial_url_registration_data,))
     conn.commit()
-    get_initial_syncurl = requests.get(initial_sync_request, headers = headers)
+    get_initial_syncurl = requests.get(initial_url_registration_data, headers = headers)
     converturltotxt = get_initial_syncurl.text
     converttojson = json.loads(converturltotxt)
-    initial_syncurl = converttojson.get('nextSyncUrl',"Ecosia: No sync url was found in this instance")
+    initial_syncurl = converttojson.get('nextPageUrl',"Ecosia: No sync url was found in this instance")
+    print('initial_syncurl: ', initial_syncurl)
     #cur.execute('''UPDATE url_latest_sync SET sync_url = %s WHERE id = %s;''', (initial_syncurl, 1))
-    cur.execute('''UPDATE temporary_url_download_table SET download_url = %s WHERE id = %s;''', (initial_syncurl, 1))
+    #cur.execute('''UPDATE temporary_url_download_table SET download_url = %s WHERE id = %s;''', (initial_syncurl, 1))
+    cur.execute('''INSERT INTO temporary_url_download_table(download_url) VALUES (%s);''', (initial_syncurl,))
+
     conn.commit()
     print('Message 1: The URL table does not have any rows with URLs. The script will start downloading with the initial AKVO download URL. Also the following syncURl has been stored in the database for syncing: ', initial_syncurl)
 
@@ -119,6 +127,7 @@ else:
 
     for first_download_url in fetch_latest_url: # Parse through the nextPageUrl pages. Get the following nextPageUrl and store it in the table
         cur.execute('''SELECT download_url FROM temporary_url_download_table order by id DESC LIMIT 1;''')
+
         first_download_url = cur.fetchone()[0]
         load_page = requests.get(first_download_url, headers=headers).content
         page_decode = load_page.decode() # decode from byte to string
@@ -127,7 +136,8 @@ else:
         print('Message x6: start harvesting from next url page: ', count_pages)
         print(json_dict)
 
-        for level1 in json_dict['formInstanceChanged']:
+        #for level1 in json_dict['formInstances']:
+        for level1 in json_dict['formInstances']:
             count_identifiers += 1
             print('nr identifiers downloaded so far: ', count_identifiers, ': ', level1['identifier'])
             modifiedat = level1['modifiedAt']
