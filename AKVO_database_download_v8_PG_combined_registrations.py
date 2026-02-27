@@ -127,7 +127,7 @@ else:
         print('Message x6: start harvesting from next url page: ', count_pages)
         print(json_dict)
 
-        for level1 in json_dict['formInstances']:
+        for level1 in json_dict['formInstanceChanged']:
             count_identifiers += 1
             print('nr identifiers downloaded so far: ', count_identifiers, ': ', level1['identifier'])
             modifiedat = level1['modifiedAt']
