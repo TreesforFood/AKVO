@@ -1410,25 +1410,12 @@ chloris_uploaded,
 kanop_uploaded,
 'False' AS edit_confirmation
 
-FROM akvo_tree_registration_areas_updated AS u
-WHERE  (
-    NOT EXISTS (
-      SELECT 1
-      FROM akvo_tree_registration_areas_edits AS e
-      WHERE e.identifier_akvo = u.identifier_akvo
-    )
-    AND u.chloris_uploaded = False -- This condition makes sure that submissions alreay uploaded to KANOP or CHLORIS will NOT be updated in the EDITS table (does not make sense as these submissions may not be modified anymore). Only in case chloris_uploaded is FALSE, there will be an update
-    AND u.kanop_uploaded = False -- This condition makes sure that submissions alreay uploaded to KANOP or CHLORIS will NOT be updated in the EDITS table (does not make sense as these submissions may not be modified anymore). Only in case kanop_uploaded is FALSE, there will be an update
-  )
-  OR
-  (
-    EXISTS (
-      SELECT 1
-      FROM akvo_tree_registration_areas_edits AS e
-      WHERE e.identifier_akvo = u.identifier_akvo
-    )
-    AND u.edit_confirmation = True -- This condition makes sure that the geometric error detections are being updated for the edits table (geometric error script runs on the UPDATE table)
-  );
+FROM akvo_tree_registration_areas_updated
+WHERE NOT EXISTS (SELECT 1 FROM akvo_tree_registration_areas_edits
+WHERE akvo_tree_registration_areas_updated.identifier_akvo = akvo_tree_registration_areas_edits.identifier_akvo
+AND akvo_tree_registration_areas_updated.edit_confirmation = False -- This condition makes sure that the geometric error detections are being updated for the edits table (geometric error script runs on the UPDATE table)
+AND (akvo_tree_registration_areas_updated.chloris_uploaded = False OR akvo_tree_registration_areas_updated.kanop_uploaded = False)); -- This condition makes sure that submissions alreay uploaded to KANOP or CHLORIS will NOT be updated in the EDITS table (does not make sense as these submissions may not be modified anymore)
+
 
 
 -- Delete rows that were removed from the EDITS table.
