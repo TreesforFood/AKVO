@@ -127,6 +127,8 @@ FROM akvo_site_registration_distributed_trees AS a
 LEFT JOIN akvo_tree_distribution_unregistered_farmers AS b
 ON a.identifier_akvo = b.identifier_akvo),
 
+
+
 -- Make a CTE table to do a count for unregistered farmers with the ODK form
 CTE_odk_tree_count_unregistered_farmers AS (SELECT submissionid_odk, SUM(tree_species_number_registered) total_registered_tree_number
 FROM ODK_unregistered_farmers_tree_registration_species
@@ -134,7 +136,8 @@ GROUP BY ODK_unregistered_farmers_tree_registration_species.submissionid_odk),
 
 -- Here we prepare the ODK tree registration of unregistered farmers. A join is needed for this query
 CTE_join_tree_distribution_and_registration_ODK AS (SELECT
-a.submissionid_odk,
+b.ecosia_site_id_dist AS identifier_akvo,
+b.submissionid_odk AS instance,
 b.device_id,
 b.submission_date,
 
@@ -208,7 +211,8 @@ ON a.ecosia_site_id_dist = b.ecosia_site_id_dist
 JOIN CTE_odk_tree_count_unregistered_farmers c
 ON b.submissionid_odk = c.submissionid_odk),
 
--- Below we integrate a few specific registrations that have no link with neither the AKVO nor the ODK tree distribution form. AS such, we still integrate them to the dashboard since the number of trees and location are in this dataset. But no farmer name, no submissionid/identifier_akvo or no id_planting_site is there....
+
+-- Below we integrate a few specific registrations that have NO LINK with neither the AKVO nor the ODK tree distribution form. AS such, we still integrate them to the dashboard since the number of trees and location are in this dataset. But no farmer name, no submissionid/identifier_akvo or no id_planting_site is there....
 CTE_join_tree_distribution_and_registration_empty_no_links AS (SELECT
 b.submissionid_odk,
 b.device_id,
@@ -294,6 +298,7 @@ AND b.ecosia_site_id_dist = ''),
 
 CTE_join_tree_distribution_and_registration_AKVO_vs_ODK AS (SELECT
 a.identifier_akvo,
+b.submissionid_odk AS instance, -- We need the instance of ODK (submissionid_odk) here to create a unique id (combination of identifier_akvo and instance)
 b.device_id,
 b.submission_date,
 
@@ -304,7 +309,6 @@ WHEN b.updated_at ISNULL
 THEN b.submission_date
 END AS updated_at,
 
-a.instance::text,
 b.field_date,
 'AKVO-ODK' AS source_data,
 'unregistered_farmers' AS data_form,
@@ -644,11 +648,11 @@ UNION ALL
 --- UNION with data from ODK tree registrations of unregistered farmers
 
 SELECT
-i.submissionid_odk AS identifier_akvo,
+i.identifier_akvo,
 CONCAT(i.contract_number,' - ', i.planting_site_id, ' - ', i.recipient_full_name) AS displayname,
 
 i.device_id,
-i.submissionid_odk::text AS instance,
+i.instance::text,
 i.submission_date,
 NULL AS submission_year,
 'n/a' AS submissiontime,
