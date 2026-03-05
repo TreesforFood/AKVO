@@ -1421,7 +1421,6 @@ AND akvo_tree_registration_areas_updated.edit_confirmation = False -- This condi
 AND (akvo_tree_registration_areas_updated.chloris_uploaded = False OR akvo_tree_registration_areas_updated.kanop_uploaded = False)); -- This condition makes sure that submissions alreay uploaded to KANOP or CHLORIS will NOT be updated in the EDITS table (does not make sense as these submissions may not be modified anymore)
 
 
-
 -- Delete rows that were removed from the EDITS table.
 DELETE FROM akvo_tree_registration_areas_edits
 WHERE NOT EXISTS (SELECT 1 FROM akvo_tree_registration_areas_updated
@@ -1592,6 +1591,7 @@ JOIN akvo_tree_registration_areas_updated t3
 on t1.identifier_akvo = t3.identifier_akvo);'''
 
 conn.commit()
+
 
 # Works well
 create_a2_akvo = '''CREATE TABLE calc_tab_monitoring_calculations_per_site_merged_akvo AS
