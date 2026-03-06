@@ -7790,7 +7790,8 @@ identifier_akvo,
 organisation,
 contract_number,
 kanop_uploaded,
-chloris_uploaded
+chloris_uploaded,
+polygon
 FROM akvo_tree_registration_areas_updated
 WHERE kanop_uploaded = true OR chloris_uploaded = true;'''
 
