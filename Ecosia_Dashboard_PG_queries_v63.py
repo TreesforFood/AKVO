@@ -1481,7 +1481,7 @@ conn.commit()
 # After a polygon modification in EDITS, the calc_area needs to be recalculated. Then this recalculated area must also enter into the UPDATED TABLE
 update_calc_area_edits = '''
 UPDATE akvo_tree_registration_areas_edits
-SET calc_area = ROUND(ST_Area(polygon::geography) / 10000, 2)
+SET calc_area = ST_Area(polygon::geography) / 10000
 WHERE akvo_tree_registration_areas_edits.edit_confirmation = TRUE
 AND akvo_tree_registration_areas_edits.polygon IS NOT NULL;'''
 
