@@ -7919,7 +7919,7 @@ GRANT SELECT ON spatial_ref_sys TO ecosia_editing;
 
 ALTER TABLE akvo_tree_registration_areas_edits enable ROW LEVEL SECURITY;
 ALTER TABLE superset_ecosia_tree_registration_photos enable ROW LEVEL SECURITY;
-ALTER TABLE kanop_chloris_uploads_spatial_overview enable ROW LEVEL SECURITY
+ALTER TABLE kanop_chloris_uploads_spatial_overview enable ROW LEVEL SECURITY;
 
 --ALTER DEFAULT PRIVILEGES IN SCHEMA heroku_ext GRANT SELECT ON TABLES TO ecosia_editing;
 
