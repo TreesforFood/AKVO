@@ -1250,7 +1250,6 @@ total_nr_geometric_errors,
 
 FROM akvo_tree_registration_areas_integrated
 WHERE
--- akvo_tree_registration_areas_integrated.submission >= CURRENT_DATE - INTERVAL '2 day'  -- Only recent submissions. -- The additional >= CURRENT_DATE - INTERVAL '2 day' condition is needed to prevent that deleted identifiers (done with edits) will re-appear in the UPDATE table throught the UPDATE from the INTEGRATED table.
 NOT EXISTS (SELECT 1 FROM akvo_tree_registration_areas_updated --The problem with matching identifiers (see below) is that through the form of unregistered farmers, multiple areas may be submitted, having the same identifier....
 WHERE akvo_tree_registration_areas_updated.identifier_akvo = akvo_tree_registration_areas_integrated.identifier_akvo
 AND akvo_tree_registration_areas_updated.instance = akvo_tree_registration_areas_integrated.instance);
@@ -1482,7 +1481,7 @@ conn.commit()
 # After a polygon modification in EDITS, the calc_area needs to be recalculated. Then this recalculated area must also enter into the UPDATED TABLE
 update_calc_area_edits = '''
 UPDATE akvo_tree_registration_areas_edits
-SET calc_area = ROUND(ST_Area(polygon)/10000,2)
+SET calc_area = ROUND(ST_Area(polygon::geography) / 10000, 2)
 WHERE akvo_tree_registration_areas_edits.edit_confirmation = TRUE
 AND akvo_tree_registration_areas_edits.polygon IS NOT NULL;'''
 
