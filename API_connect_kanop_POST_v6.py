@@ -103,12 +103,12 @@ data={
         "geometry": gdf.geometry.apply(lambda g: g.wkt).tolist(),
         "customerReferencePolygon": gdf.identifier_akvo.tolist(),
     },headers=headers)
-    
+
 if upload_polygons.status_code == 201:
-    print('Sucessfull upload of polygon: ', polygon_reference)
+    print('Sucessfull upload of polygon: ', gdf.identifier_akvo.tolist())
     count_areas_success += 1
 else:
-    print('Error with upload of polygon:: ', polygon_reference, '. Problem was: ', upload_polygons.json())
+    print('Error with upload of polygon:: ', gdf.identifier_akvo.tolist(), '. Problem was: ', upload_polygons.json())
 
 # Confirm a project. Validate your project before asking for analysis. Without this command a project is not listed at KANOP
 confirm_project = requests.patch(f"https://main.api.kanop.io/projects/{projectId}?confirm=true", headers=headers)
