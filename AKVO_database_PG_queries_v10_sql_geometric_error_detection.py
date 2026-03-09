@@ -87,11 +87,6 @@ AND ST_Overlaps(a.polgeo,c.polgeo))
 WHERE
 a.identifier_akvo != c.identifier_akvo),
 
---UPDATE akvo_tree_registration_areas_updated
---SET overlap = akvo_tree_registration_areas_updated_overlap.overlap
---FROM akvo_tree_registration_areas_updated_overlap
---WHERE akvo_tree_registration_areas_updated.identifier_akvo = akvo_tree_registration_areas_updated_overlap.identifier_akvo
-
 -- Transpose all identifiers_akvo from multiple rows into 1 row
 transpose_overlap_identifiers AS
 (SELECT z.identifier_akvo_a AS identifier_akvo,
