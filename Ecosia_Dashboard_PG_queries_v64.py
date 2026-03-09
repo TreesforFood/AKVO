@@ -4453,6 +4453,8 @@ t.check_200_trees AS more_200_trees_no_polygon,
 t.check_duplicate_polygons,
 t.needle_shape AS polygon_is_spatially_distorted,
 t.total_nr_geometric_errors AS total_nr_polygon_errors_found,
+t.chloris_uploaded,
+t.kanop_uploaded,
 
 json_build_object(
 'type', 'Polygon',
