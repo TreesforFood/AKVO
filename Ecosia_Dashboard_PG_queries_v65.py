@@ -460,9 +460,7 @@ c.polygon,
 0 AS total_number_trees_received,
 'n/a' AS check_ownership_trees,
 'n/a' AS gender_tree_receiver,
-'n/a' AS name_tree_receiver,
-False AS edit_confirmation,
-False AS delete_confirmation
+'n/a' AS name_tree_receiver
 
 FROM akvo_tree_registration_areas AS c
 
@@ -551,9 +549,7 @@ d.url_signature_tree_receiver,
 d.total_number_trees_received,
 d.check_ownership_trees,
 d.gender_tree_receiver,
-d.name_tree_receiver,
-False AS edit_confirmation,
-False AS delete_confirmation
+d.name_tree_receiver
 
 FROM CTE_join_tree_distribution_and_registration_AKVO AS d
 
@@ -643,9 +639,7 @@ h.polygon,
 0 AS total_number_trees_received,
 'n/a' AS check_ownership_trees,
 'n/a' AS gender_tree_receiver,
-'n/a' AS name_tree_receiver,
-False AS edit_confirmation,
-False AS delete_confirmation
+'n/a' AS name_tree_receiver
 
 FROM odk_tree_registration_main AS h
 
@@ -735,9 +729,7 @@ i.total_tree_nr_handed_out AS nr_trees_received,
 i.total_tree_nr_handed_out AS total_number_trees_received,
 'n/a' AS check_ownership_trees,
 'n/a' AS gender_tree_receiver,
-'n/a' AS name_tree_receiver,
-False AS edit_confirmation,
-False AS delete_confirmation
+'n/a' AS name_tree_receiver
 
 FROM CTE_join_tree_distribution_and_registration_ODK AS i
 
@@ -828,9 +820,7 @@ p.total_tree_nr_handed_out AS nr_trees_received,
 p.total_tree_nr_handed_out AS total_number_trees_received,
 'n/a' AS check_ownership_trees,
 'n/a' AS gender_tree_receiver,
-'n/a' AS name_tree_receiver,
-False AS edit_confirmation,
-False AS delete_confirmation
+'n/a' AS name_tree_receiver
 
 FROM CTE_join_tree_distribution_and_registration_empty_no_links AS p
 
@@ -921,9 +911,7 @@ j.total_tree_nr_handed_out AS nr_trees_received,
 j.total_tree_nr_handed_out AS total_number_trees_received,
 'n/a' AS check_ownership_trees,
 'n/a' AS gender_tree_receiver,
-'n/a' AS name_tree_receiver,
-False AS edit_confirmation,
-False AS delete_confirmation
+'n/a' AS name_tree_receiver
 
 FROM CTE_join_tree_distribution_and_registration_AKVO_vs_ODK AS j)
 
@@ -984,7 +972,10 @@ ADD total_nr_geometric_errors INTEGER;
 
 -- Add column to check whether a site was remapped by the partner or not. This is important for the edit function. Set default to 'no'
 ALTER TABLE akvo_tree_registration_areas_integrated
-ADD re_mapped_by_partner TEXT DEFAULT 'no';
+ADD re_mapped_by_partner TEXT DEFAULT 'no',
+ADD edit_confirmation DEFAULT False,
+ADD delete_confirmation DEFAULT False;
+
 
 -- Below we transpose all species from multiple rows into 1 row
 WITH t as
@@ -1348,7 +1339,7 @@ ALTER TABLE akvo_tree_registration_areas_edits
 ADD COLUMN IF NOT EXISTS fid SERIAL PRIMARY KEY, -- Needed in order to be able to edit in QGIS
 ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ, -- Add colum if not exits (in case table was already created)
 ADD COLUMN IF NOT EXISTS re_mapped_by_partner TEXT, -- Add colum if not exits (in case table was already created)
-ADD COLUMN IF NOT EXISTS delete_confirmation BOOLEAN;'''
+ADD COLUMN IF NOT EXISTS delete_confirmation BOOLEAN DEFAULT False;'''
 
 conn.commit()
 
@@ -1438,10 +1429,11 @@ AND akvo_tree_registration_areas_updated.delete_confirmation = FALSE;'''
 
 conn.commit()
 
+
 # Update EDITS table with geometric error detection results. This is done from the UPDATED table.
 # The geometric analysis is done AFTER the run of the (this) dashboard script.
 # Needs to be done aditional to previous update of edits table because that one updates only the NEW submissions.
-# This table is updated after a second run of the DAshboard script: In the frist run, the resultss from EDITS are tranfered to the UPDATED table.
+# This table is updated after a second run of the Dashboard script: In the frist run, the resultss from EDITS are tranfered to the UPDATED table.
 # Then the GEOMETRIC ERROR SCRIPT runs over the UPDATED table and analysis the results.
 # Afther this run of the GEOMETRIC ERROR SCRIPT, a second run of the DASHBOARD script is needed to transfer the results of the GEOMETRIC ERROR SCRIPT from the UPDATED table into the EDIT table (see below)
 create_a1_updates_from_updated_to_edits_geometric_corr = '''
@@ -1559,8 +1551,7 @@ AND (akvo_tree_registration_areas_edits.chloris_uploaded = TRUE OR akvo_tree_reg
 
 -- Delete rows that were removed in the EDIT table also from the UPDATE table.
 DELETE FROM akvo_tree_registration_areas_updated
-WHERE NOT EXISTS (SELECT 1 FROM akvo_tree_registration_areas_edits
-WHERE akvo_tree_registration_areas_updated.identifier_akvo = akvo_tree_registration_areas_edits.identifier_akvo);'''
+WHERE delete_confirmation = TRUE;'''
 
 conn.commit()
 
