@@ -973,8 +973,8 @@ ADD total_nr_geometric_errors INTEGER;
 -- Add column to check whether a site was remapped by the partner or not. This is important for the edit function. Set default to 'no'
 ALTER TABLE akvo_tree_registration_areas_integrated
 ADD re_mapped_by_partner TEXT DEFAULT 'no',
-ADD edit_confirmation DEFAULT False,
-ADD delete_confirmation DEFAULT False;
+ADD edit_confirmation BOOLEAN DEFAULT False,
+ADD delete_confirmation BOOLEAN DEFAULT False;
 
 
 -- Below we transpose all species from multiple rows into 1 row
