@@ -1425,7 +1425,9 @@ WHERE NOT EXISTS (
 )
 AND akvo_tree_registration_areas_updated.chloris_uploaded = FALSE
 AND akvo_tree_registration_areas_updated.kanop_uploaded = FALSE
-AND akvo_tree_registration_areas_updated.delete_confirmation = FALSE;'''
+AND akvo_tree_registration_areas_updated.delete_confirmation = FALSE
+AND akvo_tree_registration_areas_updated.edit_confirmation = FALSE
+AND test = 'This is real, valid data';'''
 
 conn.commit()
 
