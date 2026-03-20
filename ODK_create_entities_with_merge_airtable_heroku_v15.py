@@ -191,10 +191,20 @@ THEN TO_CHAR(submission, 'YYYY-MM-DD')
 ELSE 'Submission date unknown'
 END AS submission,
 
+---- The problem with statements below is that erroneous polygons will not be shown for a re-map...
+--CASE
+--  WHEN polygon IS NOT NULL AND ST_IsValid(polygon::geometry) AND NOT ST_IsEmpty(polygon::geometry)
+--  THEN ST_AsText(polygon)
+--  WHEN (polygon IS NULL OR NOT ST_IsValid(polygon::geometry) OR ST_IsEmpty(polygon::geometry))
+--       AND centroid_coord IS NOT NULL AND ST_IsValid(centroid_coord::geometry) AND NOT ST_IsEmpty(centroid_coord::geometry)
+--  THEN ST_AsText(centroid_coord)
+--  ELSE NULL
+--END AS new_polygon,
+
 CASE
-  WHEN polygon IS NOT NULL AND ST_IsValid(polygon::geometry) AND NOT ST_IsEmpty(polygon::geometry)
+  WHEN polygon IS NOT NULL AND NOT ST_IsEmpty(polygon::geometry)
   THEN ST_AsText(polygon)
-  WHEN (polygon IS NULL OR NOT ST_IsValid(polygon::geometry) OR ST_IsEmpty(polygon::geometry))
+  WHEN (polygon IS NULL OR ST_IsEmpty(polygon::geometry))
        AND centroid_coord IS NOT NULL AND ST_IsValid(centroid_coord::geometry) AND NOT ST_IsEmpty(centroid_coord::geometry)
   THEN ST_AsText(centroid_coord)
   ELSE NULL
