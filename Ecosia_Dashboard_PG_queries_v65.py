@@ -1085,7 +1085,8 @@ WHERE most_recent_akvo = 1)
 UPDATE akvo_tree_registration_areas_edits
 SET
 polygon = updates_polygon_akvo.polygon_remapped,
-re_mapped_by_partner = 'yes'
+re_mapped_by_partner = 'yes',
+edit_confirmation = True
 FROM updates_polygon_akvo
 WHERE akvo_tree_registration_areas_edits.identifier_akvo = updates_polygon_akvo.identifier_akvo
 AND (akvo_tree_registration_areas_edits.edit_confirmation = False
@@ -1111,6 +1112,7 @@ UPDATE akvo_tree_registration_areas_edits
 SET
 polygon = updates_polygon_odk.remaped_polygon_planting_site,
 re_mapped_by_partner = 'yes',
+edit_confirmation = True,
 updated_at = updates_polygon_odk.submission_date
 FROM updates_polygon_odk
 WHERE akvo_tree_registration_areas_edits.identifier_akvo = updates_polygon_odk.ecosia_site_id
