@@ -434,25 +434,25 @@ def process_page(json_photos_planting_site):
         if json_extract(json_in, 'photo_tree_polygon_1')[0] is not None:
             #photo_1 = "https://ecosia.getodk.cloud"+"/projects/"+str(1)+"/forms/"+str('planting_site_reporting')+"/submissions/"+str(instanceID)+"/attachments/"+json_extract(json_in, 'photo_tree_polygon_1')[0]
             photo_json_1 = json_extract(json_in, 'photo_tree_polygon_1')[0]
-            photo_1 = f"https://ecosia.getodk.cloud/v1/key/{photo_token}/projects/1/forms/planting_site_reporting/submissions/'+instanceID+'/attachments/{photo_json_1}";
+            photo_1 = f"https://ecosia.getodk.cloud/v1/key/{photo_token}/projects/1/forms/planting_site_reporting/submissions/{instanceID}/attachments/{photo_json_1}";
         else:
             photo_1 = ''
 
         if json_extract(json_in, 'photo_tree_polygon_2')[0] is not None:
             photo_json_2 = json_extract(json_in, 'photo_tree_polygon_2')[0]
-            photo_2 = f"https://ecosia.getodk.cloud/v1/key/{photo_token}/projects/1/forms/planting_site_reporting/submissions/'+instanceID+'/attachments/{photo_json_2}";
+            photo_2 = f"https://ecosia.getodk.cloud/v1/key/{photo_token}/projects/1/forms/planting_site_reporting/submissions/{instanceID}/attachments/{photo_json_2}";
         else:
             photo_2 = ''
 
         if json_extract(json_in, 'photo_tree_polygon_3')[0] is not None:
             photo_json_3 = json_extract(json_in, 'photo_tree_polygon_3')[0]
-            photo_3 = f"https://ecosia.getodk.cloud/v1/key/{photo_token}/projects/1/forms/planting_site_reporting/submissions/'+instanceID+'/attachments/{photo_json_3}";
+            photo_3 = f"https://ecosia.getodk.cloud/v1/key/{photo_token}/projects/1/forms/planting_site_reporting/submissions/{instanceID}/attachments/{photo_json_3}";
         else:
             photo_3 = ''
 
         if json_extract(json_in, 'photo_tree_polygon_4')[0] is not None:
             photo_json_4 = json_extract(json_in, 'photo_tree_polygon_4')[0]
-            photo_4 = f"https://ecosia.getodk.cloud/v1/key/{photo_token}/projects/1/forms/planting_site_reporting/submissions/'+instanceID+'/attachments/{photo_json_4}";
+            photo_4 = f"https://ecosia.getodk.cloud/v1/key/{photo_token}/projects/1/forms/planting_site_reporting/submissions/{instanceID}/attachments/{photo_json_4}";
         else:
             photo_4 = ''
 
