@@ -331,6 +331,8 @@ def process_page(json_additional_photos):
     for json_in_photos in json_additional_photos:
 
         submissionid_odk = json_extract(json_in_photos, '__Submissions-id')[0]
+        instanceID = json_extract(json_in_photos, '__Submissions-id')[0]
+
         repeatid_odk = json_extract(json_in_photos, '__id')[0]
         try:
             photo_1_1 = json_extract(json_in_photos, 'additional_photo_1')[0]
@@ -385,9 +387,11 @@ def process_page(json_pcq_method):
     count = 0  # You can make this global or return it if you want to track total count outside
     photo_token = odk_photo_token
 
+
     for json_in_pcq in json_pcq_method:
         #print(json_in_pcq)
         submissionid_odk = json_extract(json_in_pcq, '__Submissions-id')[0]
+        instanceID = json_extract(json_in_pcq, '__Submissions-id')[0]
         repeatid_odk = json_extract(json_in_pcq, '__id')[0]
 
         if json_in_pcq['gps_pcq_sample'] != None:
@@ -485,6 +489,7 @@ def process_page(json_count_tree_photos):
     for json_in_count_photos in json_count_tree_photos:
         #print(json_in_count_photos)
         submissionid_odk = json_extract(json_in_count_photos, '__Submissions-id')[0]
+        instanceID = json_extract(json_in_count_photos, '__Submissions-id')[0]
         repeatid_odk = json_extract(json_in_count_photos, '__id')[0]
 
         tree_photo_1 = json_extract(json_in_count_photos, 'tree_photo_count')[0]
