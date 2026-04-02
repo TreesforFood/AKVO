@@ -935,7 +935,8 @@ group by ecosia_site_id)
 UPDATE akvo_tree_registration_areas_updated a
 SET tree_number = coalesce(a.tree_number,0) + added_trees_per_site.added_trees
 FROM added_trees_per_site
-WHERE a.identifier_akvo = added_trees_per_site.ecosia_site_id;
+WHERE a.identifier_akvo = added_trees_per_site.ecosia_site_id
+AND COALESCE(a.tree_number, 0) <> COALESCE(a.tree_number, 0) + added_trees_per_site.added_trees;
 
 
 -- Below we update the planting date. When during a registration, no trees were registered, but only the site was mapped, no planting date is being generated.
