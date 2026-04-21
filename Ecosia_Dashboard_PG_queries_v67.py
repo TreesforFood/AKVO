@@ -6053,6 +6053,7 @@ ElSE
 END AS sub_partner,
 
 akvo_tree_registration_areas_updated.contract_number AS sub_contract,
+'Tree registration' AS procedure,
 akvo_tree_registration_areas_updated.id_planting_site,
 akvo_tree_registration_areas_updated.submission AS submission_date,
 AKVO_tree_registration_species.identifier_akvo,
@@ -6148,10 +6149,6 @@ akvo_tree_registration_areas_updated.contract_number AS sub_contract,
 'Tree registration' AS procedure,
 akvo_tree_registration_areas_updated.id_planting_site,
 akvo_tree_registration_areas_updated.submission AS submission_date,
-
-odk_tree_registration_main.contract_number AS sub_contract,
-odk_tree_registration_main.id_planting_site,
-odk_tree_registration_main.submission_date,
 odk_tree_registration_main.ecosia_site_id AS identifier_akvo,
 odk_tree_registration_main.submissionid_odk AS instance,
 seperate_tree_species_registration_odk.species_registered_odk AS lat_name_species,
@@ -6167,7 +6164,7 @@ ON odk_tree_registration_main.ecosia_site_id = seperate_tree_species_registratio
 
 SELECT * FROM tree_registration_species_akvo
 UNION ALL
-SELECT * FROM tree_registration_species_akvo;
+SELECT * FROM tree_registration_species_odk;
 
 --The column below is UPDATED by the following sql. This is to create clean contract numbers for Superset
 ALTER TABLE superset_ecosia_tree_registration_species
