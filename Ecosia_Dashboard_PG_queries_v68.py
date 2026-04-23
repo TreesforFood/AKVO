@@ -6901,8 +6901,8 @@ akvo_tree_registration_areas_updated.country),
 -- Here we convert the photo (GPS) locations (ODK TREE REGISTRATION) from WKT format to geojson string format that can be read by superset
 wkt_photo_registration_gps_to_geojson_odk AS
 (SELECT
-odk_tree_registration_main.submissionid_odk,
-odk_tree_registration_main.submissionid_odk::TEXT AS repeatid_odk,
+odk_tree_registration_photos.submissionid_odk,
+odk_tree_registration_photos.repeatid_odk::TEXT,
 odk_tree_registration_main.submission_date,
 
 CASE
