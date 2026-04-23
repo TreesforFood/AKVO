@@ -6902,7 +6902,7 @@ akvo_tree_registration_areas_updated.country),
 wkt_photo_registration_gps_to_geojson_odk AS
 (SELECT
 odk_tree_registration_main.submissionid_odk,
-odk_tree_registration_main.repeatid_odk::TEXT,
+odk_tree_registration_main.submissionid_odk::TEXT AS repeatid_odk,
 odk_tree_registration_main.submission_date,
 
 CASE
