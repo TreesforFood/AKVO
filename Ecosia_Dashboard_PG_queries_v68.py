@@ -6900,14 +6900,37 @@ akvo_tree_registration_areas_updated.country),
 
 -- Here we convert the photo (GPS) locations (ODK TREE REGISTRATION) from WKT format to geojson string format that can be read by superset
 wkt_photo_registration_gps_to_geojson_odk AS
-(       WHEN odk_tree_registration_main.test = 'This is real, valid data\r' THEN 'no'
-        WHEN odk_tree_registration_main.test = 'valid_data' THEN 'no'
-        WHEN odk_tree_registration_main.test = 'Valid data' THEN 'no'
-        WHEN odk_tree_registration_main.test = 'This is real, valid data' THEN 'no'
-        WHEN odk_tree_registration_main.test IS NULL THEN 'no'
-    END AS test,
+(SELECT
+odk_tree_registration_main.submissionid_odk,
+odk_tree_registration_main.repeatid_odk::TEXT,
+odk_tree_registration_main.submission_date,
+
+CASE
+WHEN odk_tree_registration_main.test = 'test_data'
+THEN 'yes'
+WHEN odk_tree_registration_main.test = 'This is a test, this record can be deleted.'
+THEN 'yes'
+WHEN odk_tree_registration_main.test = 'This is a test, this record can be deleted'
+THEN 'yes'
+WHEN odk_tree_registration_main.test = 'xxxxx'
+THEN 'yes'
+WHEN odk_tree_registration_main.test = ''
+THEN 'no'
+WHEN odk_tree_registration_main.test = 'This is real, valid data\r'
+THEN 'no'
+WHEN odk_tree_registration_main.test = 'valid_data'
+THEN 'no'
+WHEN odk_tree_registration_main.test = 'Valid data'
+THEN 'no'
+WHEN odk_tree_registration_main.test = 'This is real, valid data'
+THEN 'no'
+WHEN odk_tree_registration_main.test ISNULL
+THEN 'no'
+END AS test,
+
     LOWER(odk_tree_registration_main.country) AS country,
-    -- Safe calculation for partnercode_main (handles empty organisation)
+
+	-- Safe calculation for partnercode_main (handles empty organisation)
     CASE
         WHEN odk_tree_registration_main.organisation = '' OR odk_tree_registration_main.organisation IS NULL THEN 0
         ELSE CAST(
@@ -6918,7 +6941,8 @@ wkt_photo_registration_gps_to_geojson_odk AS
             ) AS NUMERIC
         )
     END AS partnercode_main,
-    -- Safe calculation for partnercode_sub (handles empty or non-hyphen organisation)
+
+	-- Safe calculation for partnercode_sub (handles empty or non-hyphen organisation)
     CASE
         WHEN odk_tree_registration_main.organisation = '' OR odk_tree_registration_main.organisation IS NULL THEN 0
         WHEN POSITION('-' IN odk_tree_registration_main.organisation) = 0 THEN 0
@@ -6945,7 +6969,8 @@ wkt_photo_registration_gps_to_geojson_odk AS
         WHEN POSITION('/ ' IN odk_tree_registration_main.organisation) > 0 THEN LOWER(right(odk_tree_registration_main.organisation, (LENGTH(odk_tree_registration_main.organisation) - strpos(odk_tree_registration_main.organisation, '/')-1)))
         ELSE ''
     END AS sub_partner,
-    odk_tree_registration_main.contract_number AS sub_contract,
+
+	odk_tree_registration_main.contract_number AS sub_contract,
     odk_tree_registration_main.id_planting_site,
     'no display name' AS display_name,
     'Photo registration' AS procedure,
