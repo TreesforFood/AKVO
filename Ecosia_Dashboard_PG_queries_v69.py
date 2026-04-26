@@ -8478,7 +8478,7 @@ FROM contract_percentages
 GROUP BY contract_number
 ORDER BY contract_number)
 
-UPDATE superset_ecosia_contract_overview o
+UPDATE superset_ecosia_contract_overview
 SET
     nr_rs_analysed_sites = t.nr_rs_analysed_sites,
     percentage_sites_positive = c.percentage_sites_positive,
@@ -8486,8 +8486,8 @@ SET
     percentage_sites_neutral = c.percentage_sites_neutral,
     percentage_sites_unknown = c.percentage_sites_unknown
 FROM total_nr_rs_analysed_sites t
-JOIN contract_percentages_join c ON o.contract_number = c.contract_number
-WHERE o.sub_contract = t.contract_number;'''
+JOIN contract_percentages_join c ON superset_ecosia_contract_overview.contract_number = c.contract_number
+WHERE superset_ecosia_contract_overview.sub_contract = t.contract_number;'''
 
 conn.commit()
 
