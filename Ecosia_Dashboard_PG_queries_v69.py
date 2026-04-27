@@ -8485,13 +8485,15 @@ SET
     percentage_sites_negative = c.percentage_sites_negative,
     percentage_sites_neutral = c.percentage_sites_neutral,
     percentage_sites_unknown = c.percentage_sites_unknown
-FROM total_nr_rs_analysed_sites t
-JOIN contract_percentages_join c ON superset_ecosia_contract_overview.contract_number = c.contract_number
-WHERE superset_ecosia_contract_overview.sub_contract = t.contract_number;'''
+FROM
+    total_nr_rs_analysed_sites t
+JOIN
+    contract_percentages_join c
+    ON superset_ecosia_contract_overview.contract_number = c.contract_number
+WHERE
+    superset_ecosia_contract_overview.sub_contract = t.contract_number;'''
 
 conn.commit()
-
-
 
 create_a50 = '''CREATE TABLE kanop_chloris_uploads_spatial_overview
 AS SELECT
