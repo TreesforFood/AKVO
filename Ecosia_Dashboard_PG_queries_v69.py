@@ -1571,6 +1571,7 @@ create_a1_remote_sensing_results = '''CREATE TABLE superset_ecosia_kanop_chloris
   LEFT(t3.planting_date, 4)::integer as planting_year,  -- Make sure this column exists in t1 subquery or remove it here
   ROUND(t3.calc_area,1) AS area_size_ha,
   t1.contract_number,
+  t3.contract_number AS sub_contract_number,
   t1.year_of_analisis,
   t1.chloris_above_ground_dry_biomass,
   t2.kanop_above_ground_living_biomass AS kanop_above_ground_dry_biomass
@@ -8441,17 +8442,17 @@ conn.commit()
 
 
 create_49a_remote_sensing_trend_results_contract_level = '''WITH contract_trends AS (
-    SELECT
-        contract_number,
-        combined_trend,
-        COUNT(*) AS total_sites
-    FROM superset_ecosia_kanop_chloris_results
-    GROUP BY contract_number, combined_trend
-),
+SELECT
+    contract_number,
+    combined_trend,
+    COUNT(DISTINCT identifier_akvo) AS total_sites_per_rs_trend
+FROM superset_ecosia_kanop_chloris_results
+GROUP BY contract_number, combined_trend
+ORDER BY contract_number),
 
 total_nr_rs_analysed_sites AS (SELECT
     contract_number,
-    COUNT(DISTINCT identifier_akvo) AS nr_rs_analysed_sites
+    COUNT(DISTINCT identifier_akvo) AS total_nr_rs_analysed_sites
 FROM
     superset_ecosia_kanop_chloris_results
 GROUP BY
@@ -8461,26 +8462,26 @@ ORDER BY
 
 contract_percentages AS (
     SELECT
-	    contract_number,
+	    sub_contract_number,
         combined_trend,
-        ROUND((COUNT(*) * 100.0 / SUM(COUNT(*)) OVER (PARTITION BY contract_number)), 2) AS percentage_sites
+        ROUND((COUNT(*) * 100.0 / SUM(COUNT(*)) OVER (PARTITION BY sub_contract_number)), 2) AS percentage_sites
     FROM superset_ecosia_kanop_chloris_results
-    GROUP BY contract_number, combined_trend
+    GROUP BY sub_contract_number, combined_trend
 ),
 
 contract_percentages_join AS (SELECT
-    contract_number,
+    sub_contract_number,
     COALESCE(MAX(CASE WHEN combined_trend = 'positive' THEN percentage_sites END), 0) AS percentage_sites_positive,
     COALESCE(MAX(CASE WHEN combined_trend = 'negative' THEN percentage_sites END), 0) AS percentage_sites_negative,
     COALESCE(MAX(CASE WHEN combined_trend = 'neutral' THEN percentage_sites END), 0) AS percentage_sites_neutral,
 	COALESCE(MAX(CASE WHEN combined_trend = 'unknown' THEN percentage_sites END), 0) AS percentage_sites_unknown
 FROM contract_percentages
-GROUP BY contract_number
-ORDER BY contract_number)
+GROUP BY sub_contract_number
+ORDER BY sub_contract_number)
 
 UPDATE superset_ecosia_contract_overview
 SET
-    nr_rs_analysed_sites = t.nr_rs_analysed_sites,
+total_nr_rs_analysed_sites = t.total_nr_rs_analysed_sites,
     percentage_sites_positive = c.percentage_sites_positive,
     percentage_sites_negative = c.percentage_sites_negative,
     percentage_sites_neutral = c.percentage_sites_neutral,
@@ -8489,9 +8490,10 @@ FROM
     total_nr_rs_analysed_sites t
 JOIN
     contract_percentages_join c
-    ON superset_ecosia_contract_overview.contract_number = c.contract_number
-WHERE
-    superset_ecosia_contract_overview.sub_contract = t.contract_number;'''
+    ON t.contract_number = c.sub_contract_number
+WHERE superset_ecosia_contract_overview.sub_contract = t.contract_number;'''
+
+
 
 conn.commit()
 
