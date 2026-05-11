@@ -45,7 +45,6 @@ DROP TABLE IF EXISTS superset_ecosia_tree_distribution_unregistered_farmers;
 DROP TABLE IF EXISTS superset_ecosia_site_registration_unregistered_farmers;
 DROP TABLE IF EXISTS superset_ecosia_contract_overview;
 DROP TABLE IF EXISTS AKVO_tree_registration_areas_updated_KANOP;
---DROP TABLE IF EXISTS akvo_tree_registration_areas_updated_remotesensing;
 DROP TABLE IF EXISTS superset_ecosia_kanop_chloris_results;
 DROP TABLE IF EXISTS photo_locations;
 DROP TABLE IF EXISTS kanop_chloris_uploads_spatial_overview;'''
@@ -8426,17 +8425,15 @@ FROM CALC_TAB_tree_submissions_per_contract;
 
 --The column below is UPDATED by the following sql. This is to create clean contract numbers for Superset
 ALTER TABLE superset_ecosia_contract_overview
-ADD contract NUMERIC(10,0);
-
-UPDATE superset_ecosia_contract_overview
-SET contract = TRUNC(sub_contract);
-
-ALTER TABLE superset_ecosia_contract_overview
+ADD contract NUMERIC(10,0)
 ADD percentage_sites_positive NUMERIC(5,2),
 ADD percentage_sites_negative NUMERIC(5,2),
 ADD percentage_sites_neutral NUMERIC(5,2),
-ADD percentage_sites_unknown NUMERIC(5,2),
-ADD total_nr_sites_rs_analised NUMERIC(5,0);'''
+ADD total_nr_rs_analysed_sites INTEGER,
+ADD percentage_sites_unknown NUMERIC(5,2);
+
+UPDATE superset_ecosia_contract_overview
+SET contract = TRUNC(sub_contract);'''
 
 conn.commit()
 
@@ -8481,7 +8478,7 @@ ORDER BY sub_contract_number)
 
 UPDATE superset_ecosia_contract_overview
 SET
-total_nr_rs_analysed_sites = t.total_nr_rs_analysed_sites,
+	total_nr_rs_analysed_sites = t.total_nr_rs_analysed_sites,
     percentage_sites_positive = c.percentage_sites_positive,
     percentage_sites_negative = c.percentage_sites_negative,
     percentage_sites_neutral = c.percentage_sites_neutral,
@@ -8492,8 +8489,6 @@ JOIN
     contract_percentages_join c
     ON t.contract_number = c.sub_contract_number
 WHERE superset_ecosia_contract_overview.sub_contract = t.contract_number;'''
-
-
 
 conn.commit()
 
