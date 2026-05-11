@@ -8425,7 +8425,7 @@ FROM CALC_TAB_tree_submissions_per_contract;
 
 --The column below is UPDATED by the following sql. This is to create clean contract numbers for Superset
 ALTER TABLE superset_ecosia_contract_overview
-ADD contract NUMERIC(10,0)
+ADD contract NUMERIC(10,0),
 ADD percentage_sites_positive NUMERIC(5,2),
 ADD percentage_sites_negative NUMERIC(5,2),
 ADD percentage_sites_neutral NUMERIC(5,2),
