@@ -24,8 +24,7 @@ print('A: ', projects_dict)
 
 cur.execute('''DROP TABLE IF EXISTS KANOP_analysis;''')
 conn.commit()
-cur.execute('''DROP TABLE IF EXISTS kanop_analysis_polygon_level_1_moment;''')
-conn.commit()
+
 cur.execute('''DROP TABLE IF EXISTS superset_ecosia_KANOP_polygon_level_1_moment;''')
 conn.commit()
 
@@ -34,7 +33,6 @@ id SERIAL,
 identifier_akvo TEXT,
 name_project TEXT,
 processing_status_site_year TEXT,
-processing_status_site_overall TEXT,
 request_measurement_date DATE,
 year_of_analisis INTEGER,
 kanop_project_id TEXT,
@@ -102,11 +100,6 @@ conn.commit()
 # Projects meta: List all your projects
 project_list_overview = projects_dict['projects'] # Generates a list with dictionaries of projects. Print(project_list_overview) # Output: {'projectId': 1880, 'customerId': 254, 'name': 'APAF', 'description': '','country': 'Ivory Coast', 'projectType': 'climate', 'startDate': '2018-01-01','status': 'CREATED', 'area': 51.89, 'duration': 20, 'polygonCount': 7, 'createdAt': '2023-10-02 18:31:34.556883','updatedAt': '2023-10-02 18:32:02.459363'}
 print('B: ', project_list_overview)
-# # Get the metadata for a project. Gives a list of configurations/settings used by KANOP. Consider if this is interesting to have
-# meta_data_of_project = requests.get(f"{root}/projects/references",headers=headers)
-# project_meta_data = meta_data_of_project.json()
-# print(project_meta_data)
-
 
 for project_list in project_list_overview:
     # Get details for a project
@@ -193,13 +186,6 @@ for project_list in project_list_overview:
                     conn.commit()
 
                 continue
-            # else:
-            #     project_year_metrics_forest_cover = response_project_level_metrics['results']['forestCover']
-            #     project_year_metrics_mean_canopy_height = response_project_level_metrics['results']['canopyHeightMean']
-            #     project_year_metrics_mean_tree_height = response_project_level_metrics['results']['treeHeightMean']
-            #     project_year_metrics_biomass = response_project_level_metrics['results']['biomass']
-            #     project_year_metrics_carbon = response_project_level_metrics['results']['carbon']
-            #     project_year_metrics_co2seq = response_project_level_metrics['results']['co2eq']
 
             # Get metrics' on POLYGON LEVEL. Here the polygon ID's can be linked with the results (results on polygon level)
             metrics_polygon_level = requests.get(f"{root}/projects/{project_id}/requests/{request_id}/metrics/{indicators}",headers=headers)
@@ -377,50 +363,9 @@ for project_list in project_list_overview:
                 conn.commit()
 
 
-        # Get the evolution of a metric over time.
-        # Get values (for all sites per submission) for each requested year for a specific indicator ON PROJECT LEVEL.
-        evolution_metrics_over_time = requests.get(f"{root}/projects/{project_id}/evolution/{indicators}",headers=headers)
-        evolution_metrics_over_time = evolution_metrics_over_time.json()
-        #print('evolution_metrics_over_time: ' , country, contract_number, evolution_metrics_over_time) # Output: evolution_metrics_over_time:  Ivory Coast APAF {'meta': {}, 'context': {'projectId': 1880, 'indicators': ['carbon'], 'aggregationLevel': 'polygons', 'aggregationLevelValues': ['1', '2', '3', '4', '5', '6', '7'], 'timeseries': 'evolution', 'timeseriesValues': ['2019-07-01', '2022-07-01']}, 'results': {'carbon': {'averageDistribution': [{'aggregate': '2019-07-01', 'value': 2359.7, 'confidenceLowerBound': 1875.7, 'confidenceUpperBound': 2815.6}, {'aggregate': '2022-07-01', 'value': 2038.9, 'confidenceLowerBound': 1621.0, 'confidenceUpperBound': 2438.2}]}}}
-
-
-        # Get the net change (variation) of an indicator over time.
-        # This endpoint shows the delta (change) between 2 requested years for a specific indicator. So it shows the difference between the values of the 'evolution_metrics_over_time' variable (see end-point above)
-        net_change_indicator_over_time = requests.get(f"{root}/projects/{project_id}/variation/{indicators}",headers=headers)
-        net_change_indicator_over_time = net_change_indicator_over_time.json()
-        #print('net_change_indicator_over_time: ', country, contract_number, net_change_indicator_over_time) # Output: net_change_indicator_over_time:  Ivory Coast APAF {'meta': {}, 'context': {'projectId': 1880, 'indicators': ['carbon'], 'aggregationLevel': 'polygons', 'aggregationLevelValues': ['1', '2', '3', '4', '5', '6', '7'], 'timeseries': 'variation', 'timeseriesValues': ['2019-07-01', '2022-07-01']}, 'results': {'carbon': {'averageDistribution': [{'aggregate': '2019-07-01'}, {'aggregate': '2022-07-01', 'value': -320.831}]}}}
-
-        #Get the change details of an indicator over time
-        change_details_indicators_over_time = requests.get(f"{root}/projects/{project_id}/change/{indicators}",headers=headers)
-        change_details_indicators_over_time = change_details_indicators_over_time.json()
-        #print('change_details_indicators: ', country, contract_number, change_details_indicators_over_time) # Output
-
-
-        list_change_gis_files = requests.get(f"{root}/projects/{project_id}/requests/{request_id}/variationGisFiles",headers=headers)
-        list_change_gis_files = list_change_gis_files.json()  #[0].get('name')
-
-        list_gis_indicators = ['forest_cover', 'canopy_height_mean', 'tree_height_mean', 'living_aboveground_biomass_per_ha', 'living_belowground_biomass_per_ha', 'living_biomass_per_ha', 'living_biomass_carbon_stock_per_ha', 'living_biomass_CO2eq_per_ha']
-
-        # variationGisFilesByRequest = requests.get(f"{root}/projects/{project_id}/requests/{request_id}/variationGisFilesByRequest",headers=headers)
-        # variationGisFilesByRequest = variationGisFilesByRequest.json()
-        # #print(project_id, variationGisFilesByRequest)
-        # for variation_indicator in variationGisFilesByRequest['variationGISFilesByRequest']:
-        #     for gis_indicator in list_gis_indicators:
-        #         if variation_indicator['name'] == gis_indicator:
-        #             variationGisFileName = variation_indicator['name']
-        #             compareToRequestID = variation_indicator['compareToRequestId']
-        #             compareToYear = variation_indicator['compareToYear']
-                    #print('TEST: ', variationGisFileName, compareToRequestID, compareToYear)
-
-
-                    # response = requests.get(f"{root}/projects/{project_id}/requests/{request_id}/variationGisFilesByRequest/{variationGisFileName}?compareToRequestId={compareToRequestID}", headers=headers)
-                    # #print(type(change_gis_files)) # gives back a class 'requests.models.Response'. Check how to read this...
-                    # print(response.status_code)
-                    # #print(response.headers)
-                    # value, params = cgi.parse_header(response.headers['content-disposition'])
-                    # with open(f"{params['filename']}", "wb") as raster:
-                    #     raster.write(response.content)
-                    #     #raster2pgsql -s 4326 -I -C -M C:\temp\test_1.tif -t 100x100 myschema.mytable > out.sql
+# Remove the processing status' and only keep the 'COMPLETED' status
+cur.execute('''DELETE FROM superset_ecosia_KANOP_polygon_level_1_moment
+WHERE processing_status_site_year != 'COMPLETED';''')
 
 
 cur.execute('''
@@ -448,6 +393,8 @@ LAG(treeHeightMean_present)
 OVER (PARTITION BY identifier_akvo, kanop_project_id ORDER BY request_measurement_date) AS treeHeightMean_previous,
 treeHeightMean_present - LAG(treeHeightMean_present)
 OVER (PARTITION BY identifier_akvo, kanop_project_id ORDER BY request_measurement_date) AS treeHeightMean_change,
+
+livingAbovegroundBiomass_present,
 
 LAG(livingAbovegroundBiomass_present)
 OVER (PARTITION BY identifier_akvo, kanop_project_id ORDER BY request_measurement_date) AS livingAbovegroundBiomass_previous,
@@ -500,71 +447,12 @@ co2eqPerHa_present - LAG(co2eqPerHa_present)
 OVER (PARTITION BY identifier_akvo, kanop_project_id ORDER BY request_measurement_date) AS co2eqPerHa_change
 
 FROM superset_ecosia_kanop_polygon_level_1_moment
-ORDER BY request_measurement_date),
+ORDER BY request_measurement_date)
 
 ------------------
 
-kanop_processing_status_ranking AS (SELECT
-id,
-identifier_akvo,
-request_measurement_date,
-processing_status_site_year,
-kanop_project_id,
-
-CASE
-WHEN processing_status_site_year ISNULL
-THEN 0
-WHEN processing_status_site_year = 'CANCELLED'
-THEN 1
-WHEN processing_status_site_year = 'REQUESTED'
-THEN 2
-WHEN processing_status_site_year = 'APPROVED'
-THEN 3
-WHEN processing_status_site_year = 'RUNNING'
-THEN 4
-WHEN processing_status_site_year = 'COMPLETED'
-THEN 5
-END AS calculation
-FROM superset_ecosia_kanop_polygon_level_1_moment),
-
-sum_results_rankings AS (SELECT
-identifier_akvo,
-kanop_project_id,
-SUM(calculation) AS calculation
-FROM kanop_processing_status_ranking
-GROUP BY kanop_project_id, identifier_akvo),
-
-classify_sum_rankings AS (SELECT
-identifier_akvo,
-kanop_project_id,
-CASE
-WHEN calculation <= 2
-THEN 'CANCELLED'
-WHEN calculation > 2 AND calculation <= 4
-THEN 'REQUESTED'
-WHEN calculation > 4 AND calculation < 10
-THEN 'RUNNING'
-WHEN calculation >= 10
-THEN 'COMPLETED'
-END AS status_processing
-FROM sum_results_rankings),
-
-kanop_processing_status_overall AS (SELECT
-id,
-y.identifier_akvo,
-y.kanop_project_id,
-request_measurement_date,
-processing_status_site_year,
-status_processing
-
-FROM superset_ecosia_kanop_polygon_level_1_moment z
-JOIN classify_sum_rankings y
-ON y.identifier_akvo = z.identifier_akvo
-AND y.kanop_project_id = z.kanop_project_id)
-
 UPDATE superset_ecosia_kanop_polygon_level_1_moment AS a
 SET
-processing_status_site_overall = c.status_processing,
 forestCover_previous = b.forestCover_previous,
 forestCover_change = b.forestCover_change,
 canopyCover_previous = b.canopyCover_previous,
@@ -594,14 +482,8 @@ co2eq_change = b.co2eq_change,
 co2eqPerHa_previous = b.co2eqPerHa_previous,
 co2eqPerHa_change = b.co2eqPerHa_change
 
-FROM
-kanop_change_table b
-JOIN kanop_processing_status_overall c
-ON b.identifier_akvo = c.identifier_akvo
-AND b.kanop_project_id = c.kanop_project_id
-WHERE a.id = b.id;
-
-''')
+FROM kanop_change_table b
+WHERE a.id = b.id;''')
 
 conn.commit()
 
