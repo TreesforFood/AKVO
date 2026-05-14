@@ -3675,11 +3675,7 @@ ELSE 0
 END AS rank_monitoring_audit_method
 FROM calc_tab_monitoring_calculations_per_site_merged
 
-
-#
 WHERE test_monitoring != 'This is a test'),
-
-
 
 CTE_total_tree_registrations AS (
 SELECT
