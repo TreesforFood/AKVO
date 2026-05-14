@@ -3673,9 +3673,7 @@ WHEN calc_tab_monitoring_calculations_per_site_merged.procedure = 'Monitoring' a
 THEN 1
 ELSE 0
 END AS rank_monitoring_audit_method
-FROM calc_tab_monitoring_calculations_per_site_merged
-
-WHERE test_monitoring != 'This is a test'),
+FROM calc_tab_monitoring_calculations_per_site_merged),
 
 CTE_total_tree_registrations AS (
 SELECT
