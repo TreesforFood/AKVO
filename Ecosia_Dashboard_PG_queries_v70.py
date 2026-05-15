@@ -8471,7 +8471,7 @@ contract_percentages AS (
     SELECT
 	    sub_contract_number,
         combined_trend,
-        ROUND((COUNT(*) * 100.0 / SUM(COUNT(*)) OVER (PARTITION BY sub_contract_number)), 2) AS percentage_sites
+        ROUND((COUNT(DISTINCT identifier_akvo) * 100.0 / SUM(COUNT(DISTINCT identifier_akvo)) OVER (PARTITION BY sub_contract_number)), 2) AS percentage_sites
     FROM superset_ecosia_kanop_chloris_results
     GROUP BY sub_contract_number, combined_trend
 ),
