@@ -4201,8 +4201,8 @@ CTE_tree_monitoring.nr_sites_monitored_audited AS "Total number of sites monitor
 CTE_count_species."Number of tree species registered",
 
 CTE_results_percentages_exotic_native.percentage_native,
-CTE_results_percentages_exotic_native.percentage_exotic,
-CTE_results_percentages_exotic_native.percentage_unknown
+CTE_results_percentages_exotic_native.percentage_exotic
+--CTE_results_percentages_exotic_native.percentage_unknown
 
 
 FROM CTE_total_tree_registrations
