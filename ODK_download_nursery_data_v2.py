@@ -250,7 +250,7 @@ for json_in in json_main_nursery_registration:
         if json_extract(json_in, 'photo_nursery_bed_1')[0] is not None:
             #photo_1 = "https://ecosia.getodk.cloud"+"/projects/"+str(1)+"/forms/"+str('planting_site_reporting')+"/submissions/"+str(instanceID)+"/attachments/"+json_extract(json_in, 'photo_tree_polygon_1')[0]
             photo_nursery_bed_ex1 = json_extract(json_in, 'photo_nursery_bed_1')[0]
-            photo_nursery_bed_1 = f"https://ecosia.getodk.cloud/v1/key/{photo_token}/projects/1/forms/{form_id}}/submissions/{instanceID}/attachments/{photo_nursery_bed_ex1}";
+            photo_nursery_bed_1 = f"https://ecosia.getodk.cloud/v1/key/{photo_token}/projects/1/forms/{form_id}/submissions/{instanceID}/attachments/{photo_nursery_bed_ex1}";
         else:
             photo_nursery_bed_1 = ''
 
@@ -258,7 +258,7 @@ for json_in in json_main_nursery_registration:
         if json_extract(json_in, 'photo_nursery_bed_2')[0] is not None:
             #photo_1 = "https://ecosia.getodk.cloud"+"/projects/"+str(1)+"/forms/"+str('planting_site_reporting')+"/submissions/"+str(instanceID)+"/attachments/"+json_extract(json_in, 'photo_tree_polygon_1')[0]
             photo_nursery_bed_ex2 = json_extract(json_in, 'photo_nursery_bed_2')[0]
-            photo_nursery_bed_2 = f"https://ecosia.getodk.cloud/v1/key/{photo_token}/projects/1/forms/{form_id}}/submissions/{instanceID}/attachments/{photo_nursery_bed_ex2}";
+            photo_nursery_bed_2 = f"https://ecosia.getodk.cloud/v1/key/{photo_token}/projects/1/forms/{form_id}/submissions/{instanceID}/attachments/{photo_nursery_bed_ex2}";
         else:
             photo_nursery_bed_2 = ''
 
@@ -266,7 +266,7 @@ for json_in in json_main_nursery_registration:
         if json_extract(json_in, 'photo_nursery_bed_3')[0] is not None:
             #photo_1 = "https://ecosia.getodk.cloud"+"/projects/"+str(1)+"/forms/"+str('planting_site_reporting')+"/submissions/"+str(instanceID)+"/attachments/"+json_extract(json_in, 'photo_tree_polygon_1')[0]
             photo_nursery_bed_ex3 = json_extract(json_in, 'photo_nursery_bed_3')[0]
-            photo_nursery_bed_3 = f"https://ecosia.getodk.cloud/v1/key/{photo_token}/projects/1/forms/{form_id}}/submissions/{instanceID}/attachments/{photo_nursery_bed_ex3}";
+            photo_nursery_bed_3 = f"https://ecosia.getodk.cloud/v1/key/{photo_token}/projects/1/forms/{form_id}/submissions/{instanceID}/attachments/{photo_nursery_bed_ex3}";
         else:
             photo_nursery_bed_3 = ''
 
@@ -274,7 +274,7 @@ for json_in in json_main_nursery_registration:
         if json_extract(json_in, 'photo_nursery_bed_4')[0] is not None:
             #photo_1 = "https://ecosia.getodk.cloud"+"/projects/"+str(1)+"/forms/"+str('planting_site_reporting')+"/submissions/"+str(instanceID)+"/attachments/"+json_extract(json_in, 'photo_tree_polygon_1')[0]
             photo_nursery_bed_ex4 = json_extract(json_in, 'photo_nursery_bed_4')[0]
-            photo_nursery_bed_4 = f"https://ecosia.getodk.cloud/v1/key/{photo_token}/projects/1/forms/{form_id}}/submissions/{instanceID}/attachments/{photo_nursery_bed_ex4}";
+            photo_nursery_bed_4 = f"https://ecosia.getodk.cloud/v1/key/{photo_token}/projects/1/forms/{form_id}/submissions/{instanceID}/attachments/{photo_nursery_bed_ex4}";
         else:
             photo_nursery_bed_4 = ''
 
@@ -282,7 +282,7 @@ for json_in in json_main_nursery_registration:
         if json_extract(json_in, 'nursery_registration_photo_north')[0] is not None:
             #photo_1 = "https://ecosia.getodk.cloud"+"/projects/"+str(1)+"/forms/"+str('planting_site_reporting')+"/submissions/"+str(instanceID)+"/attachments/"+json_extract(json_in, 'photo_tree_polygon_1')[0]
             nursery_registration_photo_north_ex1 = json_extract(json_in, 'nursery_registration_photo_north')[0]
-            nursery_registration_photo_north = f"https://ecosia.getodk.cloud/v1/key/{photo_token}/projects/1/forms/{form_id}}/submissions/{instanceID}/attachments/{nursery_registration_photo_north_ex1}";
+            nursery_registration_photo_north = f"https://ecosia.getodk.cloud/v1/key/{photo_token}/projects/1/forms/{form_id}/submissions/{instanceID}/attachments/{nursery_registration_photo_north_ex1}";
         else:
             nursery_registration_photo_north = ''
 
@@ -290,7 +290,7 @@ for json_in in json_main_nursery_registration:
         if json_extract(json_in, 'nursery_registration_photo_east')[0] is not None:
             #photo_1 = "https://ecosia.getodk.cloud"+"/projects/"+str(1)+"/forms/"+str('planting_site_reporting')+"/submissions/"+str(instanceID)+"/attachments/"+json_extract(json_in, 'photo_tree_polygon_1')[0]
             nursery_registration_photo_east_ex1 = json_extract(json_in, 'nursery_registration_photo_east')[0]
-            nursery_registration_photo_east = f"https://ecosia.getodk.cloud/v1/key/{photo_token}/projects/1/forms/{form_id}}/submissions/{instanceID}/attachments/{nursery_registration_photo_east_ex1}";
+            nursery_registration_photo_east = f"https://ecosia.getodk.cloud/v1/key/{photo_token}/projects/1/forms/{form_id}/submissions/{instanceID}/attachments/{nursery_registration_photo_east_ex1}";
         else:
             nursery_registration_photo_east = ''
 
@@ -298,7 +298,7 @@ for json_in in json_main_nursery_registration:
         if json_extract(json_in, 'nursery_registration_photo_south')[0] is not None:
             #photo_1 = "https://ecosia.getodk.cloud"+"/projects/"+str(1)+"/forms/"+str('planting_site_reporting')+"/submissions/"+str(instanceID)+"/attachments/"+json_extract(json_in, 'photo_tree_polygon_1')[0]
             nursery_registration_photo_south_ex1 = json_extract(json_in, 'nursery_registration_photo_south')[0]
-            nursery_registration_photo_south = f"https://ecosia.getodk.cloud/v1/key/{photo_token}/projects/1/forms/{form_id}}/submissions/{instanceID}/attachments/{nursery_registration_photo_south_ex1}";
+            nursery_registration_photo_south = f"https://ecosia.getodk.cloud/v1/key/{photo_token}/projects/1/forms/{form_id}/submissions/{instanceID}/attachments/{nursery_registration_photo_south_ex1}";
         else:
             nursery_registration_photo_south = ''
 
@@ -306,7 +306,7 @@ for json_in in json_main_nursery_registration:
         if json_extract(json_in, 'nursery_registration_photo_west')[0] is not None:
             #photo_1 = "https://ecosia.getodk.cloud"+"/projects/"+str(1)+"/forms/"+str('planting_site_reporting')+"/submissions/"+str(instanceID)+"/attachments/"+json_extract(json_in, 'photo_tree_polygon_1')[0]
             nursery_registration_photo_west_ex1 = json_extract(json_in, 'nursery_registration_photo_west')[0]
-            nursery_registration_photo_west = f"https://ecosia.getodk.cloud/v1/key/{photo_token}/projects/1/forms/{form_id}}/submissions/{instanceID}/attachments/{nursery_registration_photo_west_ex1}";
+            nursery_registration_photo_west = f"https://ecosia.getodk.cloud/v1/key/{photo_token}/projects/1/forms/{form_id}/submissions/{instanceID}/attachments/{nursery_registration_photo_west_ex1}";
         else:
             nursery_registration_photo_west = ''
 
@@ -375,7 +375,7 @@ for json_in in json_main_nursery_monitoring:
         if json_extract(json_in, 'nursery_monitoring_bed_1')[0] is not None:
             #photo_1 = "https://ecosia.getodk.cloud"+"/projects/"+str(1)+"/forms/"+str('planting_site_reporting')+"/submissions/"+str(instanceID)+"/attachments/"+json_extract(json_in, 'photo_tree_polygon_1')[0]
             nursery_monitoring_bed_ex1 = json_extract(json_in, 'nursery_monitoring_bed_1')[0]
-            nursery_monitoring_bed_1 = f"https://ecosia.getodk.cloud/v1/key/{photo_token}/projects/1/forms/{form_id}}/submissions/{instanceID}/attachments/{nursery_monitoring_bed_ex1}";
+            nursery_monitoring_bed_1 = f"https://ecosia.getodk.cloud/v1/key/{photo_token}/projects/1/forms/{form_id}/submissions/{instanceID}/attachments/{nursery_monitoring_bed_ex1}";
         else:
             nursery_monitoring_bed_1 = ''
 
@@ -383,7 +383,7 @@ for json_in in json_main_nursery_monitoring:
         if json_extract(json_in, 'nursery_monitoring_bed_2')[0] is not None:
             #photo_1 = "https://ecosia.getodk.cloud"+"/projects/"+str(1)+"/forms/"+str('planting_site_reporting')+"/submissions/"+str(instanceID)+"/attachments/"+json_extract(json_in, 'photo_tree_polygon_1')[0]
             nursery_monitoring_bed_ex2 = json_extract(json_in, 'nursery_monitoring_bed_2')[0]
-            nursery_monitoring_bed_2 = f"https://ecosia.getodk.cloud/v1/key/{photo_token}/projects/1/forms/{form_id}}/submissions/{instanceID}/attachments/{nursery_monitoring_bed_ex2}";
+            nursery_monitoring_bed_2 = f"https://ecosia.getodk.cloud/v1/key/{photo_token}/projects/1/forms/{form_id}/submissions/{instanceID}/attachments/{nursery_monitoring_bed_ex2}";
         else:
             nursery_monitoring_bed_2 = ''
 
@@ -391,7 +391,7 @@ for json_in in json_main_nursery_monitoring:
         if json_extract(json_in, 'nursery_monitoring_bed_3')[0] is not None:
             #photo_1 = "https://ecosia.getodk.cloud"+"/projects/"+str(1)+"/forms/"+str('planting_site_reporting')+"/submissions/"+str(instanceID)+"/attachments/"+json_extract(json_in, 'photo_tree_polygon_1')[0]
             nursery_monitoring_bed_ex3 = json_extract(json_in, 'nursery_monitoring_bed_2')[0]
-            nursery_monitoring_bed_3 = f"https://ecosia.getodk.cloud/v1/key/{photo_token}/projects/1/forms/{form_id}}/submissions/{instanceID}/attachments/{nursery_monitoring_bed_ex3}";
+            nursery_monitoring_bed_3 = f"https://ecosia.getodk.cloud/v1/key/{photo_token}/projects/1/forms/{form_id}/submissions/{instanceID}/attachments/{nursery_monitoring_bed_ex3}";
         else:
             nursery_monitoring_bed_3 = ''
 
@@ -399,7 +399,7 @@ for json_in in json_main_nursery_monitoring:
         if json_extract(json_in, 'nursery_monitoring_bed_4')[0] is not None:
             #photo_1 = "https://ecosia.getodk.cloud"+"/projects/"+str(1)+"/forms/"+str('planting_site_reporting')+"/submissions/"+str(instanceID)+"/attachments/"+json_extract(json_in, 'photo_tree_polygon_1')[0]
             nursery_monitoring_bed_ex4 = json_extract(json_in, 'nursery_monitoring_bed_2')[0]
-            nursery_monitoring_bed_4 = f"https://ecosia.getodk.cloud/v1/key/{photo_token}/projects/1/forms/{form_id}}/submissions/{instanceID}/attachments/{nursery_monitoring_bed_ex4}";
+            nursery_monitoring_bed_4 = f"https://ecosia.getodk.cloud/v1/key/{photo_token}/projects/1/forms/{form_id}/submissions/{instanceID}/attachments/{nursery_monitoring_bed_ex4}";
         else:
             nursery_monitoring_bed_4 = ''
 
