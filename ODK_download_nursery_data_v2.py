@@ -10,6 +10,7 @@ from shapely.geometry import Point
 from shapely.geometry import LineString
 import os
 import sys
+from requests.auth import HTTPBasicAuth
 from urllib.parse import quote
 
 # Retrieve environment variables from Heroku
