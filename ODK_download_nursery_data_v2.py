@@ -224,7 +224,6 @@ photo_token = quote(odk_photo_token, safe='')
 for json_in in json_main_nursery_registration:
     print(json_in)
     if json_extract(json_in, 'reporting_type')[0] == 'new_nursery':
-
         count = count+1
         user_name = json_extract(json_in, 'username')[0]
         organisation = json_extract(json_in, 'organisation')[0]
@@ -238,7 +237,8 @@ for json_in in json_main_nursery_registration:
         test_data_yes_no = json_extract(json_in, 'test_data_yes_no')[0]
         reporting_type = json_extract(json_in, 'reporting_type')[0]
         submissionid_odk = json_extract(json_in, 'instanceID')[0]
-        instanceID = json_extract(json_in, '__Submissions-id')[0]
+        #instanceID = json_extract(json_in, '__Submissions-id')[0]
+        instanceID = json_extract(json_in, 'instanceid')[0]
         ecosia_nursery_id = json_extract(json_in, 'instanceid')[0]
         nursery_id_to_monitor = json_extract(json_in, 'nursery_id_to_monitor')[0]
         select_tree_production = json_extract(json_in, 'select_tree_production')[0]
@@ -342,7 +342,7 @@ count = 0
 photo_token = quote(odk_photo_token, safe='')
 
 for json_in in json_main_nursery_monitoring:
-    #print('XXXXKLLL: ',json_in)
+
     if json_extract(json_in, 'reporting_type')[0] == 'existing_nursery':
         count = count+1
         start = json_extract(json_in, 'start')[0]
@@ -360,7 +360,8 @@ for json_in in json_main_nursery_monitoring:
         reporting_type = json_extract(json_in, 'reporting_type')[0]
         submissionid_odk = json_extract(json_in, 'instanceID')[0]
         ecosia_nursery_id = json_extract(json_in, 'instanceid')[0]
-        instanceID = json_extract(json_in, '__Submissions-id')[0]
+        #instanceID = json_extract(json_in, '__Submissions-id')[0]
+        instanceID = json_extract(json_in, 'instanceid')[0]
         nursery_id_to_monitor = json_extract(json_in, 'nursery_id_to_monitor')[0]
         nursery_monitoring_manager = json_extract(json_in, 'nursery_monitoring_manager')[0]
         nursery_monitoring_gender_manager = json_extract(json_in, 'nursery_monitoring_gender_manager')[0]
