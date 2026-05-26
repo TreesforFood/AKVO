@@ -1112,7 +1112,7 @@ WHERE most_recent_odk = 1)
 UPDATE akvo_tree_registration_areas_edits
 SET
 polygon = updates_polygon_odk.remaped_polygon_planting_site,
-re_mapped_by_partner = 'yes'
+re_mapped_by_partner = 'yes',
 -- edit_confirmation = True >> Edit confirmation not set to 'True' because this setting will enter the UPDATE table and prevent that the polygon can be modified a second time
 updated_at = updates_polygon_odk.submission_date
 FROM updates_polygon_odk
