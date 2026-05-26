@@ -4703,7 +4703,18 @@ ALTER TABLE superset_ecosia_tree_monitoring
 ADD contract NUMERIC(20,0);
 
 UPDATE superset_ecosia_tree_monitoring
-SET contract = TRUNC(sub_contract);'''
+SET contract = TRUNC(sub_contract);
+
+UPDATE superset_ecosia_tree_monitoring
+SET test = 'yes'
+WHERE test = 'This is a test, this record can be deleted.'
+OR test = 'xxxxx'
+OR test = 'This is a test, this record can be deleted';
+
+UPDATE superset_ecosia_tree_monitoring
+SET test = 'no'
+WHERE test = 'This is real, valid data'
+OR test = '';'''
 
 conn.commit()
 
