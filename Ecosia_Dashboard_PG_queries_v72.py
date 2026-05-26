@@ -1038,8 +1038,7 @@ polygon = updates_polygon_akvo.polygon_remapped,
 re_mapped_by_partner = 'yes'
 FROM updates_polygon_akvo
 WHERE akvo_tree_registration_areas_updated.identifier_akvo = updates_polygon_akvo.identifier_akvo
-AND (akvo_tree_registration_areas_updated.edit_confirmation = False
-OR akvo_tree_registration_areas_updated.edit_confirmation ISNULL);
+AND akvo_tree_registration_areas_updated.edit_confirmation = False;
 
 
 -- Below we check if a new polygon was submitted by ODK collect. If multiple submissions of new polygons were done, the latest submission will be selected
@@ -1064,9 +1063,8 @@ re_mapped_by_partner = 'yes',
 updated_at = updates_polygon_odk.submission_date
 FROM updates_polygon_odk
 WHERE akvo_tree_registration_areas_updated.identifier_akvo = updates_polygon_odk.ecosia_site_id
-AND (akvo_tree_registration_areas_updated.edit_confirmation = False
-OR akvo_tree_registration_areas_updated.edit_confirmation ISNULL)
-AND updates_polygon_odk.test != 'This is a test, this record can be deleted.';'''
+AND akvo_tree_registration_areas_updated.edit_confirmation = False
+AND updates_polygon_odk.test != 'test_data';'''
 
 conn.commit()
 
@@ -1088,8 +1086,8 @@ WHERE most_recent_akvo = 1)
 UPDATE akvo_tree_registration_areas_edits
 SET
 polygon = updates_polygon_akvo.polygon_remapped,
-re_mapped_by_partner = 'yes',
-edit_confirmation = True
+re_mapped_by_partner = 'yes'
+-- edit_confirmation = True >> Edit confirmation not set to 'True' because this setting will enter the UPDATE table and prevent that the polygon can be modified a second time
 FROM updates_polygon_akvo
 WHERE akvo_tree_registration_areas_edits.identifier_akvo = updates_polygon_akvo.identifier_akvo
 AND (akvo_tree_registration_areas_edits.edit_confirmation = False
@@ -1114,14 +1112,13 @@ WHERE most_recent_odk = 1)
 UPDATE akvo_tree_registration_areas_edits
 SET
 polygon = updates_polygon_odk.remaped_polygon_planting_site,
-re_mapped_by_partner = 'yes',
-edit_confirmation = True,
+re_mapped_by_partner = 'yes'
+-- edit_confirmation = True >> Edit confirmation not set to 'True' because this setting will enter the UPDATE table and prevent that the polygon can be modified a second time
 updated_at = updates_polygon_odk.submission_date
 FROM updates_polygon_odk
 WHERE akvo_tree_registration_areas_edits.identifier_akvo = updates_polygon_odk.ecosia_site_id
-AND (akvo_tree_registration_areas_edits.edit_confirmation = False
-OR akvo_tree_registration_areas_edits.edit_confirmation ISNULL)
-AND updates_polygon_odk.test != 'This is a test, this record can be deleted.';'''
+AND akvo_tree_registration_areas_edits.edit_confirmation = False
+AND updates_polygon_odk.test != 'test_data';'''
 
 conn.commit()
 
