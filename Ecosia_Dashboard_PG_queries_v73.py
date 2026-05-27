@@ -5664,6 +5664,7 @@ ADD lat_y REAL;
 ALTER TABLE superset_ecosia_nursery_monitoring_photos
 ADD lon_x REAL;
 
+-- For AKVO photos, the url needs to be modified in order for Preset to read it. For photos from ODK, this is not needed since the string format for Preset is arranged during the download of the data.
 UPDATE superset_ecosia_nursery_monitoring_photos
 SET
 lat_y = ST_Y(centroid_coord::geometry),
@@ -5671,17 +5672,20 @@ lon_x = ST_X(centroid_coord::geometry)
 WHERE centroid_coord NOTNULL;
 
 UPDATE superset_ecosia_nursery_monitoring_photos
-SET photo_url = RIGHT(photo_url, strpos(reverse(photo_url),'/'));
+SET photo_url = RIGHT(photo_url, strpos(reverse(photo_url),'/'))
+WHERE source_data_monitoring = 'AKVO';
 
 UPDATE superset_ecosia_nursery_monitoring_photos
-SET photo_url = CONCAT('https://akvoflow-201.s3.amazonaws.com/images',photo_url);
+SET photo_url = CONCAT('https://akvoflow-201.s3.amazonaws.com/images',photo_url)
+WHERE source_data_monitoring = 'AKVO';
 
 ALTER TABLE superset_ecosia_nursery_monitoring_photos
 ADD photo_url_preset TEXT;
 
 UPDATE superset_ecosia_nursery_monitoring_photos
 SET photo_url_preset = CONCAT('<img src="', photo_url, '" alt="s3 image" height=200/>')
-WHERE photo_url NOTNULL;'''
+WHERE photo_url NOTNULL
+AND source_data_monitoring = 'AKVO';'''
 
 conn.commit()
 
