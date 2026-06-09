@@ -88,7 +88,11 @@ for x in result:
         identifier = y['fields']['identifier']
         notes = y['fields']['Notes']
         planting_date = y['fields']['Date']
-        nr_trees_survived = y['fields']['# trees growing']
+        try:
+            nr_trees_survived = y['fields']['# trees growing']
+        except KeyError:
+            nr_trees_survived = None
+
 
         print(identifier, notes, planting_date, nr_trees_survived)
 
