@@ -43,8 +43,7 @@ cur.execute('''DROP TABLE IF EXISTS airtable_download_monitoring_results;''')
 conn.commit()
 
 cur.execute('''
-CREATE TABLE airtable_download_monitoring_results (identifier TEXT, notes TEXT, planting_date DATE, nr_trees_survived INTEGER));
-''')
+CREATE TABLE airtable_download_monitoring_results (identifier TEXT, notes TEXT, planting_date DATE, nr_trees_survived INTEGER);''')
 conn.commit()
 
 
@@ -98,10 +97,4 @@ for x in result:
 
         conn.commit()
 
-
-
-
-
-
-conn.commit()
 cur.close()
