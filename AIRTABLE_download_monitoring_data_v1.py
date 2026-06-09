@@ -87,9 +87,9 @@ count = 0
 for x in result:
     for y in x:
         identifier = y['fields']['identifier']
-        notes = y['fields']['identifier']
-        planting_date = y['fields']['identifier']
-        nr_trees_survived = y['fields']['identifier']
+        notes = y['fields']['Notes']
+        planting_date = y['fields']['Date']
+        nr_trees_survived = y['fields']['# trees growing']
 
         print(identifier, notes, planting_date, nr_trees_survived)
 
