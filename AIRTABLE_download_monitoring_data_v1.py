@@ -89,7 +89,7 @@ for x in result:
         notes = y['fields']['Notes']
         planting_date = y['fields']['Date']
         try:
-            nr_trees_survived = y['fields']['# trees growing']
+            nr_trees_survived = y['fields']['trees growing']
         except KeyError:
             nr_trees_survived = None
 
