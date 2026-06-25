@@ -2587,7 +2587,7 @@ FROM odk_tree_monitoring_main
 JOIN odk_tree_monitoring_pcq
 ON odk_tree_monitoring_main.submissionid_odk = odk_tree_monitoring_pcq.submissionid_odk
 JOIN odk_tree_registration_main
-ON odk_tree_registration_main.ecosia_site_id = odk_tree_monitoring_main.ecosia_site_id),
+ON odk_tree_registration_main.submissionid_odk = odk_tree_monitoring_main.ecosia_site_id),
 
 -- Count of PCQ samples (gps points) per label strata
 count_pcq_samples AS (SELECT
@@ -2729,7 +2729,7 @@ SUM(odk_tree_monitoring_count_trees.count_species) AS nr_trees_monitored
 
 FROM odk_tree_monitoring_count_trees
 LEFT JOIN table_label_strata
-ON odk_tree_monitoring_count_trees.submissionid_odk = table_label_strata.submissionid_odk
+ON odk_tree_monitoring_count_trees.submissionid_odk = table_label_strata.submissionid_odk_monitoring_main
 LEFT JOIN odk_tree_monitoring_main
 ON odk_tree_monitoring_main.submissionid_odk = odk_tree_monitoring_count_trees.submissionid_odk
 GROUP BY
@@ -2746,7 +2746,7 @@ SUM(odk_tree_monitoring_own_method.tree_number_own_method) AS nr_trees_monitored
 
 FROM odk_tree_monitoring_own_method
 LEFT JOIN table_label_strata
-ON odk_tree_monitoring_own_method.submissionid_odk = table_label_strata.submissionid_odk
+ON odk_tree_monitoring_own_method.submissionid_odk = table_label_strata.submissionid_odk_monitoring_main
 LEFT JOIN odk_tree_monitoring_main
 ON odk_tree_monitoring_main.submissionid_odk = odk_tree_monitoring_own_method.submissionid_odk
 GROUP BY
@@ -2762,7 +2762,7 @@ table_label_strata.label_strata,
 STRING_AGG(odk_tree_monitoring_main.username,' | ') AS submitter
 FROM odk_tree_monitoring_main
 JOIN table_label_strata
-ON odk_tree_monitoring_main.submissionid_odk = table_label_strata.submissionid_odk
+ON odk_tree_monitoring_main.submissionid_odk = table_label_strata.submissionid_odk_monitoring_main
 GROUP BY odk_tree_monitoring_main.ecosia_site_id,
 table_label_strata.label_strata),
 
@@ -2775,7 +2775,7 @@ table_label_strata.label_strata,
 STRING_AGG(odk_tree_monitoring_main.overall_observation_site,' | ') AS site_impressions
 FROM odk_tree_monitoring_main
 JOIN table_label_strata
-ON odk_tree_monitoring_main.submissionid_odk = table_label_strata.submissionid_odk
+ON odk_tree_monitoring_main.submissionid_odk = table_label_strata.submissionid_odk_monitoring_main
 GROUP BY odk_tree_monitoring_main.ecosia_site_id,
 table_label_strata.label_strata),
 
@@ -2858,7 +2858,7 @@ CASE
 	ELSE akvo_tree_registration_areas_updated.planting_date
 	END AS planting_date,
 
-MAX(table_label_strata.submission) AS latest_monitoring_submission,
+MAX(table_label_strata.submission_date_monitoring) AS latest_monitoring_submission,
 
 MAX(table_label_strata.difference_days_reg_monitoring) AS nr_days_registration_monitoring,
 MAX(table_label_strata.difference_years_reg_monitoring) AS nr_years_registration_monitoring,
@@ -2882,7 +2882,7 @@ ON odk_tree_monitoring_main.submissionid_odk = odk_tree_monitoring_pcq.submissio
 LEFT JOIN odk_tree_registration_main
 ON odk_tree_registration_main.ecosia_site_id = odk_tree_monitoring_main.ecosia_site_id
 LEFT JOIN table_label_strata
-ON odk_tree_monitoring_main.submissionid_odk = table_label_strata.submissionid_odk
+ON odk_tree_monitoring_main.submissionid_odk = table_label_strata.submissionid_odk_monitoring_main
 LEFT JOIN akvo_tree_registration_areas_updated
 ON odk_tree_monitoring_main.ecosia_site_id = akvo_tree_registration_areas_updated.identifier_akvo
 LEFT JOIN pcq_monitoring_avg_dist
@@ -2891,9 +2891,8 @@ AND pcq_monitoring_avg_dist.label_strata = table_label_strata.label_strata
 LEFT JOIN pcq_monitoring_avg_hgt
 ON pcq_monitoring_avg_hgt.ecosia_site_id = odk_tree_monitoring_main.ecosia_site_id
 AND pcq_monitoring_avg_hgt.label_strata = table_label_strata.label_strata
---AND count_pcq_samples.label_strata = table_label_strata.label_strata
 LEFT JOIN count_pcq_samples
-ON count_pcq_samples.submissionid_odk = odk_tree_monitoring_main.submissionid_odk
+ON count_pcq_samples.ecosia_site_id = odk_tree_monitoring_main.ecosia_site_id
 LEFT JOIN submittors_monitoring
 ON submittors_monitoring.ecosia_site_id = odk_tree_monitoring_main.ecosia_site_id
 AND submittors_monitoring.label_strata = table_label_strata.label_strata
@@ -3019,7 +3018,7 @@ ELSE akvo_tree_registration_areas_updated.planting_date
 END AS planting_date,
 
 
-MAX(table_label_strata.submission) AS latest_monitoring_submission,
+MAX(table_label_strata.submission_date_monitoring) AS latest_monitoring_submission,
 MAX(table_label_strata.difference_days_reg_monitoring) AS nr_days_registration_monitoring,
 MAX(table_label_strata.difference_years_reg_monitoring) AS nr_years_registration_monitoring,
 table_label_strata.label_strata,
@@ -3043,7 +3042,7 @@ ON odk_tree_monitoring_main.ecosia_site_id = odk_tree_registration_main.ecosia_s
 LEFT JOIN akvo_tree_registration_areas_updated
 ON odk_tree_monitoring_main.ecosia_site_id = akvo_tree_registration_areas_updated.identifier_akvo
 LEFT JOIN table_label_strata
-ON odk_tree_monitoring_main.submissionid_odk = table_label_strata.submissionid_odk
+ON odk_tree_monitoring_main.ecosia_site_id = table_label_strata.submissionid_odk_monitoring_main
 LEFT JOIN odk_tree_monitoring_count_trees
 ON odk_tree_monitoring_count_trees.submissionid_odk = odk_tree_monitoring_main.submissionid_odk
 LEFT JOIN submittors_monitoring
@@ -3173,7 +3172,7 @@ THEN odk_tree_registration_main.planting_date
 ELSE akvo_tree_registration_areas_updated.planting_date
 END AS planting_date,
 
-MAX(table_label_strata.submission) AS latest_monitoring_submission,
+MAX(table_label_strata.submission_date_monitoring) AS latest_monitoring_submission,
 MAX(table_label_strata.difference_days_reg_monitoring) AS nr_days_registration_monitoring,
 MAX(table_label_strata.difference_years_reg_monitoring) AS nr_years_registration_monitoring,
 table_label_strata.label_strata,
@@ -3196,7 +3195,7 @@ ON odk_tree_monitoring_main.ecosia_site_id = odk_tree_registration_main.ecosia_s
 LEFT JOIN akvo_tree_registration_areas_updated
 ON odk_tree_monitoring_main.ecosia_site_id = akvo_tree_registration_areas_updated.identifier_akvo
 JOIN table_label_strata
-ON odk_tree_monitoring_main.submissionid_odk = table_label_strata.submissionid_odk
+ON odk_tree_monitoring_main.ecosia_site_id = table_label_strata.submissionid_odk_monitoring_main
 LEFT JOIN submittors_monitoring
 ON submittors_monitoring.ecosia_site_id = odk_tree_monitoring_main.ecosia_site_id
 AND submittors_monitoring.label_strata = table_label_strata.label_strata
@@ -3329,7 +3328,8 @@ SELECT * FROM calc_interm_results_tree_numbers_own_method_monitoring_odk
 UNION ALL
 SELECT * FROM registration_results_polygon_odk
 UNION ALL
-SELECT * FROM registration_results_non_polygon_odk)
+SELECT * FROM registration_results_non_polygon_odk
+)
 
 SELECT * FROM monitoring_tree_numbers_odk;'''
 
