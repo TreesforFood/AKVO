@@ -1343,7 +1343,8 @@ ALTER TABLE akvo_tree_registration_areas_edits
 ADD COLUMN IF NOT EXISTS fid SERIAL PRIMARY KEY, -- Needed in order to be able to edit in QGIS
 ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ, -- Add colum if not exits (in case table was already created)
 ADD COLUMN IF NOT EXISTS re_mapped_by_partner TEXT, -- Add colum if not exits (in case table was already created)
-ADD COLUMN IF NOT EXISTS delete_confirmation BOOLEAN DEFAULT False;'''
+ADD COLUMN IF NOT EXISTS delete_confirmation BOOLEAN DEFAULT False,
+ADD COLUMN IF NOT EXISTS monitored_confirmation BOOLEAN DEFAULT False;'''
 
 conn.commit()
 
