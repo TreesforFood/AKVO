@@ -1582,8 +1582,9 @@ conn.commit()
 delete_rows_from_update_table = '''
 -- Delete rows that were removed in the EDIT table also from the UPDATE table.
 DELETE FROM akvo_tree_registration_areas_updated
-WHERE (SELECT 1 FROM akvo_tree_registration_areas_edits
-WHERE akvo_tree_registration_areas_edits.delete_confirmation = true);'''
+WHERE EXISTS (SELECT 1 FROM akvo_tree_registration_areas_edits
+    WHERE akvo_tree_registration_areas_edits.delete_confirmation = true
+    AND akvo_tree_registration_areas_updated.identifier_akvo = akvo_tree_registration_areas_edits.identifier_akvo);'''
 
 conn.commit()
 
