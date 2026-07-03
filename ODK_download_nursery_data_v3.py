@@ -510,7 +510,7 @@ for json_in in json_main_nursery_registration_and_monitoring:
         nursery_monitoring_tree_capacity, nursery_monitoring_tree_species, nursery_monitoring_tree_species_other, month_first_distribution, nursery_monitoring_planting_months,
         nursery_bed_gps, nursery_monitoring_bed_1, nursery_monitoring_bed_2, nursery_monitoring_bed_3, nursery_monitoring_bed_4)
         VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)''', (submissionid_odk, user_name, organisation, today,
-        submission_date, nursery_id_to_monitor, name_nursery_registration, method_data_collection, form_version, test_data_yes_no, reporting_type, contract_number_save, nursery_registration_manager, nursery_registration_gender_manager, nursery_registration_nr_people, nursery_registration_challenges,
+        submission_date, ecosia_nursery_id, name_nursery_registration, method_data_collection, form_version, test_data_yes_no, reporting_type, contract_number_save, nursery_registration_manager, nursery_registration_gender_manager, nursery_registration_nr_people, nursery_registration_challenges,
         nursery_registration_tree_capacity, nursery_registration_tree_species, nursery_registration_tree_species_other, month_first_distribution,
         nursery_registration_planting_months, nursery_registration_gps, photo_nursery_bed_1, photo_nursery_bed_2, photo_nursery_bed_3, photo_nursery_bed_4))
 
