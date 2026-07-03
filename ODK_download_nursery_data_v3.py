@@ -328,7 +328,7 @@ for json_in in json_main_nursery_registration_and_monitoring:
         select_tree_production, contract_number_tree_production, nursery_registration_gps, lat_y, lon_x, nursery_registration_type, nursery_registration_name, nursery_registration_establishment, nursery_registration_full_production_capacity, nursery_monitoring_tree_capacity, photo_nursery_bed_1,
         photo_nursery_bed_2, photo_nursery_bed_3, photo_nursery_bed_4, nursery_registration_photo_north, nursery_registration_photo_east, nursery_registration_photo_south,
         nursery_registration_photo_west)
-        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)''', (submissionid_odk, ecosia_nursery_id, user_name, organisation, today,
+        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)''', (submissionid_odk, ecosia_nursery_id, user_name, organisation, today,
         submission_date, form_version, test_data_yes_no, reporting_type, select_tree_production, contract_number_save, nursery_registration_gps, lat_y, lon_x,
         nursery_registration_type, nursery_registration_name, nursery_registration_establishment, nursery_registration_full_production_capacity, nursery_monitoring_tree_capacity, photo_nursery_bed_1,
         photo_nursery_bed_2, photo_nursery_bed_3, photo_nursery_bed_4, nursery_registration_photo_north, nursery_registration_photo_east, nursery_registration_photo_south,
