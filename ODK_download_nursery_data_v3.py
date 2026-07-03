@@ -497,6 +497,7 @@ for json_in in json_main_nursery_registration_and_monitoring:
 
         if json_in['group_nursery_registration']['group_nursery_registration_details']['nursery_registration_gps'] != None:
             return_list = convert_point_wkt(json_in['group_nursery_registration']['group_nursery_registration_details']['nursery_registration_gps']['coordinates'])
+            print(return_list)
             nursery_registration_gps = return_list[0]
         else:
             nursery_registration_gps = None
