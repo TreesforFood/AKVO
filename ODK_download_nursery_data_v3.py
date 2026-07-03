@@ -439,7 +439,7 @@ photo_token = quote(odk_photo_token, safe='')
 # Nursery registration results that needs to go in the monitoring table
 for json_in in json_main_nursery_registration_and_monitoring:
 
-    if json_extract(json_in, 'reporting_type')[0] == 'new_nursery' AND json_extract(json_in, 'select_tree_production')[0] == 'tree_production':
+    if json_extract(json_in, 'reporting_type')[0] == 'new_nursery' and json_extract(json_in, 'select_tree_production')[0] == 'tree_production':
         submissionid_odk = json_extract(json_in, 'instanceID')[0]
         user_name = json_extract(json_in, 'username')[0]
         organisation = json_extract(json_in, 'organisation')[0]
