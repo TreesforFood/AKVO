@@ -3061,7 +3061,7 @@ ON odk_tree_monitoring_main.ecosia_site_id = odk_tree_registration_main.ecosia_s
 LEFT JOIN akvo_tree_registration_areas_updated
 ON odk_tree_monitoring_main.ecosia_site_id = akvo_tree_registration_areas_updated.identifier_akvo
 LEFT JOIN table_label_strata
-ON odk_tree_monitoring_main.ecosia_site_id = table_label_strata.submissionid_odk_monitoring_main
+ON odk_tree_monitoring_main.submissionid_odk = table_label_strata.submissionid_odk_monitoring_main
 LEFT JOIN odk_tree_monitoring_count_trees
 ON odk_tree_monitoring_count_trees.submissionid_odk = odk_tree_monitoring_main.submissionid_odk
 LEFT JOIN submittors_monitoring
