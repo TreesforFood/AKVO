@@ -1594,7 +1594,7 @@ t1.identifier_akvo,
 
 -- Create a unique code for filtering in superset, based on main organisation name
 CASE
-WHEN odk_tree_registration_main.organisation NOTNULL
+WHEN t1.organisation NOTNULL
 THEN CAST(CONCAT(
 	POWER(ASCII(LEFT(LOWER(t1.organisation),1)),3),
 	POWER(ASCII(LEFT(LOWER(t1.organisation),2)),2),
@@ -1604,8 +1604,8 @@ END AS partnercode_main,
 
 -- Create a unique code for filtering in superset, based on main sub-organisation name
 CASE
-WHEN POSITION('-' IN odk_tree_registration_main.organisation) > 0
-THEN CAST(CONCAT(POWER(ASCII(RIGHT((LOWER(odk_tree_registration_main.organisation)),
+WHEN POSITION('-' IN t1.organisation) > 0
+THEN CAST(CONCAT(POWER(ASCII(RIGHT((LOWER(t1.organisation)),
 			LENGTH(t1.organisation) - POSITION('-' IN t1.organisation) - 1)),3),
 		    POWER(ASCII(RIGHT((LOWER(t1.organisation)),
 			LENGTH(t1.organisation) - POSITION('-' IN t1.organisation) - 2)),2),
