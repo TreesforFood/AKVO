@@ -993,11 +993,7 @@ WITH t as
 UPDATE akvo_tree_registration_areas_integrated
 SET species_latin = t.species_list
 FROM t
-WHERE t.identifier_akvo = akvo_tree_registration_areas_integrated.identifier_akvo;
-
-UPDATE akvo_tree_registration_areas_integrated
-SET calc_area = 0.2
-WHERE polygon ISNULL;'''
+WHERE t.identifier_akvo = akvo_tree_registration_areas_integrated.identifier_akvo;'''
 
 conn.commit()
 
@@ -1505,14 +1501,39 @@ conn.commit()
 
 
 # After a polygon modification in EDITS, the calc_area needs to be recalculated. Then this recalculated area must also enter into the UPDATED TABLE
-update_calc_area_edits = '''
+update_calc_area_edits_polygons = '''
 UPDATE akvo_tree_registration_areas_edits
 SET calc_area = ST_Area(polygon::geography) / 10000
-WHERE akvo_tree_registration_areas_edits.edit_confirmation = TRUE
-AND akvo_tree_registration_areas_edits.polygon IS NOT NULL;'''
+--WHERE akvo_tree_registration_areas_edits.edit_confirmation = TRUE
+WHERE akvo_tree_registration_areas_edits.polygon IS NOT NULL;'''
 
 conn.commit()
 
+# After a polygon modification in EDITS, the calc_area needs to be recalculated. Then this recalculated area must also enter into the UPDATED TABLE
+update_calc_area_edits_points_buffer25m = '''
+UPDATE akvo_tree_registration_areas_edits
+SET calc_area = 0.2
+WHERE akvo_tree_registration_areas_edits.polygon ISNULL;'''
+
+conn.commit()
+
+# After a polygon modification in EDITS, the nr of points needs to be recalculated. Then this recalculated area must also enter into the UPDATED TABLE
+update_nr_points_edits_points_buffer25m = '''
+-- Update the area calculation and nr points for sites that are mapped as a polygon
+UPDATE akvo_tree_registration_areas_edits
+SET number_coord_polygon = 0
+WHERE polygon ISNULL;'''
+
+conn.commit()
+
+# After a polygon modification in EDITS, the nr of points needs to be recalculated. Then this recalculated area must also enter into the UPDATED TABLE
+update_nr_points_edits_polygon = '''
+-- Update the area calculation and nr points for sites that are mapped as a polygon
+UPDATE akvo_tree_registration_areas_edits
+SET number_coord_polygon = ST_NPoints(polygon::geometry)
+WHERE polygon IS NOT NULL;'''
+
+conn.commit()
 
 # Insert the edits back again in the UPDATE TABLE so that they become visible for the dashboard and also available for prosessing by KANOP AND CHLORIS
 create_a1_edit_integration = '''UPDATE akvo_tree_registration_areas_updated
@@ -1585,6 +1606,41 @@ DELETE FROM akvo_tree_registration_areas_updated
 WHERE EXISTS (SELECT 1 FROM akvo_tree_registration_areas_edits
     WHERE akvo_tree_registration_areas_edits.delete_confirmation = true
     AND akvo_tree_registration_areas_updated.identifier_akvo = akvo_tree_registration_areas_edits.identifier_akvo);'''
+
+conn.commit()
+
+
+# After a polygon modification in UPDATED, the calc_area needs to be recalculated.
+update_calc_area_updated_polygons = '''
+UPDATE akvo_tree_registration_areas_updated
+SET calc_area = ST_Area(polygon::geography) / 10000
+WHERE akvo_tree_registration_areas_updated.polygon IS NOT NULL;'''
+
+conn.commit()
+
+# After a polygon modification in UPDATED, the calc_area needs to be recalculated.
+update_calc_area_updated_points_buffer25m = '''
+UPDATE akvo_tree_registration_areas_updated
+SET calc_area = 0.2
+WHERE akvo_tree_registration_areas_updated.polygon ISNULL;'''
+
+conn.commit()
+
+# After a polygon modification in UPDATED, the nr of points needs to be recalculated.
+update_nr_points_updated_points_buffer25m = '''
+-- Update the area calculation and nr points for sites that are mapped as a polygon
+UPDATE akvo_tree_registration_areas_updated
+SET number_coord_polygon = 0
+WHERE akvo_tree_registration_areas_updated.polygon ISNULL;'''
+
+conn.commit()
+
+# After a polygon modification in UPDATED, the nr of points needs to be recalculated.
+update_nr_points_updated_polygon = '''
+-- Update the area calculation and nr points for sites that are mapped as a polygon
+UPDATE akvo_tree_registration_areas_updated
+SET number_coord_polygon = ST_NPoints(polygon::geometry)
+WHERE akvo_tree_registration_areas_updated.polygon IS NOT NULL;'''
 
 conn.commit()
 
@@ -4667,7 +4723,6 @@ ALTER TABLE superset_ecosia_tree_registration
 ADD contract NUMERIC(10,0);
 
 UPDATE superset_ecosia_tree_registration
---SET contract = CAST(sub_contract AS INTEGER);
 SET contract = TRUNC(sub_contract);
 
 
@@ -8769,10 +8824,23 @@ cur.execute(create_a1_updates_from_updated_to_edits_geometric_corr)
 cur.execute(create_a1_remote_sensing_upload_chloris)
 cur.execute(create_a1_remote_sensing_upload_kanop)
 cur.execute(update_updated_table_kanop_chloris)
+
+cur.execute(update_calc_area_edits_polygons)
+cur.execute(update_calc_area_edits_points_buffer25m)
+cur.execute(update_nr_points_edits_points_buffer25m)
+cur.execute(update_nr_points_edits_polygon)
+
 cur.execute(update_calc_area_edits)
 cur.execute(create_a1_edit_integration)
 cur.execute(create_clean_edits_table)
 cur.execute(delete_rows_from_update_table)
+
+cur.execute(update_calc_area_updated_polygons)
+cur.execute(update_calc_area_updated_points_buffer25m)
+cur.execute(update_nr_points_updated_points_buffer25m)
+cur.execute(update_nr_points_updated_polygon)
+
+
 cur.execute(create_a1_remote_sensing_results)
 cur.execute(create_a1_remote_sensing_trend_results)
 cur.execute(create_a2_akvo)
