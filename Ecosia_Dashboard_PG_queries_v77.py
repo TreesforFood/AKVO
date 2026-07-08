@@ -8548,22 +8548,22 @@ conn.commit()
 
 create_49a_remote_sensing_trend_results_contract_level = '''WITH contract_trends AS (
 SELECT
-    contract_number,
+    contract,
     combined_trend,
     COUNT(DISTINCT identifier_akvo) AS total_sites_per_rs_trend
 FROM superset_ecosia_kanop_chloris_results
-GROUP BY contract_number, combined_trend
-ORDER BY contract_number),
+GROUP BY contract, combined_trend
+ORDER BY contract),
 
 total_nr_rs_analysed_sites AS (SELECT
-    contract_number,
+    contract,
     COUNT(DISTINCT identifier_akvo) AS total_nr_rs_analysed_sites
 FROM
     superset_ecosia_kanop_chloris_results
 GROUP BY
-    contract_number
+    contract
 ORDER BY
-    contract_number),
+    contract),
 
 contract_percentages AS (
     SELECT
@@ -8595,8 +8595,8 @@ FROM
     total_nr_rs_analysed_sites t
 JOIN
     contract_percentages_join c
-    ON t.contract_number = c.sub_contract_number
-WHERE superset_ecosia_contract_overview.sub_contract = t.contract_number;'''
+    ON t.contract = c.sub_contract_number
+WHERE superset_ecosia_contract_overview.sub_contract = t.contract;'''
 
 conn.commit()
 
