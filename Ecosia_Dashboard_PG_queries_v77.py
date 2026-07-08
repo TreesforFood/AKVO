@@ -1665,7 +1665,7 @@ WITH stats AS (
   SELECT
     identifier_akvo,
 	id_planting_site,
-    contract_number,
+    contract,
     organisation,
     COUNT(*) AS N,
     SUM(year_of_analisis - planting_year) AS sum_x,
