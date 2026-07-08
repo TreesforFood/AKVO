@@ -1618,7 +1618,7 @@ END AS partnercode_sub,
   t1.id_planting_site,
   LEFT(t3.planting_date, 4)::integer as planting_year,  -- Make sure this column exists in t1 subquery or remove it here
   ROUND(t3.calc_area,1) AS area_size_ha,
-  t1.contract_number,
+  t1.contract_number AS contract,
   t3.contract_number AS sub_contract_number,
   t1.year_of_analisis,
   t1.chloris_above_ground_dry_biomass,
