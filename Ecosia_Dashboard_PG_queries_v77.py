@@ -1682,12 +1682,12 @@ WITH stats AS (
   FROM
     superset_ecosia_kanop_chloris_results
   GROUP BY
-    identifier_akvo, contract_number, id_planting_site, organisation
+    identifier_akvo, contract, id_planting_site, organisation
 ),
 
 classify AS (SELECT
   identifier_akvo,
-  contract_number,
+  contract,
   id_planting_site,
   organisation,
 
@@ -1716,7 +1716,7 @@ classify AS (SELECT
   -- Match trend comparison
 results AS (SELECT
 identifier_akvo,
-  contract_number,
+  contract,
   id_planting_site,
   organisation,
   trend_chloris,
@@ -1733,7 +1733,7 @@ FROM
   classify
 
 ORDER BY
-  contract_number)
+  contract)
 
 
 UPDATE superset_ecosia_kanop_chloris_results
