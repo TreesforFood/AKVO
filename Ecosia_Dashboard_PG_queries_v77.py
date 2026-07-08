@@ -8830,7 +8830,6 @@ cur.execute(update_calc_area_edits_points_buffer25m)
 cur.execute(update_nr_points_edits_points_buffer25m)
 cur.execute(update_nr_points_edits_polygon)
 
-cur.execute(update_calc_area_edits)
 cur.execute(create_a1_edit_integration)
 cur.execute(create_clean_edits_table)
 cur.execute(delete_rows_from_update_table)
