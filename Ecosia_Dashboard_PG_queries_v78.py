@@ -8799,10 +8799,12 @@ ALTER TABLE akvo_tree_registration_areas_edits enable ROW LEVEL SECURITY;
 --ALTER TABLE kanop_chloris_uploads_spatial_overview enable ROW LEVEL SECURITY;
 
 CREATE POLICY polygon_filter_policy ON akvo_tree_registration_areas_edits
-FOR SELECT USING (polygon IS NOT NULL) TO ecosia_editing;
+FOR SELECT USING (polygon IS NOT NULL)
+WITH CHECK (polygon IS NOT NULL);
 
 CREATE POLICY point_filter_policy ON akvo_tree_registration_areas_edits
-FOR SELECT USING (polygon ISNULL) TO ecosia_editing;
+FOR SELECT USING (polygon IS NULL)
+WITH CHECK (polygon IS NULL);
 
 
 --CREATE POLICY polygon_filter_policy ON akvo_tree_registration_areas_edits TO ecosia_editing USING (true);
