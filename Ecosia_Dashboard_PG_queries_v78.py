@@ -8698,7 +8698,7 @@ GRANT SELECT ON TABLE superset_ecosia_contract_overview TO ecosia_superset;
 GRANT SELECT ON TABLE superset_ecosia_new_devices TO ecosia_superset;
 GRANT SELECT ON TABLE superset_ecosia_firms_historic_fires TO ecosia_superset;
 GRANT SELECT ON TABLE superset_ecosia_kanop_chloris_results TO ecosia_superset;
-GRANT SELECT ON TABLE akvo_tree_registration_areas_edits TO ecosia_superset;
+
 
 DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_nursery_registration;
 DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_tree_registration;
@@ -8720,7 +8720,7 @@ DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_contract_overvie
 DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_new_devices;
 DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_firms_historic_fires;
 DROP POLICY IF EXISTS ecosia_superset_policy ON superset_ecosia_kanop_chloris_results;
-DROP POLICY IF EXISTS ecosia_superset_policy ON akvo_tree_registration_areas_edits;
+
 
 ALTER TABLE superset_ecosia_nursery_registration enable ROW LEVEL SECURITY;
 ALTER TABLE superset_ecosia_tree_registration enable ROW LEVEL SECURITY;
@@ -8742,7 +8742,7 @@ ALTER TABLE superset_ecosia_contract_overview enable ROW LEVEL SECURITY;
 ALTER TABLE superset_ecosia_new_devices enable ROW LEVEL SECURITY;
 ALTER TABLE superset_ecosia_firms_historic_fires enable ROW LEVEL SECURITY;
 ALTER TABLE superset_ecosia_kanop_chloris_results enable ROW LEVEL SECURITY;
-ALTER TABLE akvo_tree_registration_areas_edits enable ROW LEVEL SECURITY;
+
 
 CREATE POLICY ecosia_superset_policy ON superset_ecosia_nursery_registration TO ecosia_superset USING (true);
 CREATE POLICY ecosia_superset_policy ON superset_ecosia_tree_registration TO ecosia_superset USING (true);
@@ -8763,8 +8763,8 @@ CREATE POLICY ecosia_superset_policy ON superset_ecosia_tree_distribution_unregi
 CREATE POLICY ecosia_superset_policy ON superset_ecosia_contract_overview TO ecosia_superset USING (true);
 CREATE POLICY ecosia_superset_policy ON superset_ecosia_new_devices TO ecosia_superset USING (true);
 CREATE POLICY ecosia_superset_policy ON superset_ecosia_firms_historic_fires TO ecosia_superset USING (true);
-CREATE POLICY ecosia_superset_policy ON superset_ecosia_kanop_chloris_results TO ecosia_superset USING (true);
-CREATE POLICY ecosia_superset_policy ON akvo_tree_registration_areas_edits TO ecosia_superset USING (true);'''
+CREATE POLICY ecosia_superset_policy ON superset_ecosia_kanop_chloris_results TO ecosia_superset USING (true);'''
+
 
 conn.commit()
 
@@ -8795,19 +8795,20 @@ GRANT SELECT ON geometry_columns TO ecosia_editing;
 
 
 ALTER TABLE akvo_tree_registration_areas_edits enable ROW LEVEL SECURITY;
-ALTER TABLE superset_ecosia_tree_registration_photos enable ROW LEVEL SECURITY;
-ALTER TABLE kanop_chloris_uploads_spatial_overview enable ROW LEVEL SECURITY;
+--ALTER TABLE superset_ecosia_tree_registration_photos enable ROW LEVEL SECURITY;
+--ALTER TABLE kanop_chloris_uploads_spatial_overview enable ROW LEVEL SECURITY;
 
 CREATE POLICY polygon_filter_policy ON akvo_tree_registration_areas_edits
-FOR SELECT USING (polygon IS NOT NULL);
+FOR SELECT USING (polygon IS NOT NULL) TO ecosia_editing;
 
 CREATE POLICY point_filter_policy ON akvo_tree_registration_areas_edits
-FOR SELECT USING (polygon ISNULL);
+FOR SELECT USING (polygon ISNULL) TO ecosia_editing;
 
 
---CREATE POLICY ecosia_edit_policy ON akvo_tree_registration_areas_edits TO ecosia_editing USING (true);
-CREATE POLICY ecosia_edit_policy ON superset_ecosia_tree_registration_photos TO ecosia_editing USING (true);
-CREATE POLICY ecosia_edit_policy ON kanop_chloris_uploads_spatial_overview TO ecosia_editing USING (true);
+--CREATE POLICY polygon_filter_policy ON akvo_tree_registration_areas_edits TO ecosia_editing USING (true);
+--CREATE POLICY point_filter_policy ON akvo_tree_registration_areas_edits TO ecosia_editing USING (true);
+--CREATE POLICY ecosia_edit_policy ON superset_ecosia_tree_registration_photos TO ecosia_editing USING (true);
+--CREATE POLICY ecosia_edit_policy ON kanop_chloris_uploads_spatial_overview TO ecosia_editing USING (true);
 
 '''
 
