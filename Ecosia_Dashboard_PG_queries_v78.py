@@ -8770,7 +8770,7 @@ conn.commit()
 
 #This login (see below) and the associated grands is being used by the superset dashboard!! AS such this query is de-activated.
 create_a21_ecosia_editing = '''
-DROP POLICY IF EXISTS ecosia_edit_policy ON akvo_tree_registration_areas_edits;
+DROP POLICY IF EXISTS ecosia_edit_policy ON akvo_tree_registration_areas_edits_polygon_locations;
 DROP POLICY IF EXISTS ecosia_edit_policy ON akvo_tree_registration_areas_edits_point_locations;
 DROP POLICY IF EXISTS ecosia_edit_policy ON superset_ecosia_tree_registration_photos;
 DROP POLICY IF EXISTS ecosia_edit_policy ON kanop_chloris_uploads_spatial_overview;
@@ -8788,30 +8788,28 @@ GRANT SELECT ON TABLE public.akvo_tree_registration_areas_edits TO ecosia_editin
 GRANT SELECT ON TABLE public.photo_locations TO ecosia_editing;
 GRANT SELECT ON TABLE public.kanop_chloris_uploads_spatial_overview TO ecosia_editing;
 GRANT SELECT ON ALL TABLES IN SCHEMA heroku_ext TO ecosia_editing;
-
 GRANT SELECT ON geometry_columns TO ecosia_editing;
 GRANT SELECT ON spatial_ref_sys TO ecosia_editing;
-GRANT SELECT ON geometry_columns TO ecosia_editing;
 
+ALTER TABLE akvo_tree_registration_areas_edits ENABLE ROW LEVEL SECURITY;
+ALTER TABLE superset_ecosia_tree_registration_photos ENABLE ROW LEVEL SECURITY;
+ALTER TABLE kanop_chloris_uploads_spatial_overview ENABLE ROW LEVEL SECURITY;
 
-ALTER TABLE akvo_tree_registration_areas_edits enable ROW LEVEL SECURITY;
---ALTER TABLE superset_ecosia_tree_registration_photos enable ROW LEVEL SECURITY;
---ALTER TABLE kanop_chloris_uploads_spatial_overview enable ROW LEVEL SECURITY;
+-- Create policies without WITH CHECK for SELECT/DELETE
+CREATE POLICY ecosia_edit_policy ON akvo_tree_registration_areas_edits
+    FOR ALL
+    TO ecosia_editing
+    USING (true);
 
-CREATE POLICY polygon_filter_policy ON akvo_tree_registration_areas_edits
-FOR SELECT USING (polygon IS NOT NULL)
-WITH CHECK (polygon IS NOT NULL);
+CREATE POLICY ecosia_edit_policy ON superset_ecosia_tree_registration_photos
+    FOR ALL
+    TO ecosia_editing
+    USING (true);
 
-CREATE POLICY point_filter_policy ON akvo_tree_registration_areas_edits
-FOR SELECT USING (polygon IS NULL)
-WITH CHECK (polygon IS NULL);
-
-
---CREATE POLICY polygon_filter_policy ON akvo_tree_registration_areas_edits TO ecosia_editing USING (true);
---CREATE POLICY point_filter_policy ON akvo_tree_registration_areas_edits TO ecosia_editing USING (true);
---CREATE POLICY ecosia_edit_policy ON superset_ecosia_tree_registration_photos TO ecosia_editing USING (true);
---CREATE POLICY ecosia_edit_policy ON kanop_chloris_uploads_spatial_overview TO ecosia_editing USING (true);
-
+CREATE POLICY ecosia_edit_policy ON kanop_chloris_uploads_spatial_overview
+    FOR ALL
+    TO ecosia_editing
+    USING (true);
 '''
 
 conn.commit()
