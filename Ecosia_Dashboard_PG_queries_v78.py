@@ -8770,11 +8770,14 @@ conn.commit()
 
 #This login (see below) and the associated grands is being used by the superset dashboard!! AS such this query is de-activated.
 create_a21_ecosia_editing = '''
+-- Drop existing policies (including for akvo_tree_registration_areas_edits)
 DROP POLICY IF EXISTS ecosia_edit_policy ON akvo_tree_registration_areas_edits_polygon_locations;
 DROP POLICY IF EXISTS ecosia_edit_policy ON akvo_tree_registration_areas_edits_point_locations;
+DROP POLICY IF EXISTS ecosia_edit_policy ON akvo_tree_registration_areas_edits;
 DROP POLICY IF EXISTS ecosia_edit_policy ON superset_ecosia_tree_registration_photos;
 DROP POLICY IF EXISTS ecosia_edit_policy ON kanop_chloris_uploads_spatial_overview;
 
+-- Revoke and grant privileges
 REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA public FROM ecosia_editing;
 REVOKE ALL PRIVILEGES ON TABLE superset_ecosia_tree_registration_photos FROM ecosia_editing;
 
@@ -8791,11 +8794,12 @@ GRANT SELECT ON ALL TABLES IN SCHEMA heroku_ext TO ecosia_editing;
 GRANT SELECT ON geometry_columns TO ecosia_editing;
 GRANT SELECT ON spatial_ref_sys TO ecosia_editing;
 
+-- Enable Row-Level Security (RLS)
 ALTER TABLE akvo_tree_registration_areas_edits ENABLE ROW LEVEL SECURITY;
 ALTER TABLE superset_ecosia_tree_registration_photos ENABLE ROW LEVEL SECURITY;
 ALTER TABLE kanop_chloris_uploads_spatial_overview ENABLE ROW LEVEL SECURITY;
 
--- Create policies without WITH CHECK for SELECT/DELETE
+-- Create policies
 CREATE POLICY ecosia_edit_policy ON akvo_tree_registration_areas_edits
     FOR ALL
     TO ecosia_editing
@@ -8810,6 +8814,7 @@ CREATE POLICY ecosia_edit_policy ON kanop_chloris_uploads_spatial_overview
     FOR ALL
     TO ecosia_editing
     USING (true);
+
 '''
 
 conn.commit()
