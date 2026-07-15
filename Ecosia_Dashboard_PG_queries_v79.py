@@ -3646,7 +3646,7 @@ SELECT * FROM calc_tab_monitoring_calculations_per_site_merged_odk
 
 UNION All
 
-SELECT * FROM calc_tab_monitoring_calculations_per_site_merged_airtable;
+SELECT * FROM calc_tab_monitoring_calculations_per_site_merged_airtable
 )'''
 
 conn.commit()
