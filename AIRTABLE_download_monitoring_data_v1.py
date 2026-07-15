@@ -43,7 +43,7 @@ cur.execute('''DROP TABLE IF EXISTS airtable_download_monitoring_results;''')
 conn.commit()
 
 cur.execute('''
-CREATE TABLE airtable_download_monitoring_results (identifier TEXT, notes TEXT, planting_date DATE, nr_trees_survived INTEGER);''')
+CREATE TABLE airtable_download_monitoring_results (identifier TEXT, notes TEXT, monitoring_date DATE, nr_trees_survived INTEGER);''')
 conn.commit()
 
 
@@ -87,17 +87,17 @@ for x in result:
     for y in x:
         identifier = y['fields']['identifier']
         notes = y['fields']['Notes']
-        planting_date = y['fields']['Date']
+        monitoring_date = y['fields']['Date']
         try:
             nr_trees_survived = y['fields']['trees growing']
         except KeyError:
             nr_trees_survived = None
 
 
-        print(identifier, notes, planting_date, nr_trees_survived)
+        print(identifier, notes, monitoring_date, nr_trees_survived)
 
-        cur.execute('''INSERT INTO airtable_download_monitoring_results (identifier, notes, planting_date, nr_trees_survived)
-        VALUES (%s,%s,%s,%s)''', (identifier, notes, planting_date, nr_trees_survived))
+        cur.execute('''INSERT INTO airtable_download_monitoring_results (identifier, notes, monitoring_date, nr_trees_survived)
+        VALUES (%s,%s,%s,%s)''', (identifier, notes, monitoring_date, nr_trees_survived))
 
         conn.commit()
 
