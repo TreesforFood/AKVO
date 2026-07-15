@@ -18,6 +18,7 @@ DROP TABLE IF EXISTS AKVO_tree_registration_areas_integrated;
 DROP TABLE IF EXISTS calc_tab_monitoring_calculations_per_site_merged_by_partner;
 DROP TABLE IF EXISTS calc_tab_monitoring_calculations_per_site_merged_akvo;
 DROP TABLE IF EXISTS calc_tab_monitoring_calculations_per_site_merged_odk;
+DROP TABLE IF EXISTS calc_tab_monitoring_calculations_per_site_merged_airtable;
 DROP TABLE IF EXISTS calc_tab_monitoring_calculations_per_site_merged;
 DROP TABLE IF EXISTS CALC_TAB_linear_regression_results;
 DROP TABLE IF EXISTS CALC_TAB_overall_statistics;
