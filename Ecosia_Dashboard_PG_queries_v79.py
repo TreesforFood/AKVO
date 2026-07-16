@@ -2552,7 +2552,7 @@ akvo_tree_registration_areas_updated.contract_number,
 akvo_tree_registration_areas_updated.id_planting_site,
 akvo_tree_registration_areas_updated.calc_area,
 akvo_tree_registration_areas_updated.tree_number AS registered_tree_number,
-'AKVO' AS data_source,
+akvo_tree_registration_areas_updated.data_source AS data_source,
 'Registration' AS procedure,
 'tree registration' AS data_collection_method,
 ROUND(100/NULLIF(SQRT(akvo_tree_registration_areas_updated.tree_number/NULLIF(akvo_tree_registration_areas_updated.calc_area,0)),0),2)
@@ -2570,8 +2570,9 @@ akvo_tree_registration_areas_updated.submission AS latest_registration_submissio
 0 AS "Average tree height (m)",
 'No site impression yet because it is a first registration.' AS site_impressions
 
-FROM akvo_tree_registration_areas_updated
-WHERE polygon NOTNULL),
+FROM akvo_tree_registration_areas_updated -- Better to use akvo_tree_registration_areas because in the updated table also ODK results are there. Change later.
+WHERE polygon NOTNULL
+AND akvo_tree_registration_areas_updated.data_source = 'AKVO'),
 
 
 -- Add the NON-polygon results from registrations to the upper table so that the initial registered tree numbers are integrated
@@ -2605,8 +2606,9 @@ akvo_tree_registration_areas_updated.submission AS latest_registration_submissio
 0 AS "Average tree height (m)",
 'No site impression yet because it is a first registration.' AS site_impressions
 
-FROM akvo_tree_registration_areas_updated
-WHERE polygon ISNULL),
+FROM akvo_tree_registration_areas_updated -- Better to use akvo_tree_registration_areas because in the updated table also ODK results are there. Change later.
+WHERE polygon ISNULL
+AND akvo_tree_registration_areas_updated.data_source = 'AKVO'),
 
 --UNION of the six tables (PCQ and COUNTS) FROM MONITORING and AUDITS and registration data (polygon and non-polygon)
 monitoring_tree_numbers AS
@@ -3021,6 +3023,7 @@ odk_tree_registration_main.organisation,
 odk_tree_monitoring_main.organisation,
 akvo_tree_registration_areas_updated.id_planting_site,
 akvo_tree_registration_areas_updated.name_owner,
+akvo_tree_registration_areas_updated.data_source,
 site_impressions_monitoring.site_impressions,
 pcq_monitoring_avg_hgt.pcq_results_merged_monitoring_hgt,
 odk_tree_monitoring_main.contract_number_monitoring,
@@ -3169,6 +3172,7 @@ GROUP BY
 table_label_strata.label_strata,
 odk_tree_monitoring_main.contract_number_monitoring,
 akvo_tree_registration_areas_updated.contract_number,
+akvo_tree_registration_areas_updated.data_source,
 akvo_tree_registration_areas_updated.id_planting_site,
 akvo_tree_registration_areas_updated.name_owner,
 odk_tree_monitoring_main.country,
@@ -3303,7 +3307,7 @@ ON odk_tree_monitoring_main.ecosia_site_id = odk_tree_registration_main.ecosia_s
 LEFT JOIN akvo_tree_registration_areas_updated
 ON odk_tree_monitoring_main.ecosia_site_id = akvo_tree_registration_areas_updated.identifier_akvo
 JOIN table_label_strata
-ON odk_tree_monitoring_main.ecosia_site_id = table_label_strata.submissionid_odk_monitoring_main
+ON odk_tree_monitoring_main.submissionid_odk = table_label_strata.submissionid_odk_monitoring_main
 LEFT JOIN submittors_monitoring
 ON submittors_monitoring.ecosia_site_id = odk_tree_monitoring_main.ecosia_site_id
 AND submittors_monitoring.label_strata = table_label_strata.label_strata
@@ -3319,9 +3323,9 @@ GROUP BY
 table_label_strata.label_strata,
 odk_tree_monitoring_main.ecosia_site_id,
 akvo_tree_registration_areas_updated.planting_date,
---odk_tree_monitoring_own_method.tree_number_own_method,
 odk_tree_monitoring_main.contract_number_monitoring,
 akvo_tree_registration_areas_updated.contract_number,
+akvo_tree_registration_areas_updated.data_source,
 akvo_tree_registration_areas_updated.id_planting_site,
 akvo_tree_registration_areas_updated.name_owner,
 odk_tree_monitoring_main.country,
