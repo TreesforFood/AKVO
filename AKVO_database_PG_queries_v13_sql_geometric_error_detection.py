@@ -58,13 +58,13 @@ DROP TABLE IF EXISTS akvo_tree_registration_areas_updated_temp_table2;
 UPDATE akvo_tree_registration_areas_updated
 SET overlap = NULL;
 
-CREATE TEMPORARY TABLE akvo_tree_registration_areas_updated_temp_table1 AS (SELECT identifier_akvo, id_planting_site, organisation, country,
+CREATE TEMPORARY TABLE akvo_tree_registration_areas_updated_temp_table1 AS (SELECT identifier_akvo, test, id_planting_site, organisation, country,
 total_nr_geometric_errors, ST_MakeValid(polygon::geometry) AS pol, ST_Transform(polygon::geometry,4326) AS polgeo
 FROM akvo_tree_registration_areas_updated
 WHERE polygon NOTNULL
 AND test != 'This is a test, this record can be deleted.');
 
-CREATE TEMPORARY TABLE akvo_tree_registration_areas_updated_temp_table2 AS (SELECT identifier_akvo, id_planting_site, organisation, country,
+CREATE TEMPORARY TABLE akvo_tree_registration_areas_updated_temp_table2 AS (SELECT identifier_akvo, test, id_planting_site, organisation, country,
 total_nr_geometric_errors, ST_Transform(polgeo::geometry,4326) AS polgeo
 FROM akvo_tree_registration_areas_updated_temp_table1
 WHERE polgeo NOTNULL AND ST_IsValid(polgeo::geometry)
