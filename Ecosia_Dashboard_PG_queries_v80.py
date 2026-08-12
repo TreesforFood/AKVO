@@ -1750,7 +1750,7 @@ WITH stats AS (
   FROM
     superset_ecosia_kanop_chloris_results
   GROUP BY
-    identifier_akvo, contract, id_planting_site, organisation
+    identifier_akvo, contract, id_planting_site, partner
 ),
 
 classify AS (SELECT
@@ -8876,8 +8876,9 @@ kanop_uploaded,
 chloris_uploaded,
 polygon
 FROM akvo_tree_registration_areas_updated
-WHERE kanop_uploaded = TRUE OR chloris_uploaded = TRUE
-OR edit_confirmation = TRUE;''' # OR condition with Edit confirmation has been added so that this QGIS polygon layer is updated eventhough not yet uploaded to kanop or chloris
+WHERE kanop_uploaded = TRUE OR chloris_uploaded = TRUE;'''
+
+# OR edit_confirmation = TRUE;''' # OR condition with Edit confirmation has been added so that this QGIS polygon layer is updated eventhough not yet uploaded to kanop or chloris
 
 conn.commit()
 
