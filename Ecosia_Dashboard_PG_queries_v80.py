@@ -1757,7 +1757,8 @@ classify AS (SELECT
   identifier_akvo,
   contract,
   id_planting_site,
-  organisation,
+  --organisation,
+  partner,
 
   -- Calculate slope for kanop
   (N * sum_xy_kanop - sum_x * sum_y_kanop) * 1.0 / NULLIF((N * sum_x2 - sum_x * sum_x), 0) AS slope_kanop,
@@ -1786,7 +1787,8 @@ results AS (SELECT
 identifier_akvo,
   contract,
   id_planting_site,
-  organisation,
+  --organisation,
+  partner,
   trend_chloris,
   trend_kanop,
 
