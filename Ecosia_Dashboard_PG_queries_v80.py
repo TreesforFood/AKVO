@@ -1733,7 +1733,8 @@ WITH stats AS (
     identifier_akvo,
 	id_planting_site,
     contract,
-    organisation,
+    --organisation,
+	partner,
     COUNT(*) AS N,
     SUM(year_of_analisis - planting_year) AS sum_x,
 
