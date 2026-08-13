@@ -1436,8 +1436,7 @@ AND akvo_tree_registration_areas_updated.test = 'This is real, valid data';'''
 conn.commit()
 
 # Create a view for QGIS that filters on polygons (> 200 trees)
-create_a1_edits_qgis_layer_with_polygons =
-'''CREATE OR REPLACE VIEW qgis_tree_registration_areas AS
+create_a1_edits_qgis_layer_with_polygons = '''CREATE OR REPLACE VIEW qgis_tree_registration_areas AS
 SELECT
     identifier_akvo,
 	display_name,
@@ -1513,8 +1512,7 @@ conn.commit()
 
 
 # Create a view for QGIS that filters on points (< 200 trees)
-create_a1_edits_qgis_layer_with_points =
-'''CREATE OR REPLACE VIEW qgis_tree_registration_points AS
+create_a1_edits_qgis_layer_with_points = '''CREATE OR REPLACE VIEW qgis_tree_registration_points AS
 SELECT
         identifier_akvo,
 		display_name,
