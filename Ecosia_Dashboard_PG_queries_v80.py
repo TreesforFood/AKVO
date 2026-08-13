@@ -1750,7 +1750,7 @@ WITH stats AS (
   FROM
     superset_ecosia_kanop_chloris_results
   GROUP BY
-    identifier_akvo, contract, id_planting_site, partner
+    identifier_akvo, contract, id_planting_site, partner, organisation
 ),
 
 classify AS (SELECT
