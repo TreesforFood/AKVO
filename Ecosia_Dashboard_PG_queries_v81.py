@@ -1885,7 +1885,7 @@ WITH stats AS (
     identifier_akvo,
 	id_planting_site,
     contract,
-    --organisation,
+    organisation,
 	partner,
     COUNT(*) AS N,
     SUM(year_of_analisis - planting_year) AS sum_x,
@@ -1902,14 +1902,14 @@ WITH stats AS (
   FROM
     superset_ecosia_kanop_chloris_results
   GROUP BY
-    identifier_akvo, contract, id_planting_site, partner
+    identifier_akvo, contract, id_planting_site, partner, organisation
 ),
 
 classify AS (SELECT
   identifier_akvo,
   contract,
   id_planting_site,
-  --organisation,
+  organisation,
   partner,
 
   -- Calculate slope for kanop
@@ -1939,7 +1939,7 @@ results AS (SELECT
 identifier_akvo,
   contract,
   id_planting_site,
-  --organisation,
+  organisation,
   partner,
   trend_chloris,
   trend_kanop,
