@@ -1832,7 +1832,7 @@ THEN CAST(CONCAT(POWER(ASCII(RIGHT((LOWER(t1.organisation)),
 ELSE 0
 END AS partnercode_sub,
 
-  -- t1.organisation,
+  t1.organisation,
   t1.organisation AS partner,
   t1.id_planting_site,
   LEFT(t3.planting_date, 4)::integer as planting_year,  -- Make sure this column exists in t1 subquery or remove it here
