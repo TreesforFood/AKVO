@@ -9137,8 +9137,9 @@ create_a21_ecosia_editing = '''
 -- Drop existing policies (including for akvo_tree_registration_areas_edits)
 DROP POLICY IF EXISTS ecosia_edit_policy ON superset_ecosia_tree_registration_photos;
 DROP POLICY IF EXISTS ecosia_edit_policy ON kanop_chloris_uploads_spatial_overview;
-DROP POLICY IF EXISTS ecosia_edit_policy_polygons ON akvo_tree_registration_areas_edits;
-DROP POLICY IF EXISTS ecosia_edit_policy_points ON akvo_tree_registration_areas_edits;
+
+--DROP POLICY IF EXISTS ecosia_edit_policy_polygons ON akvo_tree_registration_areas_edits;
+--DROP POLICY IF EXISTS ecosia_edit_policy_points ON akvo_tree_registration_areas_edits;
 
 
 -- Revoke and grant privileges
@@ -9148,40 +9149,47 @@ REVOKE DELETE ON qgis_tree_registration_areas FROM ecosia_editing;
 REVOKE INSERT ON qgis_tree_registration_areas FROM ecosia_editing;
 REVOKE DELETE ON qgis_tree_registration_points FROM ecosia_editing;
 REVOKE INSERT ON qgis_tree_registration_points FROM ecosia_editing;
+REVOKE DELETE ON ALL TABLES IN SCHEMA public FROM ecosia_editing;
+REVOKE DELETE ON ALL TABLES IN SCHEMA heroku_ext FROM ecosia_editing;
 
 GRANT USAGE ON SCHEMA public TO ecosia_editing;
 GRANT USAGE ON SCHEMA heroku_ext TO ecosia_editing;
 
-GRANT UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO ecosia_editing;
-GRANT UPDATE, DELETE ON ALL TABLES IN SCHEMA heroku_ext TO ecosia_editing;
 
-GRANT SELECT ON TABLE public.akvo_tree_registration_areas_edits TO ecosia_editing;
-GRANT SELECT ON TABLE public.photo_locations TO ecosia_editing;
-GRANT SELECT ON TABLE public.kanop_chloris_uploads_spatial_overview TO ecosia_editing;
+
+
+GRANT SELECT, UPDATE ON ALL TABLES IN SCHEMA public TO ecosia_editing;
+GRANT SELECT, UPDATE ON ALL TABLES IN SCHEMA heroku_ext TO ecosia_editing;
+
 GRANT SELECT, UPDATE ON qgis_tree_registration_areas TO ecosia_editing;
 GRANT SELECT, UPDATE ON qgis_tree_registration_points TO ecosia_editing;
+
 
 GRANT SELECT ON ALL TABLES IN SCHEMA heroku_ext TO ecosia_editing;
 
 GRANT SELECT ON geometry_columns TO ecosia_editing;
 GRANT SELECT ON spatial_ref_sys TO ecosia_editing;
 
+GRANT SELECT ON TABLE public.akvo_tree_registration_areas_edits TO ecosia_editing;
+GRANT SELECT ON TABLE public.photo_locations TO ecosia_editing;
+GRANT SELECT ON TABLE public.kanop_chloris_uploads_spatial_overview TO ecosia_editing;
+
 
 -- Enable Row-Level Security (RLS)
-ALTER TABLE akvo_tree_registration_areas_edits ENABLE ROW LEVEL SECURITY;
+--ALTER TABLE akvo_tree_registration_areas_edits ENABLE ROW LEVEL SECURITY;
 ALTER TABLE superset_ecosia_tree_registration_photos ENABLE ROW LEVEL SECURITY;
 ALTER TABLE kanop_chloris_uploads_spatial_overview ENABLE ROW LEVEL SECURITY;
 
 -- Create policies
-CREATE POLICY ecosia_edit_policy_polygons ON akvo_tree_registration_areas_edits
-    FOR ALL
-    TO ecosia_editing
-    USING (polygon IS NULL);
+--CREATE POLICY ecosia_edit_policy_polygons ON akvo_tree_registration_areas_edits
+--    FOR ALL
+--    TO ecosia_editing
+--    USING (polygon IS NULL);
 
-CREATE POLICY ecosia_edit_policy_points ON akvo_tree_registration_areas_edits
-    FOR ALL
-    TO ecosia_editing
-    USING (polygon IS NOT NULL);
+--CREATE POLICY ecosia_edit_policy_points ON akvo_tree_registration_areas_edits
+--    FOR ALL
+--    TO ecosia_editing
+--    USING (polygon IS NOT NULL);
 
 CREATE POLICY ecosia_edit_policy ON superset_ecosia_tree_registration_photos
     FOR ALL
