@@ -1475,8 +1475,8 @@ SELECT
 	lat_y,
 	lon_x,
 	number_coord_polygon,
-	centroid_coord,
-	polygon AS geometry,
+	--centroid_coord,
+	polygon,
 	re_mapped_by_partner,
 	--multipoint,
 	confirm_plant_location_own_land,
@@ -1551,8 +1551,8 @@ SELECT
 		lat_y,
 		lon_x,
 		number_coord_polygon,
-		centroid_coord AS geometry,
-		polygon,
+		centroid_coord,
+		--polygon,
 		re_mapped_by_partner,
 		--multipoint,
 		confirm_plant_location_own_land,
@@ -9179,6 +9179,8 @@ GRANT SELECT ON TABLE public.kanop_chloris_uploads_spatial_overview TO ecosia_ed
 --ALTER TABLE akvo_tree_registration_areas_edits ENABLE ROW LEVEL SECURITY;
 ALTER TABLE superset_ecosia_tree_registration_photos ENABLE ROW LEVEL SECURITY;
 ALTER TABLE kanop_chloris_uploads_spatial_overview ENABLE ROW LEVEL SECURITY;
+ALTER TABLE qgis_tree_registration_areas DISABLE ROW LEVEL SECURITY;
+ALTER TABLE qgis_tree_registration_points DISABLE ROW LEVEL SECURITY;
 
 -- Create policies
 --CREATE POLICY ecosia_edit_policy_polygons ON akvo_tree_registration_areas_edits
