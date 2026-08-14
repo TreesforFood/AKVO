@@ -9138,8 +9138,8 @@ create_a21_ecosia_editing = '''
 DROP POLICY IF EXISTS ecosia_edit_policy ON superset_ecosia_tree_registration_photos;
 DROP POLICY IF EXISTS ecosia_edit_policy ON kanop_chloris_uploads_spatial_overview;
 
---DROP POLICY IF EXISTS ecosia_edit_policy_polygons ON akvo_tree_registration_areas_edits;
---DROP POLICY IF EXISTS ecosia_edit_policy_points ON akvo_tree_registration_areas_edits;
+DROP POLICY IF EXISTS ecosia_edit_policy_polygons ON akvo_tree_registration_areas_edits;
+DROP POLICY IF EXISTS ecosia_edit_policy_points ON akvo_tree_registration_areas_edits;
 
 
 -- Revoke and grant privileges
@@ -9176,22 +9176,22 @@ GRANT SELECT ON TABLE public.kanop_chloris_uploads_spatial_overview TO ecosia_ed
 
 
 -- Enable Row-Level Security (RLS)
-ALTER TABLE akvo_tree_registration_areas_edits ENABLE ROW LEVEL SECURITY;
+--ALTER TABLE akvo_tree_registration_areas_edits ENABLE ROW LEVEL SECURITY;
 ALTER TABLE superset_ecosia_tree_registration_photos ENABLE ROW LEVEL SECURITY;
 ALTER TABLE kanop_chloris_uploads_spatial_overview ENABLE ROW LEVEL SECURITY;
 --ALTER TABLE qgis_tree_registration_areas DISABLE ROW LEVEL SECURITY;
 --ALTER TABLE qgis_tree_registration_points DISABLE ROW LEVEL SECURITY;
 
 -- Create policies
-CREATE POLICY ecosia_edit_policy_polygons ON akvo_tree_registration_areas_edits
-    FOR ALL
-    TO ecosia_editing
-    USING (polygon IS NULL);
+--CREATE POLICY ecosia_edit_policy_polygons ON akvo_tree_registration_areas_edits
+--    FOR ALL
+--    TO ecosia_editing;
+--    USING (polygon IS NULL);
 
-CREATE POLICY ecosia_edit_policy_points ON akvo_tree_registration_areas_edits
-    FOR ALL
-    TO ecosia_editing
-    USING (polygon IS NOT NULL);
+--CREATE POLICY ecosia_edit_policy_points ON akvo_tree_registration_areas_edits
+--    FOR ALL
+--    TO ecosia_editing
+--    USING (polygon IS NOT NULL);
 
 CREATE POLICY ecosia_edit_policy ON superset_ecosia_tree_registration_photos
     FOR ALL
