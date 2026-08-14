@@ -1475,8 +1475,8 @@ SELECT
 	lat_y,
 	lon_x,
 	number_coord_polygon,
-	centroid_coord,
-	polygon,
+	--centroid_coord,
+	polygon AS geom,
 	re_mapped_by_partner,
 	--multipoint,
 	confirm_plant_location_own_land,
@@ -1551,8 +1551,8 @@ SELECT
 		lat_y,
 		lon_x,
 		number_coord_polygon,
-		centroid_coord,
-		polygon,
+		centroid_coord AS geom,
+		--polygon,
 		re_mapped_by_partner,
 		--multipoint,
 		confirm_plant_location_own_land,
@@ -9155,15 +9155,15 @@ REVOKE DELETE ON ALL TABLES IN SCHEMA heroku_ext FROM ecosia_editing;
 GRANT USAGE ON SCHEMA public TO ecosia_editing;
 GRANT USAGE ON SCHEMA heroku_ext TO ecosia_editing;
 
-
-
-
 --GRANT SELECT, UPDATE ON ALL TABLES IN SCHEMA public TO ecosia_editing;
 --GRANT SELECT, UPDATE ON ALL TABLES IN SCHEMA heroku_ext TO ecosia_editing;
 
 GRANT SELECT, UPDATE ON qgis_tree_registration_areas TO ecosia_editing;
 GRANT SELECT, UPDATE ON qgis_tree_registration_points TO ecosia_editing;
+GRANT UPDATE ON akvo_tree_registration_areas_edits TO ecosia_editing;
 
+REVOKE DELETE ON akvo_tree_registration_areas_edits FROM ecosia_editing;
+REVOKE INSERT ON akvo_tree_registration_areas_edits FROM ecosia_editing;
 
 GRANT SELECT ON ALL TABLES IN SCHEMA heroku_ext TO ecosia_editing;
 
