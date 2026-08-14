@@ -9158,8 +9158,8 @@ GRANT USAGE ON SCHEMA heroku_ext TO ecosia_editing;
 
 
 
-GRANT SELECT, UPDATE ON ALL TABLES IN SCHEMA public TO ecosia_editing;
-GRANT SELECT, UPDATE ON ALL TABLES IN SCHEMA heroku_ext TO ecosia_editing;
+--GRANT SELECT, UPDATE ON ALL TABLES IN SCHEMA public TO ecosia_editing;
+--GRANT SELECT, UPDATE ON ALL TABLES IN SCHEMA heroku_ext TO ecosia_editing;
 
 GRANT SELECT, UPDATE ON qgis_tree_registration_areas TO ecosia_editing;
 GRANT SELECT, UPDATE ON qgis_tree_registration_points TO ecosia_editing;
