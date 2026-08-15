@@ -1438,8 +1438,8 @@ conn.commit()
 # Create a view for QGIS that filters on polygons (> 200 trees)
 create_a1_edits_qgis_layer_with_polygons = '''CREATE OR REPLACE VIEW qgis_tree_registration_areas AS
 SELECT
-	--ROW_NUMBER () OVER () AS id,
-	identifier_akvo AS id,
+	ROW_NUMBER () OVER () AS id,
+	identifier_akvo,
 	display_name,
 	device_id,
 	instance,
@@ -1515,7 +1515,8 @@ conn.commit()
 # Create a view for QGIS that filters on points (< 200 trees)
 create_a1_edits_qgis_layer_with_points = '''CREATE OR REPLACE VIEW qgis_tree_registration_points AS
 SELECT
-        identifier_akvo,
+        ROW_NUMBER () OVER () AS id,
+		identifier_akvo,
 		display_name,
 		device_id,
 		instance,
