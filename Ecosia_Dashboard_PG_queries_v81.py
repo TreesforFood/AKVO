@@ -1476,7 +1476,7 @@ SELECT
 	lon_x,
 	number_coord_polygon,
 	--centroid_coord,
-	ST_Transform(polygon, 4326) AS geom,
+	ST_Transform(CAST(polygon AS geometry), 4326) AS geom,
 	re_mapped_by_partner,
 	--multipoint,
 	confirm_plant_location_own_land,
