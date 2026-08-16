@@ -9312,44 +9312,29 @@ REVOKE DELETE ON ALL TABLES IN SCHEMA heroku_ext FROM ecosia_editing;
 GRANT USAGE ON SCHEMA public TO ecosia_editing;
 GRANT USAGE ON SCHEMA heroku_ext TO ecosia_editing;
 
---GRANT SELECT, UPDATE ON ALL TABLES IN SCHEMA public TO ecosia_editing;
---GRANT SELECT, UPDATE ON ALL TABLES IN SCHEMA heroku_ext TO ecosia_editing;
-
 GRANT SELECT, UPDATE ON public.qgis_tree_registration_areas TO ecosia_editing;
 GRANT SELECT, UPDATE ON public.qgis_tree_registration_points TO ecosia_editing;
-GRANT UPDATE ON public.akvo_tree_registration_areas_edits TO ecosia_editing;
+--GRANT UPDATE ON public.akvo_tree_registration_areas_edits TO ecosia_editing;
 
-REVOKE DELETE ON akvo_tree_registration_areas_edits FROM ecosia_editing;
-REVOKE INSERT ON akvo_tree_registration_areas_edits FROM ecosia_editing;
+--REVOKE DELETE ON akvo_tree_registration_areas_edits FROM ecosia_editing;
+--REVOKE INSERT ON akvo_tree_registration_areas_edits FROM ecosia_editing;
 
 GRANT SELECT ON ALL TABLES IN SCHEMA heroku_ext TO ecosia_editing;
 
 GRANT SELECT ON geometry_columns TO ecosia_editing;
 GRANT SELECT ON spatial_ref_sys TO ecosia_editing;
 
-GRANT SELECT ON TABLE public.akvo_tree_registration_areas_edits TO ecosia_editing;
+--GRANT SELECT ON TABLE public.akvo_tree_registration_areas_edits TO ecosia_editing;
 GRANT SELECT ON TABLE public.photo_locations TO ecosia_editing;
 GRANT SELECT ON TABLE public.kanop_chloris_uploads_spatial_overview TO ecosia_editing;
 
 
 -- Enable Row-Level Security (RLS)
---ALTER TABLE akvo_tree_registration_areas_edits ENABLE ROW LEVEL SECURITY;
 ALTER TABLE superset_ecosia_tree_registration_photos ENABLE ROW LEVEL SECURITY;
 ALTER TABLE kanop_chloris_uploads_spatial_overview ENABLE ROW LEVEL SECURITY;
---ALTER TABLE qgis_tree_registration_areas DISABLE ROW LEVEL SECURITY;
---ALTER TABLE qgis_tree_registration_points DISABLE ROW LEVEL SECURITY;
+
 
 -- Create policies
---CREATE POLICY ecosia_edit_policy ON qgis_tree_registration_areas
---    FOR ALL
---    TO ecosia_editing;
---    USING (polygon IS NULL);
-
---CREATE POLICY ecosia_edit_policy ON qgis_tree_registration_points
---    FOR ALL
---    TO ecosia_editing
---    USING (polygon IS NOT NULL);
-
 CREATE POLICY ecosia_edit_policy ON superset_ecosia_tree_registration_photos
     FOR ALL
     TO ecosia_editing
