@@ -1435,156 +1435,6 @@ AND akvo_tree_registration_areas_updated.test = 'This is real, valid data';'''
 
 conn.commit()
 
-# Create a view for QGIS that filters on polygons (> 200 trees)
-create_a1_edits_qgis_layer_with_polygons = '''CREATE TABLE IF NOT EXISTS qgis_tree_registration_areas AS
-SELECT
-	identifier_akvo,
-	display_name,
-	device_id,
-	instance,
-	submission,
-	submission_year,
-	submissiontime,
-	updated_at,
-	submitter,
-	modifiedat,
-	akvo_form_version,
-	data_source,
-	form_source,
-	country,
-	test,
-	organisation,
-	contract_number,
-	id_planting_site,
-	land_title,
-	name_village,
-	name_region,
-	name_owner,
-	photo_owner,
-	gender_owner,
-	objective_site,
-	site_preparation,
-	planting_technique,
-	planting_system,
-	remark,
-	nr_trees_option,
-	planting_date,
-	tree_number,
-	estimated_area,
-	calc_area,
-	lat_y,
-	lon_x,
-	number_coord_polygon,
-	--centroid_coord,
-	polygon,
-	re_mapped_by_partner,
-	--multipoint,
-	confirm_plant_location_own_land,
-	one_multiple_planting_sites,
-	nr_trees_given_away,
-	nr_trees_received,
-	url_photo_receiver_trees,
-	location_house_tree_receiver,
-	confirm_planting_location,
-	url_signature_tree_receiver,
-	total_number_trees_received,
-	check_ownership_trees,
-	gender_tree_receiver,
-	name_tree_receiver,
-	species_latin,
-	self_intersection,
-	overlap,
-	outside_country,
-	check_200_trees,
-	check_duplicate_polygons,
-	needle_shape,
-	total_nr_geometric_errors,
-	chloris_uploaded,
-	kanop_uploaded,
-	edit_confirmation,
-	delete_confirmation,
-	monitored_confirmation
-
-FROM akvo_tree_registration_areas_edits
-WHERE polygon IS NOT NULL;'''
-
-conn.commit()
-
-
-# Create a view for QGIS that filters on points (< 200 trees)
-create_a1_edits_qgis_layer_with_points = '''CREATE TABLE IF NOT EXISTS qgis_tree_registration_points AS
-SELECT
-		identifier_akvo,
-		display_name,
-		device_id,
-		instance,
-		submission,
-		submission_year,
-		submissiontime,
-		updated_at,
-		submitter,
-		modifiedat,
-		akvo_form_version,
-		data_source,
-		form_source,
-		country,
-		test,
-		organisation,
-		contract_number,
-		id_planting_site,
-		land_title,
-		name_village,
-		name_region,
-		name_owner,
-		photo_owner,
-		gender_owner,
-		objective_site,
-		site_preparation,
-		planting_technique,
-		planting_system,
-		remark,
-		nr_trees_option,
-		planting_date,
-		tree_number,
-		estimated_area,
-		calc_area,
-		lat_y,
-		lon_x,
-		number_coord_polygon,
-		centroid_coord,
-		--polygon,
-		re_mapped_by_partner,
-		--multipoint,
-		confirm_plant_location_own_land,
-		one_multiple_planting_sites,
-		nr_trees_given_away,
-		nr_trees_received,
-		url_photo_receiver_trees,
-		location_house_tree_receiver,
-		confirm_planting_location,
-		url_signature_tree_receiver,
-		total_number_trees_received,
-		check_ownership_trees,
-		gender_tree_receiver,
-		name_tree_receiver,
-		species_latin,
-		self_intersection,
-		overlap,
-		outside_country,
-		check_200_trees,
-		check_duplicate_polygons,
-		needle_shape,
-		total_nr_geometric_errors,
-		chloris_uploaded,
-		kanop_uploaded,
-		edit_confirmation,
-		delete_confirmation,
-		monitored_confirmation
-
-FROM akvo_tree_registration_areas_edits
-WHERE polygon IS NULL;'''
-
-conn.commit()
 
 # This table is created to generate a seperate layer (areas) for QGIS. It is a workaround. Ideally, we would create it from the UPDATES table or working with a VIEW, but VIEWS are causing too much issues (no integer ID's in main table so ID's must be generated with window functions (e.g. ROWS(), which needs again a trigger to update the main table)).
 # Creating a table directly from UPDATES would mean that we have to manually distribute the current edits (in EDITS table) to saveguard them. So, I # choose to create a 2 seperate TABLES from EDITS and then merge the edits from those 2 tables again in the EDITS table... No clean, but most practical for now.
@@ -1663,6 +1513,7 @@ AND akvo_tree_registration_areas_edits.identifier_akvo = t.identifier_akvo;'''
 
 conn.commit()
 
+
 # This table is created to generate a seperate layer (areas) for QGIS. It is a workaround. Ideally, we would create it from the UPDATES table or working with a VIEW, but VIEWS are causing too much issues (no integer ID's in main table so ID's must be generated with window functions (e.g. ROWS(), which needs again a trigger to update the main table)).
 # Creating a table directly from UPDATES would mean that we have to manually distribute the current edits (in EDITS table) to saveguard them. So, I # choose to create a 2 seperate TABLES from EDITS and then merge the edits from those 2 tables again in the EDITS table... No clean, but most practical for now.
 create_a1_updates_from_qgis_layer_points = '''
@@ -1739,6 +1590,166 @@ OR akvo_tree_registration_areas_edits.delete_confirmation = TRUE
 AND akvo_tree_registration_areas_edits.identifier_akvo = t.identifier_akvo;'''
 
 conn.commit()
+
+# Create a table for QGIS that filters on polygons (> 200 trees)
+create_a1_edits_qgis_layer_with_polygons = '''
+-- First drop the table. This will delete all edits (after each run). However, if good, the edits are stored in the table 'akvo_tree_registration_areas_edits'
+DROP TABLE qgis_tree_registration_areas;
+
+CREATE TABLE qgis_tree_registration_areas AS
+SELECT
+	identifier_akvo,
+	display_name,
+	device_id,
+	instance,
+	submission,
+	submission_year,
+	submissiontime,
+	updated_at,
+	submitter,
+	modifiedat,
+	akvo_form_version,
+	data_source,
+	form_source,
+	country,
+	test,
+	organisation,
+	contract_number,
+	id_planting_site,
+	land_title,
+	name_village,
+	name_region,
+	name_owner,
+	photo_owner,
+	gender_owner,
+	objective_site,
+	site_preparation,
+	planting_technique,
+	planting_system,
+	remark,
+	nr_trees_option,
+	planting_date,
+	tree_number,
+	estimated_area,
+	calc_area,
+	lat_y,
+	lon_x,
+	number_coord_polygon,
+	--centroid_coord,
+	polygon,
+	re_mapped_by_partner,
+	--multipoint,
+	confirm_plant_location_own_land,
+	one_multiple_planting_sites,
+	nr_trees_given_away,
+	nr_trees_received,
+	url_photo_receiver_trees,
+	location_house_tree_receiver,
+	confirm_planting_location,
+	url_signature_tree_receiver,
+	total_number_trees_received,
+	check_ownership_trees,
+	gender_tree_receiver,
+	name_tree_receiver,
+	species_latin,
+	self_intersection,
+	overlap,
+	outside_country,
+	check_200_trees,
+	check_duplicate_polygons,
+	needle_shape,
+	total_nr_geometric_errors,
+	chloris_uploaded,
+	kanop_uploaded,
+	edit_confirmation,
+	delete_confirmation,
+	monitored_confirmation
+
+FROM akvo_tree_registration_areas_edits
+WHERE polygon IS NOT NULL;'''
+
+conn.commit()
+
+
+# Create a table for QGIS that filters on points (< 200 trees)
+create_a1_edits_qgis_layer_with_points = '''
+-- First drop the table. This will delete all edits (after each run). However, if good, the edits are stored in the table 'akvo_tree_registration_areas_edits'
+DROP TABLE qgis_tree_registration_points;
+
+CREATE TABLE qgis_tree_registration_points AS
+SELECT
+		identifier_akvo,
+		display_name,
+		device_id,
+		instance,
+		submission,
+		submission_year,
+		submissiontime,
+		updated_at,
+		submitter,
+		modifiedat,
+		akvo_form_version,
+		data_source,
+		form_source,
+		country,
+		test,
+		organisation,
+		contract_number,
+		id_planting_site,
+		land_title,
+		name_village,
+		name_region,
+		name_owner,
+		photo_owner,
+		gender_owner,
+		objective_site,
+		site_preparation,
+		planting_technique,
+		planting_system,
+		remark,
+		nr_trees_option,
+		planting_date,
+		tree_number,
+		estimated_area,
+		calc_area,
+		lat_y,
+		lon_x,
+		number_coord_polygon,
+		centroid_coord,
+		--polygon,
+		re_mapped_by_partner,
+		--multipoint,
+		confirm_plant_location_own_land,
+		one_multiple_planting_sites,
+		nr_trees_given_away,
+		nr_trees_received,
+		url_photo_receiver_trees,
+		location_house_tree_receiver,
+		confirm_planting_location,
+		url_signature_tree_receiver,
+		total_number_trees_received,
+		check_ownership_trees,
+		gender_tree_receiver,
+		name_tree_receiver,
+		species_latin,
+		self_intersection,
+		overlap,
+		outside_country,
+		check_200_trees,
+		check_duplicate_polygons,
+		needle_shape,
+		total_nr_geometric_errors,
+		chloris_uploaded,
+		kanop_uploaded,
+		edit_confirmation,
+		delete_confirmation,
+		monitored_confirmation
+
+FROM akvo_tree_registration_areas_edits
+WHERE polygon IS NULL;'''
+
+conn.commit()
+
 
 
 # # Set the centroid location to NULL for sites that have a polygon in the EDITS layer.
@@ -9365,12 +9376,10 @@ cur.execute(create_a1_insertion)
 cur.execute(create_a1_edit)
 
 cur.execute(create_a1_integrate_new_data)
+cur.execute(create_a1_updates_from_qgis_layer_areas)
+cur.execute(create_a1_updates_from_qgis_layer_points)
 cur.execute(create_a1_edits_qgis_layer_with_polygons)
 cur.execute(create_a1_edits_qgis_layer_with_points)
-
-cur.execute(create_a1_updates_from_qgis_layer_areas)
-
-cur.execute(create_a1_updates_from_qgis_layer_points)
 
 cur.execute(create_a1_updates_from_updated_to_edits_geometric_corr)
 cur.execute(create_a1_remote_sensing_upload_chloris)
