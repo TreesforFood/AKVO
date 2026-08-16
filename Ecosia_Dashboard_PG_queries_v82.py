@@ -1657,8 +1657,9 @@ SET
 		delete_confirmation = t.delete_confirmation,
 		monitored_confirmation = t.monitored_confirmation
 FROM qgis_tree_registration_areas t
-WHERE edit_confirmation = TRUE
-OR delete_confirmation = TRUE;'''
+WHERE akvo_tree_registration_areas_edits.edit_confirmation = TRUE
+OR akvo_tree_registration_areas_edits.delete_confirmation = TRUE
+AND akvo_tree_registration_areas_edits.identifier_akvo = t.identifier_akvo;'''
 
 conn.commit()
 
@@ -1733,8 +1734,9 @@ SET
 		delete_confirmation = t.delete_confirmation,
 		monitored_confirmation = t.monitored_confirmation
 FROM qgis_tree_registration_points t
-WHERE edit_confirmation = TRUE
-OR delete_confirmation = TRUE;'''
+WHERE akvo_tree_registration_areas_edits.edit_confirmation = TRUE
+OR akvo_tree_registration_areas_edits.delete_confirmation = TRUE
+AND akvo_tree_registration_areas_edits.identifier_akvo = t.identifier_akvo;'''
 
 conn.commit()
 
