@@ -1551,7 +1551,7 @@ SELECT
 		lat_y,
 		lon_x,
 		number_coord_polygon,
-		centroid_coord,
+		centroid_coord AS geom,
 		--polygon,
 		re_mapped_by_partner,
 		--multipoint,
@@ -1628,8 +1628,8 @@ SET
 		lat_y = t.lat_y,
 		lon_x = t.lon_x,
 		number_coord_polygon = t.number_coord_polygon,
-		centroid_coord = t.centroid_coord,
-		polygon = t.polygon,
+		--centroid_coord = t.centroid_coord,
+		polygon = t.geom,
 		re_mapped_by_partner = t.re_mapped_by_partner,
 		confirm_plant_location_own_land = t.confirm_plant_location_own_land,
 		one_multiple_planting_sites = t.one_multiple_planting_sites,
@@ -1657,7 +1657,8 @@ SET
 		delete_confirmation = t.delete_confirmation,
 		monitored_confirmation = t.monitored_confirmation
 FROM qgis_tree_registration_areas t
-WHERE edit_confirmation = TRUE;'''
+WHERE edit_confirmation = TRUE
+OR delete_confirmation = TRUE;'''
 
 conn.commit()
 
@@ -1703,8 +1704,8 @@ SET
 		lat_y = t.lat_y,
 		lon_x = t.lon_x,
 		number_coord_polygon = t.number_coord_polygon,
-		centroid_coord = t.centroid_coord,
-		polygon = t.polygon,
+		centroid_coord = t.geom,
+		--polygon = t.polygon,
 		re_mapped_by_partner = t.re_mapped_by_partner,
 		confirm_plant_location_own_land = t.confirm_plant_location_own_land,
 		one_multiple_planting_sites = t.one_multiple_planting_sites,
@@ -1732,7 +1733,8 @@ SET
 		delete_confirmation = t.delete_confirmation,
 		monitored_confirmation = t.monitored_confirmation
 FROM qgis_tree_registration_points t
-WHERE edit_confirmation = TRUE;'''
+WHERE edit_confirmation = TRUE
+OR delete_confirmation = TRUE;'''
 
 conn.commit()
 
