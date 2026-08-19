@@ -9346,6 +9346,16 @@ ALTER TABLE kanop_chloris_uploads_spatial_overview ENABLE ROW LEVEL SECURITY;
 
 
 -- Create policies
+CREATE POLICY update_policy ON qgis_tree_registration_areas
+    FOR UPDATE
+    TO ecosia_editing
+    USING (true);
+
+CREATE POLICY update_policy ON qgis_tree_registration_points
+    FOR UPDATE
+    TO ecosia_editing
+    USING (true);
+
 CREATE POLICY ecosia_edit_policy ON superset_ecosia_tree_registration_photos
     FOR ALL
     TO ecosia_editing
