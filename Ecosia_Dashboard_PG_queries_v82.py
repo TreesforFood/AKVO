@@ -9343,6 +9343,8 @@ GRANT SELECT ON TABLE public.kanop_chloris_uploads_spatial_overview TO ecosia_ed
 -- Enable Row-Level Security (RLS)
 ALTER TABLE superset_ecosia_tree_registration_photos ENABLE ROW LEVEL SECURITY;
 ALTER TABLE kanop_chloris_uploads_spatial_overview ENABLE ROW LEVEL SECURITY;
+ALTER TABLE qgis_tree_registration_areas ENABLE ROW LEVEL SECURITY;
+ALTER TABLE qgis_tree_registration_points ENABLE ROW LEVEL SECURITY;
 
 
 -- Create policies
