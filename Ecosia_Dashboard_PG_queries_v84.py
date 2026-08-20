@@ -1666,7 +1666,9 @@ SELECT
 	monitored_confirmation
 
 FROM akvo_tree_registration_areas_edits
-WHERE polygon IS NOT NULL;'''
+WHERE polygon IS NOT NULL;
+
+ADD COLUMN IF NOT EXISTS fid SERIAL PRIMARY KEY, -- Needed in order to be able to edit in QGIS;'''
 
 conn.commit()
 
@@ -1746,7 +1748,9 @@ SELECT
 		monitored_confirmation
 
 FROM akvo_tree_registration_areas_edits
-WHERE polygon IS NULL;'''
+WHERE polygon IS NULL;
+
+ADD COLUMN IF NOT EXISTS fid SERIAL PRIMARY KEY, -- Needed in order to be able to edit in QGIS;'''
 
 conn.commit()
 
