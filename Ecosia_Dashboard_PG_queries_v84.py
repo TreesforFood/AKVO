@@ -1669,7 +1669,7 @@ FROM akvo_tree_registration_areas_edits
 WHERE polygon IS NOT NULL;
 
 ALTER TABLE qgis_tree_registration_areas
-ADD COLUMN IF NOT EXISTS fid SERIAL PRIMARY KEY -- Needed in order to be able to edit in QGIS;'''
+ADD COLUMN IF NOT EXISTS fid SERIAL PRIMARY KEY; -- Needed in order to be able to edit in QGIS;'''
 
 conn.commit()
 
@@ -1751,8 +1751,8 @@ SELECT
 FROM akvo_tree_registration_areas_edits
 WHERE polygon IS NULL;
 
-ALTER TABLE qgis_tree_registration_areas
-ADD COLUMN IF NOT EXISTS fid SERIAL PRIMARY KEY -- Needed in order to be able to edit in QGIS;'''
+ALTER TABLE qgis_tree_registration_points
+ADD COLUMN IF NOT EXISTS fid SERIAL PRIMARY KEY; -- Needed in order to be able to edit in QGIS;'''
 
 conn.commit()
 
