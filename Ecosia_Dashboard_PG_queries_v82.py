@@ -9338,20 +9338,20 @@ GRANT SELECT ON spatial_ref_sys TO ecosia_editing;
 --GRANT SELECT ON TABLE public.akvo_tree_registration_areas_edits TO ecosia_editing;
 GRANT SELECT ON TABLE public.photo_locations TO ecosia_editing;
 GRANT SELECT ON TABLE public.kanop_chloris_uploads_spatial_overview TO ecosia_editing;
-GRANT SELECT ON TABLE public.akvo_tree_registration_areas_edits TO ecosia_editing;
+--GRANT SELECT ON TABLE public.akvo_tree_registration_areas_edits TO ecosia_editing;
 
 
 -- Enable Row-Level Security (RLS)
 ALTER TABLE superset_ecosia_tree_registration_photos ENABLE ROW LEVEL SECURITY;
 ALTER TABLE kanop_chloris_uploads_spatial_overview ENABLE ROW LEVEL SECURITY;
-ALTER TABLE akvo_tree_registration_areas_edits ENABLE ROW LEVEL SECURITY;
-ALTER TABLE qgis_tree_registration_areas ENABLE ROW LEVEL SECURITY;
+--ALTER TABLE akvo_tree_registration_areas_edits ENABLE ROW LEVEL SECURITY;
+--ALTER TABLE qgis_tree_registration_areas ENABLE ROW LEVEL SECURITY;
 
 -- Create policies
-CREATE POLICY select_policy ON akvo_tree_registration_areas_edits
-    FOR SELECT
-    TO ecosia_editing
-    USING (true);
+--CREATE POLICY select_policy ON akvo_tree_registration_areas_edits
+--    FOR SELECT
+--    TO ecosia_editing
+--    USING (true);
 
 CREATE POLICY update_policy ON qgis_tree_registration_areas
     FOR UPDATE
