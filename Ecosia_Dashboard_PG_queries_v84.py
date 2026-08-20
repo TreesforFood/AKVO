@@ -9366,22 +9366,10 @@ CREATE POLICY ecosia_edit_policy_polygons ON qgis_tree_registration_areas
     TO ecosia_editing
     USING (polygon IS NOT NULL);
 
-CREATE POLICY ecosia_edit_policy_points ON qgis_tree_registration_areas
-    FOR ALL
-    TO ecosia_editing
-    USING (polygon IS NOT NULL);
----
-
---- ingevoegd:
-CREATE POLICY ecosia_edit_policy_polygons ON qgis_tree_registration_points
-    FOR ALL
-    TO ecosia_editing
-    USING (polygon IS NULL);
-
 CREATE POLICY ecosia_edit_policy_points ON qgis_tree_registration_points
     FOR ALL
     TO ecosia_editing
-    USING (polygon IS NULL);
+    USING (centroid_coord IS NOT NULL);
 ---
 
 CREATE POLICY ecosia_edit_policy ON superset_ecosia_tree_registration_photos
