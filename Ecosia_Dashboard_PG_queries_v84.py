@@ -928,7 +928,7 @@ WITH added_trees_per_site AS
 ecosia_site_id,
 SUM(nr_added_trees) AS added_trees
 FROM odk_tree_monitoring_main
-WHERE test = 'valid_data'qgis
+WHERE test = 'valid_data'
 AND nr_added_trees NOTNULL
 group by ecosia_site_id)
 
