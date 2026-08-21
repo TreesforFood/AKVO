@@ -251,7 +251,7 @@ count = 0
 # Get the results from the pagination function
 for x in result_partnercode:
     for y in x:
-        monitoring_partnername_airtable = LOWER(y['fields']['Partnername'])
+        monitoring_partnername_airtable = y['fields']['Partnername'].lower()
         id_airtable = y['id']
 
         cur.execute('''
