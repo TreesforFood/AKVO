@@ -131,7 +131,7 @@ while True :
         response= requests.get(url +'?offset=' + offset, headers=headers)
         response_monitoring = response.json()
         records = list(response_monitoring['records'])
-        result_mmonitoring.append(records)
+        result_monitoring.append(records)
         #print(records[0]['fields']['Username'] , len(records))
 
         try :
