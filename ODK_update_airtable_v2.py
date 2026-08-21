@@ -178,8 +178,6 @@ for x in result_monitoring:
         FROM superset_ecosia_tree_monitoring a
         LEFT JOIN check_monitoring_status b
         ON a.identifier_akvo = b.identifier_akvo
-        GROUP BY b.identifier_akvo, b.monitoring_status
-        ORDER BY b.identifier_akvo;
         WHERE b.identifier_akvo = %s
         group by contract''', (monitoring_identifier_airtable,))
 
