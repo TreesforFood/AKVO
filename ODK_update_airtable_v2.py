@@ -117,7 +117,7 @@ for x in result:
 
 
 # Pagination function to parse through all Airtable pages (Each Airtable page has 100 rows).
-global offset
+global offset_monitoring
 offset = '0'
 result_monitoring = []
 desired_users = {}
@@ -128,7 +128,7 @@ while True :
     url = "https://api.airtable.com/v0/appkx2PPsqz3axWDy/Monitoring"
 
     try :
-        response= requests.get(url +'?offset=' + offset, headers=headers)
+        response= requests.get(url +'?offset=' + offset_monitoring, headers=headers)
         response_monitoring = response.json()
         records = list(response_monitoring['records'])
         result_monitoring.append(records)
