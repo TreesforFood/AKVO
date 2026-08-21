@@ -928,7 +928,7 @@ WITH added_trees_per_site AS
 ecosia_site_id,
 SUM(nr_added_trees) AS added_trees
 FROM odk_tree_monitoring_main
-WHERE test = 'valid_data'
+WHERE test = 'valid_data'qgis
 AND nr_added_trees NOTNULL
 group by ecosia_site_id)
 
@@ -1429,8 +1429,8 @@ WHERE NOT EXISTS (
 )
 AND akvo_tree_registration_areas_updated.chloris_uploaded = FALSE
 AND akvo_tree_registration_areas_updated.kanop_uploaded = FALSE
---AND akvo_tree_registration_areas_updated.delete_confirmation = FALSE
---AND akvo_tree_registration_areas_updated.edit_confirmation = FALSE
+--AND akvo_tree_registration_areas_updated.delete_confirmation = FALSE -- Not needed. Makes no sense.
+--AND akvo_tree_registration_areas_updated.edit_confirmation = FALSE -- Not needed. Makes no sense.
 AND akvo_tree_registration_areas_updated.test = 'This is real, valid data';'''
 
 conn.commit()
@@ -1439,7 +1439,7 @@ conn.commit()
 # This table is created to generate a seperate layer (areas) for QGIS. It is a workaround. Ideally, we would create it from the UPDATES table or working with a VIEW, but VIEWS are causing too much issues (no integer ID's in main table so ID's must be generated with window functions (e.g. ROWS(), which needs again a trigger to update the main table)).
 # Creating a table directly from UPDATES would mean that we have to manually distribute the current edits (in EDITS table) to saveguard them. So, I # choose to create a 2 seperate TABLES from EDITS and then merge the edits from those 2 tables again in the EDITS table... No clean, but most practical for now.
 create_a1_updates_from_qgis_layer_areas = '''
-UPDATE akvo_tree_registration_areas_edits
+UPDATE akvo_tree_registration_areas_edits a
 SET
 		identifier_akvo = t.identifier_akvo,
 		display_name = t.display_name,
@@ -1507,9 +1507,9 @@ SET
 		delete_confirmation = t.delete_confirmation,
 		monitored_confirmation = t.monitored_confirmation
 FROM qgis_tree_registration_areas t
-WHERE akvo_tree_registration_areas_edits.edit_confirmation = TRUE
-OR akvo_tree_registration_areas_edits.delete_confirmation = TRUE
-AND akvo_tree_registration_areas_edits.identifier_akvo = t.identifier_akvo;'''
+WHERE (t.edit_confirmation = TRUE
+OR t.delete_confirmation = TRUE)
+AND a.identifier_akvo = t.identifier_akvo;'''
 
 conn.commit()
 
@@ -1517,7 +1517,7 @@ conn.commit()
 # This table is created to generate a seperate layer (areas) for QGIS. It is a workaround. Ideally, we would create it from the UPDATES table or working with a VIEW, but VIEWS are causing too much issues (no integer ID's in main table so ID's must be generated with window functions (e.g. ROWS(), which needs again a trigger to update the main table)).
 # Creating a table directly from UPDATES would mean that we have to manually distribute the current edits (in EDITS table) to saveguard them. So, I # choose to create a 2 seperate TABLES from EDITS and then merge the edits from those 2 tables again in the EDITS table... No clean, but most practical for now.
 create_a1_updates_from_qgis_layer_points = '''
-UPDATE akvo_tree_registration_areas_edits
+UPDATE akvo_tree_registration_areas_edits a
 SET
 		identifier_akvo = t.identifier_akvo,
 		display_name = t.display_name,
@@ -1585,9 +1585,9 @@ SET
 		delete_confirmation = t.delete_confirmation,
 		monitored_confirmation = t.monitored_confirmation
 FROM qgis_tree_registration_points t
-WHERE akvo_tree_registration_areas_edits.edit_confirmation = TRUE
-OR akvo_tree_registration_areas_edits.delete_confirmation = TRUE
-AND akvo_tree_registration_areas_edits.identifier_akvo = t.identifier_akvo;'''
+WHERE (t.edit_confirmation = TRUE
+OR t.delete_confirmation = TRUE)
+AND a.identifier_akvo = t.identifier_akvo;'''
 
 conn.commit()
 
