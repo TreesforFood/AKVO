@@ -258,7 +258,7 @@ for x in result_partnercode:
 
         SELECT
         LOWER(organisation),
-        LOWER(partnercode_main)
+        partnercode_main
 
         FROM superset_ecosia_contract_overview
         WHERE organisation = %s''', (monitoring_partnername_airtable,))
