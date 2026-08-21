@@ -179,7 +179,7 @@ for x in result_monitoring:
         LEFT JOIN check_monitoring_status b
         ON a.identifier_akvo = b.identifier_akvo
         WHERE b.identifier_akvo = %s
-        group by contract''', (monitoring_identifier_airtable,))
+        GROUP BY b.identifier_akvo''', (monitoring_identifier_airtable,))
 
         rows = cur.fetchall()
 
