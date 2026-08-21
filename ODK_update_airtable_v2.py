@@ -155,28 +155,31 @@ for x in result_monitoring:
 
         cur.execute('''
 
-        WITH check_monitoring_status AS (SELECT
+        WITH check_monitoring_status AS (
+        SELECT
         identifier_akvo,
         MAX(label_strata) AS monitoring_status
         FROM superset_ecosia_tree_monitoring
-        GROUP BY identifier_akvo)
+        GROUP BY identifier_akvo
+        )
 
         SELECT
-		b.identifier_akvo,
-        a.organisation,
-        a.contract,
+        b.identifier_akvo,
+        MAX(a.organisation) AS organisation,
+        MAX(a.contract) AS contract,
 
-    	CASE
-        WHEN b.monitoring_status IN (180, 360, 540)
-        THEN 't=1'
-        WHEN b.monitoring_status IN (720, 900)
-        THEN 't=2'
+        CASE
+        WHEN b.monitoring_status = 0 THEN 'no monitoring carried out'
+        WHEN b.monitoring_status IN (180, 360, 540) THEN 't=1'
+        WHEN b.monitoring_status IN (720, 900) THEN 't=2'
         ELSE 't=3'
         END AS monitoring_status
 
         FROM superset_ecosia_tree_monitoring a
-        JOIN check_monitoring_status b
+        LEFT JOIN check_monitoring_status b
         ON a.identifier_akvo = b.identifier_akvo
+        GROUP BY b.identifier_akvo, b.monitoring_status
+        ORDER BY b.identifier_akvo;
         WHERE b.identifier_akvo = %s
         group by contract''', (monitoring_identifier_airtable,))
 
