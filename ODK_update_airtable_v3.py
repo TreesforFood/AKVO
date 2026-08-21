@@ -269,7 +269,7 @@ for x in result_partnercode:
             print(row)
 
             try:
-                partnercode_main = row[1]
+                partnercode_main = str(row[1])
             except (TypeError, ValueError):
                 partnercode_main = ''  # default or fallback value
 
