@@ -118,7 +118,7 @@ for x in result:
 
 # Pagination function to parse through all Airtable pages (Each Airtable page has 100 rows).
 global offset_monitoring
-offset = '0'
+offset_monitoring = '0'
 result_monitoring = []
 desired_users = {}
 
@@ -135,7 +135,7 @@ while True :
         #print(records[0]['fields']['Username'] , len(records))
 
         try :
-            offset = response_monitoring['offset']
+            offset_monitoring = response_monitoring['offset']
 
         except Exception as ex:
             break
