@@ -9330,7 +9330,7 @@ GRANT UPDATE, DELETE ON ALL TABLES IN SCHEMA heroku_ext TO ecosia_editing;
 
 
 
-GRANT SELECT ON TABLE public.akvo_tree_registration_areas_edits TO ecosia_editing;
+--GRANT SELECT ON TABLE public.akvo_tree_registration_areas_edits TO ecosia_editing;
 
 --ingevoegd:
 GRANT SELECT ON TABLE public.qgis_tree_registration_areas TO ecosia_editing;
@@ -9356,23 +9356,23 @@ ALTER TABLE superset_ecosia_tree_registration_photos ENABLE ROW LEVEL SECURITY;
 ALTER TABLE kanop_chloris_uploads_spatial_overview ENABLE ROW LEVEL SECURITY;
 
 -- Create policies
-CREATE POLICY ecosia_edit_policy_polygons ON akvo_tree_registration_areas_edits
-    FOR ALL
-    TO ecosia_editing
-    USING (polygon IS NULL);
+--CREATE POLICY ecosia_edit_policy_polygons ON akvo_tree_registration_areas_edits
+--    FOR ALL
+--    TO ecosia_editing
+--    USING (polygon IS NULL);
 
-CREATE POLICY ecosia_edit_policy_points ON akvo_tree_registration_areas_edits
-    FOR ALL
-    TO ecosia_editing
-    USING (polygon IS NOT NULL);
+--CREATE POLICY ecosia_edit_policy_points ON akvo_tree_registration_areas_edits
+--    FOR ALL
+--    TO ecosia_editing
+--    USING (polygon IS NOT NULL);
 
 --- ingevoegd:
-CREATE POLICY ecosia_edit_policy_polygons ON qgis_tree_registration_areas
+CREATE POLICY ecosia_edit_policy ON qgis_tree_registration_areas
     FOR ALL
     TO ecosia_editing
     USING (true);
 
-CREATE POLICY ecosia_edit_policy_points ON qgis_tree_registration_points
+CREATE POLICY ecosia_edit_policy ON qgis_tree_registration_points
     FOR ALL
     TO ecosia_editing
     USING (true);
