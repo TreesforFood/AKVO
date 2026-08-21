@@ -187,7 +187,7 @@ for x in result_monitoring:
             print(row)
 
             try:
-                organisation = int(row[1])
+                organisation = row[1]
             except (TypeError, ValueError):
                 organisation = ''  # default or fallback value
 
@@ -199,7 +199,7 @@ for x in result_monitoring:
 
 
             try:
-                monitoring_status = int(row[3])
+                monitoring_status = row[3]
             except (TypeError, ValueError):
                 monitoring_status = 'no monitoring carried out'  # default or fallback value
 
@@ -215,4 +215,3 @@ for x in result_monitoring:
             response_airtable_partner = requests.patch(row_airtable_to_update, headers=headers, json=update_partner_airtable)
             response_airtable_contract = requests.patch(row_airtable_to_update, headers=headers, json=update_contract_airtable)
             response_airtable_monitoring_status = requests.patch(row_airtable_to_update, headers=headers, json=update_monitoring_status_airtable)
-            #data = json.loads(response_airtable.text)
