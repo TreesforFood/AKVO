@@ -251,7 +251,7 @@ count = 0
 # Get the results from the pagination function
 for x in result_partnercode:
     for y in x:
-        monitoring_partnername_airtable = y['fields']['Partnername'].lower()
+        monitoring_partnername_airtable = y['fields']['System name'].lower()
         id_airtable = y['id']
 
         cur.execute('''
@@ -276,7 +276,7 @@ for x in result_partnercode:
             row_airtable_to_update = f"https://api.airtable.com/v0/appkx2PPsqz3axWDy/Partners/{id_airtable}"
 
             # Set the new field values for the record
-            update_partnercode_airtable = {'fields':{'Partner': partnercode_main}}
+            update_partnercode_airtable = {'fields':{'partnercode_main': partnercode_main}}
 
 
             # Send your request to update the record and parse the response
