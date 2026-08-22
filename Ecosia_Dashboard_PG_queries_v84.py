@@ -9344,8 +9344,8 @@ GRANT SELECT ON ALL TABLES IN SCHEMA heroku_ext TO ecosia_editing;
 GRANT SELECT ON geometry_columns TO ecosia_editing;
 GRANT SELECT ON spatial_ref_sys TO ecosia_editing;
 
--- Enable Row-Level Security (RLS)
-ALTER TABLE akvo_tree_registration_areas_edits ENABLE ROW LEVEL SECURITY;
+-- Laatst aangepast:
+--ALTER TABLE akvo_tree_registration_areas_edits ENABLE ROW LEVEL SECURITY;
 
 --ingevoegd:
 ALTER TABLE qgis_tree_registration_areas ENABLE ROW LEVEL SECURITY;
