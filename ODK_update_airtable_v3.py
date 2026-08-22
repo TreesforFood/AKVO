@@ -251,7 +251,11 @@ count = 0
 # Get the results from the pagination function
 for x in result_partnercode:
     for y in x:
-        monitoring_partnername_airtable = y['fields']['System name'].lower()
+        try:
+            monitoring_partnername_airtable = y['fields']['System name'].lower()
+        except KeyError:
+            monitoring_partnername_airtable = ''
+
         id_airtable = y['id']
 
         cur.execute('''
