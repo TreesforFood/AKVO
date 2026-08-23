@@ -253,6 +253,7 @@ for x in result_partnercode:
     for y in x:
         try:
             monitoring_partnername_airtable = y['fields']['System name'].lower()
+            print('monitoring_partnername_airtable:', monitoring_partnername_airtable)
         except KeyError:
             monitoring_partnername_airtable = ''
 
@@ -274,6 +275,7 @@ for x in result_partnercode:
 
             try:
                 partnercode_main = str(row[1])
+                print('partnercode_main:', partnercode_main)
             except (TypeError, ValueError):
                 partnercode_main = ''  # default or fallback value
 
