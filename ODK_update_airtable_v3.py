@@ -255,17 +255,17 @@ for x in result_partnercode:
             monitoring_partnername_airtable = y['fields']['System name'].lower()
             print('monitoring_partnername_airtable:', monitoring_partnername_airtable)
         except KeyError:
-            monitoring_partnername_airtable = ''
+            monitoring_partnername_airtable = 'no name...?'
 
         id_airtable = y['id']
 
         cur.execute('''
 
         SELECT
-        LOWER(organisation),
+        DISTINCT LOWER(organisation),
         partnercode_main
 
-        FROM superset_ecosia_contract_overview
+        FROM superset_ecosia_tree_registration
         WHERE organisation = %s''', (monitoring_partnername_airtable,))
 
         rows = cur.fetchall()
