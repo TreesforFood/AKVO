@@ -253,11 +253,14 @@ for x in result_partnercode:
     for y in x:
         try:
             monitoring_partnername_airtable = y['fields']['System name'].lower()
-            print('monitoring_partnername_airtable:', monitoring_partnername_airtable)
         except KeyError:
             monitoring_partnername_airtable = 'no name...?'
 
+        print('monitoring_partnername_airtable:', monitoring_partnername_airtable)
+
         id_airtable = y['id']
+
+        print('monitoring_partnername_airtable = ', monitoring_partnername_airtable, 'id_airtable = ', id_airtable)
 
         cur.execute('''
 
@@ -278,6 +281,8 @@ for x in result_partnercode:
                 print('partnercode_main:', partnercode_main)
             except (TypeError, ValueError):
                 partnercode_main = ''  # default or fallback value
+
+            print(partnercode_main, id_airtable)
 
             row_airtable_to_update = f"https://api.airtable.com/v0/appkx2PPsqz3axWDy/Partners/{id_airtable}"
 
