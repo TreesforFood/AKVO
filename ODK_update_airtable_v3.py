@@ -184,13 +184,12 @@ for x in result_monitoring:
         rows = cur.fetchall()
 
         for row in rows:
-            print(row)
+            #print(row)
 
             try:
                 organisation = row[1]
             except (TypeError, ValueError):
                 organisation = ''  # default or fallback value
-
 
             try:
                 contract = int(row[2])
@@ -203,6 +202,7 @@ for x in result_monitoring:
             except (TypeError, ValueError):
                 monitoring_status = 'no monitoring carried out'  # default or fallback value
 
+            print(organisation, contract, monitoring_status)
 
             row_airtable_to_update = f"https://api.airtable.com/v0/appkx2PPsqz3axWDy/Monitoring/{id_airtable}"
 
@@ -256,11 +256,11 @@ for x in result_partnercode:
         except KeyError:
             monitoring_partnername_airtable = 'no name...?'
 
-        print('monitoring_partnername_airtable:', monitoring_partnername_airtable)
+        #print('monitoring_partnername_airtable:', monitoring_partnername_airtable)
 
         id_airtable = y['id']
 
-        print('monitoring_partnername_airtable = ', monitoring_partnername_airtable, 'id_airtable = ', id_airtable)
+        #print('monitoring_partnername_airtable = ', monitoring_partnername_airtable, 'id_airtable = ', id_airtable)
 
         cur.execute('''
 
@@ -274,15 +274,15 @@ for x in result_partnercode:
         rows = cur.fetchall()
 
         for row in rows:
-            print(row)
+            #print(row)
 
             try:
                 partnercode_main = str(row[1])
-                print('partnercode_main:', partnercode_main)
+                #print('partnercode_main:', partnercode_main)
             except (TypeError, ValueError):
                 partnercode_main = ''  # default or fallback value
 
-            print(partnercode_main, id_airtable)
+            #print(partnercode_main, id_airtable)
 
             row_airtable_to_update = f"https://api.airtable.com/v0/appkx2PPsqz3axWDy/Partners/{id_airtable}"
 
