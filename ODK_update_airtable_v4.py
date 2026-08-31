@@ -191,7 +191,7 @@ for x in result_monitoring:
                 organisation = ''
 
             try:
-                contract = int(row) if row is not None else 0
+                contract = float(row) if row is not None else 0
             except (TypeError, ValueError, IndexError):
                 contract = 0
 
