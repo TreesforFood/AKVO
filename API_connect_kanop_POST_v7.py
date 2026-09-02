@@ -30,7 +30,7 @@ contract_number = input('select the contract number: ')
 cur.execute('''
 DROP TABLE IF EXISTS KANOP_latest_uploads;
 
-WITH KANOP_new_uploads AS (
+CREATE TABLE KANOP_latest_uploads AS WITH KANOP_new_uploads AS (
   SELECT
     a.identifier_akvo,
     b.identifier_akvo AS identifier_already_submitted_to_kanop,
@@ -86,7 +86,7 @@ a.identifier_akvo,
     a.planting_date,
     ST_AsText(a.polygon::geometry) as polygon,
     TO_CHAR(a.planting_date::date, 'yyyy') AS planting_year_uploaded
-FROM bounding_box_filter a;''', (contract_number,))
+FROM bounding_box_filter a''', (contract_number,))
 
 conn.commit()
 
