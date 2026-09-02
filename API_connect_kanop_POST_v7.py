@@ -30,29 +30,66 @@ contract_number = input('select the contract number: ')
 cur.execute('''
 DROP TABLE IF EXISTS KANOP_latest_uploads;
 
-CREATE TABLE KANOP_latest_uploads AS
-WITH KANOP_new_uploads AS (SELECT
+WITH KANOP_new_uploads AS (
+  SELECT
+    a.identifier_akvo,
+    b.identifier_akvo AS identifier_already_submitted_to_kanop,
+    a.contract_number,
+    a.planting_date,
+    a.polygon,
+    TO_CHAR(a.planting_date::date, 'yyyy') AS planting_year_uploaded
+  FROM akvo_tree_registration_areas_updated a
+  LEFT JOIN kanop_uploads b
+    ON a.identifier_akvo = b.identifier_akvo
+  WHERE a.polygon IS NOT NULL
+    AND a.total_nr_geometric_errors = 0
+    AND a.planting_date <> ''
+    AND a.test != 'This is a test, this record can be deleted.'
+),
+
+select_table AS (
+  SELECT *
+  FROM KANOP_new_uploads
+  WHERE contract_number = %s
+AND identifier_already_submitted_to_kanop IS NULL
+),
+
+random_polygon AS (
+  SELECT polygon::geometry AS geom
+  FROM select_table
+  ORDER BY RANDOM()
+  LIMIT 1
+),
+
+bounding_box AS (
+  SELECT
+    ST_Expand(
+      ST_Transform((SELECT geom FROM random_polygon), 3857),
+      35350  -- 35.35 km in meters (half of 70.7 km)
+    ) AS bbox
+),
+
+bounding_box_filter AS (
+  SELECT t.*
+  FROM select_table t
+  CROSS JOIN bounding_box bb
+  WHERE ST_Intersects(
+    ST_Transform(t.polygon::geometry, 3857),
+    bb.bbox
+  )
+)
+
+SELECT
 a.identifier_akvo,
-b.identifier_akvo AS identifier_already_submitted_to_kanop,
-a.contract_number,
-a.planting_date,
-ST_AsText(a.polygon::geometry) as polygon,
-TO_CHAR(a.planting_date::date, 'yyyy') AS planting_year_uploaded
-FROM akvo_tree_registration_areas_updated a
-
-LEFT JOIN kanop_uploads b
-ON a.identifier_akvo = b.identifier_akvo
-
-WHERE a.polygon NOTNULL
-AND a.total_nr_geometric_errors = 0
-AND a.planting_date <> ''
-AND a.test != 'This is a test, this record can be deleted.')
-
-SELECT * FROM KANOP_new_uploads
-WHERE contract_number = %s
-AND identifier_already_submitted_to_kanop ISNULL''', (contract_number,))
+    a.identifier_akvo AS identifier_already_submitted_to_kanop,
+    a.contract_number,
+    a.planting_date,
+    ST_AsText(a.polygon::geometry) as polygon,
+    TO_CHAR(a.planting_date::date, 'yyyy') AS planting_year_uploaded
+FROM bounding_box_filter a;''', (contract_number,))
 
 conn.commit()
+
 
 cur.execute('''SELECT * FROM KANOP_latest_uploads
 WHERE ST_Area(coordinates::geography) <= 500000000;''')
