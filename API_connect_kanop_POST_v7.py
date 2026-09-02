@@ -90,10 +90,8 @@ FROM bounding_box_filter a''', (contract_number,))
 
 conn.commit()
 
-
-cur.execute('''SELECT * FROM KANOP_latest_uploads
-WHERE ST_Area(coordinates::geography) <= 500000000;''')
-
+cur.execute('''SELECT
+COUNT(*) FROM KANOP_latest_uploads;''')
 rowcount = cur.fetchone()[0]
 rowcount = str(rowcount)
 
