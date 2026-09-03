@@ -135,21 +135,20 @@ data={
         "customerReferencePolygon": gdf.identifier_akvo.tolist(),
     },headers=headers)
 
-if upload_polygons.status_code == 200:
-    #print('Sucessfull upload of polygon: ', gdf.identifier_akvo.tolist())
+if upload_polygons.status_code == 201:
+    print('Sucessfull upload of polygon: ', gdf.identifier_akvo.tolist())
     count_areas_success += 1
-    print('Project confirmed sucessfully. From the total of ', rowcount, ' areas in batch x ', count_areas_success, ' were sucessfully uploaded')
+    #print('Project confirmed sucessfully. From the total of ', rowcount, ' areas in batch x ', count_areas_success, ' were sucessfully uploaded')
 else:
     print('Error with upload of polygon:: ', gdf.identifier_akvo.tolist(), '. Problem was: ', upload_polygons.json())
 
 
-
-# # Confirm a project. Validate your project before asking for analysis. Without this command a project is not listed at KANOP
-# confirm_project = requests.patch(f"https://main.api.kanop.io/projects/{projectId}?confirm=true", headers=headers)
-# if confirm_project.status_code == 200:
-#     print('Project confirmed sucessfully. From the total of ', rowcount, ' areas in batch x ', count_areas_success, ' were sucessfully uploaded')
-# else:
-#     print('Error in confirmation of project.', 'Problem was: ', confirm_project.json())
+# Confirm a project. Validate your project before asking for analysis. Without this command a project is not listed at KANOP
+confirm_project = requests.patch(f"https://main.api.kanop.io/projects/{projectId}?confirm=true", headers=headers)
+if confirm_project.status_code == 200:
+    print('Project confirmed sucessfully. From the total of ', rowcount, ' areas in batch x ', count_areas_success, ' were sucessfully uploaded')
+else:
+    print('Error in confirmation of project.', 'Problem was: ', confirm_project.json())
 
 
 # IMPORTANT NOTE: AFTER PROCESSING A POST AND CONFIRMING A PROJECT, YOU ALSO HAS TO RUN THE SCRIPT FOR A DATA REQUEST.
