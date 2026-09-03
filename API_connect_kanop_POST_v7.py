@@ -125,12 +125,6 @@ df['geometry'] = df['polygon'].apply(wkt.loads)
 # Create GeoDataFrame, assuming EPSG:4326 (WGS84) CRS; change if needed
 gdf = gpd.GeoDataFrame(df, geometry='geometry', crs="EPSG:4326")
 
-# for input_data in row:
-#     polygons = input_data[2]
-#     polygon_reference = input_data[0]
-#     print(polygon_reference)
-#     count_areas_total += 1
-
 
 # Populate your project with one or more polygons. Done by sending raw data.
 upload_polygons = requests.post(f"https://main.api.kanop.io/projects/{projectId}/polygons",
@@ -141,7 +135,7 @@ data={
         "customerReferencePolygon": gdf.identifier_akvo.tolist(),
     },headers=headers)
 
-if upload_polygons.status_code == 201:
+if upload_polygons.status_code == 200:
     print('Sucessfull upload of polygon: ', gdf.identifier_akvo.tolist())
     count_areas_success += 1
 else:
@@ -150,7 +144,7 @@ else:
 # Confirm a project. Validate your project before asking for analysis. Without this command a project is not listed at KANOP
 confirm_project = requests.patch(f"https://main.api.kanop.io/projects/{projectId}?confirm=true", headers=headers)
 if confirm_project.status_code == 200:
-    print('Project confirmed sucessfully. From the total of ', count_areas_total, ' areas ', count_areas_success, ' were sucessfully uploaded')
+    print('Project confirmed sucessfully. From the total of ', rowcount, ' areas in batch x ', count_areas_success, ' were sucessfully uploaded')
 else:
     print('Error in confirmation of project.', 'Problem was: ', confirm_project.json())
 
