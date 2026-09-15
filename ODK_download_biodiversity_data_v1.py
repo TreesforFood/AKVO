@@ -252,13 +252,12 @@ def json_extract(obj, key):
 table_name = "Submissions"
 
 def process_page(json_registration):
-    count = 0  # You can make this global or return it if you want to track total count outside
-
     for json_in in json_registration:
-        print(json_in)
-#             count = count+1
+        print(json_extract(json_in, 'instanceID'))
 #
-#             submissionid_odk = json_extract(json_in, 'instanceID')[0]
+#
+        submissionid_odk = json_extract(json_in, 'instanceID')[0]
+        print(submissionid_odk)
 #             ecosia_site_id = json_extract(json_in, 'instanceid')[0]
 #
 #             start = json_extract(json_in, 'start')[0]
@@ -451,7 +450,7 @@ def process_page(json_registration):
 #
 #         conn.commit()
 #
-# 
+#
 # # call the submissions
 # print('processing the fotos...')
 # client = ODKCentralClient(base_url, default_project_id, table_name, username, password, page_size)
