@@ -303,6 +303,7 @@ def process_page(json_species):
         identifier_akvo = json_extract(json_species_repeat, '__Submissions-id')[0]
         class_species = json_extract(json_species_repeat, 'class_species')[0]
         exotic_native = json_extract(json_species_repeat, 'exotic_native')[0]
+        instanceID = json_extract(json_species_repeat, '__Submissions-id')[0]
 
         if json_extract(json_species_repeat, 'photo_species')[0] is not None:
             #photo_1 = "https://ecosia.getodk.cloud"+"/projects/"+str(1)+"/forms/"+str('planting_site_reporting')+"/submissions/"+str(instanceID)+"/attachments/"+json_extract(json_in, 'photo_tree_polygon_1')[0]
