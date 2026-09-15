@@ -17,7 +17,7 @@ from urllib.parse import quote
 base_url = "https://ecosia.getodk.cloud"
 username = os.environ["ODK_CENTRAL_USERNAME"]
 password = os.environ["ODK_CENTRAL_PASSWORD"]
-form_id = "Biodiversity_reporting"
+form_id = "biodiversity_reporting"
 default_project_id = 1
 page_size = 5000
 auth = HTTPBasicAuth(username, password)
