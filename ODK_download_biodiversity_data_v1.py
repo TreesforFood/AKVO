@@ -280,7 +280,7 @@ def process_page(json_registration):
             lon_x = None
             lat_y = None
 
-        cur.execute('''INSERT INTO ODK_biodiversity_main (identifier_odk, submission_date, lat_y, lon_x, country, topography, surrounding, form_version, centroid_coord)
+        cur.execute('''INSERT INTO ODK_biodiversity_main (identifier_odk, submission_date, lat_y, lon_x, country, topography, surrounding, centroid_coord)
         VALUES (%s,%s,%s,%s,%s,%s,%s,%s)''', (identifier_odk, submission_date, lat_y, lon_x, country, topography, surrounding, centroid_coord))
 
         conn.commit()
