@@ -297,12 +297,19 @@ table_name = "Submissions.group_main_entrance.repeat_photos"
 def process_page(json_species):
     count = 0  # You can make this globa
 
+    photo_token = quote(odk_photo_token, safe='')
+
     for json_species_repeat in json_species:
         identifier_akvo = json_extract(json_species_repeat, '__Submissions-id')[0]
-        photo_species = json_extract(json_species_repeat, 'photo_species')[0]
         class_species = json_extract(json_species_repeat, 'class_species')[0]
         exotic_native = json_extract(json_species_repeat, 'exotic_native')[0]
 
+        if json_extract(json_species_repeat, 'photo_species')[0] is not None:
+            #photo_1 = "https://ecosia.getodk.cloud"+"/projects/"+str(1)+"/forms/"+str('planting_site_reporting')+"/submissions/"+str(instanceID)+"/attachments/"+json_extract(json_in, 'photo_tree_polygon_1')[0]
+            photo_species1 = json_extract(json_species_repeat, 'photo_species')[0]
+            photo_species = f"https://ecosia.getodk.cloud/v1/key/{photo_token}/projects/1/forms/biodiversity_reporting/submissions/{instanceID}/attachments/{photo_species1}";
+        else:
+            photo_species = ''
 
         # Create a temp CTE table to download all main registration data from ODK
         cur.execute('''INSERT INTO ODK_biodiversity_species (identifier_akvo, photo_species, class_species, exotic_native)
