@@ -298,10 +298,7 @@ def process_page(json_species):
     count = 0  # You can make this globa
 
     for json_species_repeat in json_species:
-        #print(json_in_tree_species)
         identifier_akvo = json_extract(json_species_repeat, '__Submissions-id')[0]
-        species_name_latin = json_extract(json_species_repeat, 'calculate_species_position')[0]
-        nr_trees_per_species = json_extract(json_species_repeat, 'nr_trees_per_species_registered')[0]
         photo_species = json_extract(json_species_repeat, 'photo_species')[0]
         class_species = json_extract(json_species_repeat, 'class_species')[0]
         exotic_native = json_extract(json_species_repeat, 'exotic_native')[0]
@@ -313,6 +310,10 @@ def process_page(json_species):
 
         conn.commit()
 
+# call the submissions
+print('processing the tree species...')
+client = ODKCentralClient(base_url, default_project_id, table_name, username, password, page_size)
+json_species = client.get_all_submissions(form_id, process_page_callback = process_page)
 
 
 conn.close()
