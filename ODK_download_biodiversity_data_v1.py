@@ -253,83 +253,39 @@ table_name = "Submissions"
 
 def process_page(json_registration):
     for json_in in json_registration:
-        print(json_extract(json_in, 'instanceID'))
-#
-#
+        #print(json_extract(json_in, 'instanceID'))
         submissionid_odk = json_extract(json_in, 'instanceID')[0]
-        print(submissionid_odk)
-#             ecosia_site_id = json_extract(json_in, 'instanceid')[0]
-#
-#             start = json_extract(json_in, 'start')[0]
-#             end = json_extract(json_in, 'end')[0]
-#             updated_at = json_extract(json_in, 'updatedAt')[0]
-#             submission_date = json_extract(json_in, 'submissionDate')[0]
-#             today = json_extract(json_in, 'today')[0]
-#             #print('id:', ecosia_site_id, 'updatedAt:', updated_at, 'submission_date:', submission_date, 'Start:', start, 'End:', end)
-#
-#             device_id = json_extract(json_in, 'device_id')[0]
-#             submitter = json_extract(json_in, 'username')[0]
-#
-#             odk_form_version = json_extract(json_in, 'formVersion')[0]
-#
-#             country = json_extract(json_in, 'country_registration_save')[0]
-#             test_data_yes_no = json_extract(json_in, 'test_data_yes_no')[0]
-#             land_title = json_extract(json_in, 'landuse_title')[0]
-#             name_owner_individual = json_extract(json_in, 'name_owner_individual')[0]
-#             gender_owner = json_extract(json_in, 'gender_owner')[0]
-#             name_owner_communal = json_extract(json_in, 'name_owner_communal')[0]
-#             planting_technique = json_extract(json_in, 'planting_technique')[0]
-#             test = json_extract(json_in, 'test_data_yes_no')[0]
-#             reporting_type = json_extract(json_in, 'reporting_type')[0]
-#             reporting_activity_new_site = json_extract(json_in, 'reporting_activity_new_site')[0]
-#             area_calculation_round_decimal = json_extract(json_in, 'area_calculation_round_decimal')[0]
-#             baseline_mature_trees = json_extract(json_in, 'baseline_mature_trees')[0]
-#             id_planting_site = json_extract(json_in, 'id_planting_site')[0]
-#             landscape_element_new_site = json_extract(json_in, 'landscape_element_type')[0]
-#
-#             if json_in['group_new_site']['group_map_new_site']['gps_center_planting_site'] != None:
-#                 return_list = convert_point_wkt(json_in['group_new_site']['group_map_new_site']['gps_center_planting_site']['coordinates'])
-#                 geometry_planting_point = return_list[0]
-#                 lon_x = return_list[1]
-#                 lat_y = return_list[2]
-#             else:
-#                 geometry_planting_point = None
-#                 lon_x = None
-#                 lat_y = None
-#
-#
-#             #if landscape_element_new_site == 'line_planting':
-#             if json_in['group_new_site']['group_map_new_site']['line_planting_site'] != None:
-#                 geometry_planting_line = convert_line_wkt(json_in['group_new_site']['group_map_new_site']['line_planting_site']['coordinates'])
-#                 #print('LINESTRING:', geometry_planting_line)
-#             else:
-#                 geometry_planting_line = None
-#
-#             #if landscape_element_new_site == 'area_planting':
-#             if json_in['group_new_site']['group_map_new_site']['polygon_planting_site'] != None:
-#                 geometry_planting_polygon = convert_polygon_wkt(json_in['group_new_site']['group_map_new_site']['polygon_planting_site']['coordinates'][0])
-#                 #print('POLYGON: ',geometry_planting_polygon)
-#             else:
-#                 geometry_planting_polygon = None
-#
-#             contract_number = json_extract(json_in, 'contract_number')[0]
-#             tree_species = json_extract(json_in, 'tree_species_registered')[0]
-#             organisation = json_extract(json_in, 'organisation')[0]
-#             tree_number = json_extract(json_in, 'tree_number')[0]
-#             audit = json_extract(json_in, 'audit')[0]
-#             meta_instanceID = json_extract(json_in, 'instanceID')[0] # be carefull: the variable in this json is instanceID NOT instanceId!
-#             name_region = 'still to be intergrated'
-#             photo_owner = json_extract(json_in, 'photo_owner')[0]
-#             remark = json_extract(json_in, 'remark')[0]
-#             #nr_trees_option = json_extract(json_in, 'landscape_element_type')[0]
-#             planting_date = json_extract(json_in, 'planting_date')[0]
-#
-#             # Create a temp CTE table to download all main registration data from ODK
-#             cur.execute('''INSERT INTO ODK_Tree_registration_main (submissionid_odk, ecosia_site_id, device_id, updated_at, field_date, submission_date, submission_date_time_start, start, ends, submitter, odk_form_version, test, reporting_type, reporting_activity_new_site, country, organisation, contract_number, id_planting_site, land_title, name_owner, landscape_element_type, photo_owner, gender_owner, planting_technique, remark, planting_date, tree_number, tree_species, calc_area, lat_y, lon_x, centroid_coord, polygon, line)
-#             VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)''', (submissionid_odk, ecosia_site_id, device_id, updated_at, today, submission_date, submission_date, start, end, submitter, odk_form_version, test, reporting_type, reporting_activity_new_site, country, organisation, contract_number, id_planting_site, land_title, name_owner_individual, landscape_element_new_site, photo_owner, gender_owner, planting_technique, remark, planting_date, tree_number, tree_species, area_calculation_round_decimal, lat_y, lon_x, geometry_planting_point, geometry_planting_polygon, geometry_planting_line))
-#
-#             conn.commit()
-#
+        #print(submissionid_odk)
+
+        start = json_extract(json_in, 'start')[0]
+        end = json_extract(json_in, 'end')[0]
+        updated_at = json_extract(json_in, 'updatedAt')[0]
+        submission_date = json_extract(json_in, 'submissionDate')[0]
+        today = json_extract(json_in, 'today')[0]
+
+        identifier_odk = json_extract(json_in, 'key')[0]
+        country = json_extract(json_in, 'country')[0]
+        topography = json_extract(json_in, 'topography')[0]
+        surrounding = json_extract(json_in, 'surrounding')[0]
+        form_version = json_extract(json_in, 'form_version')[0]
+        centroid_coord = json_extract(json_in, 'gps_photo')[0]
+
+        if json_in['gps_photo'] != None:
+            return_list = convert_point_wkt(json_in['gps_photo']['coordinates'])
+            centroid_coord = return_list[0]
+            lon_x = return_list[1]
+            lat_y = return_list[2]
+        else:
+            centroid_coord = None
+            lon_x = None
+            lat_y = None
+
+        cur.execute('''INSERT INTO ODK_biodiversity_main (identifier_odk, submission_date, lat_y, lon_x, country, topography, surrounding, form_version, centroid_coord)
+        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)''', (identifier_odk, submission_date, lat_y, lon_x, country, topography, surrounding, form_version, centroid_coord))
+
+        conn.commit()
+
+
 # call the submissions
 print('processing the main data...')
 client = ODKCentralClient(base_url, default_project_id, table_name, username, password, page_size)
