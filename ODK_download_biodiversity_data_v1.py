@@ -330,10 +330,10 @@ def process_page(json_registration):
 #
 #             conn.commit()
 #
-# # call the submissions
-# print('processing the main data...')
-# client = ODKCentralClient(base_url, default_project_id, table_name, username, password, page_size)
-# json_registration = client.get_all_submissions(form_id, process_page_callback = process_page)
+# call the submissions
+print('processing the main data...')
+client = ODKCentralClient(base_url, default_project_id, table_name, username, password, page_size)
+json_registration = client.get_all_submissions(form_id, process_page_callback = process_page)
 #
 #
 #
