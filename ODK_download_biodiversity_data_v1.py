@@ -41,7 +41,7 @@ conn.commit()
 
 cur.execute('''CREATE TABLE IF NOT EXISTS ODK_biodiversity_main (FID SERIAL PRIMARY KEY, identifier_odk TEXT, submission_date DATE, lat_y REAL, lon_x REAL, country TEXT, topography TEXT, surrounding TEXT, centroid_coord geometry(POINT, 4326));
 
-CREATE TABLE IF NOT EXISTS ODK_biodiversity_species (FID SERIAL PRIMARY KEY, parent_key TEXT, photo_species TEXT, class_species TEXT, exotic_native TEXT );''')
+CREATE TABLE IF NOT EXISTS ODK_biodiversity_species (identifier_akvo TEXT, photo_species TEXT, class_species TEXT, exotic_native TEXT );''')
 
 conn.commit()
 
@@ -290,127 +290,29 @@ def process_page(json_registration):
 print('processing the main data...')
 client = ODKCentralClient(base_url, default_project_id, table_name, username, password, page_size)
 json_registration = client.get_all_submissions(form_id, process_page_callback = process_page)
-#
-#
-#
-#
-# table_name = "Submissions.group_new_site.group_tree_registration.repeat_registration_nr_species"
-#
-# def process_page(json_nr_per_tree_species):
-#     count = 0  # You can make this globa
-#
-#     for json_in_tree_species in json_nr_per_tree_species:
-#         #print(json_in_tree_species)
-#         submissionid_odk = json_extract(json_in_tree_species, '__Submissions-id')[0]
-#         species_name_latin = json_extract(json_in_tree_species, 'calculate_species_position')[0]
-#         nr_trees_per_species = json_extract(json_in_tree_species, 'nr_trees_per_species_registered')[0]
-#         iucn_code = species_name_latin
-#         native_exotic = species_name_latin
-#         #print(submissionid_odk, species_name_latin, nr_trees_per_species)
-#
-#
-#         # Create a temp CTE table to download all main registration data from ODK
-#         cur.execute('''INSERT INTO ODK_Tree_registration_tree_species (submissionid_odk, species_name_latin, iucn_code, native_exotic, nr_trees_per_species)
-#         VALUES (%s,%s,%s,%s,%s)''', (submissionid_odk, species_name_latin, iucn_code, native_exotic, nr_trees_per_species))
-#
-#         conn.commit()
-#
-#
-# # call the submissions
-# print('processing the tree species...')
-# client = ODKCentralClient(base_url, default_project_id, table_name, username, password, page_size)
-# json_nr_per_tree_species = client.get_all_submissions(form_id, process_page_callback = process_page)
-#
-#
-# cur.execute('''UPDATE ODK_Tree_registration_tree_species
-# SET iucn_code = RIGHT(species_name_latin,3)
-# WHERE LENGTH(species_name_latin) > 3;''')
-#
-# cur.execute('''UPDATE ODK_Tree_registration_tree_species
-# SET native_exotic = SUBSTRING(species_name_latin, LENGTH(species_name_latin) - 2, 1)
-# WHERE LENGTH(species_name_latin) > 4;''')
-#
-#
-# # After the insert of new manual submissions into the main table, the table content with manual submissions can be deleted
-# cur.execute('''TRUNCATE tree_registration_main_manual_submissions''')
-#
-#
-# # In order to update/modify data in QGIS we need an FID serial column. Since this was already made, we first have to drop this old column and then create a new FID column with serial numbers. This is the most secure approach compared to updating the FID.
-# cur.execute('''
-# ALTER TABLE ODK_Tree_registration_main
-# DROP COLUMN IF EXISTS FID;''')
-# conn.commit()
-#
-# # Add the FID column in order to be able to edit the data in QGIS (without the FID column editing is not possible in QGIS)
-# cur.execute('''ALTER TABLE ODK_Tree_registration_main ADD column FID SERIAL PRIMARY KEY''')
-# conn.commit()
-#
-#
-# # We first create the pgcrypto extension to enable the generation of new uuid's. THis is for new submissions made in QGIS (manual uploads)
-# cur.execute('''CREATE EXTENSION IF NOT EXISTS pgcrypto;''')
-# conn.commit()
-#
-# # Update the uuid's for new records that were added to the database (e.g. by manual upload) in QGIS. Add the 'uuid:' so that this matches the typo comming from ODK submissions.
-# cur.execute('''UPDATE ODK_Tree_registration_main
-# SET submissionid_odk = gen_random_uuid()
-# WHERE submissionid_odk IS NULL;''')
-# conn.commit()
-#
-#
-# table_name = "Submissions.group_new_site.group_tree_photos.repeat_photos_polygon"
-# def process_page(json_photos_planting_site):
-#
-#     photo_token = quote(odk_photo_token, safe='')
-#
-#     for json_in in json_photos_planting_site:
-#         #print(json_in)
-#         submissionid_odk = json_extract(json_in, '__Submissions-id')[0]
-#         repeatid_odk = json_extract(json_in, '__id')[0]
-#         if json_in['group_photos']['gps_photo_polygon'] != None:
-#             return_list = convert_point_wkt(json_in['group_photos']['gps_photo_polygon']['coordinates'])
-#             gps_photo_polygon = return_list[0]
-#         #photo_1 = json_extract(json_in, 'photo_tree_polygon_1')[0]
-#         #photo_2 = json_extract(json_in, 'photo_tree_polygon_2')[0]
-#         #photo_3 = json_extract(json_in, 'photo_tree_polygon_3')[0]
-#         #photo_4 = json_extract(json_in, 'photo_tree_polygon_4')[0]
-#         instanceID = json_extract(json_in, '__Submissions-id')[0]
-#
-#         if json_extract(json_in, 'photo_tree_polygon_1')[0] is not None:
-#             #photo_1 = "https://ecosia.getodk.cloud"+"/projects/"+str(1)+"/forms/"+str('planting_site_reporting')+"/submissions/"+str(instanceID)+"/attachments/"+json_extract(json_in, 'photo_tree_polygon_1')[0]
-#             photo_json_1 = json_extract(json_in, 'photo_tree_polygon_1')[0]
-#             photo_1 = f"https://ecosia.getodk.cloud/v1/key/{photo_token}/projects/1/forms/planting_site_reporting/submissions/{instanceID}/attachments/{photo_json_1}";
-#         else:
-#             photo_1 = ''
-#
-#         if json_extract(json_in, 'photo_tree_polygon_2')[0] is not None:
-#             photo_json_2 = json_extract(json_in, 'photo_tree_polygon_2')[0]
-#             photo_2 = f"https://ecosia.getodk.cloud/v1/key/{photo_token}/projects/1/forms/planting_site_reporting/submissions/{instanceID}/attachments/{photo_json_2}";
-#         else:
-#             photo_2 = ''
-#
-#         if json_extract(json_in, 'photo_tree_polygon_3')[0] is not None:
-#             photo_json_3 = json_extract(json_in, 'photo_tree_polygon_3')[0]
-#             photo_3 = f"https://ecosia.getodk.cloud/v1/key/{photo_token}/projects/1/forms/planting_site_reporting/submissions/{instanceID}/attachments/{photo_json_3}";
-#         else:
-#             photo_3 = ''
-#
-#         if json_extract(json_in, 'photo_tree_polygon_4')[0] is not None:
-#             photo_json_4 = json_extract(json_in, 'photo_tree_polygon_4')[0]
-#             photo_4 = f"https://ecosia.getodk.cloud/v1/key/{photo_token}/projects/1/forms/planting_site_reporting/submissions/{instanceID}/attachments/{photo_json_4}";
-#         else:
-#             photo_4 = ''
-#
-#         # Populate the photo registration table
-#         cur.execute('''INSERT INTO ODK_Tree_registration_photos (submissionid_odk, repeatid_odk, photo_name_1, photo_name_2, photo_name_3, photo_name_4, photo_gps_location)
-#         VALUES (%s,%s,%s,%s,%s,%s,%s)''', (submissionid_odk, repeatid_odk, photo_1, photo_2, photo_3, photo_4, gps_photo_polygon))
-#
-#         conn.commit()
-#
-#
-# # call the submissions
-# print('processing the fotos...')
-# client = ODKCentralClient(base_url, default_project_id, table_name, username, password, page_size)
-# json_photos_planting_site = client.get_all_submissions(form_id, process_page_callback = process_page)
+
+
+table_name = "Submissions.group_main_entrance.repeat_photos"
+
+def process_page(json_species):
+    count = 0  # You can make this globa
+
+    for json_species_repeat in json_species:
+        #print(json_in_tree_species)
+        identifier_akvo = json_extract(json_species_repeat, '__Submissions-id')[0]
+        species_name_latin = json_extract(json_species_repeat, 'calculate_species_position')[0]
+        nr_trees_per_species = json_extract(json_species_repeat, 'nr_trees_per_species_registered')[0]
+        photo_species = json_extract(json_species_repeat, 'photo_species')[0]
+        class_species = json_extract(json_species_repeat, 'class_species')[0]
+        exotic_native = json_extract(json_species_repeat, 'exotic_native')[0]
+
+
+        # Create a temp CTE table to download all main registration data from ODK
+        cur.execute('''INSERT INTO ODK_biodiversity_species (identifier_akvo, photo_species, class_species, exotic_native)
+        VALUES (%s,%s,%s,%s)''', (identifier_akvo, photo_species, class_species, exotic_native))
+
+        conn.commit()
+
 
 
 conn.close()
