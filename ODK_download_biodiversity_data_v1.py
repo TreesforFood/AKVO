@@ -39,7 +39,7 @@ conn.commit()
 
 #photo_species	class_species	exotic_native	PARENT_KEY	KEY
 
-cur.execute('''CREATE TABLE IF NOT EXISTS ODK_biodiversity_main (FID SERIAL PRIMARY KEY, key TEXT, submission_date DATE, lat_y REAL, lon_x REAL, country TEXT, topography TEXT, surrounding TEXT, form_version TEXT, centroid_coord geometry(POINT, 4326));
+cur.execute('''CREATE TABLE IF NOT EXISTS ODK_biodiversity_main (FID SERIAL PRIMARY KEY, key TEXT, submission_date DATE, lat_y REAL, lon_x REAL, country TEXT, topography TEXT, surrounding TEXT, centroid_coord geometry(POINT, 4326));
 
 CREATE TABLE IF NOT EXISTS ODK_biodiversity_species (FID SERIAL PRIMARY KEY, parent_key TEXT, photo_species TEXT, class_species TEXT, exotic_native TEXT );''')
 
@@ -267,7 +267,7 @@ def process_page(json_registration):
         country = json_extract(json_in, 'country')[0]
         topography = json_extract(json_in, 'topography')[0]
         surrounding = json_extract(json_in, 'surrounding')[0]
-        form_version = json_extract(json_in, 'form_version')[0]
+        #form_version = json_extract(json_in, 'form_version')[0]
         centroid_coord = json_extract(json_in, 'gps_photo')[0]
 
         if json_in['gps_photo'] != None:
@@ -281,7 +281,7 @@ def process_page(json_registration):
             lat_y = None
 
         cur.execute('''INSERT INTO ODK_biodiversity_main (identifier_odk, submission_date, lat_y, lon_x, country, topography, surrounding, form_version, centroid_coord)
-        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)''', (identifier_odk, submission_date, lat_y, lon_x, country, topography, surrounding, form_version, centroid_coord))
+        VALUES (%s,%s,%s,%s,%s,%s,%s,%s)''', (identifier_odk, submission_date, lat_y, lon_x, country, topography, surrounding, centroid_coord))
 
         conn.commit()
 
