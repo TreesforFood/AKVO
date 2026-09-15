@@ -268,7 +268,7 @@ def process_page(json_registration):
         topography = json_extract(json_in, 'topography')[0]
         surrounding = json_extract(json_in, 'surrounding')[0]
         #form_version = json_extract(json_in, 'form_version')[0]
-        centroid_coord = json_extract(json_in, 'gps_photo')[0]
+
 
         if json_in['gps_photo'] != None:
             return_list = convert_point_wkt(json_in['gps_photo']['coordinates'])
