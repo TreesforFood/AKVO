@@ -253,7 +253,7 @@ table_name = "Submissions"
 
 def process_page(json_registration):
     for json_in in json_registration:
-        #print(json_extract(json_in, 'instanceID'))
+        print(json_in)
         submissionid_odk = json_extract(json_in, 'instanceID')[0]
         #print(submissionid_odk)
 
@@ -263,7 +263,7 @@ def process_page(json_registration):
         submission_date = json_extract(json_in, 'submissionDate')[0]
         today = json_extract(json_in, 'today')[0]
 
-        identifier_odk = json_extract(json_in, 'key')[0]
+        identifier_odk = json_extract(json_in, 'instanceID')[0]
         country = json_extract(json_in, 'country')[0]
         topography = json_extract(json_in, 'topography')[0]
         surrounding = json_extract(json_in, 'surrounding')[0]
