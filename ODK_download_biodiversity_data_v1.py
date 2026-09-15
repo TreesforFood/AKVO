@@ -39,7 +39,7 @@ conn.commit()
 
 #photo_species	class_species	exotic_native	PARENT_KEY	KEY
 
-cur.execute('''CREATE TABLE IF NOT EXISTS ODK_biodiversity_main (FID SERIAL PRIMARY KEY, key TEXT, submission_date DATE, lat_y REAL, lon_x REAL, country TEXT, topography TEXT, surrounding TEXT, centroid_coord geometry(POINT, 4326));
+cur.execute('''CREATE TABLE IF NOT EXISTS ODK_biodiversity_main (FID SERIAL PRIMARY KEY, identifier_odk TEXT, submission_date DATE, lat_y REAL, lon_x REAL, country TEXT, topography TEXT, surrounding TEXT, centroid_coord geometry(POINT, 4326));
 
 CREATE TABLE IF NOT EXISTS ODK_biodiversity_species (FID SERIAL PRIMARY KEY, parent_key TEXT, photo_species TEXT, class_species TEXT, exotic_native TEXT );''')
 
