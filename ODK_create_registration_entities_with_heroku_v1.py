@@ -161,7 +161,7 @@ CASE
        AND centroid_coord IS NOT NULL AND ST_IsValid(centroid_coord::geometry) AND NOT ST_IsEmpty(centroid_coord::geometry)
   THEN ST_AsText(centroid_coord)
   ELSE NULL
-END AS polygon,
+END AS polygon
 
 FROM akvo_tree_registration_areas_updated
 WHERE test = 'This is real, valid data'
