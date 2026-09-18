@@ -177,7 +177,7 @@ polygon,
 '' AS geometry
 
 FROM temp_contract_overview
-LIMIT 50;''')
+LIMIT 10;''')
 
 conn.commit()
 
@@ -241,7 +241,7 @@ SET geometry = REPLACE(RTRIM(LTRIM(geometry,'POINT (('),'))'),',',';')::varchar(
 WHERE geometry LIKE 'POINT%';''')
 conn.commit()
 
-# We need to set the column RN to text ttype because this is the only data type alowed by ODK entities. However, before we can change to text we first need to define is=t as bigint
+# We need to set the column RN to text type because this is the only data type alowed by ODK entities. However, before we can change to text we first need to define it as bigint
 cur.execute('''UPDATE getodk_entities_upload_table_registrations
 SET row_number = row_number::bigint;''')
 conn.commit()
@@ -257,7 +257,7 @@ conn.commit()
 
 # Set the RN column to string because that is the only type allowed by ODK entitities
 cur.execute('''UPDATE getodk_entities_upload_table_registrations
-SET row_number = row_number::text;''')
+SET row_number = row_number::varchar(255);''')
 conn.commit()
 
 # Select all rows and fetch them all
