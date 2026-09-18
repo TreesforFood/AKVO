@@ -149,7 +149,7 @@ END AS organisation,
 CASE
 WHEN contract_number NOTNULL
 THEN contract_number
-ELSE '0.00'
+ELSE 0.00
 END AS contract_number,
 
 identifier_akvo AS identifier,
