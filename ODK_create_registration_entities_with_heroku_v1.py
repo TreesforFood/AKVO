@@ -175,7 +175,8 @@ identifier,
 polygon,
 '' AS geometry
 
-FROM temp_contract_overview;''')
+FROM temp_contract_overview
+LIMIT 500;''')
 
 conn.commit()
 
