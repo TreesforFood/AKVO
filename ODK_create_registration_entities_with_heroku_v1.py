@@ -148,7 +148,7 @@ END AS organisation,
 
 CASE
 WHEN contract_number NOTNULL
-THEN contract_number::varchar(10)
+THEN contract_number
 ELSE '0.00'
 END AS contract_number,
 
@@ -171,7 +171,7 @@ SELECT
 ROW_NUMBER()OVER(PARTITION BY label ORDER BY label) AS row_number, --Give duplicates a number higher than 1
 label,
 LOWER(organisation) AS name_partner,
-contract_number,
+contract_number::varchar(10),
 identifier,
 polygon,
 '' AS geometry
@@ -257,7 +257,7 @@ conn.commit()
 
 # Set the RN column to string because that is the only type allowed by ODK entitities
 cur.execute('''UPDATE getodk_entities_upload_table_registrations
-SET row_number = row_number::varchar(255);''')
+SET row_number = row_number::varchar(10);''')
 conn.commit()
 
 # Select all rows and fetch them all
