@@ -171,7 +171,7 @@ SELECT
 ROW_NUMBER()OVER(PARTITION BY label ORDER BY label) AS row_number, --Give duplicates a number higher than 1
 label,
 LOWER(organisation) AS name_partner,
-contract_number::varchar(10),
+contract_number::text,
 identifier,
 polygon,
 '' AS geometry
