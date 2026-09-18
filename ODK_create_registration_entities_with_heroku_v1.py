@@ -147,7 +147,7 @@ ELSE 'organisation_unknown'
 END AS organisation,
 
 CASE
-WHEN contract_number NOTNULL
+WHEN contract_number NOTNULL AND contract_number < 1000
 THEN contract_number
 ELSE 0.00
 END AS contract_number,
@@ -257,7 +257,7 @@ conn.commit()
 
 # Set the RN column to string because that is the only type allowed by ODK entitities
 cur.execute('''UPDATE getodk_entities_upload_table_registrations
-SET row_number = row_number::varchar(10);''')
+SET row_number = row_number::text;''')
 conn.commit()
 
 # Select all rows and fetch them all
