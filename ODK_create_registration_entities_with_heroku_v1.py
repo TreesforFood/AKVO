@@ -138,7 +138,7 @@ cur.execute(
 
 WITH temp_contract_overview AS (
 
-SELECT DISTINCT(CONCAT('Organisation: ', LOWER(organisation), ' | Contract number: ', contract_number, ' | Site ID: ', REGEXP_REPLACE(id_planting_site, '[^a-zA-Z0-9 ]', '', 'g'), ' | Name owner: ', name_owner , ' | Ecosia site id: ', identifier_akvo)) AS label,
+SELECT DISTINCT(CONCAT('Organisation: ', LOWER(organisation), ' | Contract number: ', contract_number, ' | Ecosia site id: ', identifier_akvo)) AS label,
 
 CASE -- Fields can not be empty when uploaded to the entity list of ODK. If so, ODK gives a 'no string' error
 WHEN organisation NOTNULL
@@ -176,7 +176,7 @@ polygon,
 '' AS geometry
 
 FROM temp_contract_overview
-LIMIT 500;''')
+LIMIT 50;''')
 
 conn.commit()
 
@@ -186,7 +186,8 @@ cur.execute('''DELETE FROM getodk_entities_upload_table_registrations WHERE row_
 conn.commit()
 
 cur.execute('''SELECT polygon, identifier FROM getodk_entities_upload_table_registrations
-WHERE polygon IS NOT NULL;''')
+WHERE polygon IS NOT NULL AND name_partner IS NOT NULL
+AND contract_number IS NOT NULL AND identifier IS NOT NULL;''')
 conn.commit()
 
 rows = cur.fetchall()
