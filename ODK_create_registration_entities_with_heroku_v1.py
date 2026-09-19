@@ -170,9 +170,9 @@ SELECT
 ROW_NUMBER()OVER(PARTITION BY label ORDER BY label) AS row_number, --Give duplicates a number higher than 1
 label,
 LOWER(organisation) AS name_partner,
-contract_number::text,
+--contract_number::text,
 identifier,
-polygon,
+--polygon,
 '' AS geometry
 
 FROM temp_contract_overview
