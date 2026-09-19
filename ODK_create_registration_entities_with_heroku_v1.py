@@ -170,13 +170,13 @@ SELECT
 ROW_NUMBER()OVER(PARTITION BY label ORDER BY label) AS row_number, --Give duplicates a number higher than 1
 label,
 LOWER(organisation) AS name_partner,
---contract_number::text,
+contract_number::text,
 identifier,
 polygon,
 '' AS geometry
 
 FROM temp_contract_overview
-LIMIT 1;''')
+LIMIT 500;''')
 
 conn.commit()
 
@@ -188,7 +188,7 @@ conn.commit()
 cur.execute('''SELECT polygon,
 identifier FROM getodk_entities_upload_table_registrations
 WHERE polygon IS NOT NULL AND name_partner IS NOT NULL
---AND contract_number IS NOT NULL
+AND contract_number IS NOT NULL
 AND identifier IS NOT NULL;''')
 conn.commit()
 
@@ -288,7 +288,7 @@ client = Client(config_path="/app/tmp/pyodk_config.ini", cache_path="/app/tmp/py
 
 client.open()
 
-client.entities.merge(entities_list, entity_list_name='test', project_id=1, match_keys=None, add_new_properties=True, update_matched=False, delete_not_matched=True, source_label_key='label', source_keys=None,create_source=None, source_size=None)
+client.entities.merge(entities_list, entity_list_name='registration_trees', project_id=1, match_keys=None, add_new_properties=True, update_matched=False, delete_not_matched=True, source_label_key='label', source_keys=None,create_source=None, source_size=None)
 
 client.close()
 
