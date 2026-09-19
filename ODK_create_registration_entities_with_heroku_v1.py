@@ -188,7 +188,8 @@ conn.commit()
 cur.execute('''SELECT polygon,
 identifier FROM getodk_entities_upload_table_registrations
 WHERE polygon IS NOT NULL AND name_partner IS NOT NULL
-AND contract_number IS NOT NULL AND identifier IS NOT NULL;''')
+--AND contract_number IS NOT NULL
+AND identifier IS NOT NULL;''')
 conn.commit()
 
 rows = cur.fetchall()
