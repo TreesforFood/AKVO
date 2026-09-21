@@ -40,7 +40,6 @@ cur = conn.cursor()
 
 # Drop the latests upload table
 cur.execute('''DROP TABLE IF EXISTS getodk_entities_upload_table_registrations;''')
-cur.execute('''DROP TABLE IF EXISTS getodk_entities_upload_table_all_registrations;''')
 conn.commit()
 
 #Create empty contract list to collect all activated contracts for monitoring
@@ -176,7 +175,7 @@ polygon,
 '' AS geometry
 
 FROM temp_contract_overview
-LIMIT 500;''')
+WHERE contract_number = 243.00 OR contract_number = 286.00;''')
 
 conn.commit()
 
