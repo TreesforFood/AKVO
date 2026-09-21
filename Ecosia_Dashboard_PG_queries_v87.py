@@ -9445,9 +9445,92 @@ CREATE POLICY ecosia_edit_policy ON kanop_chloris_uploads_spatial_overview
 conn.commit()
 
 
+create_a22_openforest_access = '''
+REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA public FROM openforest_access;
+
+GRANT USAGE ON SCHEMA PUBLIC TO openforest_access;
+GRANT USAGE ON SCHEMA HEROKU_EXT TO openforest_access;
+
+GRANT SELECT ON TABLE superset_ecosia_nursery_registration TO openforest_access;
+GRANT SELECT ON TABLE superset_ecosia_tree_registration TO openforest_access;
+GRANT SELECT ON TABLE superset_ecosia_tree_monitoring TO openforest_access;
+GRANT SELECT ON TABLE superset_ecosia_nursery_monitoring TO openforest_access;
+GRANT SELECT ON TABLE superset_ecosia_nursery_monitoring_species TO openforest_access;
+GRANT SELECT ON TABLE superset_ecosia_nursery_registration_photos TO openforest_access;
+GRANT SELECT ON TABLE superset_ecosia_nursery_monitoring_photos TO openforest_access;
+GRANT SELECT ON TABLE superset_ecosia_tree_registration_photos TO openforest_access;
+GRANT SELECT ON TABLE superset_ecosia_tree_registration_species TO openforest_access;
+GRANT SELECT ON TABLE superset_ecosia_geolocations TO openforest_access;
+GRANT SELECT ON TABLE superset_ecosia_tree_registration_light TO openforest_access;
+GRANT SELECT ON TABLE superset_ecosia_tree_monitoring_photos TO openforest_access;
+GRANT SELECT ON TABLE superset_ecosia_tree_distribution_unregistered_farmers TO openforest_access;
+GRANT SELECT ON TABLE superset_ecosia_contract_overview TO openforest_access;
+GRANT SELECT ON TABLE superset_ecosia_new_devices TO openforest_access;
+GRANT SELECT ON TABLE superset_ecosia_firms_historic_fires TO openforest_access;
+GRANT SELECT ON TABLE superset_ecosia_kanop_chloris_results TO openforest_access;
+
+DROP POLICY IF EXISTS openforest_access_policy ON superset_ecosia_nursery_registration;
+DROP POLICY IF EXISTS openforest_access_policy ON superset_ecosia_tree_registration;
+DROP POLICY IF EXISTS openforest_access_policy ON superset_ecosia_tree_monitoring;
+DROP POLICY IF EXISTS openforest_access_policy ON superset_ecosia_nursery_monitoring;
+DROP POLICY IF EXISTS openforest_access_policy ON superset_ecosia_nursery_monitoring_species;
+DROP POLICY IF EXISTS openforest_access_policy ON superset_ecosia_nursery_registration_photos;
+DROP POLICY IF EXISTS openforest_access_policy ON superset_ecosia_nursery_monitoring_photos;
+DROP POLICY IF EXISTS openforest_access_policy ON superset_ecosia_tree_registration_photos;
+DROP POLICY IF EXISTS openforest_access_policy ON superset_ecosia_tree_registration_species;
+DROP POLICY IF EXISTS openforest_access_policy ON superset_ecosia_geolocations;
+DROP POLICY IF EXISTS openforest_access_policy ON superset_ecosia_tree_registration_light;
+DROP POLICY IF EXISTS openforest_access_policy ON superset_ecosia_tree_monitoring_photos;
+DROP POLICY IF EXISTS openforest_access_policy ON superset_ecosia_tree_distribution_unregistered_farmers;
+DROP POLICY IF EXISTS openforest_access_policy ON superset_ecosia_contract_overview;
+DROP POLICY IF EXISTS openforest_access_policy ON superset_ecosia_new_devices;
+DROP POLICY IF EXISTS openforest_access_policy ON superset_ecosia_firms_historic_fires;
+DROP POLICY IF EXISTS openforest_access_policy ON superset_ecosia_kanop_chloris_results;
+
+
+ALTER TABLE superset_ecosia_nursery_registration enable ROW LEVEL SECURITY;
+ALTER TABLE superset_ecosia_tree_registration enable ROW LEVEL SECURITY;
+ALTER TABLE superset_ecosia_tree_monitoring enable ROW LEVEL SECURITY;
+ALTER TABLE superset_ecosia_nursery_monitoring enable ROW LEVEL SECURITY;
+ALTER TABLE superset_ecosia_nursery_monitoring_species enable ROW LEVEL SECURITY;
+ALTER TABLE superset_ecosia_nursery_registration_photos enable ROW LEVEL SECURITY;
+ALTER TABLE superset_ecosia_nursery_monitoring_photos enable ROW LEVEL SECURITY;
+ALTER TABLE superset_ecosia_tree_registration_photos enable ROW LEVEL SECURITY;
+ALTER TABLE superset_ecosia_tree_registration_species enable ROW LEVEL SECURITY;
+ALTER TABLE superset_ecosia_geolocations enable ROW LEVEL SECURITY;
+ALTER TABLE superset_ecosia_tree_registration_light enable ROW LEVEL SECURITY;
+ALTER TABLE superset_ecosia_tree_monitoring_photos enable ROW LEVEL SECURITY;
+ALTER TABLE superset_ecosia_tree_distribution_unregistered_farmers enable ROW LEVEL SECURITY;
+ALTER TABLE superset_ecosia_contract_overview enable ROW LEVEL SECURITY;
+ALTER TABLE superset_ecosia_new_devices enable ROW LEVEL SECURITY;
+ALTER TABLE superset_ecosia_firms_historic_fires enable ROW LEVEL SECURITY;
+ALTER TABLE superset_ecosia_kanop_chloris_results enable ROW LEVEL SECURITY;
+
+
+CREATE POLICY openforest_access_policy ON superset_ecosia_nursery_registration TO openforest_access USING (true);
+CREATE POLICY openforest_access_policy ON superset_ecosia_tree_registration TO openforest_access USING (true);
+CREATE POLICY openforest_access_policy ON superset_ecosia_tree_monitoring TO openforest_access USING (true);
+CREATE POLICY openforest_access_policy ON superset_ecosia_nursery_monitoring TO openforest_access USING (true);
+CREATE POLICY openforest_access_policy ON superset_ecosia_nursery_monitoring_species TO openforest_access USING (true);
+CREATE POLICY openforest_access_policy ON superset_ecosia_nursery_registration_photos TO openforest_access USING (true);
+CREATE POLICY openforest_access_policy ON superset_ecosia_nursery_monitoring_photos TO openforest_access USING (true);
+CREATE POLICY openforest_access_policy ON superset_ecosia_tree_registration_photos TO openforest_access USING (true);
+CREATE POLICY openforest_access_policy ON superset_ecosia_tree_registration_species TO openforest_access USING (true);
+CREATE POLICY openforest_access_policy ON superset_ecosia_geolocations TO openforest_access USING (true);
+CREATE POLICY openforest_access_policy ON superset_ecosia_tree_registration_light TO openforest_access USING (true);
+CREATE POLICY openforest_access_policy ON superset_ecosia_tree_monitoring_photos TO openforest_access USING (true);
+CREATE POLICY openforest_access_policy ON superset_ecosia_tree_distribution_unregistered_farmers TO openforest_access USING (true);
+CREATE POLICY openforest_access_policy ON superset_ecosia_contract_overview TO openforest_access USING (true);
+CREATE POLICY openforest_access_policy ON superset_ecosia_new_devices TO openforest_access USING (true);
+CREATE POLICY openforest_access_policy ON superset_ecosia_firms_historic_fires TO openforest_access USING (true);
+CREATE POLICY openforest_access_policy ON superset_ecosia_kanop_chloris_results TO openforest_access USING (true);'''
+
+conn.commit()
+
+
+
 # Execute drop tables
 cur.execute(drop_tables)
-
 conn.commit()
 
 
@@ -9520,6 +9603,7 @@ cur.execute(create_a50)
 
 cur.execute(create_a20_ecosia_superset) # This gives grand access to QGIS users. With this login (inside QGIS) they will only see the superset tables
 cur.execute(create_a21_ecosia_editing) # Used by the Preset dashboard. No grand limitation. As such it is de-activated
+cur.execute(create_a22_openforest_access)
 
 conn.commit()
 
