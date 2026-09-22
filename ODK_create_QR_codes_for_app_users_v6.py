@@ -165,7 +165,20 @@ for key, value in desired_users.items():
     list_user_name_airtable.append(value)
     # Truncate the username to get only the organisation name:
     list_user_organisation = value.split("_")
-    provisioned_users = client.projects.create_app_users(display_names=list_user_name_airtable, forms=FORMS_TO_ACCESS, project_id=PROJECT_ID, properties={"organisation": list_user_organisation})
+
+    #provisioned_users = client.projects.create_app_users(display_names=list_user_name_airtable, forms=FORMS_TO_ACCESS, project_id=PROJECT_ID)
+
+    response = client.post(
+            f"https://ecosia.getodk.cloud/projects/{project_id}/app-users",
+            json={
+                "displayName": list_user_name_airtable,
+                "properties": {
+                    "organisation": list_user_organisation
+                }
+            },
+        )
+        #print(response.json())
+
 
     ## Generate the QR codes.
     for user in provisioned_users:
