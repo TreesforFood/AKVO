@@ -70,7 +70,7 @@ with open(file_path, "w") as file:
 with Client(config_path="/app/tmp/pyodk_config.ini", cache_path="/app/tmp/pyodk_cache.ini"):
 
 
-    response_app_users = client.get(f"/projects/{PROJECT_ID}/app-users")
+    response_app_users = Client.get(f"/projects/{PROJECT_ID}/app-users")
 
     for app_user in response_app_users.json():
         print(app_user)
@@ -81,7 +81,7 @@ with Client(config_path="/app/tmp/pyodk_config.ini", cache_path="/app/tmp/pyodk_
         organisation = app_user['displayName']
 
         # Set the property value 'organisation' for the user:
-        respons_user_id = client.patch(
+        respons_user_id = Client.patch(
         f"/projects/{PROJECT_ID}/app-users/{app_user_id}",
         json={
             "properties": {
