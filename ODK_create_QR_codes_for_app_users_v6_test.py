@@ -54,26 +54,25 @@ PROJECT_NAME = 'ecosia'
 ADMIN_PASSWORD = "ecosia_change_settings"
 
 
-# # Define a writable path for GetODK (/app/tmp is a writable directory on Heroku)
-# file_path = "/app/tmp/pyodk_config.ini"
-#
-# # Create the GetODK directory if it doesn't exist
-# os.makedirs(os.path.dirname(file_path), exist_ok=True)
-#
-# # Write the GetODK configuration to the file
-# with open(file_path, "w") as file:
-#     file.write(file_content)
+# Define a writable path for GetODK (/app/tmp is a writable directory on Heroku)
+file_path = "/app/tmp/pyodk_config.ini"
+
+# Create the GetODK directory if it doesn't exist
+os.makedirs(os.path.dirname(file_path), exist_ok=True)
+
+# Write the GetODK configuration to the file
+with open(file_path, "w") as file:
+    file.write(file_content)
 
 
 # Set the property value to each app user for organisation so that it can be used as a filter for the entity list
 # First get the app user id:
-# client = Client(config_path="/app/tmp/pyodk_config.ini", cache_path="/app/tmp/pyodk_cache.ini")
-# client.open()
+with Client(config_path="/app/tmp/pyodk_config.ini", cache_path="/app/tmp/pyodk_cache.ini"):
 
-with Client() as client:
-    response_user = client.get(f"https://ecosia.getodk.cloud/projects/{PROJECT_ID}/app-users")
 
-    for app_user in response_user.json():
+    response_app_users = client.get(f"https://ecosia.getodk.cloud/projects/{PROJECT_ID}/app-users")
+
+    for app_user in response_app_users.json():
         print(app_user)
         app_user_id = app_user['id']
         print('app_user_id: ', app_user_id)
