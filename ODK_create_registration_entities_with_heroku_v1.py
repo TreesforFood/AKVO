@@ -175,7 +175,7 @@ polygon,
 '' AS geometry
 
 FROM temp_contract_overview
-WHERE contract_number = 243.00 OR contract_number = 286.00;''')
+LIMIT 10000;''')
 
 conn.commit()
 
