@@ -98,7 +98,7 @@ with Client(config_path="/app/tmp/pyodk_config.ini", cache_path="/app/tmp/pyodk_
             f"/projects/{PROJECT_ID}/app-users/{app_user_id}",
             json={
                 "properties": {
-                    "organisation": {organisation}
+                    "organisation": 'Progreso'
                 }
             },
         )
