@@ -169,7 +169,7 @@ for key, value in desired_users.items():
     #provisioned_users = client.projects.create_app_users(display_names=list_user_name_airtable, forms=FORMS_TO_ACCESS, project_id=PROJECT_ID)
 
     response = client.post(
-            f"https://ecosia.getodk.cloud/projects/{project_id}/app-users",
+            f"https://ecosia.getodk.cloud/projects/{default_project_id}/app-users",
             json={
                 "displayName": list_user_name_airtable,
                 "properties": {
