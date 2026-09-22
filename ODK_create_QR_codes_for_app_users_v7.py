@@ -215,48 +215,6 @@ for key, value in desired_users.items():
         #print(data)
 
 
-
-# base_url = "https://ecosia.getodk.cloud"
-# username = os.environ["ODK_CENTRAL_USERNAME"]
-# password = os.environ["ODK_CENTRAL_PASSWORD"]
-# default_project_id = 1
-
-
-# Construct the URL
-url = f"{base_url}/v1/projects/{default_project_id}/app-users"
-
-# Step 1: Get session token
-response = requests.post(
-    url, data=json.dumps({"email": username, "password": password}),
-    headers={"Content-Type": "application/json"},
-)
-token = response.json()["token"]
-
-
-# Step 2: List app users for a project
-app_users_response = requests.get(
-    central_url + "/v1/projects/" + str(project_id) + "/app-users",
-    headers={"Authorization": "Bearer " + token},
-)
-
-
-# Set up headers (if authentication is required)
-headers = {
-    "Authorization": f"Bearer {api_key}",
-    "Content-Type": "application/json"
-}
-
-# Make the GET request
-response = requests.get(url, headers=headers)
-
-# Check the response
-if response.status_code == 200:
-    app_users = response.json()  # Parse the JSON response
-    print("App Users:", app_users)
-else:
-    print(f"Error: {response.status_code} - {response.text}")
-
-
 # Below we populate the app_user property 'organisation'. This field is used as a filter for the entity list
 with Client(config_path="/app/tmp/pyodk_config.ini", cache_path="/app/tmp/pyodk_cache.ini") as client:
 
