@@ -70,7 +70,7 @@ with open(file_path, "w") as file:
 with Client(config_path="/app/tmp/pyodk_config.ini", cache_path="/app/tmp/pyodk_cache.ini"):
 
 
-    response_app_users = client.get(f"https://ecosia.getodk.cloud/projects/{PROJECT_ID}/app-users")
+    response_app_users = client.get(f"/projects/{PROJECT_ID}/app-users")
 
     for app_user in response_app_users.json():
         print(app_user)
@@ -82,7 +82,7 @@ with Client(config_path="/app/tmp/pyodk_config.ini", cache_path="/app/tmp/pyodk_
 
         # Set the property value 'organisation' for the user:
         respons_user_id = client.patch(
-        f"https://ecosia.getodk.cloud/projects/{PROJECT_ID}/app-users/{app_user_id}",
+        f"/projects/{PROJECT_ID}/app-users/{app_user_id}",
         json={
             "properties": {
                 "organisation": {organisation}}},)
