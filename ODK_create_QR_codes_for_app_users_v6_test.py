@@ -94,11 +94,12 @@ with Client(config_path="/app/tmp/pyodk_config.ini", cache_path="/app/tmp/pyodk_
         app_user_id = app_user['id']
         print('app_user_id: ', app_user_id)
         organisation = app_user['displayName']
+        organisation_clean = organisation.split('_')
         respons_user_id = client.patch(  # Use 'client', not 'Client'
             f"/projects/{PROJECT_ID}/app-users/{app_user_id}",
             json={
                 "properties": {
-                    "organisation": 'Progreso'
+                    "organisation": organisation_clean
                 }
             },
         )
