@@ -82,7 +82,7 @@ with Client(config_path="/app/tmp/pyodk_config.ini", cache_path="/app/tmp/pyodk_
 
         # Set the property value 'organisation' for the user:
         respons_user_id = client.patch(
-        f"/projects/{PROJECT_ID}/app-users/{app_user_id}",
+        f"https://ecosia.getodk.cloud/projects/{PROJECT_ID}/app-users/{app_user_id}",
         json={
             "properties": {
                 "organisation": {organisation}}},)
