@@ -67,23 +67,38 @@ with open(file_path, "w") as file:
 
 # Set the property value to each app user for organisation so that it can be used as a filter for the entity list
 # First get the app user id:
-with Client(config_path="/app/tmp/pyodk_config.ini", cache_path="/app/tmp/pyodk_cache.ini"):
+# with Client(config_path="/app/tmp/pyodk_config.ini", cache_path="/app/tmp/pyodk_cache.ini"):
+#
+#
+#     response_app_users = Client.get(f"/projects/{PROJECT_ID}/app-users")
+#
+#     for app_user in response_app_users.json():
+#         print(app_user)
+#         app_user_id = app_user['id']
+#         print('app_user_id: ', app_user_id)
+#
+#         # Get the organisation name from the username:
+#         organisation = app_user['displayName']
+#
+#         # Set the property value 'organisation' for the user:
+#         respons_user_id = Client.patch(
+#         f"/projects/{PROJECT_ID}/app-users/{app_user_id}",
+#         json={
+#             "properties": {
+#                 "organisation": {organisation}}},)
 
-
-    response_app_users = Client.get(f"/projects/{PROJECT_ID}/app-users")
-
+with Client(config_path="/app/tmp/pyodk_config.ini", cache_path="/app/tmp/pyodk_cache.ini") as client:  # Note: 'client' is the instance
+    response_app_users = client.get(f"/projects/{PROJECT_ID}/app-users")  # Use 'client', not 'Client'
     for app_user in response_app_users.json():
         print(app_user)
         app_user_id = app_user['id']
         print('app_user_id: ', app_user_id)
-
-        # Get the organisation name from the username:
         organisation = app_user['displayName']
-
-        # Set the property value 'organisation' for the user:
-        respons_user_id = Client.patch(
-        f"/projects/{PROJECT_ID}/app-users/{app_user_id}",
-        json={
-            "properties": {
-                "organisation": {organisation}}},)
-    #print(response.json())
+        respons_user_id = client.patch(  # Use 'client', not 'Client'
+            f"/projects/{PROJECT_ID}/app-users/{app_user_id}",
+            json={
+                "properties": {
+                    "organisation": {organisation}
+                }
+            },
+        )
