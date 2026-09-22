@@ -73,6 +73,7 @@ client.open()
 response_user = client.get(f"/projects/{PROJECT_ID}/app-users")
 
 for app_user in response_user.json():
+    print(app_user)
     app_user_id = app_user['id']
     print('app_user_id: ', app_user_id)
 
