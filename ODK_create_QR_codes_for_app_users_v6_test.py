@@ -78,7 +78,7 @@ for app_user in response_user.json():
     print('app_user_id: ', app_user_id)
 
     # Get the organisation name from the username:
-    organisation = app_user['Display Name']
+    organisation = app_user['displayName']
 
     # Set the property value 'organisation' for the user:
     respons_user_id = client.patch(
