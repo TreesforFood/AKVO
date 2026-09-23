@@ -42,7 +42,7 @@ cur = conn.cursor()
 cur.execute('''DROP TABLE IF EXISTS getodk_entities_upload_table_registrations;''')
 conn.commit()
 
-Create empty contract list to collect all activated contracts for monitoring
+#Create empty contract list to collect all activated contracts for monitoring
 list_contracts = []
 list_identifiers = []
 
