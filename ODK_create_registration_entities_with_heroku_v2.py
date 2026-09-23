@@ -197,7 +197,7 @@ CASE
        AND centroid_coord IS NOT NULL AND ST_IsValid(centroid_coord::geometry) AND NOT ST_IsEmpty(centroid_coord::geometry)
   THEN ST_AsText(centroid_coord)
   ELSE NULL
-END AS new_polygon,
+END AS polygon,
 
 identifier_akvo AS ecosia_site_id,
 
@@ -245,7 +245,7 @@ geometry_point,
 odk_entity_geometry,
 contract_number,
 identifier_akvo,
-new_polygon,
+polygon,
 ecosia_site_id,
 CAST(area_ha AS TEXT) AS area_ha,
 tree_number,
