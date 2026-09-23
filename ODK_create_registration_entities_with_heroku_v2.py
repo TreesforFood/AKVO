@@ -181,7 +181,7 @@ CASE
 
 
 contract_number::varchar(10),
-'' AS identifier_akvo,
+'' AS identifier,
 
 CASE -- Fields can not be empty when uploaded to the entity list of ODK. If so, ODK gives a 'no string' error
 WHEN submission NOTNULL
@@ -244,7 +244,7 @@ geometry,
 geometry_point,
 odk_entity_geometry,
 contract_number,
-identifier_akvo,
+identifier,
 polygon,
 ecosia_site_id,
 CAST(area_ha AS TEXT) AS area_ha,
