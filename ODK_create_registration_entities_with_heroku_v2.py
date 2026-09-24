@@ -236,7 +236,7 @@ SELECT
 ROW_NUMBER()OVER(PARTITION BY label ORDER BY label) AS row_number, --Give duplicates a number higher than 1
 label,
 LOWER(country) AS country,
-LOWER(organisation) AS organisation,
+LOWER(organisation) AS name_partner,
 id_planting_site,
 name_id_planting_site,
 location_area,
