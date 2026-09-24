@@ -162,12 +162,8 @@ WHEN name_owner ISNULL
 THEN CONCAT(id_planting_site, ' | owner unknown')
 END AS name_id_planting_site,
 
-'' AS location_area,
 '' AS geometry,
-'' AS geometry_point,
-'' AS odk_entity_geometry,
 
--- CONCAT(SUBSTRING(contract_number::varchar(10) FROM 1 FOR POSITION('.' IN contract_number::varchar(10)) - 1),'.00') AS contract_number_match_airtable,
 
 CONCAT(
 CASE
@@ -179,9 +175,7 @@ CASE
   '.00'
 ) AS contract_number_match_airtable,
 
-
 contract_number::varchar(10),
-'' AS identifier,
 
 CASE -- Fields can not be empty when uploaded to the entity list of ODK. If so, ODK gives a 'no string' error
 WHEN submission NOTNULL
@@ -200,6 +194,8 @@ CASE
 END AS polygon,
 
 identifier_akvo AS ecosia_site_id,
+
+'' AS monitor_check,
 
 CASE -- Fields can not be empty when uploaded to the entity list of ODK. If so, ODK gives a 'no string' error
 WHEN calc_area > 0
@@ -244,9 +240,9 @@ geometry,
 geometry_point,
 odk_entity_geometry,
 contract_number,
-identifier,
 polygon,
 ecosia_site_id,
+monitor_check,
 CAST(area_ha AS TEXT) AS area_ha,
 tree_number,
 user_name_enumerator,
@@ -264,12 +260,18 @@ conn.commit()
 cur.execute('''DELETE FROM getodk_entities_upload_table_registrations WHERE row_number > 1;''')
 conn.commit()
 
+cur.execute('''UPDATE getodk_entities_upload_table_registrations
+SET monitor_check = '1'
+WHERE ecosia_site_id IN %s OR ecosia_site_id IN %s;''', (tuple_contracts, tuple_identifiers);''')
+conn.commit()
+
 cur.execute('''SELECT polygon,
 identifier FROM getodk_entities_upload_table_registrations
 WHERE polygon IS NOT NULL AND name_partner IS NOT NULL
 AND contract_number IS NOT NULL
 AND identifier IS NOT NULL;''')
 conn.commit()
+
 
 rows = cur.fetchall()
 
