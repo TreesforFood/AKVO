@@ -137,7 +137,7 @@ cur.execute(
 
 WITH temp_contract_overview AS (
 
-SELECT DISTINCT(CONCAT('Organisation: ', LOWER(organisation), ' | Contract number: ', contract_number, ' | Site ID: ', REGEXP_REPLACE(id_planting_site, '[^a-zA-Z0-9 ]', '', 'g'), ' | Name owner: ', name_owner , ' | Ecosia site id: ', identifier_akvo)) AS label,
+SELECT DISTINCT(CONCAT('Organisation: ', LOWER(organisation), ' | Contract number: ', contract_number, ' | Site ID: ', REGEXP_REPLACE(id_planting_site, '[^a-zA-Z0-9 ]', '', 'g'), ' | Name owner: ', name_owner , ' | Ecosia site id: ', ecosia_site_id)) AS label,
 
 CASE -- Fields can not be empty when uploaded to the entity list of ODK. If so, ODK gives a 'no string' error
 WHEN country NOTNULL
@@ -263,10 +263,10 @@ WHERE ecosia_site_id IN %s OR ecosia_site_id IN %s;''', (tuple_contracts, tuple_
 conn.commit()
 
 cur.execute('''SELECT polygon,
-identifier FROM getodk_entities_upload_table_registrations
+ecosia_site_id FROM getodk_entities_upload_table_registrations
 WHERE polygon IS NOT NULL AND name_partner IS NOT NULL
 AND contract_number IS NOT NULL
-AND identifier IS NOT NULL;''')
+AND ecosia_site_id IS NOT NULL;''')
 conn.commit()
 
 
@@ -304,7 +304,7 @@ for key,value in dict.items():
     print(key,value)
     cur.execute('''UPDATE getodk_entities_upload_table_registrations
     SET geometry = %s
-    WHERE identifier = %s''', (value,key))
+    WHERE ecosia_site_id = %s''', (value,key))
     conn.commit()
 
 
