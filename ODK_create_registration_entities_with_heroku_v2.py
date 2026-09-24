@@ -262,7 +262,7 @@ conn.commit()
 
 cur.execute('''UPDATE getodk_entities_upload_table_registrations
 SET monitor_check = '1'
-WHERE ecosia_site_id IN %s OR ecosia_site_id IN %s;''', (tuple_contracts, tuple_identifiers);''')
+WHERE ecosia_site_id IN %s OR ecosia_site_id IN %s;''', (tuple_contracts, tuple_identifiers))
 conn.commit()
 
 cur.execute('''SELECT polygon,
