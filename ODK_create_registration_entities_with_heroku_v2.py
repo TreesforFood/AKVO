@@ -343,7 +343,7 @@ SET row_number = row_number::text;''')
 conn.commit()
 
 # Select all rows and fetch them all
-cur.execute('''SELECT * FROM getodk_entities_upload_table_registrations''')
+cur.execute('''SELECT * FROM getodk_entities_upload_table_registrations;''')
 conn.commit()
 
 rows_dict = cur.fetchall()
