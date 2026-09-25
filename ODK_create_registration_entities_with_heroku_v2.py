@@ -257,11 +257,6 @@ conn.commit()
 cur.execute('''DELETE FROM getodk_entities_upload_table_registrations WHERE row_number > 1;''')
 conn.commit()
 
-cur.execute('''UPDATE getodk_entities_upload_table_registrations
-SET monitor_check = '1'
-WHERE ecosia_site_id IN %s OR ecosia_site_id IN %s;''', (tuple_contracts, tuple_identifiers))
-conn.commit()
-
 cur.execute('''SELECT polygon,
 ecosia_site_id FROM getodk_entities_upload_table_registrations
 WHERE polygon IS NOT NULL AND name_partner IS NOT NULL
@@ -339,6 +334,12 @@ cur.execute('''UPDATE getodk_entities_upload_table_registrations
 SET row_number = row_number::text;''')
 conn.commit()
 
+# Set instances to monitoring by giving them a '1' value. This is the filter for ODK Collect to monitor specific sites
+cur.execute('''UPDATE getodk_entities_upload_table_registrations
+SET monitor_check = '1'
+WHERE ecosia_site_id IN %s OR ecosia_site_id IN %s;''', (tuple_contracts, tuple_identifiers))
+conn.commit()
+
 # Select all rows and fetch them all
 cur.execute('''SELECT * FROM getodk_entities_upload_table_registrations;''')
 conn.commit()
@@ -366,7 +367,7 @@ client = Client(config_path="/app/tmp/pyodk_config.ini", cache_path="/app/tmp/py
 
 client.open()
 
-client.entities.merge(entities_list, entity_list_name='registration_trees', project_id=1, match_keys='ecosia_site_id', add_new_properties=True, update_matched=True, delete_not_matched=True, source_label_key='label', source_keys=None,create_source=None, source_size=None)
+client.entities.merge(entities_list, entity_list_name='registration_trees', project_id=1, match_keys='ecosia_site_id', add_new_properties=True, update_matched=False, delete_not_matched=True, source_label_key='label', source_keys=None,create_source=None, source_size=None)
 
 client.close()
 
