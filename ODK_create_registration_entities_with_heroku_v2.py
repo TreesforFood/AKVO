@@ -320,7 +320,7 @@ cur.execute('''UPDATE getodk_entities_upload_table_registrations
 SET row_number = row_number::bigint;''')
 conn.commit()
 
-# cur.execute('''ALTER TABLE getodk_entities_upload_table_registrations ALTER COLUMN row_number TYPE text USING row_number::text;''')
+cur.execute('''ALTER TABLE getodk_entities_upload_table_registrations ALTER COLUMN row_number TYPE text USING row_number::text;''')
 
 # Set the new_polygon column to string (text) where there is no polygon (NULL values)
 cur.execute('''UPDATE getodk_entities_upload_table_registrations
