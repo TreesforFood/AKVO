@@ -248,7 +248,7 @@ planting_date,
 landscape_element
 
 FROM temp_contract_overview
-LIMIT 500;''')
+LIMIT 1000;''')
 
 conn.commit()
 
@@ -283,7 +283,7 @@ id = [row[1]for row in rows]
 geometries = [wkt.loads(row[0]) for row in rows]
 for lon_lat_coords in geometries:
     lat_lon_coords.append(transform(flip, lon_lat_coords).wkt)
-
+    print('lat_lon_coords: ', lat_lon_coords)
 
 # Linking the polygons to their identifier
 for key in id:
@@ -296,7 +296,7 @@ for key in id:
 
 # Update the table with reverse coordinates
 for key,value in dict.items():
-    print(key,value)
+    print('EENS ZIEN WAT DIT IS:', key,value)
     cur.execute('''UPDATE getodk_entities_upload_table_registrations
     SET geometry = %s
     WHERE ecosia_site_id = %s''', (value,key))
@@ -320,7 +320,7 @@ cur.execute('''UPDATE getodk_entities_upload_table_registrations
 SET row_number = row_number::bigint;''')
 conn.commit()
 
-cur.execute('''ALTER TABLE getodk_entities_upload_table_registrations ALTER COLUMN row_number TYPE text USING row_number::text;''')
+# cur.execute('''ALTER TABLE getodk_entities_upload_table_registrations ALTER COLUMN row_number TYPE text USING row_number::text;''')
 
 # Set the new_polygon column to string (text) where there is no polygon (NULL values)
 cur.execute('''UPDATE getodk_entities_upload_table_registrations
