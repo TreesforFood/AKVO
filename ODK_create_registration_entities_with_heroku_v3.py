@@ -275,7 +275,7 @@ AND ecosia_site_id IS NOT NULL;''')
 conn.commit()
 
 
-for row in fetchsome(cursor, number_rows_batch=500):
+for row in fetchsome(cur, number_rows_batch=500):
     process(row)
     print(row)
 
