@@ -290,10 +290,11 @@ while True:
     print(f"Processing batch starting at offset {offset} with {len(rows)} rows...")
 
     # Initialize variables for this batch
-    id = [row for row in rows]
-    geometries = [wkt.loads(row) for row in rows]
+    id = [row[1]for row in rows]
+    geometries = [wkt.loads(row[0]) for row in rows]
     lat_lon_coords = []
     dict = {}
+
 
     # Create a dictionary and appending the polygons to this dictionary
     for lon_lat_coords in geometries:
@@ -315,6 +316,7 @@ while True:
         ''', (value, key))
 
     conn.commit()
+
     print(f"Batch at offset {offset} processed.")
 
     # Increment offset for the next batch
