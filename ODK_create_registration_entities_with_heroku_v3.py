@@ -130,210 +130,208 @@ for contracts in tuple_contracts:
     print(count_contracts, contracts)
 
 
-# Function to process a database in batches
-def fetchsome(cursor, number_rows_batch):
-    fetch = cursor.fetchmany
-    while True:
-        rows = fetch(number_rows_batch)
-        if not rows: break
-        for row in rows:
-            yield row
+# Helper function to fetch a batch of rows
+def fetchsome(cur, number_rows_batch=500):
+    """
+    Fetches a batch of rows from the cursor.
+    Assumes the cursor has a `fetchmany` method.
+    """
+    return cur.fetchmany(number_rows_batch)
 
-
-# Select entities to upload to GetODK. Note that the label column of the ODK entities table does not accept strange characters. So these are removed in this sql
-# Also duplicate labels should be avoided!
+# 1. Create the table with the full dataset (no LIMIT)
 cur.execute(
-'''CREATE TABLE getodk_entities_upload_table_registrations AS
+    '''CREATE TABLE getodk_entities_upload_table_registrations AS
 
-WITH temp_contract_overview AS (
+    WITH temp_contract_overview AS (
 
-SELECT DISTINCT(CONCAT('Organisation: ', LOWER(organisation), ' | Contract number: ', contract_number, ' | Site ID: ', REGEXP_REPLACE(id_planting_site, '[^a-zA-Z0-9 ]', '', 'g'), ' | Name owner: ', name_owner , ' | Ecosia site id: ', identifier_akvo)) AS label,
+    SELECT DISTINCT(CONCAT('Organisation: ', LOWER(organisation), ' | Contract number: ', contract_number, ' | Site ID: ', REGEXP_REPLACE(id_planting_site, '[^a-zA-Z0-9 ]', '', 'g'), ' | Name owner: ', name_owner , ' | Ecosia site id: ', identifier_akvo)) AS label,
 
-CASE -- Fields can not be empty when uploaded to the entity list of ODK. If so, ODK gives a 'no string' error
-WHEN country NOTNULL
-THEN country
-ELSE 'Country unknown'
-END AS country,
+    CASE -- Fields can not be empty when uploaded to the entity list of ODK. If so, ODK gives a 'no string' error
+    WHEN country NOTNULL
+    THEN country
+    ELSE 'Country unknown'
+    END AS country,
 
-CASE -- Fields can not be empty when uploaded to the entity list of ODK. If so, ODK gives a 'no string' error
-WHEN organisation NOTNULL
-THEN organisation
-ELSE 'organisation_unknown'
-END AS organisation,
+    CASE -- Fields can not be empty when uploaded to the entity list of ODK. If so, ODK gives a 'no string' error
+    WHEN organisation NOTNULL
+    THEN organisation
+    ELSE 'organisation_unknown'
+    END AS organisation,
 
-id_planting_site,
+    id_planting_site,
 
-CASE -- Fields can not be empty when uploaded to the entity list of ODK. If so, ODK gives a 'no string' error
-WHEN name_owner NOTNULL
-THEN CONCAT(id_planting_site, ' | ', name_owner)
-WHEN name_owner = ''
-THEN CONCAT(id_planting_site, ' | owner unknown')
-WHEN name_owner ISNULL
-THEN CONCAT(id_planting_site, ' | owner unknown')
-END AS name_id_planting_site,
+    CASE -- Fields can not be empty when uploaded to the entity list of ODK. If so, ODK gives a 'no string' error
+    WHEN name_owner NOTNULL
+    THEN CONCAT(id_planting_site, ' | ', name_owner)
+    WHEN name_owner = ''
+    THEN CONCAT(id_planting_site, ' | owner unknown')
+    WHEN name_owner ISNULL
+    THEN CONCAT(id_planting_site, ' | owner unknown')
+    END AS name_id_planting_site,
 
-'' AS geometry,
+    '' AS geometry,
+
+    CONCAT(
+    CASE
+        WHEN POSITION('.' IN contract_number::varchar(10)) > 0 THEN
+        SUBSTRING(contract_number::varchar(10) FROM 1 FOR POSITION('.' IN contract_number::varchar(10)) - 1)
+        ELSE
+        contract_number::varchar(10)
+    END,
+    '.00'
+    ) AS contract_number_match_airtable,
+
+    contract_number::varchar(10),
+
+    CASE -- Fields can not be empty when uploaded to the entity list of ODK. If so, ODK gives a 'no string' error
+    WHEN submission NOTNULL
+    THEN TO_CHAR(submission, 'YYYY-MM-DD')
+    ELSE 'Submission date unknown'
+    END AS submission,
 
 
-CONCAT(
-CASE
-    WHEN POSITION('.' IN contract_number::varchar(10)) > 0 THEN
-      SUBSTRING(contract_number::varchar(10) FROM 1 FOR POSITION('.' IN contract_number::varchar(10)) - 1)
-    ELSE
-      contract_number::varchar(10)
-  END,
-  '.00'
-) AS contract_number_match_airtable,
+    CASE
+    WHEN polygon IS NOT NULL AND NOT ST_IsEmpty(polygon::geometry)
+    THEN ST_AsText(polygon)
+    WHEN (polygon IS NULL OR ST_IsEmpty(polygon::geometry))
+    AND centroid_coord IS NOT NULL AND ST_IsValid(centroid_coord::geometry) AND NOT ST_IsEmpty(centroid_coord::geometry)
+    THEN ST_AsText(centroid_coord)
+    ELSE NULL
+    END AS polygon,
 
-contract_number::varchar(10),
+    identifier_akvo AS ecosia_site_id,
 
-CASE -- Fields can not be empty when uploaded to the entity list of ODK. If so, ODK gives a 'no string' error
-WHEN submission NOTNULL
-THEN TO_CHAR(submission, 'YYYY-MM-DD')
-ELSE 'Submission date unknown'
-END AS submission,
+    '' AS monitor_check,
 
+    CASE -- Fields can not be empty when uploaded to the entity list of ODK. If so, ODK gives a 'no string' error
+    WHEN calc_area > 0
+    THEN calc_area
+    ELSE '0'
+    END AS area_ha,
 
-CASE
-  WHEN polygon IS NOT NULL AND NOT ST_IsEmpty(polygon::geometry)
-  THEN ST_AsText(polygon)
-  WHEN (polygon IS NULL OR ST_IsEmpty(polygon::geometry))
-       AND centroid_coord IS NOT NULL AND ST_IsValid(centroid_coord::geometry) AND NOT ST_IsEmpty(centroid_coord::geometry)
-  THEN ST_AsText(centroid_coord)
-  ELSE NULL
-END AS polygon,
+    CASE -- Fields can not be empty when uploaded to the entity list of ODK. If so, ODK gives a 'no string' error
+    WHEN planting_date NOTNULL
+    THEN planting_date
+    ELSE 'planting date unknown'
+    END AS planting_date,
 
-identifier_akvo AS ecosia_site_id,
+    'planting_site' AS landscape_element,
 
-'' AS monitor_check,
+    CASE -- Fields can not be empty when uploaded to the entity list of ODK. If so, ODK gives a 'no string' error
+    WHEN tree_number NOTNULL
+    THEN CAST(tree_number AS text)
+    WHEN tree_number ISNULL
+    THEN CAST(0 AS text)
+    END AS tree_number,
 
-CASE -- Fields can not be empty when uploaded to the entity list of ODK. If so, ODK gives a 'no string' error
-WHEN calc_area > 0
-THEN calc_area
-ELSE '0'
-END AS area_ha,
+    CASE -- Fields can not be empty when uploaded to the entity list of ODK. If so, ODK gives a 'no string' error
+    WHEN submitter NOTNULL
+    THEN submitter
+    ELSE 'submitter unknown'
+    END AS user_name_enumerator
 
-CASE -- Fields can not be empty when uploaded to the entity list of ODK. If so, ODK gives a 'no string' error
-WHEN planting_date NOTNULL
-THEN planting_date
-ELSE 'planting date unknown'
-END AS planting_date,
+    FROM akvo_tree_registration_areas_updated
+    WHERE test = 'This is real, valid data'
+    OR test = '')
 
-'planting_site' AS landscape_element,
+    SELECT
+    ROW_NUMBER()OVER(PARTITION BY label ORDER BY label) AS row_number, --Give duplicates a number higher than 1
+    label,
+    LOWER(country) AS country,
+    LOWER(organisation) AS name_partner,
+    id_planting_site,
+    name_id_planting_site,
+    geometry,
+    contract_number,
+    polygon,
+    ecosia_site_id,
+    monitor_check,
+    CAST(area_ha AS TEXT) AS area_ha,
+    tree_number,
+    user_name_enumerator,
+    submission AS site_registration_date,
+    planting_date,
+    landscape_element
 
-CASE -- Fields can not be empty when uploaded to the entity list of ODK. If so, ODK gives a 'no string' error
-WHEN tree_number NOTNULL
-THEN CAST(tree_number AS text)
-WHEN tree_number ISNULL
-THEN CAST(0 AS text)
-END AS tree_number,
-
-CASE -- Fields can not be empty when uploaded to the entity list of ODK. If so, ODK gives a 'no string' error
-WHEN submitter NOTNULL
-THEN submitter
-ELSE 'submitter unknown'
-END AS user_name_enumerator
-
-FROM akvo_tree_registration_areas_updated
-WHERE test = 'This is real, valid data'
-OR test = '')
-
-SELECT
-ROW_NUMBER()OVER(PARTITION BY label ORDER BY label) AS row_number, --Give duplicates a number higher than 1
-label,
-LOWER(country) AS country,
-LOWER(organisation) AS name_partner,
-id_planting_site,
-name_id_planting_site,
-geometry,
-contract_number,
-polygon,
-ecosia_site_id,
-monitor_check,
-CAST(area_ha AS TEXT) AS area_ha,
-tree_number,
-user_name_enumerator,
-submission AS site_registration_date,
-planting_date,
-landscape_element
-
-FROM temp_contract_overview
-LIMIT 1000;''')
-
+    FROM temp_contract_overview;''') # Removed LIMIT 1000
 conn.commit()
 
-
-# Remove the duplicate labels
+# 2. Remove the duplicate labels
 cur.execute('''DELETE FROM getodk_entities_upload_table_registrations WHERE row_number > 1;''')
 conn.commit()
 
-cur.execute('''SELECT polygon,
-ecosia_site_id FROM getodk_entities_upload_table_registrations
-WHERE polygon IS NOT NULL AND name_partner IS NOT NULL
-AND contract_number IS NOT NULL
-AND ecosia_site_id IS NOT NULL;''')
+# 3. Define the flip function
+def flip(x, y):
+    """Flips the x and y coordinate values"""
+    return y, x
+
+# 4. Process in batches of 1000 rows
+batch_size = 1000
+offset = 0
+
+while True:
+    # Fetch a batch of rows
+    cur.execute('''
+        SELECT polygon, ecosia_site_id
+        FROM getodk_entities_upload_table_registrations
+        WHERE polygon IS NOT NULL
+        AND name_partner IS NOT NULL
+        AND contract_number IS NOT NULL
+        AND ecosia_site_id IS NOT NULL
+        LIMIT %s OFFSET %s
+    ''', (batch_size, offset))
+
+    rows = cur.fetchall()
+
+    # If no more rows, break the loop
+    if not rows:
+        break
+
+    print(f"Processing batch starting at offset {offset} with {len(rows)} rows...")
+
+    # Initialize variables for this batch
+    id = [row for row in rows]
+    geometries = [wkt.loads(row) for row in rows]
+    lat_lon_coords = []
+    dict = {}
+
+    # Create a dictionary and appending the polygons to this dictionary
+    for lon_lat_coords in geometries:
+        lat_lon_coords.append(transform(flip, lon_lat_coords).wkt)
+
+    # Linking the polygons to their identifier
+    for key in id:
+        for value in lat_lon_coords:
+            dict[key] = value
+            lat_lon_coords.remove(value)
+            break
+
+    # Update the table with reverse coordinates
+    for key, value in dict.items():
+        cur.execute('''
+            UPDATE getodk_entities_upload_table_registrations
+            SET geometry = %s
+            WHERE ecosia_site_id = %s
+        ''', (value, key))
+
+    conn.commit()
+    print(f"Batch at offset {offset} processed.")
+
+    # Increment offset for the next batch
+    offset += batch_size
+
+
+# Remove the WKT format ('POLYGON(( etc))')
+cur.execute('''UPDATE getodk_entities_upload_table_registrations
+SET geometry = REPLACE(RTRIM(LTRIM(geometry,'POLYGON (('),'))'),',',';')::varchar(50000)
+WHERE geometry LIKE 'POLYGON%';''')
 conn.commit()
 
-
-for row in fetchsome(cur, number_rows_batch=500):
-    print(row)
-
-
-# def upload_batch(api_url, batch, headers=None, timeout=30):
-#     """Upload a batch of rows to an API endpoint."""
-#     headers = headers or {"Content-Type": "application/json"}
-#     response = requests.post(api_url, json=batch, headers=headers, timeout=timeout)
-#     response.raise_for_status()
-#     return response.status_code
-
-
-
-# # Reverse the x and y coordinates
-# def flip(x, y):
-#     """Flips the x and y coordinate values"""
-#     return y, x
-#
-# dict = {}
-# lat_lon_coords = []
-#
-#
-# # Create a dictionary and appending the polygons to this dictionary
-# id = [row[1]for row in rows]
-#
-# geometries = [wkt.loads(row[0]) for row in rows]
-# for lon_lat_coords in geometries:
-#     lat_lon_coords.append(transform(flip, lon_lat_coords).wkt)
-#     print('lat_lon_coords: ', lat_lon_coords)
-#
-# # Linking the polygons to their identifier
-# for key in id:
-#     for value in lat_lon_coords:
-#         #print('v:', value)
-#         dict[key] = value
-#         lat_lon_coords.remove(value)
-#         break
-#
-#
-# # Update the table with reverse coordinates
-# for key,value in dict.items():
-#     print('EENS ZIEN WAT DIT IS:', key,value)
-#     cur.execute('''UPDATE getodk_entities_upload_table_registrations
-#     SET geometry = %s
-#     WHERE ecosia_site_id = %s''', (value,key))
-#     conn.commit()
-#
-#
-# # Remove the WKT format ('POLYGON(( etc))')
-# cur.execute('''UPDATE getodk_entities_upload_table_registrations
-# SET geometry = REPLACE(RTRIM(LTRIM(geometry,'POLYGON (('),'))'),',',';')::varchar(50000)
-# WHERE geometry LIKE 'POLYGON%';''')
-# conn.commit()
-#
-# # Remove the WKT format ('POINT(( etc))')
-# cur.execute('''UPDATE getodk_entities_upload_table_registrations
-# SET geometry = REPLACE(RTRIM(LTRIM(geometry,'POINT (('),'))'),',',';')::varchar(50000)
-# WHERE geometry LIKE 'POINT%';''')
-# conn.commit()
+# Remove the WKT format ('POINT(( etc))')
+cur.execute('''UPDATE getodk_entities_upload_table_registrations
+SET geometry = REPLACE(RTRIM(LTRIM(geometry,'POINT (('),'))'),',',';')::varchar(50000)
+WHERE geometry LIKE 'POINT%';''')
+conn.commit()
 #
 # # We need to set the column RN to text type because this is the only data type alowed by ODK entities. However, before we can change to text we first need to define it as bigint
 # cur.execute('''UPDATE getodk_entities_upload_table_registrations
