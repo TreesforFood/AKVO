@@ -44,17 +44,14 @@ cur = conn.cursor()
 batch_size = 1000
 
 while True:
-    cur.execute('''
-        WITH to_update AS (SELECT ctid
-        FROM getodk_entities_upload_table_registrations
-        WHERE geometry LIKE 'POLYGON%'
-        LIMIT %s)
+    cur.execute('''WITH to_update AS (SELECT ctid FROM getodk_entities_upload_table_registrations
+    WHERE geometry LIKE 'POLYGON%'
+    LIMIT %s)
 
-        UPDATE getodk_entities_upload_table_registrations AS t
-        SET geometry = REPLACE(RTRIM(LTRIM(geometry,'POLYGON (('),'))'),',',';')::varchar(50000)
-        WHERE geometry LIKE 'POLYGON%'
-        FROM to_update AS u
-        WHERE t.ctid = u.ctid''', (batch_size,))
+    UPDATE getodk_entities_upload_table_registrations AS t
+    SET geometry = REPLACE(RTRIM(LTRIM(geometry,'POLYGON (('),'))'),',',';')::varchar(50000)
+    FROM to_update AS u
+    WHERE t.ctid = u.ctid''', (batch_size,))
 
     if cur.rowcount == 0:
         break
