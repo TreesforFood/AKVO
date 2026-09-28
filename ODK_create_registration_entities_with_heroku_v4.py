@@ -333,14 +333,12 @@ while True:
         UPDATE getodk_entities_upload_table_registrations
         SET geometry = REPLACE(RTRIM(LTRIM(geometry,'POLYGON (('),'))'),',',';')::varchar(50000)
         WHERE geometry LIKE 'POLYGON%'
-            LIMIT %s
-        )
-    ''', (batch_size,))
+            LIMIT %s)''', (batch_size,))
 
     if cur.rowcount == 0:
         break
 
-    connection.commit()  # commit after each batch
+    conn.commit()  # commit after each batch
 
     # # Remove the WKT format ('POINT(( etc))')
     # cur.execute('''UPDATE getodk_entities_upload_table_registrations
