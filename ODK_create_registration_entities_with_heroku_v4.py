@@ -333,7 +333,7 @@ while True:
         UPDATE getodk_entities_upload_table_registrations
         SET geometry = REPLACE(RTRIM(LTRIM(geometry,'POLYGON (('),'))'),',',';')::varchar(50000)
         WHERE geometry LIKE 'POLYGON%'
-            LIMIT %s)''', (batch_size,))
+            LIMIT %s''', (batch_size,))
 
     if cur.rowcount == 0:
         break
