@@ -27,9 +27,7 @@ default_project_id = {default_project_id}
 conn = psycopg2.connect(os.environ["DATABASE_URL"], sslmode='require')
 cur = conn.cursor()
 
-
-# 5. Process in batches of 1000 rows
-batch_size = 1000
+batch_size = 100
 
 while True:
     cur.execute('''WITH to_update AS (SELECT ecosia_site_id FROM getodk_entities_upload_table_registrations
@@ -39,7 +37,7 @@ while True:
     UPDATE getodk_entities_upload_table_registrations AS t
     SET geometry = REPLACE(RTRIM(LTRIM(geometry,'POLYGON (('),'))'),',',';')::varchar(50000)
     FROM to_update AS u
-    WHERE t.ecosia_site_id = u.ecosia_site_id''', (batch_size,))
+    WHERE t.ecosia_site_id = u.ecosia_site_id;''', (batch_size,))
 
     if cur.rowcount == 0:
         break
