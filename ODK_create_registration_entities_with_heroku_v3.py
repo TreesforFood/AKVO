@@ -335,61 +335,61 @@ SET geometry = REPLACE(RTRIM(LTRIM(geometry,'POINT (('),'))'),',',';')::varchar(
 WHERE geometry LIKE 'POINT%';''')
 conn.commit()
 #
-# # We need to set the column RN to text type because this is the only data type alowed by ODK entities. However, before we can change to text we first need to define it as bigint
-# cur.execute('''UPDATE getodk_entities_upload_table_registrations
-# SET row_number = row_number::bigint;''')
-# conn.commit()
-#
-# cur.execute('''ALTER TABLE getodk_entities_upload_table_registrations ALTER COLUMN row_number TYPE text USING row_number::text;''')
-#
-# # Set the new_polygon column to string (text) where there is no polygon (NULL values)
-# cur.execute('''UPDATE getodk_entities_upload_table_registrations
-# SET geometry = ''
-# WHERE geometry IS NULL
-# OR geometry = '';''')
-# conn.commit()
-#
-# # Set the RN column to string because that is the only type allowed by ODK entitities
-# cur.execute('''UPDATE getodk_entities_upload_table_registrations
-# SET row_number = row_number::text;''')
-# conn.commit()
-#
-# # Set instances to monitoring by giving them a '1' value. This is the filter for ODK Collect to monitor specific sites
-# cur.execute('''UPDATE getodk_entities_upload_table_registrations
-# SET monitor_check = '1'
-# WHERE ecosia_site_id IN %s OR ecosia_site_id IN %s;''', (tuple_contracts, tuple_identifiers))
-# conn.commit()
-#
-# # Select all rows and fetch them all
-# cur.execute('''SELECT * FROM getodk_entities_upload_table_registrations;''')
-# conn.commit()
-#
-# rows_dict = cur.fetchall()
-#
-#
-# # Convert the postgres data into a dictionary and place these dictionaries into a list
-# columns = []
-# entities_list = []
-# entities = {}
-# for column in cur.description:
-#     columns.append(column[0].lower())
-# for row in rows_dict:
-#     for i in range(len(row)):
-#         entities[columns[i]] = row[i]
-#         if isinstance(row[i], str):
-#             entities[columns[i]] = row[i].strip()
-#     entities_list.append(entities.copy())
-#     print('ENTITY LIST:', entities_list)
-#
-#
-# #Connect to ODK central server and use the merge command
-# client = Client(config_path="/app/tmp/pyodk_config.ini", cache_path="/app/tmp/pyodk_cache.ini")
-#
-# client.open()
-#
-# client.entities.merge(entities_list, entity_list_name='registration_trees', project_id=1, match_keys=['ecosia_site_id'], add_new_properties=True, update_matched=True, delete_not_matched=True, source_label_key='label', source_keys=None,create_source=None, source_size=None)
-#
-# client.close()
-#
-# conn.commit()
-# cur.close()
+# We need to set the column RN to text type because this is the only data type alowed by ODK entities. However, before we can change to text we first need to define it as bigint
+cur.execute('''UPDATE getodk_entities_upload_table_registrations
+SET row_number = row_number::bigint;''')
+conn.commit()
+
+cur.execute('''ALTER TABLE getodk_entities_upload_table_registrations ALTER COLUMN row_number TYPE text USING row_number::text;''')
+
+# Set the new_polygon column to string (text) where there is no polygon (NULL values)
+cur.execute('''UPDATE getodk_entities_upload_table_registrations
+SET geometry = ''
+WHERE geometry IS NULL
+OR geometry = '';''')
+conn.commit()
+
+# Set the RN column to string because that is the only type allowed by ODK entitities
+cur.execute('''UPDATE getodk_entities_upload_table_registrations
+SET row_number = row_number::text;''')
+conn.commit()
+
+# Set instances to monitoring by giving them a '1' value. This is the filter for ODK Collect to monitor specific sites
+cur.execute('''UPDATE getodk_entities_upload_table_registrations
+SET monitor_check = '1'
+WHERE ecosia_site_id IN %s OR ecosia_site_id IN %s;''', (tuple_contracts, tuple_identifiers))
+conn.commit()
+
+# Select all rows and fetch them all
+cur.execute('''SELECT * FROM getodk_entities_upload_table_registrations;''')
+conn.commit()
+
+rows_dict = cur.fetchall()
+
+
+# Convert the postgres data into a dictionary and place these dictionaries into a list
+columns = []
+entities_list = []
+entities = {}
+for column in cur.description:
+    columns.append(column[0].lower())
+for row in rows_dict:
+    for i in range(len(row)):
+        entities[columns[i]] = row[i]
+        if isinstance(row[i], str):
+            entities[columns[i]] = row[i].strip()
+    entities_list.append(entities.copy())
+    print('ENTITY LIST:', entities_list)
+
+
+#Connect to ODK central server and use the merge command
+client = Client(config_path="/app/tmp/pyodk_config.ini", cache_path="/app/tmp/pyodk_cache.ini")
+
+client.open()
+
+client.entities.merge(entities_list, entity_list_name='registration_trees', project_id=1, match_keys=['ecosia_site_id'], add_new_properties=True, update_matched=True, delete_not_matched=True, source_label_key='label', source_keys=None,create_source=None, source_size=None)
+
+client.close()
+
+conn.commit()
+cur.close()
