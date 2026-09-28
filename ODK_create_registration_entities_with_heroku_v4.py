@@ -330,15 +330,23 @@ batch_size = 1000
 
 while True:
     cur.execute('''
-        UPDATE getodk_entities_upload_table_registrations
+        WITH to_update AS (
+            SELECT ctid
+            FROM getodk_entities_upload_table_registrations
+            WHERE geometry LIKE 'POLYGON%'
+            LIMIT %s
+        )
+        UPDATE getodk_entities_upload_table_registrations AS t
         SET geometry = REPLACE(RTRIM(LTRIM(geometry,'POLYGON (('),'))'),',',';')::varchar(50000)
         WHERE geometry LIKE 'POLYGON%'
-            LIMIT %s''', (batch_size,))
+        FROM to_update AS u
+        WHERE t.ctid = u.ctid
+    ''', (batch_size,))
 
     if cur.rowcount == 0:
         break
 
-    conn.commit()  # commit after each batch
+    conn.commit() # commit after each batch
 
     # # Remove the WKT format ('POINT(( etc))')
     # cur.execute('''UPDATE getodk_entities_upload_table_registrations
