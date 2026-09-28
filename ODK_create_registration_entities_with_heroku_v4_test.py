@@ -32,12 +32,12 @@ batch_size = 100
 while True:
     cur.execute('''WITH to_update AS (SELECT ecosia_site_id FROM getodk_entities_upload_table_registrations
     WHERE geometry LIKE 'POLYGON%'
-    LIMIT 1000)
+    LIMIT %s)
 
     UPDATE getodk_entities_upload_table_registrations AS t
     SET geometry = REPLACE(RTRIM(LTRIM(geometry,'POLYGON (('),'))'),',',';')::varchar(50000)
     FROM to_update AS u
-    WHERE t.ecosia_site_id = u.ecosia_site_id;''')
+    WHERE t.ecosia_site_id = u.ecosia_site_id''',(batch_size,))
 
     if cur.rowcount == 0:
         break
