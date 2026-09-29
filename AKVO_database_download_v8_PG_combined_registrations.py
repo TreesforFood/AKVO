@@ -27,6 +27,7 @@ if response.status_code in [200]: # in case good response from AKVO server
     token_type = tok_dict["token_type"]
     access_token = tok_dict["access_token"]
     token_id = tok_dict["id_token"]
+    print(token_id)
 else: # in case of error from AKVO server
     print(response.text)
 
@@ -42,6 +43,7 @@ cur = conn.cursor()
 ################################## GET FIRST DOWNLOAD URL FROM AKVO (REGISTRATION DATA)
 
 initial_url_registration_data = 'https://api-auth0.akvo.org/flow/orgs/ecosia/form_instances?survey_id=31840001&form_id=48090001&page_size=200'
+print('initial_url_registration_data: ',initial_url_registration_data)
 #initial_sync_request = 'https://api-auth0.akvo.org/flow/orgs/ecosia/sync?initial=true' # with this link, you get the first page with the NextUrl in it. This URL is being send by an api call.
 
 cur.execute('''CREATE TABLE IF NOT EXISTS temporary_url_download_table (id SERIAL PRIMARY KEY, download_url TEXT);''')
@@ -134,7 +136,7 @@ else:
         json_dict = json.loads(page_decode) # convert from string to json dictionary
         count_pages += 1
         print('Message x6: start harvesting from next url page: ', count_pages)
-        print(json_dict)
+        print('Check:', json_dict)
 
         #for level1 in json_dict['formInstances']:
         for level1 in json_dict['formInstances']:
