@@ -27,4 +27,4 @@ projects_dict = references.json()
 delete_project_id = input('what project_id must be deleted?: ')
 
 # Populate your project with one or more polygons. Done by sending raw data.
-requests.delete(f"https://api.kanop.io/projects/{delete_project_id}")
+requests.delete(f"https://api.kanop.io/projects/{delete_project_id}",headers=headers})
