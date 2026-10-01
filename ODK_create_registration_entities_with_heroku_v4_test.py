@@ -63,8 +63,8 @@ while True:
     lat_lon_coords = []
 
     for row in rows:
-        polygon_wkt = row
-        ecosia_id = row
+        polygon_wkt = [row[0]for row in rows]
+        ecosia_id = [row[1]for row in rows]
 
     # Parse WKT to Shapely geometry
     if polygon_wkt is None:
