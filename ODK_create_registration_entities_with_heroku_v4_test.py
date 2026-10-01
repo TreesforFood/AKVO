@@ -1,6 +1,7 @@
 from shapely import wkt
 from shapely import wkb
 from shapely.ops import transform
+from shapely.geometry import shape
 from pyodk.client import Client
 import pandas as pd
 import requests
@@ -32,7 +33,7 @@ cur = conn.cursor()
 def flip(x, y):
     """Flips the x and y coordinate values"""
     return y, x
-    
+
 
 batch_size = 1000
 offset = 0
