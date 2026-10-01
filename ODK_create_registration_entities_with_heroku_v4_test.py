@@ -67,7 +67,7 @@ while True:
         ecosia_id = id
 
     # Parse WKT to Shapely geometry
-    if polygon_wkt is None or polygon_wkt ='':
+    if polygon_wkt is None:
         continue
 
     try:
