@@ -65,29 +65,36 @@ while True:
     for row in rows:
         polygon_wkt = row
         ecosia_id = row
+
+    # Parse WKT to Shapely geometry
+    if polygon_wkt is None:
+        continue
+
+    try:
+        geom = shape(polygon_wkt)
+
+        # Transform coordinates (swap lon/lat)
+        transformed_geom = transform(flip, geom)
+
+        # Convert to clean WKT string (remove extra parentheses and spaces)
+        clean_wkt = transformed_geom.wkt.replace('POLYGON ((', 'POLYGON(').replace('))', ')')
+
+        lat_lon_coords.append(clean_wkt)
+
         id_list.append(ecosia_id)
 
-        # Parse WKT to Shapely geometry
-        if polygon_wkt is None:
-            continue
-        else:
-            geom = shape(polygon_wkt)
+    except Exception as e:
+        print(f"Error transforming polygon for ecosia_site_id={ecosia_id}: {e}")
+        continue
 
-            # Transform coordinates (swap lon/lat)
-            transformed_geom = transform(flip, geom)
 
-            # Convert to clean WKT string (remove extra parentheses and spaces)
-            clean_wkt = transformed_geom.wkt.replace('POLYGON ((', 'POLYGON(').replace('))', ')')
-
-            lat_lon_coords.append(clean_wkt)
-
-        # Update the table with reverse coordinates
-        for key, value in zip(id_list, lat_lon_coords):
-            cur.execute('''
-                UPDATE getodk_entities_upload_table_registrations
-                SET geometry = %s
-                WHERE ecosia_site_id = %s
-            ''', (value, key))
+    # Update the table with reverse coordinates
+    for key, value in zip(id_list, lat_lon_coords):
+        cur.execute('''
+            UPDATE getodk_entities_upload_table_registrations
+            SET geometry = %s
+            WHERE ecosia_site_id = %s
+        ''', (value, key))
 
     conn.commit()
 
