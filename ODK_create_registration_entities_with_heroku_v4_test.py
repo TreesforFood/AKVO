@@ -35,7 +35,7 @@ def flip(x, y):
     return y, x
 
 
-batch_size = 1000
+batch_size = 100
 offset = 0
 
 while True:
@@ -62,12 +62,12 @@ while True:
     id_list = []
     lat_lon_coords = []
 
-    for row in rows:
-        polygon_wkt = [row[0]for row in rows]
-        ecosia_id = [row[1]for row in rows]
+    for pol, id in rows:
+        polygon_wkt = pol
+        ecosia_id = id
 
     # Parse WKT to Shapely geometry
-    if polygon_wkt is None:
+    if polygon_wkt is None or polygon_wkt ='':
         continue
 
     try:
