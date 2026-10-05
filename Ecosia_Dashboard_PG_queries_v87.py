@@ -1949,7 +1949,7 @@ conn.commit()
 # After a polygon modification in UPDATED, the calc_area needs to be recalculated.
 update_calc_area_updated_polygons = '''
 UPDATE akvo_tree_registration_areas_updated
-SET calc_area = ST_Area(polygon::geography) / 10000
+SET calc_area = ST_Area(ST_MakeValid(polygon::geometry)::geography) / 10000
 WHERE akvo_tree_registration_areas_updated.polygon IS NOT NULL
 AND akvo_tree_registration_areas_updated.calc_area > 0;'''
 
