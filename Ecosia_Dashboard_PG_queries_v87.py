@@ -1669,10 +1669,9 @@ conn.commit()
 # After a polygon modification in EDITS, the calc_area needs to be recalculated. Then this recalculated area must also enter into the UPDATED TABLE
 update_calc_area_edits_polygons = '''
 UPDATE akvo_tree_registration_areas_edits
-SET calc_area = ST_Area(polygon::geography) / 10000
---WHERE akvo_tree_registration_areas_edits.edit_confirmation = TRUE
-WHERE akvo_tree_registration_areas_edits.polygon IS NOT NULL
-AND akvo_tree_registration_areas_edits.calc_area > 0;'''
+SET calc_area = ST_Area(ST_MakeValid(polygon::geometry)::geography) / 10000
+WHERE polygon IS NOT NULL
+AND calc_area > 0;'''
 
 conn.commit()
 
@@ -2541,7 +2540,7 @@ LEFT JOIN site_impressions_monitoring
 ON site_impressions_monitoring.identifier_akvo = AKVO_Tree_monitoring_areas.identifier_akvo
 AND site_impressions_monitoring.label_strata = table_label_strata.label_strata
 
-where AKVO_Tree_monitoring_areas.method_selection = 'Number of living trees is unknown. Go to PCQ method.'
+WHERE AKVO_Tree_monitoring_areas.method_selection = 'Number of living trees is unknown. Go to PCQ method.'
 AND Akvo_tree_registration_areas_updated.identifier_akvo NOTNULL
 
 GROUP BY
