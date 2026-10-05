@@ -28,6 +28,134 @@ default_project_id = {default_project_id}
 conn = psycopg2.connect(os.environ["DATABASE_URL"], sslmode='require')
 cur = conn.cursor()
 
+# Drop the latests upload table
+cur.execute('''DROP TABLE IF EXISTS getodk_entities_upload_table_registrations;''')
+conn.commit()
+
+# 1. Create the table with the full dataset (no LIMIT)
+cur.execute(
+    '''CREATE TABLE getodk_entities_upload_table_registrations AS
+
+    WITH temp_contract_overview AS (
+
+    SELECT DISTINCT(CONCAT('Organisation: ', LOWER(organisation), ' | Contract number: ', contract_number, ' | Site ID: ', REGEXP_REPLACE(id_planting_site, '[^a-zA-Z0-9 ]', '', 'g'), ' | Name owner: ', name_owner , ' | Ecosia site id: ', identifier_akvo)) AS label,
+
+    CASE -- Fields can not be empty when uploaded to the entity list of ODK. If so, ODK gives a 'no string' error
+    WHEN country NOTNULL
+    THEN country
+    ELSE 'Country unknown'
+    END AS country,
+
+    CASE -- Fields can not be empty when uploaded to the entity list of ODK. If so, ODK gives a 'no string' error
+    WHEN organisation NOTNULL
+    THEN organisation
+    ELSE 'organisation_unknown'
+    END AS organisation,
+
+    id_planting_site,
+
+    CASE -- Fields can not be empty when uploaded to the entity list of ODK. If so, ODK gives a 'no string' error
+    WHEN name_owner NOTNULL
+    THEN CONCAT(id_planting_site, ' | ', name_owner)
+    WHEN name_owner = ''
+    THEN CONCAT(id_planting_site, ' | owner unknown')
+    WHEN name_owner ISNULL
+    THEN CONCAT(id_planting_site, ' | owner unknown')
+    END AS name_id_planting_site,
+
+    '' AS geometry,
+
+    CONCAT(
+    CASE
+        WHEN POSITION('.' IN contract_number::varchar(10)) > 0 THEN
+        SUBSTRING(contract_number::varchar(10) FROM 1 FOR POSITION('.' IN contract_number::varchar(10)) - 1)
+        ELSE
+        contract_number::varchar(10)
+    END,
+    '.00'
+    ) AS contract_number_match_airtable,
+
+    contract_number::varchar(10),
+
+    CASE -- Fields can not be empty when uploaded to the entity list of ODK. If so, ODK gives a 'no string' error
+    WHEN submission NOTNULL
+    THEN TO_CHAR(submission, 'YYYY-MM-DD')
+    ELSE 'Submission date unknown'
+    END AS submission,
+
+
+    CASE
+    WHEN polygon IS NOT NULL AND NOT ST_IsEmpty(polygon::geometry)
+    THEN ST_AsText(polygon)
+    WHEN (polygon IS NULL OR ST_IsEmpty(polygon::geometry))
+    AND centroid_coord IS NOT NULL AND ST_IsValid(centroid_coord::geometry) AND NOT ST_IsEmpty(centroid_coord::geometry)
+    THEN ST_AsText(centroid_coord)
+    ELSE NULL
+    END AS polygon,
+
+    identifier_akvo AS ecosia_site_id,
+
+    '' AS monitor_check,
+
+    CASE -- Fields can not be empty when uploaded to the entity list of ODK. If so, ODK gives a 'no string' error
+    WHEN calc_area > 0
+    THEN calc_area
+    ELSE '0'
+    END AS area_ha,
+
+    CASE -- Fields can not be empty when uploaded to the entity list of ODK. If so, ODK gives a 'no string' error
+    WHEN planting_date NOTNULL
+    THEN planting_date
+    ELSE 'planting date unknown'
+    END AS planting_date,
+
+    'planting_site' AS landscape_element,
+
+    CASE -- Fields can not be empty when uploaded to the entity list of ODK. If so, ODK gives a 'no string' error
+    WHEN tree_number NOTNULL
+    THEN CAST(tree_number AS text)
+    WHEN tree_number ISNULL
+    THEN CAST(0 AS text)
+    END AS tree_number,
+
+    CASE -- Fields can not be empty when uploaded to the entity list of ODK. If so, ODK gives a 'no string' error
+    WHEN submitter NOTNULL
+    THEN submitter
+    ELSE 'submitter unknown'
+    END AS user_name_enumerator
+
+    FROM akvo_tree_registration_areas_updated
+    WHERE test = 'This is real, valid data'
+    OR test = '')
+
+    SELECT
+    ROW_NUMBER()OVER(PARTITION BY label ORDER BY label) AS row_number, --Give duplicates a number higher than 1
+    label,
+    LOWER(country) AS country,
+    LOWER(organisation) AS name_partner,
+    id_planting_site,
+    name_id_planting_site,
+    geometry,
+    contract_number,
+    polygon,
+    ecosia_site_id,
+    monitor_check,
+    CAST(area_ha AS TEXT) AS area_ha,
+    tree_number,
+    user_name_enumerator,
+    submission AS site_registration_date,
+    planting_date,
+    landscape_element
+
+    FROM temp_contract_overview
+    LIMIT 2000;''') # Later remove this LIMIT 2000. This is for testing!!!
+
+conn.commit()
+
+
+# 2. Remove the duplicate labels
+cur.execute('''DELETE FROM getodk_entities_upload_table_registrations WHERE row_number > 1;''')
+conn.commit()
 
 # 3. Define the flip function
 def flip(x, y):
@@ -43,7 +171,7 @@ while True:
     cur.execute('''
         SELECT polygon, ecosia_site_id
         FROM getodk_entities_upload_table_registrations
-        WHERE polygon IS NOT NULL
+        WHERE polygon IS NOT NULL -- Only for polygons this batch!
           AND name_partner IS NOT NULL
           AND contract_number IS NOT NULL
           AND ecosia_site_id IS NOT NULL
@@ -58,7 +186,7 @@ while True:
 
     print(f"Processing batch starting at offset {offset} with {len(rows)} rows...")
 
-    # Prepare data for transformation
+    # Batch processing of data: Prepare data for transformation (flip coordinates and replace '')
     id_list = []
     lat_lon_coords = []
 
@@ -66,35 +194,44 @@ while True:
         polygon_wkt = pol
         ecosia_id = id
 
-    # Parse WKT to Shapely geometry
-    if polygon_wkt is None:
-        continue
+        try:
+            if polygon_wkt is None:
+                raise ValueError(f"Polygon is none or empty for ecosia_id={ecosia_id}")
 
-    try:
-        geom = shape(polygon_wkt)
+            geom = shape(polygon_wkt)
 
-        # Transform coordinates (swap lon/lat)
-        transformed_geom = transform(flip, geom)
+            # Transform coordinates (swap lon/lat)
+            transformed_geom = transform(flip, geom)
 
-        # Convert to clean WKT string (remove extra parentheses and spaces)
-        clean_wkt = transformed_geom.wkt.replace('POLYGON ((', 'POLYGON(').replace('))', ')')
+            # Convert to clean WKT string (remove extra parentheses and spaces)
+            clean_wkt = transformed_geom.wkt.replace('POLYGON ((', 'POLYGON(').replace('))', ')')
 
-        lat_lon_coords.append(clean_wkt)
+            lat_lon_coords.append(clean_wkt)
 
-        id_list.append(ecosia_id)
+            id_list.append(ecosia_id)
 
-    except Exception as e:
-        print(f"Error transforming polygon for ecosia_site_id={ecosia_id}: {e}")
-        continue
+        except ValueError as ve:
+            print(f"Null polygon skipped for ecosia_id={ecosia_id}: {ve}")
+            continue
+
+        except Exception as e:
+            print(f"Error transforming polygon for ecosia_site_id={ecosia_id}: {e}")
+            continue
 
 
-    # Update the table with reverse coordinates
+
+    # Update the table with reverse coordinates. The entire batch at once.
     for key, value in zip(id_list, lat_lon_coords):
-        cur.execute('''
-            UPDATE getodk_entities_upload_table_registrations
+        cur.execute('''UPDATE getodk_entities_upload_table_registrations
             SET geometry = %s
-            WHERE ecosia_site_id = %s
-        ''', (value, key))
+            WHERE ecosia_site_id = %s''', (value, key))
+
+        # Remove the WKT format ('POLYGON(( etc))')
+        cur.execute('''UPDATE getodk_entities_upload_table_registrations
+        SET geometry = REPLACE(RTRIM(LTRIM(geometry,'POLYGON (('),'))'),',',';')::varchar(50000)
+        WHERE geometry LIKE 'POLYGON%'
+        AND ecosia_site_id = %s''', (key,))
+
 
     conn.commit()
 
