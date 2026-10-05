@@ -1671,7 +1671,8 @@ update_calc_area_edits_polygons = '''
 UPDATE akvo_tree_registration_areas_edits
 SET calc_area = ST_Area(polygon::geography) / 10000
 --WHERE akvo_tree_registration_areas_edits.edit_confirmation = TRUE
-WHERE akvo_tree_registration_areas_edits.polygon IS NOT NULL;'''
+WHERE akvo_tree_registration_areas_edits.polygon IS NOT NULL
+AND akvo_tree_registration_areas_edits.calc_area > 0;'''
 
 conn.commit()
 
@@ -9446,7 +9447,7 @@ conn.commit()
 
 
 create_a22_openforest_access = '''
-REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA public FROM openforest_access;
+--REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA public FROM openforest_access;
 
 GRANT USAGE ON SCHEMA PUBLIC TO openforest_access;
 GRANT USAGE ON SCHEMA HEROKU_EXT TO openforest_access;
@@ -9603,7 +9604,7 @@ cur.execute(create_a50)
 
 cur.execute(create_a20_ecosia_superset) # This gives grand access to QGIS users. With this login (inside QGIS) they will only see the superset tables
 cur.execute(create_a21_ecosia_editing) # Used by the Preset dashboard. No grand limitation. As such it is de-activated
-cur.execute(create_a22_openforest_access)
+cur.execute(create_a22_openforest_access) # Used by OpenForest to built a draft dashboard
 
 conn.commit()
 
