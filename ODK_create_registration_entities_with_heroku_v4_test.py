@@ -231,9 +231,7 @@ while True:
             continue
 
 
-    columns = []
-    entities_list = []
-    entities = {}
+
 
     # Update the table with reverse coordinates. The entire batch at once.
     for key, value in zip(id_list, lat_lon_coords):
@@ -277,6 +275,10 @@ while True:
         conn.commit()
 
     rows_dict = cur.fetchall()
+
+    columns = []
+    entities_list = []
+    entities = {}
 
     # Convert the postgres data into a dictionary and place these dictionaries into a list
     for column in cur.description:
