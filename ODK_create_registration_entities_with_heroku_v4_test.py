@@ -34,6 +34,10 @@ os.makedirs(os.path.dirname(file_path), exist_ok=True)
 with open(file_path, "w") as file:
     file.write(file_content)
 
+# Connect to the Postgresql database on Heroku
+conn = psycopg2.connect(os.environ["DATABASE_URL"], sslmode='require')
+cur = conn.cursor()
+
 # Drop the latests upload table
 cur.execute('''DROP TABLE IF EXISTS getodk_entities_upload_table_registrations;''')
 conn.commit()
