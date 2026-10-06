@@ -173,6 +173,8 @@ def flip(x, y):
     return y, x
 
 
+
+
 batch_size = 100
 offset = 0
 
@@ -298,7 +300,6 @@ while True:
 
     print(f"Batch at offset {offset} processed.")
 
-    cur.close() # Close the cur for the next batch
     # Increment offset for the next batch
     offset += batch_size
 
