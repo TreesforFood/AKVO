@@ -290,6 +290,7 @@ while True:
                 entities[columns[i]] = row[i].strip()
         entities_list.append(entities.copy())
 
+    print(entities_list)
 
     #Connect to ODK central server and use the merge command
     client = Client(config_path="/app/tmp/pyodk_config.ini", cache_path="/app/tmp/pyodk_cache.ini")
