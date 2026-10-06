@@ -264,8 +264,7 @@ while True:
         cur.execute('''SELECT * FROM getodk_entities_upload_table_registrations;''')
         conn.commit()
 
-        rows_dict = cur.fetchall()
-
+    rows_dict = cur.fetchall()
 
     # Convert the postgres data into a dictionary and place these dictionaries into a list
     for column in cur.description:
