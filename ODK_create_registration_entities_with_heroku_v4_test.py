@@ -219,6 +219,9 @@ while True:
             continue
 
 
+    columns = []
+    entities_list = []
+    entities = {}
 
     # Update the table with reverse coordinates. The entire batch at once.
     for key, value in zip(id_list, lat_lon_coords):
@@ -231,14 +234,65 @@ while True:
         SET geometry = REPLACE(RTRIM(LTRIM(geometry,'POLYGON (('),'))'),',',';')::varchar(50000)
         WHERE geometry LIKE 'POLYGON%'
         AND ecosia_site_id = %s''', (key,))
+        conn.commit()
+
+        cur.execute('''UPDATE getodk_entities_upload_table_registrations
+        SET row_number = row_number::bigint;''')
+        conn.commit()
+
+        cur.execute('''ALTER TABLE getodk_entities_upload_table_registrations ALTER COLUMN row_number TYPE text USING row_number::text;''')
+
+        # Set the new_polygon column to string (text) where there is no polygon (NULL values)
+        cur.execute('''UPDATE getodk_entities_upload_table_registrations
+        SET geometry = ''
+        WHERE geometry IS NULL
+        OR geometry = '';''')
+        conn.commit()
+
+        # Set the RN column to string because that is the only type allowed by ODK entitities
+        cur.execute('''UPDATE getodk_entities_upload_table_registrations
+        SET row_number = row_number::text;''')
+        conn.commit()
+
+        # Set instances to monitoring by giving them a '1' value. This is the filter for ODK Collect to monitor specific sites
+        cur.execute('''UPDATE getodk_entities_upload_table_registrations
+        SET monitor_check = '1'
+        WHERE ecosia_site_id IN %s OR ecosia_site_id IN %s;''', (tuple_contracts, tuple_identifiers))
+        conn.commit()
+
+        # Select all rows and fetch them all
+        cur.execute('''SELECT * FROM getodk_entities_upload_table_registrations;''')
+        conn.commit()
+
+        rows_dict = cur.fetchall()
 
 
-    conn.commit()
+    # Convert the postgres data into a dictionary and place these dictionaries into a list
+    for column in cur.description:
+        columns.append(column[0].lower())
+    for row in rows_dict:
+        for i in range(len(row)):
+            entities[columns[i]] = row[i]
+            if isinstance(row[i], str):
+                entities[columns[i]] = row[i].strip()
+        entities_list.append(entities.copy())
+
+
+    #Connect to ODK central server and use the merge command
+    client = Client(config_path="/app/tmp/pyodk_config.ini", cache_path="/app/tmp/pyodk_cache.ini")
+
+    client.open()
+
+    client.entities.merge(entities_list, entity_list_name='registration_trees', project_id=1, match_keys=['ecosia_site_id'], add_new_properties=True, update_matched=True, delete_not_matched=True, source_label_key='label', source_keys=None,create_source=None, source_size=None)
+
+    #client.close()
 
     print(f"Batch at offset {offset} processed.")
 
+    cur.close() # Close the cur for the next batch
     # Increment offset for the next batch
     offset += batch_size
 
+client.close()
 cur.close()
 conn.close()
