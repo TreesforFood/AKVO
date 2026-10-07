@@ -211,6 +211,7 @@ while True:
 
     id_list = []
     lat_lon_coords = []
+    rows_dict = []  # Initialize before try
 
     for pol, ecosia_id in rows:
         #print(pol) # POLYGON((3 5, 5 6, etc))
