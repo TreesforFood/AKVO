@@ -236,6 +236,10 @@ while True:
 
             id_list.append(ecosia_id)
 
+            print('see if the id and coord are of the same length: ', len(id_list), len(lat_lon_coords))
+
+            print('test if it is a flat list: ', type(id_list[0]))
+
         except ValueError as ve:
             print(f"Null polygon skipped for ecosia_id={ecosia_id}: {ve}")
             continue
