@@ -212,18 +212,20 @@ while True:
     lat_lon_coords = []
 
     for pol, ecosia_id in rows:
-        print(pol)
-        print(type(pol))
+        print(pol) # POLYGON((3 5, 5 6, etc))
+        print(type(pol)) # str type
         try:
+
             if pol is None:
                 raise ValueError(f"Polygon is None for ecosia_id={ecosia_id}")
 
-            geom = shape(pol)
-            transformed_geom = shp_transform(flip, geom)
-            clean_wkt = transformed_geom.wkt.replace('POLYGON ((', 'POLYGON(').replace('))', ')')
+                geometries = wkt.loads(pol)
+
+            for lon_lat_coords in geometries:
+                lat_lon_coords.append(transform(flip, lon_lat_coords).wkt)
+                print('lat_lon_coords: ', lat_lon_coords)
 
             id_list.append(ecosia_id)
-            lat_lon_coords.append(clean_wkt)
 
         except ValueError as ve:
             print(f"Null polygon skipped for ecosia_id={ecosia_id}: {ve}")
