@@ -214,6 +214,8 @@ while True:
     for pol, ecosia_id in rows:
         try:
             if pol is None:
+                print(pol)
+                print(type(pol))
                 raise ValueError(f"Polygon is None for ecosia_id={ecosia_id}")
 
             geom = shape(pol)
@@ -308,10 +310,14 @@ while True:
         print(f"ODK merge failed for batch at offset {offset}: {e}")
         # Optionally: implement retry logic here
 
+
+    finally:
+        if client is not None:
+            client.close()  # <-- Always close if it was created
+
     offset += batch_size
 
 
-client.close()
 conn.commit()
 cur.close()
 conn.close()
