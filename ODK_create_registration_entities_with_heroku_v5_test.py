@@ -223,13 +223,13 @@ while True:
             print(geometries)
             print(type(geometries))
 
-            for lon_lat_coords in geometries:
-                lat_lon_coords.append(transform(flip, lon_lat_coords).wkt)
-                print('lat_lon_coords: ', lat_lon_coords)
+            # for lon_lat_coords in geometries:
+            #     lat_lon_coords.append(transform(flip, lon_lat_coords).wkt)
+            #     print('lat_lon_coords: ', lat_lon_coords)
 
-            # for lon, lat in geom.exterior.coords:
-            #     transformed = transform(flip, Point(lon, lat))
-            #     lat_lon_coords.append(transformed.wkt)
+            for lon, lat in geometries.exterior.coords:
+                transformed = transform(flip, Point(lon, lat))
+                lat_lon_coords.append(transformed.wkt)
 
             id_list.append(ecosia_id)
 
