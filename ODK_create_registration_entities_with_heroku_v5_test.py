@@ -219,9 +219,9 @@ while True:
             if pol is None:
                 raise ValueError(f"Polygon is None for ecosia_id={ecosia_id}")
 
-                geom = wkt.loads(pol)
-                print(geom)
-                print(type(geom))
+            geom = wkt.loads(pol)
+            print(geom)
+            print(type(geom))
 
             # for lon_lat_coords in geometries:
             #     lat_lon_coords.append(transform(flip, lon_lat_coords).wkt)
