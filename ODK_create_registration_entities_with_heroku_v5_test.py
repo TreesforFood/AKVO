@@ -260,7 +260,7 @@ while True:
                     '))', ')'),
                 ',', ';')
             WHERE geometry LIKE 'POLYGON%'
-              AND ecosia_site_id = %s''', (id_list,))
+              AND ecosia_site_id IN %s''', (id_list,))
 
         conn.commit()
 
