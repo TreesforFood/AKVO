@@ -260,27 +260,26 @@ while True:
                     '))', ')'),
                 ',', ';')
             WHERE geometry LIKE 'POLYGON%'
-              AND ecosia_site_id IN (SELECT unnest(%s::text[]))
-        ''', (id_list,))
+              AND ecosia_site_id = %s''', (id_list,))
 
         conn.commit()
 
-    # --- Set monitor_check for matching IDs ---
-    if 'tuple_contracts' in locals() and 'tuple_identifiers' in locals():
-        cur.execute('''
-            UPDATE getodk_entities_upload_table_registrations
-            SET monitor_check = '1'
-            WHERE ecosia_site_id = ANY(%s::text[])
-        ''', (tuple_contracts + tuple_identifiers,))
-        conn.commit()
+    # # --- Set monitor_check for matching IDs ---
+    # if 'tuple_contracts' in locals() and 'tuple_identifiers' in locals():
+    #     cur.execute('''
+    #         UPDATE getodk_entities_upload_table_registrations
+    #         SET monitor_check = '1'
+    #         WHERE ecosia_site_id = ANY(%s::text[])
+    #     ''', (tuple_contracts + tuple_identifiers,))
+    #     conn.commit()
 
-    # --- Fetch only the current batch for ODK merge ---
-    placeholders = ','.join(['%s'] * len(id_list)) if id_list else "'NULL'"
-    cur.execute(f'''
-        SELECT * FROM getodk_entities_upload_table_registrations
-        WHERE ecosia_site_id IN ({placeholders})
-    ''', id_list)
-
+    # # --- Fetch only the current batch for ODK merge ---
+    # placeholders = ','.join(['%s'] * len(id_list)) if id_list else "'NULL'"
+    # cur.execute(f'''
+    #     SELECT * FROM getodk_entities_upload_table_registrations
+    #     WHERE ecosia_site_id IN ({placeholders})
+    # ''', id_list)
+    #
     rows_dict = cur.fetchall()
 
     # Build entities list
