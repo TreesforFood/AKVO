@@ -232,13 +232,14 @@ while True:
 
             for lon, lat in geometries.exterior.coords:
                 transformed = transform(flip, Point(lon, lat))
-                lat_lon_coords.append(transformed.wkt)
+                # creates a list with tuples (coordinates, id):
+                lat_lon_coords.append((transformed.wkt, ecosia_id, ))
 
-            id_list.append(ecosia_id)
+            #id_list.append(ecosia_id)
 
-            print('see if the id and coord are of the same length: ', len(id_list), len(lat_lon_coords))
+            #print('see if the id and coord are of the same length: ', len(id_list), len(lat_lon_coords))
 
-            print('test if it is a flat list: ', type(id_list[0]))
+            #print('test if it is a flat list: ', type(id_list[0]))
 
         except ValueError as ve:
             print(f"Null polygon skipped for ecosia_id={ecosia_id}: {ve}")
@@ -266,18 +267,16 @@ while True:
         #     WHERE geometry LIKE 'POLYGON%'
         #       AND ecosia_site_id IN %s''', (id_list,))
 
-           # Clean geometry strings in one shot
-        placeholders = ','.join(['%s'] * len(id_list))
-        cur.execute(f'''
-            UPDATE getodk_entities_upload_table_registrations
-            SET geometry = REPLACE(
-                REPLACE(
-                    REPLACE(geometry, 'POLYGON ((', 'POLYGON('),
-                    '))', ')'),
-                ',', ';')
-            WHERE geometry LIKE 'POLYGON%'
-              AND ecosia_site_id IN ({placeholders})
-        ''', id_list)
+        if lat_lon_coords:
+            cur.executemany('''
+                UPDATE getodk_entities_upload_table_registrations
+                SET geometry = REPLACE(
+                    REPLACE(
+                        REPLACE(%s, 'POLYGON ((', 'POLYGON('),
+                        '))', ')'),
+                    ',', ';')
+                WHERE ecosia_site_id = %s
+            ''', lat_lon_coords)
 
         conn.commit()
 
