@@ -274,7 +274,8 @@ while True:
         cur.execute('''SELECT * FROM getodk_entities_upload_table_registrations;''')
         conn.commit()
 
-    rows_dict = cur.fetchall()
+        rows_dict = cur.fetchall()
+        print(row_dict)
 
     columns = []
     entities_list = []
@@ -306,5 +307,6 @@ while True:
     offset += batch_size
 
 client.close()
+conn.commit()
 cur.close()
 conn.close()
