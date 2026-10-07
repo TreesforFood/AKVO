@@ -252,25 +252,14 @@ while True:
 
     # --- Batch UPDATE using executemany (much faster) ---
     if id_list:
-        cur.executemany('''
+        cur.execute('''
             UPDATE getodk_entities_upload_table_registrations
             SET geometry = %s
             WHERE ecosia_site_id = %s
         ''', lat_lon_coords)
 
-        # # Clean geometry strings in one shot
-        # cur.execute('''
-        #     UPDATE getodk_entities_upload_table_registrations
-        #     SET geometry = REPLACE(
-        #         REPLACE(
-        #             REPLACE(geometry, 'POLYGON ((', 'POLYGON('),
-        #             '))', ')'),
-        #         ',', ';')
-        #     WHERE geometry LIKE 'POLYGON%'
-        #       AND ecosia_site_id IN %s''', (id_list,))
-
         if lat_lon_coords:
-            cur.executemany('''
+            cur.execute('''
                 UPDATE getodk_entities_upload_table_registrations
                 SET geometry = REPLACE(
                     REPLACE(
@@ -280,25 +269,12 @@ while True:
                 WHERE ecosia_site_id = %s
             ''', lat_lon_coords)
 
+        # Select all rows and fetch them all
+        cur.execute('''SELECT * FROM getodk_entities_upload_table_registrations;''')
+
         conn.commit()
 
-    # # --- Set monitor_check for matching IDs ---
-    # if 'tuple_contracts' in locals() and 'tuple_identifiers' in locals():
-    #     cur.execute('''
-    #         UPDATE getodk_entities_upload_table_registrations
-    #         SET monitor_check = '1'
-    #         WHERE ecosia_site_id = ANY(%s::text[])
-    #     ''', (tuple_contracts + tuple_identifiers,))
-    #     conn.commit()
-
-    # # --- Fetch only the current batch for ODK merge ---
-    # placeholders = ','.join(['%s'] * len(id_list)) if id_list else "'NULL'"
-    # cur.execute(f'''
-    #     SELECT * FROM getodk_entities_upload_table_registrations
-    #     WHERE ecosia_site_id IN ({placeholders})
-    # ''', id_list)
-    #
-    rows_dict = cur.fetchall()
+        rows_dict = cur.fetchall()
 
     # Build entities list
     columns = [col[0].lower() for col in cur.description]
