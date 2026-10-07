@@ -292,15 +292,17 @@ while True:
             cache_path="/app/tmp/pyodk_cache.ini"
         )
 
-    #Connect to ODK central server and use the merge command
-    client = Client(config_path="/app/tmp/pyodk_config.ini", cache_path="/app/tmp/pyodk_cache.ini")
+        client.open()
 
-    client.open()
+        #Connect to ODK central server and use the merge command
+        client = Client(config_path="/app/tmp/pyodk_config.ini", cache_path="/app/tmp/pyodk_cache.ini")
 
-    client.entities.merge(entities_list, entity_list_name='registration_trees', project_id=1, match_keys=['ecosia_site_id'], add_new_properties=True, update_matched=True, delete_not_matched=False, source_label_key='label', source_keys=None,create_source=None, source_size=None)
+        client.open()
+
+        client.entities.merge(entities_list, entity_list_name='registration_trees', project_id=1, match_keys=['ecosia_site_id'], add_new_properties=True, update_matched=True, delete_not_matched=False, source_label_key='label', source_keys=None,create_source=None, source_size=None)
 
 
-    print(f"Batch at offset {offset} processed.")
+        print(f"Batch at offset {offset} processed.")
 
     except Exception as e:
         print(f"ODK merge failed for batch at offset {offset}: {e}")
