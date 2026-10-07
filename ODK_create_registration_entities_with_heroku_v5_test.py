@@ -251,8 +251,20 @@ while True:
             WHERE ecosia_site_id = %s
         ''', zip(lat_lon_coords, id_list))
 
-        # Clean geometry strings in one shot
-        cur.execute('''
+        # # Clean geometry strings in one shot
+        # cur.execute('''
+        #     UPDATE getodk_entities_upload_table_registrations
+        #     SET geometry = REPLACE(
+        #         REPLACE(
+        #             REPLACE(geometry, 'POLYGON ((', 'POLYGON('),
+        #             '))', ')'),
+        #         ',', ';')
+        #     WHERE geometry LIKE 'POLYGON%'
+        #       AND ecosia_site_id IN %s''', (id_list,))
+
+           # Clean geometry strings in one shot
+        placeholders = ','.join(['%s'] * len(id_list))
+        cur.execute(f'''
             UPDATE getodk_entities_upload_table_registrations
             SET geometry = REPLACE(
                 REPLACE(
@@ -260,7 +272,8 @@ while True:
                     '))', ')'),
                 ',', ';')
             WHERE geometry LIKE 'POLYGON%'
-              AND ecosia_site_id IN %s''', (id_list,))
+              AND ecosia_site_id IN ({placeholders})
+        ''', id_list)
 
         conn.commit()
 
