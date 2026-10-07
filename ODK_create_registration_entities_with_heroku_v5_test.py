@@ -219,7 +219,7 @@ while True:
             if pol is None:
                 raise ValueError(f"Polygon is None for ecosia_id={ecosia_id}")
 
-            geom = wkt.loads(pol)
+            geometries = wkt.loads(pol)
             print(geom)
             print(type(geom))
 
