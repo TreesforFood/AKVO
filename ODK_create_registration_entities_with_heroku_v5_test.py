@@ -212,10 +212,10 @@ while True:
     lat_lon_coords = []
 
     for pol, ecosia_id in rows:
+        print(pol)
+        print(type(pol))
         try:
             if pol is None:
-                print(pol)
-                print(type(pol))
                 raise ValueError(f"Polygon is None for ecosia_id={ecosia_id}")
 
             geom = shape(pol)
