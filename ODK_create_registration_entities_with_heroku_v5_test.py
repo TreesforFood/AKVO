@@ -256,7 +256,7 @@ while True:
             UPDATE getodk_entities_upload_table_registrations
             SET geometry = %s
             WHERE ecosia_site_id = %s
-        ''', zip(lat_lon_coords, id_list))
+        ''', lat_lon_coords)
 
         # # Clean geometry strings in one shot
         # cur.execute('''
