@@ -212,14 +212,16 @@ while True:
     lat_lon_coords = []
 
     for pol, ecosia_id in rows:
-        print(pol) # POLYGON((3 5, 5 6, etc))
-        print(type(pol)) # str type
+        #print(pol) # POLYGON((3 5, 5 6, etc))
+        #print(type(pol)) # str type
         try:
 
             if pol is None:
                 raise ValueError(f"Polygon is None for ecosia_id={ecosia_id}")
 
                 geom = wkt.loads(pol)
+                print(geom)
+                print(type(geom))
 
             # for lon_lat_coords in geometries:
             #     lat_lon_coords.append(transform(flip, lon_lat_coords).wkt)
