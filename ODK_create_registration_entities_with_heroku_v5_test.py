@@ -2,6 +2,7 @@ from shapely import wkt
 from shapely import wkb
 from shapely.ops import transform
 from shapely.geometry import shape
+from shapely.geometry import Point
 from pyodk.client import Client
 import pandas as pd
 import requests
@@ -223,9 +224,11 @@ while True:
             print(geometries)
             print(type(geometries))
 
+            # Creates error: Error transforming polygon for ecosia_id=scdt-jedt-8kag: 'Polygon' object is not iterable
             # for lon_lat_coords in geometries:
             #     lat_lon_coords.append(transform(flip, lon_lat_coords).wkt)
             #     print('lat_lon_coords: ', lat_lon_coords)
+
 
             for lon, lat in geometries.exterior.coords:
                 transformed = transform(flip, Point(lon, lat))
