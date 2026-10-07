@@ -235,6 +235,8 @@ while True:
                 # creates a list with tuples (coordinates, id):
                 lat_lon_coords.append((transformed.wkt, ecosia_id, ))
 
+            print('See the list with tuples: ', lat_lon_coords)
+
             #id_list.append(ecosia_id)
 
             #print('see if the id and coord are of the same length: ', len(id_list), len(lat_lon_coords))
