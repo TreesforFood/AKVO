@@ -212,9 +212,9 @@ while True:
     id_list = []
     lat_lon_coords = []
     rows_dict = []  # Initialize before try
-    columns = []
-    entities_list = []
-    entities = {}
+    # columns = []
+    # entities_list = []
+    # entities = {}
 
     for pol, ecosia_id in rows:
         #print(pol) # POLYGON((3 5, 5 6, etc))
@@ -280,22 +280,12 @@ while True:
 
         rows_dict = cur.fetchall()
 
-    # # Build entities list
-    # columns = [col[0].lower() for col in cur.description]
-    # entities_list = []
-    # for row in rows_dict:
-    #     entity = {}
-    #     for i, val in enumerate(row):
-    #         key = columns[i]
-    #         entity[key] = val.strip() if isinstance(val, str) else val
-    #     entities_list.append(entity)
-    #
-    # if not entities_list:
-    #     print(f"No entities to merge for batch at offset {offset}.")
-    #     offset += batch_size
-    #     continue
 
-    # Convert the postgres data into a dictionary and place these dictionaries into a list
+        # Convert the postgres data into a dictionary and place these dictionaries into a list
+
+        columns = []
+        entities_list = []
+        entities = {}
 
         for column in cur.description:
             columns.append(column[0].lower())
