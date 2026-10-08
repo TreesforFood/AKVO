@@ -297,46 +297,46 @@ while True:
 
     # Convert the postgres data into a dictionary and place these dictionaries into a list
 
-    for column in cur.description:
-        columns.append(column[0].lower())
-    for row in rows_dict:
-        for i in range(len(row)):
-            entities[columns[i]] = row[i]
-            if isinstance(row[i], str):
-                entities[columns[i]] = row[i].strip()
-        entities_list.append(entities.copy())
-        print('ENTITY LIST:', entities_list)
+        for column in cur.description:
+            columns.append(column[0].lower())
+        for row in rows_dict:
+            for i in range(len(row)):
+                entities[columns[i]] = row[i]
+                if isinstance(row[i], str):
+                    entities[columns[i]] = row[i].strip()
+            entities_list.append(entities.copy())
+            print('ENTITY LIST:', entities_list)
 
 
-    # --- Merge into ODK Central ---
-    try:
-        client = Client(
-            config_path="/app/tmp/pyodk_config.ini",
-            cache_path="/app/tmp/pyodk_cache.ini"
-        )
+        # --- Merge into ODK Central ---
+        try:
+            client = Client(
+                config_path="/app/tmp/pyodk_config.ini",
+                cache_path="/app/tmp/pyodk_cache.ini"
+            )
 
 
-        #Connect to ODK central server and use the merge command
-        client = Client(config_path="/app/tmp/pyodk_config.ini", cache_path="/app/tmp/pyodk_cache.ini")
+            #Connect to ODK central server and use the merge command
+            client = Client(config_path="/app/tmp/pyodk_config.ini", cache_path="/app/tmp/pyodk_cache.ini")
 
-        client.open()
+            client.open()
 
-        client.entities.merge(entities_list, entity_list_name='registration_trees', project_id=1, match_keys=['ecosia_site_id'], add_new_properties=True, update_matched=True, delete_not_matched=False, source_label_key='label', source_keys=None,create_source=None, source_size=None)
+            client.entities.merge(entities_list, entity_list_name='registration_trees', project_id=1, match_keys=['ecosia_site_id'], add_new_properties=True, update_matched=True, delete_not_matched=False, source_label_key='label', source_keys=None,create_source=None, source_size=None)
 
-        client.close()
+            client.close()
 
-        print(f"Batch at offset {offset} processed.")
+            print(f"Batch at offset {offset} processed.")
 
-    except Exception as e:
-        print(f"ODK merge failed for batch at offset {offset}: {e}")
-        # Optionally: implement retry logic here
+        except Exception as e:
+            print(f"ODK merge failed for batch at offset {offset}: {e}")
+            # Optionally: implement retry logic here
 
 
-    finally:
-        if client is not None:
-            client.close()  # <-- Always close if it was created
+        finally:
+            if client is not None:
+                client.close()  # <-- Always close if it was created
 
-    offset += batch_size
+        offset += batch_size
 
 
 conn.commit()
