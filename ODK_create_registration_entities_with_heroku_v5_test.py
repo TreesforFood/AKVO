@@ -295,6 +295,7 @@ while True:
     entities = {}
 
     for column in cur.description:
+        print('Column: ', column)
         columns.append(column[0].lower())
     for row in rows_dict:
         for i in range(len(row)):
