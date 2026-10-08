@@ -256,7 +256,7 @@ while True:
             continue
 
     # --- Batch UPDATE using executemany (much faster) ---
-    if lat_lon_coord:
+    if lat_lon_coords:
         cur.executemany('''
             UPDATE getodk_entities_upload_table_registrations
             SET geometry = %s
