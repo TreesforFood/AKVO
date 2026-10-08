@@ -209,7 +209,7 @@ while True:
 
     print(f"Processing batch starting at offset {offset} with {len(rows)} rows...")
 
-    id_list = []
+    #id_list = []
     lat_lon_coords = []
     rows_dict = []  # Initialize before try
     # columns = []
@@ -239,6 +239,7 @@ while True:
                 # creates a list with tuples (coordinates, id):
                 lat_lon_coords.append((transformed.wkt, ecosia_id, ))
 
+
             print('See the list with tuples: ', lat_lon_coords)
 
             #id_list.append(ecosia_id)
@@ -255,15 +256,15 @@ while True:
             continue
 
     # --- Batch UPDATE using executemany (much faster) ---
-    if id_list:
-        cur.execute('''
+    if lat_lon_coord:
+        cur.executemany('''
             UPDATE getodk_entities_upload_table_registrations
             SET geometry = %s
             WHERE ecosia_site_id = %s
         ''', lat_lon_coords)
 
         if lat_lon_coords:
-            cur.execute('''
+            cur.executemany('''
                 UPDATE getodk_entities_upload_table_registrations
                 SET geometry = REPLACE(
                     REPLACE(
@@ -281,52 +282,51 @@ while True:
         rows_dict = cur.fetchall()
 
 
-        # Convert the postgres data into a dictionary and place these dictionaries into a list
+    # Convert the postgres data into a dictionary and place these dictionaries into a list
 
-        columns = []
-        entities_list = []
-        entities = {}
+    columns = []
+    entities_list = []
+    entities = {}
 
-        for column in cur.description:
-            columns.append(column[0].lower())
-        for row in rows_dict:
-            for i in range(len(row)):
-                entities[columns[i]] = row[i]
-                if isinstance(row[i], str):
-                    entities[columns[i]] = row[i].strip()
-            entities_list.append(entities.copy())
-            print('ENTITY LIST:', entities_list)
-
-
-        # --- Merge into ODK Central ---
-        try:
-            client = Client(
-                config_path="/app/tmp/pyodk_config.ini",
-                cache_path="/app/tmp/pyodk_cache.ini"
-            )
+    for column in cur.description:
+        columns.append(column[0].lower())
+    for row in rows_dict:
+        for i in range(len(row)):
+            entities[columns[i]] = row[i]
+            if isinstance(row[i], str):
+                entities[columns[i]] = row[i].strip()
+        entities_list.append(entities.copy())
+        print('ENTITY LIST:', entities_list)
 
 
-            #Connect to ODK central server and use the merge command
-            client = Client(config_path="/app/tmp/pyodk_config.ini", cache_path="/app/tmp/pyodk_cache.ini")
+    # --- Merge into ODK Central ---
 
-            client.open()
+    client = None
 
-            client.entities.merge(entities_list, entity_list_name='registration_trees', project_id=1, match_keys=['ecosia_site_id'], add_new_properties=True, update_matched=True, delete_not_matched=False, source_label_key='label', source_keys=None,create_source=None, source_size=None)
+    try:
+        client = Client(
+            config_path="/app/tmp/pyodk_config.ini",
+            cache_path="/app/tmp/pyodk_cache.ini"
+        )
 
-            client.close()
+        client.open()
 
-            print(f"Batch at offset {offset} processed.")
+        client.entities.merge(entities_list, entity_list_name='registration_trees', project_id=1, match_keys=['ecosia_site_id'], add_new_properties=True, update_matched=True, delete_not_matched=False, source_label_key='label', source_keys=None,create_source=None, source_size=None)
 
-        except Exception as e:
-            print(f"ODK merge failed for batch at offset {offset}: {e}")
-            # Optionally: implement retry logic here
+        client.close()
+
+        print(f"Batch at offset {offset} processed.")
+
+    except Exception as e:
+        print(f"ODK merge failed for batch at offset {offset}: {e}")
+        # Optionally: implement retry logic here
 
 
-        finally:
-            if client is not None:
-                client.close()  # <-- Always close if it was created
+    finally:
+        if client is not None:
+            client.close()  # <-- Always close if it was created
 
-        offset += batch_size
+    offset += batch_size
 
 
 conn.commit()
