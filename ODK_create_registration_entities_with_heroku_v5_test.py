@@ -209,7 +209,7 @@ while True:
 
     print(f"Processing batch starting at offset {offset} with {len(rows)} rows...")
 
-    #id_list = []
+    id_list = []
     lat_lon_coords = []
     rows_dict = []  # Initialize before try
     # columns = []
@@ -236,17 +236,15 @@ while True:
 
             for lon, lat in geometries.exterior.coords:
                 transformed = transform(flip, Point(lon, lat))
+
                 # creates a list with tuples (coordinates, id):
                 lat_lon_coords.append((transformed.wkt, ecosia_id, ))
+                id_list.append(ecosia_id)
+
 
 
             print('See the list with tuples: ', lat_lon_coords)
 
-            #id_list.append(ecosia_id)
-
-            #print('see if the id and coord are of the same length: ', len(id_list), len(lat_lon_coords))
-
-            #print('test if it is a flat list: ', type(id_list[0]))
 
         except ValueError as ve:
             print(f"Null polygon skipped for ecosia_id={ecosia_id}: {ve}")
@@ -275,7 +273,15 @@ while True:
             ''', lat_lon_coords)
 
         # Select all rows and fetch them all
-        cur.execute('''SELECT * FROM getodk_entities_upload_table_registrations;''')
+        # cur.executemany('''SELECT * FROM getodk_entities_upload_table_registrations
+        # WHERE ecosia_site_id IN %s''',(id_list,))
+
+        placeholders = ','.join(['%s'] * len(id_list))
+
+        query = '''SELECT * FROM getodk_entities_upload_table_registrations
+        WHERE ecosia_site_id IN ({})'''.format(placeholders)
+
+        cur.execute(query, id_list)
 
         conn.commit()
 
