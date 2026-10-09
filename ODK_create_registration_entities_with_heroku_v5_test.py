@@ -227,10 +227,13 @@ while True:
             #geometries = wkt.loads(pol)
             geometries = pol
             print('Geometries check: ', geometries)
+            print('Geometries check: ', type(geometries))
 
             #geometries = [wkt.loads(row[0]) for row in rows]
-            for lon_lat_coords in geometries:
-                lat_lon_coords.append(transform(flip, lon_lat_coords).wkt, ecosia_id)
+            for lon_lat in geometries:
+                lat_lon_coords.append(transform(flip, lon_lat).wkt, ecosia_id)
+
+
 
 
 
