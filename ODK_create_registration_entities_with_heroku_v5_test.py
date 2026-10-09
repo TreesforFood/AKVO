@@ -232,17 +232,7 @@ while True:
             #geometries = [wkt.loads(row[0]) for row in rows]
             #for lon_lat in geometries:
             lat_lon_coords.append((transform(flip, geometries).wkt, ecosia_id))
-
-
-
-
-
-
-            # for lon, lat in geometries.exterior.coords:
-            #     transformed = transform(flip, Point(lon, lat))
-            #
-            #     # creates a list with tuples (coordinates, id):
-            #     lat_lon_coords.append((transformed.wkt, ecosia_id))
+            id_list.append(ecosia_id)
 
             print('See tuples: ', lat_lon_coords)
 
@@ -273,17 +263,17 @@ while True:
                 WHERE ecosia_site_id = %s
             ''', lat_lon_coords)
 
-        # Select all rows and fetch them all
-        # cur.executemany('''SELECT * FROM getodk_entities_upload_table_registrations
-        # WHERE ecosia_site_id IN %s''',(id_list,))
 
-        placeholders = ','.join(['%s'] * len(id_list))
+        placeholders = ','.join(['%s'] * len(lat_lon_coords))
 
         query = '''SELECT * FROM getodk_entities_upload_table_registrations
         WHERE ecosia_site_id IN ({})'''.format(placeholders)
 
-        cur.execute(query, id_list)
+        cur.execute(query, lat_lon_coords)
 
+        # cur.executemany('''SELECT * FROM getodk_entities_upload_table_registrations
+        # # WHERE ecosia_site_id IN %s''', id_list)
+        #
         conn.commit()
 
         rows_dict = cur.fetchall()
