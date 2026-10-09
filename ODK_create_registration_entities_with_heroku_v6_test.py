@@ -229,6 +229,8 @@ while True:
             lat_lon_coords.append((transform(flip, geometries).wkt, ecosia_id))
             id_list.append(ecosia_id)
 
+            print('See length tuples: ', len(lat_lon_coords))
+
 
         except ValueError as ve:
             print(f"Null polygon skipped for ecosia_id={ecosia_id}: {ve}")
@@ -250,12 +252,13 @@ while True:
             UPDATE getodk_entities_upload_table_registrations
             SET geometry = REPLACE(RTRIM(LTRIM(%s,'POLYGON (('),'))'),',',';')::varchar(50000)
             WHERE ecosia_site_id = %s
-        ''', lat_lon_coords)
+            AND polygon LIKE 'POLYGON%'''', lat_lon_coords)
 
     if lat_lon_coords:
         cur.executemany('''UPDATE getodk_entities_upload_table_registrations
         SET geometry = REPLACE(RTRIM(LTRIM(%s,'POINT (('),'))'),',',';')::varchar(50000)
         WHERE ecosia_site_id = %s
+        AND polygon LIKE 'POINT%'
         ''', lat_lon_coords)
 
 
