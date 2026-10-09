@@ -254,7 +254,7 @@ while True:
 
     if lat_lon_coords:
         cur.executemany('''UPDATE getodk_entities_upload_table_registrations
-        SET geometry = REPLACE(RTRIM(LTRIM(geometry,'POINT (('),'))'),',',';')::varchar(50000)
+        SET geometry = REPLACE(RTRIM(LTRIM(%s,'POINT (('),'))'),',',';')::varchar(50000)
         WHERE ecosia_site_id = %s
         ''', lat_lon_coords)
 
