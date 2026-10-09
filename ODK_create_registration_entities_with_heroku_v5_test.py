@@ -225,13 +225,13 @@ while True:
                 raise ValueError(f"Polygon is None for ecosia_id={ecosia_id}")
 
             #geometries = wkt.loads(pol)
-            geometries = pol
+            geometries = wkt.loads(pol)
             print('Geometries check: ', geometries)
             print('Geometries check: ', type(geometries))
 
             #geometries = [wkt.loads(row[0]) for row in rows]
-            for lon_lat in geometries:
-                lat_lon_coords.append(transform(flip, lon_lat).wkt, ecosia_id)
+            #for lon_lat in geometries:
+            lat_lon_coords.append(transform(flip, geometries).wkt, ecosia_id)
 
 
 
