@@ -217,7 +217,7 @@ while True:
     # entities = {}
 
     for pol, ecosia_id in rows:
-        #print(pol) # POLYGON((3 5, 5 6, etc))
+        print(pol) # POLYGON((3 5, 5 6, etc))
         #print(type(pol)) # str type
         try:
 
@@ -225,21 +225,20 @@ while True:
                 raise ValueError(f"Polygon is None for ecosia_id={ecosia_id}")
 
             geometries = wkt.loads(pol)
-            print('Geometries: ', geometries)
-            print(type(geometries))
+            print('Geometries check: ', geometries)
 
-            # Creates error: Error transforming polygon for ecosia_id=scdt-jedt-8kag: 'Polygon' object is not iterable
-            # for lon_lat_coords in geometries:
-            #     lat_lon_coords.append(transform(flip, lon_lat_coords).wkt)
-            #     print('lat_lon_coords: ', lat_lon_coords)
+            #geometries = [wkt.loads(row[0]) for row in rows]
+            for lon_lat_coords in geometries:
+                lat_lon_coords.append(transform(flip, lon_lat_coords).wkt, ecosia_id)
 
 
-            for lon, lat in geometries.exterior.coords:
-                transformed = transform(flip, Point(lon, lat))
 
-                # creates a list with tuples (coordinates, id):
-                lat_lon_coords.append((transformed.wkt, ecosia_id, ))
-                id_list.append(ecosia_id)
+            # for lon, lat in geometries.exterior.coords:
+            #     transformed = transform(flip, Point(lon, lat))
+            #
+            #     # creates a list with tuples (coordinates, id):
+            #     lat_lon_coords.append((transformed.wkt, ecosia_id))
+
                 print('See tuples: ', lat_lon_coords)
 
 
