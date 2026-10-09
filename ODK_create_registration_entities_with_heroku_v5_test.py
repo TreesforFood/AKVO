@@ -225,7 +225,7 @@ while True:
                 raise ValueError(f"Polygon is None for ecosia_id={ecosia_id}")
 
             geometries = wkt.loads(pol)
-            print(geometries)
+            print('Geometries: ', geometries)
             print(type(geometries))
 
             # Creates error: Error transforming polygon for ecosia_id=scdt-jedt-8kag: 'Polygon' object is not iterable
@@ -240,10 +240,7 @@ while True:
                 # creates a list with tuples (coordinates, id):
                 lat_lon_coords.append((transformed.wkt, ecosia_id, ))
                 id_list.append(ecosia_id)
-
-
-
-            print('See the list with tuples: ', lat_lon_coords)
+                print('See tuples: ', lat_lon_coords)
 
 
         except ValueError as ve:
