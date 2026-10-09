@@ -243,7 +243,7 @@ while True:
             #     # creates a list with tuples (coordinates, id):
             #     lat_lon_coords.append((transformed.wkt, ecosia_id))
 
-                print('See tuples: ', lat_lon_coords)
+            print('See tuples: ', lat_lon_coords)
 
 
         except ValueError as ve:
