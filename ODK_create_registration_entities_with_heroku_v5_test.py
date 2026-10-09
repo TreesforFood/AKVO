@@ -224,7 +224,8 @@ while True:
             if pol is None:
                 raise ValueError(f"Polygon is None for ecosia_id={ecosia_id}")
 
-            geometries = wkt.loads(pol)
+            #geometries = wkt.loads(pol)
+            geometries = pol
             print('Geometries check: ', geometries)
 
             #geometries = [wkt.loads(row[0]) for row in rows]
