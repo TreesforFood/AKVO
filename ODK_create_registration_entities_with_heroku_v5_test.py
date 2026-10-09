@@ -265,7 +265,7 @@ while True:
 
 
         # placeholders = ','.join(['%s'] * len(lat_lon_coords))
-        # 
+        #
         # query = '''SELECT * FROM getodk_entities_upload_table_registrations
         # WHERE ecosia_site_id IN ({})'''.format(placeholders)
         #
@@ -319,7 +319,7 @@ while True:
 
         client.open()
 
-        client.entities.merge(entities_list, entity_list_name='registration_trees', project_id=1, match_keys=['ecosia_site_id'], add_new_properties=True, update_matched=True, delete_not_matched=False, source_label_key='label', source_keys=None,create_source=None, source_size=None)
+        client.entities.merge(entities_list, entity_list_name='registration_trees', project_id=1, match_keys=['ecosia_site_id'], add_new_properties=True, update_matched=True, delete_not_matched=True, source_label_key='label', source_keys=None,create_source=None, source_size=None)
 
         client.close()
 
