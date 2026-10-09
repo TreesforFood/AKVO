@@ -253,10 +253,10 @@ while True:
             SET geometry = REPLACE(RTRIM(LTRIM(%s,'POLYGON (('),'))'),',',';')::varchar(50000)
             WHERE polygon LIKE 'POLYGON%' AND ecosia_site_id = %s''', lat_lon_coords) # Use double quotes here because of the ' at the end of %
 
-    if lat_lon_coords:
-        cur.executemany('''UPDATE getodk_entities_upload_table_registrations
-        SET geometry = REPLACE(RTRIM(LTRIM(%s,'POINT (('),'))'),',',';')::varchar(50000)
-        WHERE polygon LIKE 'POINT%' AND ecosia_site_id = %s''', lat_lon_coords) # Use double quotes here because of the ' at the end of %
+    # if lat_lon_coords:
+    #     cur.executemany('''UPDATE getodk_entities_upload_table_registrations
+    #     SET geometry = REPLACE(RTRIM(LTRIM(%s,'POINT (('),'))'),',',';')::varchar(50000)
+    #     WHERE polygon LIKE 'POINT%' AND ecosia_site_id = %s''', lat_lon_coords) # Use double quotes here because of the ' at the end of %
 
 
     id_list = [item[1] for item in lat_lon_coords]
@@ -266,7 +266,6 @@ while True:
     WHERE ecosia_site_id IN ({})'''.format(placeholders)
 
     cur.execute(query, id_list)
-
 
     conn.commit()
 
