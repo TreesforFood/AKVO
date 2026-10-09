@@ -235,6 +235,7 @@ while True:
             id_list.append(ecosia_id)
 
             print('See tuples: ', lat_lon_coords)
+            print('See length tuples: ', len(lat_lon_coords))
 
 
         except ValueError as ve:
@@ -252,23 +253,13 @@ while True:
             WHERE ecosia_site_id = %s
         ''', lat_lon_coords)
 
-        # if lat_lon_coords:
-        #     cur.executemany('''
-        #         UPDATE getodk_entities_upload_table_registrations
-        #         SET geometry = REPLACE(
-        #             REPLACE(
-        #                 REPLACE(%s, 'POLYGON ((', 'POLYGON('),
-        #                 '))', ')'),
-        #             ',', ';')
-        #         WHERE ecosia_site_id = %s
-        #     ''', lat_lon_coords)
 
-        if lat_lon_coords:
-            cur.executemany('''
-                UPDATE getodk_entities_upload_table_registrations
-                SET geometry = REPLACE(RTRIM(LTRIM(%s,'POLYGON (('),'))'),',',';')::varchar(50000)
-                WHERE ecosia_site_id = %s
-            ''', lat_lon_coords)
+    if lat_lon_coords:
+        cur.executemany('''
+            UPDATE getodk_entities_upload_table_registrations
+            SET geometry = REPLACE(RTRIM(LTRIM(%s,'POLYGON (('),'))'),',',';')::varchar(50000)
+            WHERE ecosia_site_id = %s
+        ''', lat_lon_coords)
 
         # cur.execute('''UPDATE getodk_entities_upload_table_registrations
         # SET geometry = REPLACE(RTRIM(LTRIM(geometry,'POLYGON (('),'))'),',',';')::varchar(50000)
