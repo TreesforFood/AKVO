@@ -264,12 +264,12 @@ while True:
             ''', lat_lon_coords)
 
 
-        placeholders = ','.join(['%s'] * len(lat_lon_coords))
-
-        query = '''SELECT * FROM getodk_entities_upload_table_registrations
-        WHERE ecosia_site_id IN ({})'''.format(placeholders)
-
-        cur.execute(query, lat_lon_coords)
+        # placeholders = ','.join(['%s'] * len(lat_lon_coords))
+        # 
+        # query = '''SELECT * FROM getodk_entities_upload_table_registrations
+        # WHERE ecosia_site_id IN ({})'''.format(placeholders)
+        #
+        # cur.execute(query, lat_lon_coords)
 
 
         id_list = [item[1] for item in lat_lon_coords]
