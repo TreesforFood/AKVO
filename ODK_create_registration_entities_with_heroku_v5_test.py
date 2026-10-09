@@ -231,7 +231,8 @@ while True:
 
             #geometries = [wkt.loads(row[0]) for row in rows]
             #for lon_lat in geometries:
-            lat_lon_coords.append(transform(flip, geometries).wkt, ecosia_id)
+            lat_lon_coords.append((transform(flip, geometries).wkt, ecosia_id))
+
 
 
 
