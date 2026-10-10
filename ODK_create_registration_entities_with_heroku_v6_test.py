@@ -213,7 +213,7 @@ while True:
 
     id_list = []
     lat_lon_coords = []
-    rows_dict = []  # Initialize before try
+    #rows_dict = []  # Initialize before try
 
 
     for pol, ecosia_id in rows:
@@ -227,7 +227,7 @@ while True:
 
             #for lon_lat in geometries:
             lat_lon_coords.append((transform(flip, geometries).wkt, ecosia_id))
-            id_list.append(ecosia_id)
+            #id_list.append(ecosia_id)
 
             print('See length tuples: ', len(lat_lon_coords))
 
@@ -251,7 +251,7 @@ while True:
         cur.executemany('''
             UPDATE getodk_entities_upload_table_registrations
             SET geometry = REPLACE(RTRIM(LTRIM(%s,'POLYGON (('),'))'),',',';')::varchar(50000)
-            WHERE polygon LIKE 'POLYGON%' AND ecosia_site_id = %s''', lat_lon_coords) # Use double quotes here because of the ' at the end of %
+            WHERE polygon IS NOT NULL AND polygon LIKE 'POLYGON%' AND ecosia_site_id = %s''', lat_lon_coords) # Use double quotes here because of the ' at the end of %
 
     # if lat_lon_coords:
     #     cur.executemany('''UPDATE getodk_entities_upload_table_registrations
