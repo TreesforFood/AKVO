@@ -258,10 +258,20 @@ while True:
     #         SET geometry = REPLACE(RTRIM(LTRIM(%s,'POLYGON (('),'))'),',',';')::varchar(50000)
     #         WHERE polygon IS NOT NULL AND polygon LIKE 'POLYGON%' AND ecosia_site_id = %s''', lat_lon_coords) # Use double quotes here because of the ' at the end of %
 
-    if lat_lon_coords:
-        cur.executemany('''UPDATE getodk_entities_upload_table_registrations
-        SET geometry = REPLACE(RTRIM(LTRIM(%s, \'POLYGON ((\'), \'))\'), \',\', \';\')::varchar(50000)
-        WHERE polygon IS NOT NULL AND polygon LIKE \'POLYGON%\' AND ecosia_site_id = %s''', lat_lon_coords)
+    # Clean the data in Python
+    cleaned_coords = [
+        (
+            coord.replace('POINT (', '').replace(')', '').replace(',', ';'),
+            site_id
+        )
+        for coord, site_id in lat_lon_coords
+    ]
+
+    cur.executemany("""
+        UPDATE getodk_entities_upload_table_registrations
+        SET geometry = %s::varchar(50000)
+        WHERE polygon IS NOT NULL AND polygon LIKE 'POLYGON%' AND ecosia_site_id = %s
+    """, cleaned_coords)
 
     # if lat_lon_coords:
     #     cur.executemany('''UPDATE getodk_entities_upload_table_registrations
