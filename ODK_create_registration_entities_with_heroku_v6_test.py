@@ -247,31 +247,41 @@ while True:
             WHERE ecosia_site_id = %s
         ''', lat_lon_coords)
 
-    print(type(lat_lon_coords))          # should be list
-    print(len(lat_lon_coords))           # number of rows to update
-    print(len(lat_lon_coords[0]))        # should be 2
-    print(lat_lon_coords[0])             # e.g., ('POLYGON((...))', 123)
-
     # if lat_lon_coords:
     #     cur.executemany('''
     #         UPDATE getodk_entities_upload_table_registrations
     #         SET geometry = REPLACE(RTRIM(LTRIM(%s,'POLYGON (('),'))'),',',';')::varchar(50000)
     #         WHERE polygon IS NOT NULL AND polygon LIKE 'POLYGON%' AND ecosia_site_id = %s''', lat_lon_coords) # Use double quotes here because of the ' at the end of %
 
-    # Clean the data in Python
-    cleaned_coords = [
-        (
-            coord.replace('POINT (', '').replace(')', '').replace(',', ';'),
-            site_id
-        )
-        for coord, site_id in lat_lon_coords
-    ]
+    if lat_lon_coords:
+        cur.execute('''
+            UPDATE getodk_entities_upload_table_registrations
+            SET geometry = REPLACE(RTRIM(LTRIM(polygon,'POLYGON (('),'))'),',',';')::varchar(50000)
+            WHERE polygon LIKE 'POLYGON%';''') # Use double quotes here because of the ' at the end of %
 
-    cur.executemany("""
-        UPDATE getodk_entities_upload_table_registrations
-        SET geometry = %s::varchar(50000)
-        WHERE polygon IS NOT NULL AND polygon LIKE 'POLYGON%' AND ecosia_site_id = %s
-    """, cleaned_coords)
+    if lat_lon_coords:
+        cur.execute('''
+            UPDATE getodk_entities_upload_table_registrations
+            SET geometry = REPLACE(RTRIM(LTRIM(polygon,'POINT (('),'))'),',',';')::varchar(50000)
+            WHERE polygon LIKE 'POINT%';''') # Use double quotes here because of the ' at the end of %
+
+
+
+
+    # # Clean the data in Python
+    # cleaned_coords = [
+    #     (
+    #         coord.replace('POINT (', '').replace(')', '').replace(',', ';'),
+    #         site_id
+    #     )
+    #     for coord, site_id in lat_lon_coords
+    # ]
+    #
+    # cur.executemany('''
+    #     UPDATE getodk_entities_upload_table_registrations
+    #     SET geometry = %s::varchar(50000)
+    #     WHERE polygon IS NOT NULL AND polygon LIKE 'POLYGON%' AND ecosia_site_id = %s
+    # ''', cleaned_coords)
 
     # if lat_lon_coords:
     #     cur.executemany('''UPDATE getodk_entities_upload_table_registrations
@@ -279,13 +289,13 @@ while True:
     #     WHERE polygon LIKE 'POINT%' AND ecosia_site_id = %s''', lat_lon_coords) # Use double quotes here because of the ' at the end of %
 
 
-    id_list = [item[1] for item in lat_lon_coords]
-
-    placeholders = ','.join(['%s'] * len(id_list))
-    query = '''SELECT * FROM getodk_entities_upload_table_registrations
-    WHERE ecosia_site_id IN ({})'''.format(placeholders)
-
-    cur.execute(query, id_list)
+    # id_list = [item[1] for item in lat_lon_coords]
+    #
+    # placeholders = ','.join(['%s'] * len(id_list))
+    # query = '''SELECT * FROM getodk_entities_upload_table_registrations
+    # WHERE ecosia_site_id IN ({})'''.format(placeholders)
+    #
+    # cur.execute(query, id_list)
 
     conn.commit()
 
