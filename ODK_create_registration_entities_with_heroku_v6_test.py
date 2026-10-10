@@ -247,6 +247,11 @@ while True:
             WHERE ecosia_site_id = %s
         ''', lat_lon_coords)
 
+    print(type(lat_lon_coords))          # should be list
+    print(len(lat_lon_coords))           # number of rows to update
+    print(len(lat_lon_coords[0]))        # should be 2
+    print(lat_lon_coords[0])             # e.g., ('POLYGON((...))', 123)
+
     if lat_lon_coords:
         cur.executemany('''
             UPDATE getodk_entities_upload_table_registrations
