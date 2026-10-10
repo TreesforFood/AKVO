@@ -252,11 +252,16 @@ while True:
     print(len(lat_lon_coords[0]))        # should be 2
     print(lat_lon_coords[0])             # e.g., ('POLYGON((...))', 123)
 
+    # if lat_lon_coords:
+    #     cur.executemany('''
+    #         UPDATE getodk_entities_upload_table_registrations
+    #         SET geometry = REPLACE(RTRIM(LTRIM(%s,'POLYGON (('),'))'),',',';')::varchar(50000)
+    #         WHERE polygon IS NOT NULL AND polygon LIKE 'POLYGON%' AND ecosia_site_id = %s''', lat_lon_coords) # Use double quotes here because of the ' at the end of %
+
     if lat_lon_coords:
-        cur.executemany('''
-            UPDATE getodk_entities_upload_table_registrations
-            SET geometry = REPLACE(RTRIM(LTRIM(%s,'POLYGON (('),'))'),',',';')::varchar(50000)
-            WHERE polygon IS NOT NULL AND polygon LIKE 'POLYGON%' AND ecosia_site_id = %s''', lat_lon_coords) # Use double quotes here because of the ' at the end of %
+        cur.executemany('''UPDATE getodk_entities_upload_table_registrations
+        SET geometry = REPLACE(RTRIM(LTRIM(%s, \'POLYGON ((\'), \'))\'), \',\', \';\')::varchar(50000)
+        WHERE polygon IS NOT NULL AND polygon LIKE \'POLYGON%\' AND ecosia_site_id = %s''', lat_lon_coords)
 
     # if lat_lon_coords:
     #     cur.executemany('''UPDATE getodk_entities_upload_table_registrations
