@@ -289,13 +289,13 @@ while True:
     #     WHERE polygon LIKE 'POINT%' AND ecosia_site_id = %s''', lat_lon_coords) # Use double quotes here because of the ' at the end of %
 
 
-    # id_list = [item[1] for item in lat_lon_coords]
-    #
-    # placeholders = ','.join(['%s'] * len(id_list))
-    # query = '''SELECT * FROM getodk_entities_upload_table_registrations
-    # WHERE ecosia_site_id IN ({})'''.format(placeholders)
-    #
-    # cur.execute(query, id_list)
+    id_list = [item[1] for item in lat_lon_coords]
+
+    placeholders = ','.join(['%s'] * len(id_list))
+    query = '''SELECT * FROM getodk_entities_upload_table_registrations
+    WHERE ecosia_site_id IN ({})'''.format(placeholders)
+
+    cur.execute(query, id_list)
 
     conn.commit()
 
