@@ -257,13 +257,13 @@ while True:
         cur.execute('''
             UPDATE getodk_entities_upload_table_registrations
             SET geometry = REPLACE(RTRIM(LTRIM(polygon,'POLYGON (('),'))'),',',';')::varchar(50000)
-            WHERE polygon LIKE 'POLYGON%';''') # Use double quotes here because of the ' at the end of %
+            WHERE geometry LIKE 'POLYGON%';''') # Use double quotes here because of the ' at the end of %
 
     if lat_lon_coords:
         cur.execute('''
             UPDATE getodk_entities_upload_table_registrations
             SET geometry = REPLACE(RTRIM(LTRIM(polygon,'POINT (('),'))'),',',';')::varchar(50000)
-            WHERE polygon LIKE 'POINT%';''') # Use double quotes here because of the ' at the end of %
+            WHERE geometry LIKE 'POINT%';''') # Use double quotes here because of the ' at the end of %
 
 
 
