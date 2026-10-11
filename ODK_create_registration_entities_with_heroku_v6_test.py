@@ -44,7 +44,7 @@ cur.execute('''DROP TABLE IF EXISTS getodk_entities_upload_table_registrations;'
 conn.commit()
 
 
-#######
+###################################
 #Create empty contract list to collect all activated contracts for monitoring
 list_contracts = []
 list_identifiers = []
@@ -126,6 +126,7 @@ for contracts in tuple_contracts:
     count_contracts += 1
     print(count_contracts, contracts)
 
+###################################
 
 # 1. Create the table with the full dataset (no LIMIT)
 cur.execute(
@@ -242,8 +243,7 @@ cur.execute(
     planting_date,
     landscape_element
 
-    FROM temp_contract_overview
-    LIMIT 2000;''') # Later remove this LIMIT 2000. This is for testing!!!
+    FROM temp_contract_overview;''') # Later remove this LIMIT 2000. This is for testing!!!
 
 conn.commit()
 
