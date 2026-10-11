@@ -43,6 +43,90 @@ cur = conn.cursor()
 cur.execute('''DROP TABLE IF EXISTS getodk_entities_upload_table_registrations;''')
 conn.commit()
 
+
+#######
+#Create empty contract list to collect all activated contracts for monitoring
+list_contracts = []
+list_identifiers = []
+
+# Connect to Airtable
+auth_token = os.environ["TOKEN_AIRTABLE"]
+headers = {"Authorization": f"Bearer {auth_token}"}
+url_contracts = os.environ["URL_AIRTABLE_CONTRACTS"]
+response = requests.get(url_contracts, headers=headers)
+data_contracts = response.json()
+
+
+# Pagination function to parse through all Airtable pages (Each Airtable page has 100 rows).
+global offset
+offset = '0'
+result = []
+desired_users = {}
+
+while True :
+    url = "https://api.airtable.com/v0/appkx2PPsqz3axWDy/Contracts"
+
+    try :
+        response= requests.get(url +'?offset=' + offset, headers=headers)
+        response_Table = response.json()
+        records = list(response_Table['records'])
+        result.append(records)
+        #print(records[0]['fields']['Username'] , len(records))
+
+        try :
+            offset = response_Table['offset']
+
+        except Exception as ex:
+            break
+
+    except error as e:
+        print('Error: ', e)
+
+count = 0
+
+# Get the results from the pagination function
+for x in result:
+    for y in x:
+        #print(y)
+        contracts = y['fields']['ID']
+        contract_id = str(contracts)+'.00'
+        #print(contracts)
+        try:
+            confirmation_monitoring = y['fields']['monitor?']
+            #print(confirmation_monitoring)
+            if confirmation_monitoring is True: # Returns true if activated. If not activated it loops into the python Except
+                try:
+                    check_availability_identifiers_akvo = y['fields']['sites for monitor']
+                except KeyError:
+                # Only store contract numbers where no identifier is given. If an identifier is given, no contract number must be added to the list/tuple
+                    list_contracts.append(contract_id)
+                    #tuple_contracts_to_monitor = tuple(list_contracts)
+                    #print("TEST 3 contracts: ", list_contracts)
+                else:
+                    list_identifiers_specific_to_monitor = y['fields']['sites for monitor'].split(",")
+                    count_identifiers = 0
+                    for x in list_identifiers_specific_to_monitor:
+                        list_identifiers.append(x)
+
+        except KeyError:
+            continue
+
+
+tuple_contracts = tuple(list_contracts)
+list_identifiers_clean = []
+for i in list_identifiers:
+    j = ''.join(i.split())  # Removes ALL whitespace (spaces, tabs, newlines, etc.)
+    list_identifiers_clean.append(j)
+
+tuple_identifiers = tuple(list_identifiers_clean)
+
+print(tuple_identifiers)
+count_contracts = 0
+for contracts in tuple_contracts:
+    count_contracts += 1
+    print(count_contracts, contracts)
+
+
 # 1. Create the table with the full dataset (no LIMIT)
 cur.execute(
     '''CREATE TABLE getodk_entities_upload_table_registrations AS
@@ -247,25 +331,25 @@ while True:
             WHERE ecosia_site_id = %s
         ''', lat_lon_coords)
 
-    # if lat_lon_coords:
-    #     cur.executemany('''
-    #         UPDATE getodk_entities_upload_table_registrations
-    #         SET geometry = REPLACE(RTRIM(LTRIM(%s,'POLYGON (('),'))'),',',';')::varchar(50000)
-    #         WHERE polygon IS NOT NULL AND polygon LIKE 'POLYGON%' AND ecosia_site_id = %s''', lat_lon_coords) # Use double quotes here because of the ' at the end of %
 
     if lat_lon_coords:
         cur.execute('''
-            UPDATE getodk_entities_upload_table_registrations
-            SET geometry = REPLACE(RTRIM(LTRIM(polygon,'POLYGON (('),'))'),',',';')::varchar(50000)
-            WHERE geometry LIKE 'POLYGON%';''') # Use double quotes here because of the ' at the end of %
+        UPDATE getodk_entities_upload_table_registrations
+        SET geometry = REPLACE(RTRIM(LTRIM(polygon,'POLYGON (('),'))'),',',';')::varchar(50000)
+        WHERE geometry LIKE 'POLYGON%';''')
 
     if lat_lon_coords:
         cur.execute('''
-            UPDATE getodk_entities_upload_table_registrations
-            SET geometry = REPLACE(RTRIM(LTRIM(polygon,'POINT (('),'))'),',',';')::varchar(50000)
-            WHERE geometry LIKE 'POINT%';''') # Use double quotes here because of the ' at the end of %
+        UPDATE getodk_entities_upload_table_registrations
+        SET geometry = REPLACE(RTRIM(LTRIM(polygon,'POINT (('),'))'),',',';')::varchar(50000)
+        WHERE geometry LIKE 'POINT%';''')
 
-
+    if lat_lon_coords:
+    # Set instances to monitoring by giving them a '1' value. This is the filter for ODK Collect to monitor specific sites
+        cur.execute('''UPDATE getodk_entities_upload_table_registrations
+        SET monitor_check = '1'
+        WHERE ecosia_site_id IN %s OR ecosia_site_id IN %s;''', (tuple_contracts, tuple_identifiers))
+        conn.commit()
 
 
     # # Clean the data in Python
