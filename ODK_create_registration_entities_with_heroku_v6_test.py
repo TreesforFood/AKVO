@@ -243,7 +243,8 @@ cur.execute(
     planting_date,
     landscape_element
 
-    FROM temp_contract_overview;''') # Later remove this LIMIT 2000. This is for testing!!!
+    FROM temp_contract_overview
+    LIMIT 2000;''') # Later remove this LIMIT 2000. This is for testing!!!
 
 conn.commit()
 
@@ -258,7 +259,7 @@ def flip(x, y):
     return y, x
 
 
-batch_size = 100
+batch_size = 1000
 offset = 0
 
 # --- One-time DDL operations (run once, not in loop) ---
@@ -351,28 +352,6 @@ while True:
         WHERE ecosia_site_id IN %s OR ecosia_site_id IN %s;''', (tuple_contracts, tuple_identifiers))
         conn.commit()
 
-
-    # # Clean the data in Python
-    # cleaned_coords = [
-    #     (
-    #         coord.replace('POINT (', '').replace(')', '').replace(',', ';'),
-    #         site_id
-    #     )
-    #     for coord, site_id in lat_lon_coords
-    # ]
-    #
-    # cur.executemany('''
-    #     UPDATE getodk_entities_upload_table_registrations
-    #     SET geometry = %s::varchar(50000)
-    #     WHERE polygon IS NOT NULL AND polygon LIKE 'POLYGON%' AND ecosia_site_id = %s
-    # ''', cleaned_coords)
-
-    # if lat_lon_coords:
-    #     cur.executemany('''UPDATE getodk_entities_upload_table_registrations
-    #     SET geometry = REPLACE(RTRIM(LTRIM(%s,'POINT (('),'))'),',',';')::varchar(50000)
-    #     WHERE polygon LIKE 'POINT%' AND ecosia_site_id = %s''', lat_lon_coords) # Use double quotes here because of the ' at the end of %
-
-
     id_list = [item[1] for item in lat_lon_coords]
 
     placeholders = ','.join(['%s'] * len(id_list))
@@ -432,6 +411,7 @@ while True:
             client.close()  # <-- Always close if it was created
 
     offset += batch_size
+
 
 
 conn.commit()
