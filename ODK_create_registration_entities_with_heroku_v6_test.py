@@ -253,6 +253,7 @@ conn.commit()
 cur.execute('''DELETE FROM getodk_entities_upload_table_registrations WHERE row_number > 1;''')
 conn.commit()
 
+
 # 3. Define the flip function
 def flip(x, y):
     """Flips the x and y coordinate values"""
@@ -336,13 +337,13 @@ while True:
     if lat_lon_coords:
         cur.execute('''
         UPDATE getodk_entities_upload_table_registrations
-        SET geometry = REPLACE(RTRIM(LTRIM(polygon,'POLYGON (('),'))'),',',';')::varchar(50000)
+        SET geometry = REPLACE(RTRIM(LTRIM(geometry,'POLYGON (('),'))'),',',';')::varchar(50000)
         WHERE geometry LIKE 'POLYGON%';''')
 
     if lat_lon_coords:
         cur.execute('''
         UPDATE getodk_entities_upload_table_registrations
-        SET geometry = REPLACE(RTRIM(LTRIM(polygon,'POINT (('),'))'),',',';')::varchar(50000)
+        SET geometry = REPLACE(RTRIM(LTRIM(geometry,'POINT (('),'))'),',',';')::varchar(50000)
         WHERE geometry LIKE 'POINT%';''')
 
     if lat_lon_coords:
