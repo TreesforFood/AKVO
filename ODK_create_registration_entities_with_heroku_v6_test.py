@@ -243,8 +243,7 @@ cur.execute(
     planting_date,
     landscape_element
 
-    FROM temp_contract_overview
-    LIMIT 2000;''') # Later remove this LIMIT 2000. This is for testing!!!
+    FROM temp_contract_overview;''') # Later remove this LIMIT 2000. This is for testing!!!
 
 conn.commit()
 
@@ -260,9 +259,6 @@ def flip(x, y):
     return y, x
 
 
-batch_size = 1000
-offset = 0
-
 # --- One-time DDL operations (run once, not in loop) ---
 cur.execute('''
     ALTER TABLE getodk_entities_upload_table_registrations
@@ -277,9 +273,18 @@ cur.execute('''
 ''')
 conn.commit()
 
+cur.close()
 
+
+batch_size = 2000
+offset = 0
 
 while True:
+
+    # Connect to the Postgresql database on Heroku
+    conn = psycopg2.connect(os.environ["DATABASE_URL"], sslmode='require')
+    cur = conn.cursor()
+
     cur.execute('''
         SELECT polygon, ecosia_site_id
         FROM getodk_entities_upload_table_registrations
@@ -370,12 +375,13 @@ while True:
 
     columns = []
     entities_list = []
-    entities = {}
+    #entities = {}
 
     for column in cur.description:
         print('Column: ', column)
         columns.append(column[0].lower())
     for row in rows_dict:
+        entities = {}
         for i in range(len(row)):
             entities[columns[i]] = row[i]
             if isinstance(row[i], str):
@@ -402,6 +408,8 @@ while True:
 
         print(f"Batch at offset {offset} processed.")
 
+        entities_list = []
+
     except Exception as e:
         print(f"ODK merge failed for batch at offset {offset}: {e}")
         # Optionally: implement retry logic here
@@ -412,6 +420,8 @@ while True:
             client.close()  # <-- Always close if it was created
 
     offset += batch_size
+
+    cur.close()
 
 
 
