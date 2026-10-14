@@ -339,7 +339,7 @@ while True:
             WHERE ecosia_site_id = %s
         ''', lat_lon_coords)
 
-    
+
     if lat_lon_coords:
         cur.execute('''
         UPDATE getodk_entities_upload_table_registrations
@@ -427,11 +427,11 @@ while True:
             client.close()  # <-- Always close if it was created
 
 
-    #     # --- CRITICAL: Free all memory before next iteration ---
-    # entities_list.clear()
-    # rows_dict.clear() if isinstance(rows_dict, list) else None
-    # lat_lon_coords.clear()
-    # del entities_list, rows_dict, lat_lon_coords
+        # --- CRITICAL: Free all memory before next iteration ---
+    entities_list.clear()
+    rows_dict.clear() if isinstance(rows_dict, list) else None
+    lat_lon_coords.clear()
+    del entities_list, rows_dict, lat_lon_coords
 
     offset += batch_size
 
