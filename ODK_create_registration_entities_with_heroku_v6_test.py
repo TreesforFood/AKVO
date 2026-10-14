@@ -367,6 +367,8 @@ while True:
 
         conn.commit()
 
+    id_list = [item[1] for item in lat_lon_coords]
+
     placeholders = ','.join(['%s'] * len(id_list))
     query = '''SELECT * FROM getodk_entities_upload_table_registrations
     WHERE ecosia_site_id IN ({})'''.format(placeholders)
