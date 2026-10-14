@@ -417,7 +417,7 @@ while True:
 
         client.close()
 
-        print(f"Batch at offset {offset} processed.")
+        print(f"Last batch of ({batch_size}) instances at offset {offset} processed.")
 
         entities_list = []
 
