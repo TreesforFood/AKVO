@@ -43,7 +43,6 @@ cur = conn.cursor()
 ################################## GET FIRST DOWNLOAD URL FROM AKVO (REGISTRATION DATA)
 
 initial_url_registration_data = 'https://api-auth0.akvo.org/flow/orgs/ecosia/form_instances?survey_id=31840001&form_id=48090001&page_size=200'
-print('initial_url_registration_data: ',initial_url_registration_data)
 #initial_sync_request = 'https://api-auth0.akvo.org/flow/orgs/ecosia/sync?initial=true' # with this link, you get the first page with the NextUrl in it. This URL is being send by an api call.
 
 cur.execute('''CREATE TABLE IF NOT EXISTS temporary_url_download_table (id SERIAL PRIMARY KEY, download_url TEXT);''')
@@ -299,8 +298,9 @@ else:
                 geom_get = level1['responses']['1960007'][0]['50110008'] # Up to this level it can go wrong (due to empty entry)
                 if geom_get != None:
                     geom_get = level1['responses']['1960007'][0]['50110008']['features'][0].get('geometry','')
-                    area_ha = area(geom_get)
-                    area_ha = round((area_ha/10000),3)
+                    # area_ha = area(geom_get)
+                    # area_ha = round((area_ha/10000),3)
+                    area_ha = round(abs(area_ha / 10000), 3) # This prevents negative values
                     geometry = convert.geojson_to_wkt(geom_get)
                     get_geom_type = geometry.split(' ',1)
 
