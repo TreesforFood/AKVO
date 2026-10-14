@@ -277,7 +277,7 @@ conn.commit()
 cur.close()
 
 
-batch_size = 2000
+batch_size = 500
 offset = 0
 
 while True:
