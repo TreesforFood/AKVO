@@ -244,6 +244,7 @@ cur.execute(
     landscape_element
 
     FROM temp_contract_overview
+    ORDER BY row_number
     LIMIT 2000;''') # Later remove this LIMIT 2000. This is for testing!!!
 
 conn.commit()
@@ -293,6 +294,7 @@ while True:
           AND name_partner IS NOT NULL
           AND contract_number IS NOT NULL
           AND ecosia_site_id IS NOT NULL
+          ORDER BY row_number ASC
         LIMIT %s OFFSET %s
     ''', (batch_size, offset))
 
