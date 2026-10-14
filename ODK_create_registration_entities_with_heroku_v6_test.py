@@ -345,7 +345,7 @@ while True:
         UPDATE getodk_entities_upload_table_registrations
         SET geometry = REPLACE(RTRIM(LTRIM(geometry,'POLYGON (('),'))'),',',';')::varchar(50000)
         WHERE geometry LIKE 'POLYGON%'
-        AND ecosia_site_id = ANY(%s)''', (ecosia_ids,))
+        AND ecosia_site_id = ANY(%s)''', (ecosia_id,))
 
 
     if lat_lon_coords:
@@ -353,7 +353,7 @@ while True:
         UPDATE getodk_entities_upload_table_registrations
         SET geometry = REPLACE(RTRIM(LTRIM(geometry,'POINT (('),'))'),',',';')::varchar(50000)
         WHERE geometry LIKE 'POINT%'
-        AND ecosia_site_id = ANY(%s)''', (ecosia_ids,))
+        AND ecosia_site_id = ANY(%s)''', (ecosia_id,))
 
     if lat_lon_coords:
     # Set instances to monitoring by giving them a '1' value. This is the filter for ODK Collect to monitor specific sites
