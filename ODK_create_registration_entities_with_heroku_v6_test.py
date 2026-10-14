@@ -345,22 +345,27 @@ while True:
         cur.execute('''
         UPDATE getodk_entities_upload_table_registrations
         SET geometry = REPLACE(RTRIM(LTRIM(geometry,'POLYGON (('),'))'),',',';')::varchar(50000)
-        WHERE geometry LIKE 'POLYGON%'
-        AND ecosia_site_id = ANY(%s)''', (tuple(id_list),))
+        WHERE geometry LIKE 'POLYGON%';''')
+        #AND ecosia_site_id = ANY(%s)''', (tuple(id_list),))
+
+        conn.commit()
 
 
     if lat_lon_coords:
         cur.execute('''
         UPDATE getodk_entities_upload_table_registrations
         SET geometry = REPLACE(RTRIM(LTRIM(geometry,'POINT (('),'))'),',',';')::varchar(50000)
-        WHERE geometry LIKE 'POINT%'
-        AND ecosia_site_id = ANY(%s)''', (tuple(id_list),))
+        WHERE geometry LIKE 'POINT%';''')
+        #AND ecosia_site_id = ANY(%s)''', (tuple(id_list),))
+
+        conn.commit()
 
     if lat_lon_coords:
     # Set instances to monitoring by giving them a '1' value. This is the filter for ODK Collect to monitor specific sites
         cur.execute('''UPDATE getodk_entities_upload_table_registrations
         SET monitor_check = '1'
         WHERE ecosia_site_id IN %s OR ecosia_site_id IN %s;''', (tuple_contracts, tuple_identifiers))
+
         conn.commit()
 
     placeholders = ','.join(['%s'] * len(id_list))
