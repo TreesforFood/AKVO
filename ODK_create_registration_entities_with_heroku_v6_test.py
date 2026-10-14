@@ -343,13 +343,16 @@ while True:
         cur.execute('''
         UPDATE getodk_entities_upload_table_registrations
         SET geometry = REPLACE(RTRIM(LTRIM(geometry,'POLYGON (('),'))'),',',';')::varchar(50000)
-        WHERE geometry LIKE 'POLYGON%';''')
+        WHERE geometry LIKE 'POLYGON%'
+        AND ecosia_site_id = ANY(%s)''', (ecosia_ids,))
+
 
     if lat_lon_coords:
         cur.execute('''
         UPDATE getodk_entities_upload_table_registrations
         SET geometry = REPLACE(RTRIM(LTRIM(geometry,'POINT (('),'))'),',',';')::varchar(50000)
-        WHERE geometry LIKE 'POINT%';''')
+        WHERE geometry LIKE 'POINT%'
+        AND ecosia_site_id = ANY(%s)''', (ecosia_ids,))
 
     if lat_lon_coords:
     # Set instances to monitoring by giving them a '1' value. This is the filter for ODK Collect to monitor specific sites
@@ -419,9 +422,17 @@ while True:
         if client is not None:
             client.close()  # <-- Always close if it was created
 
+
+        # --- CRITICAL: Free all memory before next iteration ---
+    entities_list.clear()
+    rows_dict.clear() if isinstance(rows_dict, list) else None
+    lat_lon_coords.clear()
+    del entities_list, rows_dict, lat_lon_coords
+
     offset += batch_size
 
     cur.close()
+    conn.close()
 
 
 
