@@ -244,8 +244,7 @@ cur.execute(
     landscape_element
 
     FROM temp_contract_overview
-    ORDER BY row_number
-    LIMIT 2000;''') # Later remove this LIMIT 2000. This is for testing!!!
+    ORDER BY row_number;''') # Later remove this LIMIT 2000. This is for testing!!!
 
 conn.commit()
 
