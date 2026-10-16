@@ -3091,6 +3091,8 @@ ON odk_tree_monitoring_main.submissionid_odk = odk_tree_monitoring_pcq.submissio
 WHERE odk_tree_monitoring_pcq.tree_distance_q4 IS NOT NULL),
 
 
+
+
 -- Get all PCQ MONITORIG HEIGHT values into 1 column in order to calculate the average
 merge_pcq_monitoring_hgt AS (SELECT
 odk_tree_monitoring_main.ecosia_site_id,
@@ -9365,11 +9367,13 @@ DROP POLICY IF EXISTS ecosia_edit_policy_points ON akvo_tree_registration_areas_
 --ingevoegd:
 DROP POLICY IF EXISTS ecosia_edit_policy ON qgis_tree_registration_areas;
 DROP POLICY IF EXISTS ecosia_edit_policy ON qgis_tree_registration_points;
+DROP POLICY IF EXISTS ecosia_edit_policy ON qgis_repaired_self_intersection;
 ---
 
 DROP POLICY IF EXISTS ecosia_edit_policy ON akvo_tree_registration_areas_edits;
 DROP POLICY IF EXISTS ecosia_edit_policy ON superset_ecosia_tree_registration_photos;
 DROP POLICY IF EXISTS ecosia_edit_policy ON kanop_chloris_uploads_spatial_overview;
+
 
 -- Revoke and grant privileges
 REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA public FROM ecosia_editing;
@@ -9388,6 +9392,7 @@ GRANT UPDATE, DELETE ON ALL TABLES IN SCHEMA heroku_ext TO ecosia_editing;
 --ingevoegd:
 GRANT SELECT ON TABLE public.qgis_tree_registration_areas TO ecosia_editing;
 GRANT SELECT ON TABLE public.qgis_tree_registration_points TO ecosia_editing;
+GRANT SELECT ON TABLE public.qgis_repaired_self_intersection TO ecosia_editing;
 ---
 
 GRANT SELECT ON TABLE public.photo_locations TO ecosia_editing;
@@ -9403,23 +9408,19 @@ GRANT SELECT ON spatial_ref_sys TO ecosia_editing;
 --ingevoegd:
 ALTER TABLE qgis_tree_registration_areas ENABLE ROW LEVEL SECURITY;
 ALTER TABLE qgis_tree_registration_points ENABLE ROW LEVEL SECURITY;
+ALTER TABLE qgis_repaired_self_intersection ENABLE ROW LEVEL SECURITY;
 --
 
 ALTER TABLE superset_ecosia_tree_registration_photos ENABLE ROW LEVEL SECURITY;
 ALTER TABLE kanop_chloris_uploads_spatial_overview ENABLE ROW LEVEL SECURITY;
 
--- Create policies
---CREATE POLICY ecosia_edit_policy_polygons ON akvo_tree_registration_areas_edits
---    FOR ALL
---    TO ecosia_editing
---    USING (polygon IS NULL);
-
---CREATE POLICY ecosia_edit_policy_points ON akvo_tree_registration_areas_edits
---    FOR ALL
---    TO ecosia_editing
---    USING (polygon IS NOT NULL);
 
 --- ingevoegd:
+CREATE POLICY ecosia_edit_policy ON qgis_repaired_self_intersection
+    FOR ALL
+    TO ecosia_editing
+    USING (true);
+	
 CREATE POLICY ecosia_edit_policy ON qgis_tree_registration_areas
     FOR ALL
     TO ecosia_editing
