@@ -7,7 +7,7 @@ cur = conn.cursor()
 
 drop_tables = '''DROP TABLE IF EXISTS qgis_repaired_self_intersection;'''
 
-create_table = '''CREATE TABLE qgis_repaired_self_intersection (fid SERIAL PRIMARY KEY, identifier_akvo TEXT, valid_polygon TEXT, error_detected TEXT, original_type TEXT, repaired_type TEXT, repaired_polygon geography(POLYGON, 4326)));'''
+create_table = '''CREATE TABLE qgis_repaired_self_intersection (fid SERIAL PRIMARY KEY, identifier_akvo TEXT, valid_polygon TEXT, error_detected TEXT, original_type TEXT, repaired_type TEXT, repaired_polygon geography(POLYGON, 4326));'''
 
 conn.commit()
 
