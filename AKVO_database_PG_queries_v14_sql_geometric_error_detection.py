@@ -7,7 +7,7 @@ cur = conn.cursor()
 
 drop_tables = '''DROP TABLE IF EXISTS qgis_repaired_self_intersection;'''
 
-create_table = '''CREATE TABLE qgis_repaired_self_intersection (fid SERIAL PRIMARY KEY, identifier_akvo TEXT, valid_polygon TEXT, error_detected TEXT, original_type TEXT, repaired_type TEXT, repaired_polygon geography(POLYGON, 4326));'''
+create_table = '''CREATE TABLE qgis_repaired_self_intersection (fid SERIAL PRIMARY KEY, identifier_akvo TEXT, valid_polygon TEXT, error_detected TEXT, original_type TEXT, repaired_type TEXT, repaired_polygon geography(MultiPolygon, 4326));'''
 
 conn.commit()
 
@@ -30,22 +30,15 @@ WITH detect_repair_self_intersections AS (SELECT
     ST_IsValidReason(polygon::geometry) AS validity_reason,
     ST_GeometryType(polygon::geometry) AS original_type,
     ST_GeometryType(ST_MakeValid(polygon::geometry, 'method=structure')) AS repaired_type,
-	ST_MakeValid(polygon::geometry, 'method=structure') AS repaired_polygon
+	ST_Multi(ST_MakeValid(polygon::geometry, 'method=structure')) AS repaired_polygon
 FROM akvo_tree_registration_areas_updated
 WHERE polygon IS NOT NULL
 AND ST_IsValid(polygon::geometry) = false)
 
-UPDATE qgis_repaired_self_intersection
-SET
-    identifier_akvo = d.identifier_akvo,
-    valid_polygon = d.is_valid,
-    error_detected = d.validity_reason,
-    original_type = d.original_type,
-    repaired_type = d.repaired_type,
-    repaired_polygon = d.repaired_polygon
-FROM detect_repair_self_intersections d
-WHERE qgis_repaired_self_intersection.identifier_akvo = d.identifier_akvo;'''
-
+INSERT INTO qgis_repaired_self_intersection (identifier_akvo, valid_polygon, error_detected, original_type, repaired_type, repaired_polygon)
+SELECT identifier_akvo, is_valid, validity_reason, original_type, repaired_type, repaired_polygon
+FROM detect_repair_self_intersections
+WHERE ST_GeometryType(repaired_polygon) IN ('ST_Polygon', 'ST_MultiPolygon');'''
 
 
 detect_self_intersections = '''
