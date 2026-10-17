@@ -438,7 +438,7 @@ while True:
     del entities_list, rows_dict, lat_lon_coords, id_list
 
     offset += batch_size
-    print(offset)
+    print('offset: ', offset)
 
     cur.close()
     conn.close()
