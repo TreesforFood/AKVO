@@ -336,7 +336,7 @@ while True:
 
     # --- Batch UPDATE using executemany ---
     if lat_lon_coords:
-        id_tuple = tuple(id_list)
+        id_list = [item[1] for item in lat_lon_coords]
 
     # --- Batch UPDATE using executemany (much faster) ---
     if lat_lon_coords:
@@ -351,8 +351,7 @@ while True:
         cur.execute('''
         UPDATE getodk_entities_upload_table_registrations
         SET geometry = REPLACE(RTRIM(LTRIM(geometry,'POLYGON (('),'))'),',',';')::varchar(50000)
-        WHERE geometry LIKE 'POLYGON%' AND ecosia_site_id IN %s;''', (id_tuple,))
-        #AND ecosia_site_id = ANY(%s)''', (tuple(id_list),))
+        WHERE geometry LIKE 'POLYGON%' AND ecosia_site_id = ANY(%s)''', (id_list,))
 
         conn.commit()
 
@@ -361,7 +360,7 @@ while True:
         cur.execute('''
         UPDATE getodk_entities_upload_table_registrations
         SET geometry = REPLACE(RTRIM(LTRIM(geometry,'POINT (('),'))'),',',';')::varchar(50000)
-        WHERE geometry LIKE 'POINT%' AND ecosia_site_id IN %s;''', (id_tuple,))
+        WHERE geometry LIKE 'POINT%' AND ecosia_site_id = ANY(%s)''', (id_list,))
         #AND ecosia_site_id = ANY(%s)''', (tuple(id_list),))
 
         conn.commit()
