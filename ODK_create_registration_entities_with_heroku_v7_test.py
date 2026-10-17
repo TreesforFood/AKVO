@@ -351,7 +351,7 @@ while True:
         cur.execute('''
         UPDATE getodk_entities_upload_table_registrations
         SET geometry = REPLACE(RTRIM(LTRIM(geometry,'POLYGON (('),'))'),',',';')::varchar(50000)
-        WHERE geometry LIKE 'POLYGON%';''', (id_tuple,))
+        WHERE geometry LIKE 'POLYGON%' AND ecosia_site_id IN %s;''', (id_tuple,))
         #AND ecosia_site_id = ANY(%s)''', (tuple(id_list),))
 
         conn.commit()
@@ -361,7 +361,7 @@ while True:
         cur.execute('''
         UPDATE getodk_entities_upload_table_registrations
         SET geometry = REPLACE(RTRIM(LTRIM(geometry,'POINT (('),'))'),',',';')::varchar(50000)
-        WHERE geometry LIKE 'POINT%';''', (id_tuple,))
+        WHERE geometry LIKE 'POINT%' AND ecosia_site_id IN %s;''', (id_tuple,))
         #AND ecosia_site_id = ANY(%s)''', (tuple(id_list),))
 
         conn.commit()
