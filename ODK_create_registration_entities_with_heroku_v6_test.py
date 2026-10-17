@@ -284,8 +284,8 @@ offset = 0
 while True:
 
     # Connect to the Postgresql database on Heroku
-    # conn = psycopg2.connect(os.environ["DATABASE_URL"], sslmode='require')
-    # cur = conn.cursor()
+    conn = psycopg2.connect(os.environ["DATABASE_URL"], sslmode='require')
+    cur = conn.cursor()
 
     cur.execute('''
         SELECT polygon, ecosia_site_id
