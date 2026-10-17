@@ -274,7 +274,7 @@ cur.execute('''
 ''')
 conn.commit()
 
-cur.close()
+#cur.close()
 
 
 batch_size = 500
@@ -283,8 +283,8 @@ offset = 0
 while True:
 
     # Connect to the Postgresql database on Heroku
-    conn = psycopg2.connect(os.environ["DATABASE_URL"], sslmode='require')
-    cur = conn.cursor()
+    # conn = psycopg2.connect(os.environ["DATABASE_URL"], sslmode='require')
+    # cur = conn.cursor()
 
     cur.execute('''
         SELECT polygon, ecosia_site_id
@@ -440,7 +440,7 @@ while True:
     offset += batch_size
     print('offset: ', offset)
 
-    cur.close()
+    #cur.close()
     conn.close()
 
 
