@@ -454,7 +454,6 @@ while True:
     #conn.close()
 
 
-finally:
-    # Close connection ONLY when the while loop breaks or crashes entirely
-    conn.close()
-    print("Database connection successfully closed.")
+# Close connection ONLY when the while loop breaks or crashes entirely
+conn.close()
+print("Database connection successfully closed.")
