@@ -10,6 +10,7 @@ import psycopg2
 from sqlalchemy import create_engine
 import requests
 import os
+import gc
 
 # Retrieve environment variables
 base_url = "https://ecosia.getodk.cloud"
@@ -432,13 +433,17 @@ while True:
 
         # --- CRITICAL: Free all memory before next iteration ---
     entities_list.clear()
-    rows_dict.clear() if isinstance(rows_dict, list) else None
+    #rows_dict.clear() if isinstance(rows_dict, list) else None
+    rows_dict = []
     id_list.clear()
     lat_lon_coords.clear()
-    del entities_list, rows_dict, lat_lon_coords, id_list
+    #del entities_list, rows_dict, lat_lon_coords, id_list
+
+    # 2. Force Python to immediately release this memory back to the OS
+    gc.collect()
 
     offset += batch_size
-    print('offset: ', offset)
+    print('Next offset: ', offset)
 
     #cur.close()
     conn.close()
