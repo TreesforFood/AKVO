@@ -445,8 +445,8 @@ while True:
     offset += batch_size
     print('Next offset: ', offset)
 
-    #cur.close()
-    conn.close()
+    cur.close()
+    #conn.close()
 
 
 
