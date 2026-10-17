@@ -243,8 +243,8 @@ cur.execute(
     planting_date,
     landscape_element
 
-    FROM temp_contract_overview
-    ORDER BY row_number;''') # Later remove this LIMIT 2000. This is for testing!!!
+    FROM temp_contract_overview;''')
+    #ORDER BY row_number;''') # Later remove this LIMIT 2000. This is for testing!!!
 
 conn.commit()
 
@@ -433,10 +433,12 @@ while True:
         # --- CRITICAL: Free all memory before next iteration ---
     entities_list.clear()
     rows_dict.clear() if isinstance(rows_dict, list) else None
+    id_list.clear()
     lat_lon_coords.clear()
-    del entities_list, rows_dict, lat_lon_coords
+    del entities_list, rows_dict, lat_lon_coords, id_list
 
     offset += batch_size
+    print(offset)
 
     cur.close()
     conn.close()
