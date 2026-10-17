@@ -283,20 +283,25 @@ offset = 0
 
 # Connect to the Postgresql database on Heroku
 conn = psycopg2.connect(os.environ["DATABASE_URL"], sslmode='require')
-cur = conn.cursor()
+# cur = conn.cursor()
 
 while True:
+    # Open a fresh cursor for this specific batch iteration
+    cur = conn.cursor()
 
     cur.execute('''
         SELECT polygon, ecosia_site_id
         FROM getodk_entities_upload_table_registrations
         WHERE polygon IS NOT NULL
-          AND name_partner IS NOT NULL
-          AND contract_number IS NOT NULL
-          AND ecosia_site_id IS NOT NULL
+        AND name_partner IS NOT NULL
+        AND contract_number IS NOT NULL
+        AND ecosia_site_id IS NOT NULL
+        AND (monitor_check IS NULL OR monitor_check != '1')
+            ORDER BY row_number ASC
+            LIMIT %s
           ORDER BY row_number ASC
-        LIMIT %s OFFSET %s
-    ''', (batch_size, offset))
+        LIMIT %s
+    ''', (batch_size,))
 
     rows = cur.fetchall()
 
