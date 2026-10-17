@@ -298,10 +298,7 @@ while True:
         AND ecosia_site_id IS NOT NULL
         AND (monitor_check IS NULL OR monitor_check != '1')
             ORDER BY row_number ASC
-            LIMIT %s
-          ORDER BY row_number ASC
-        LIMIT %s
-    ''', (batch_size,))
+            LIMIT %s;''', (batch_size,))
 
     rows = cur.fetchall()
 
