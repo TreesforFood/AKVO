@@ -3,6 +3,7 @@ from shapely import wkb
 from shapely.ops import transform
 from shapely.geometry import shape
 from shapely.geometry import Point
+import psycopg2.extras
 from pyodk.client import Client
 import pandas as pd
 import requests
@@ -286,173 +287,179 @@ conn = psycopg2.connect(os.environ["DATABASE_URL"], sslmode='require')
 # cur = conn.cursor()
 
 while True:
-    # Open a fresh cursor for this specific batch iteration
-    cur = conn.cursor()
+    ## Open a fresh cursor for this specific batch iteration
+    #cur = conn.cursor()
 
-    cur.execute('''
-        SELECT polygon, ecosia_site_id
-        FROM getodk_entities_upload_table_registrations
-        WHERE polygon IS NOT NULL
-        AND name_partner IS NOT NULL
-        AND contract_number IS NOT NULL
-        AND ecosia_site_id IS NOT NULL
-        AND (monitor_check IS NULL OR monitor_check != '1')
-            ORDER BY row_number ASC
-            LIMIT %s;''', (batch_size,))
+    # Declare a unique NAME for the cursor to force PostgreSQL to make it a Server-Side Cursor
+    # This keeps row data on the database server rather than caching it all in your Python RAM
+    with conn.cursor(name='server_side_batch_fetch_cursor') as cur:
+        # Optimize fetching speed over the network
+        cur.itersize = batch_size
 
-    rows = cur.fetchmany(batch_size)
+        cur.execute('''
+            SELECT polygon, ecosia_site_id
+            FROM getodk_entities_upload_table_registrations
+            WHERE polygon IS NOT NULL
+            AND name_partner IS NOT NULL
+            AND contract_number IS NOT NULL
+            AND ecosia_site_id IS NOT NULL
+            AND (monitor_check IS NULL OR monitor_check != '1')
+                ORDER BY row_number ASC
+                LIMIT %s;''', (batch_size,))
 
-    if not rows:
-        break
+        rows = cur.fetchmany(batch_size)
 
-    print(f"Processing batch starting at offset {offset} with {len(rows)} rows...")
+        if not rows:
+            break
 
-    id_list = []
-    lat_lon_coords = []
-    #rows_dict = []  # Initialize before try
+        print(f"Processing batch starting at offset {offset} with {len(rows)} rows...")
 
-
-    for pol, ecosia_id in rows:
-
-        try:
-
-            if pol is None:
-                raise ValueError(f"Polygon is None for ecosia_id={ecosia_id}")
-
-            geometries = wkt.loads(pol)
-
-            #for lon_lat in geometries:
-            lat_lon_coords.append((transform(flip, geometries).wkt, ecosia_id))
-            id_list.append(ecosia_id)
-
-            print('See length tuples: ', len(lat_lon_coords))
+        id_list = []
+        lat_lon_coords = []
+        #rows_dict = []  # Initialize before try
 
 
-        except ValueError as ve:
-            print(f"Null polygon skipped for ecosia_id={ecosia_id}: {ve}")
-            continue
-        except Exception as e:
-            print(f"Error transforming polygon for ecosia_id={ecosia_id}: {e}")
-            continue
+        for pol, ecosia_id in rows:
+
+            try:
+
+                if pol is None:
+                    raise ValueError(f"Polygon is None for ecosia_id={ecosia_id}")
+
+                geometries = wkt.loads(pol)
+
+                #for lon_lat in geometries:
+                lat_lon_coords.append((transform(flip, geometries).wkt, ecosia_id))
+                id_list.append(ecosia_id)
+
+                print('See length tuples: ', len(lat_lon_coords))
 
 
-    # --- Batch UPDATE using executemany ---
-    if lat_lon_coords:
+            except ValueError as ve:
+                print(f"Null polygon skipped for ecosia_id={ecosia_id}: {ve}")
+                continue
+            except Exception as e:
+                print(f"Error transforming polygon for ecosia_id={ecosia_id}: {e}")
+                continue
+
+
+        # --- Batch UPDATE using executemany ---
+        if lat_lon_coords:
+            id_list = [item[1] for item in lat_lon_coords]
+
+        # --- Batch UPDATE using executemany (much faster) ---
+        if lat_lon_coords:
+            cur.executemany('''
+                UPDATE getodk_entities_upload_table_registrations
+                SET geometry = %s
+                WHERE ecosia_site_id = %s
+            ''', lat_lon_coords)
+
+
+        if lat_lon_coords:
+            cur.execute('''
+            UPDATE getodk_entities_upload_table_registrations
+            SET geometry = REPLACE(RTRIM(LTRIM(geometry,'POLYGON (('),'))'),',',';')::varchar(50000)
+            WHERE geometry LIKE 'POLYGON%%' AND ecosia_site_id = ANY(%s)''', (id_list,))
+
+            conn.commit()
+
+
+        if lat_lon_coords:
+            cur.execute('''
+            UPDATE getodk_entities_upload_table_registrations
+            SET geometry = REPLACE(RTRIM(LTRIM(geometry,'POINT (('),'))'),',',';')::varchar(50000)
+            WHERE geometry LIKE 'POINT%%' AND ecosia_site_id = ANY(%s)''', (id_list,))
+            #AND ecosia_site_id = ANY(%s)''', (tuple(id_list),))
+
+            conn.commit()
+
+        if lat_lon_coords:
+        # Set instances to monitoring by giving them a '1' value. This is the filter for ODK Collect to monitor specific sites
+            cur.execute('''UPDATE getodk_entities_upload_table_registrations
+            SET monitor_check = '1'
+            WHERE ecosia_site_id IN %s OR ecosia_site_id IN %s;''', (tuple_contracts, tuple_identifiers))
+
+            conn.commit()
+
         id_list = [item[1] for item in lat_lon_coords]
 
-    # --- Batch UPDATE using executemany (much faster) ---
-    if lat_lon_coords:
-        cur.executemany('''
-            UPDATE getodk_entities_upload_table_registrations
-            SET geometry = %s
-            WHERE ecosia_site_id = %s
-        ''', lat_lon_coords)
+        placeholders = ','.join(['%s'] * len(id_list))
+        query = '''SELECT * FROM getodk_entities_upload_table_registrations
+        WHERE ecosia_site_id IN ({})'''.format(placeholders)
 
-
-    if lat_lon_coords:
-        cur.execute('''
-        UPDATE getodk_entities_upload_table_registrations
-        SET geometry = REPLACE(RTRIM(LTRIM(geometry,'POLYGON (('),'))'),',',';')::varchar(50000)
-        WHERE geometry LIKE 'POLYGON%%' AND ecosia_site_id = ANY(%s)''', (id_list,))
+        cur.execute(query, id_list)
 
         conn.commit()
 
-
-    if lat_lon_coords:
-        cur.execute('''
-        UPDATE getodk_entities_upload_table_registrations
-        SET geometry = REPLACE(RTRIM(LTRIM(geometry,'POINT (('),'))'),',',';')::varchar(50000)
-        WHERE geometry LIKE 'POINT%%' AND ecosia_site_id = ANY(%s)''', (id_list,))
-        #AND ecosia_site_id = ANY(%s)''', (tuple(id_list),))
-
-        conn.commit()
-
-    if lat_lon_coords:
-    # Set instances to monitoring by giving them a '1' value. This is the filter for ODK Collect to monitor specific sites
-        cur.execute('''UPDATE getodk_entities_upload_table_registrations
-        SET monitor_check = '1'
-        WHERE ecosia_site_id IN %s OR ecosia_site_id IN %s;''', (tuple_contracts, tuple_identifiers))
-
-        conn.commit()
-
-    id_list = [item[1] for item in lat_lon_coords]
-
-    placeholders = ','.join(['%s'] * len(id_list))
-    query = '''SELECT * FROM getodk_entities_upload_table_registrations
-    WHERE ecosia_site_id IN ({})'''.format(placeholders)
-
-    cur.execute(query, id_list)
-
-    conn.commit()
-
-    rows_dict = cur.fetchall()
+        rows_dict = cur.fetchall()
 
 
-    # Convert the postgres data into a dictionary and place these dictionaries into a list
+        # Convert the postgres data into a dictionary and place these dictionaries into a list
 
-    columns = []
-    entities_list = []
-    #entities = {}
-
-    for column in cur.description:
-        print('Column: ', column)
-        columns.append(column[0].lower())
-    for row in rows_dict:
-        entities = {}
-        for i in range(len(row)):
-            entities[columns[i]] = row[i]
-            if isinstance(row[i], str):
-                entities[columns[i]] = row[i].strip()
-        entities_list.append(entities.copy())
-        print('ENTITY LIST:', entities_list)
-
-
-    # --- Merge into ODK Central ---
-
-    client = None
-
-    try:
-        client = Client(
-            config_path="/app/tmp/pyodk_config.ini",
-            cache_path="/app/tmp/pyodk_cache.ini"
-        )
-
-        client.open()
-
-        client.entities.merge(entities_list, entity_list_name='registration_trees', project_id=1, match_keys=['ecosia_site_id'], add_new_properties=True, update_matched=True, delete_not_matched=False, source_label_key='label', source_keys=None,create_source=None, source_size=None)
-
-        client.close()
-
-        print(f"Last batch of ({batch_size}) instances at offset {offset} processed.")
-
+        columns = []
         entities_list = []
+        #entities = {}
 
-    except Exception as e:
-        print(f"ODK merge failed for batch at offset {offset}: {e}")
-        # Optionally: implement retry logic here
+        for column in cur.description:
+            print('Column: ', column)
+            columns.append(column[0].lower())
+        for row in rows_dict:
+            entities = {}
+            for i in range(len(row)):
+                entities[columns[i]] = row[i]
+                if isinstance(row[i], str):
+                    entities[columns[i]] = row[i].strip()
+            entities_list.append(entities.copy())
+            print('ENTITY LIST:', entities_list)
 
 
-    finally:
-        if client is not None:
-            client.close()  # <-- Always close if it was created
+        # --- Merge into ODK Central ---
+
+        client = None
+
+        try:
+            client = Client(
+                config_path="/app/tmp/pyodk_config.ini",
+                cache_path="/app/tmp/pyodk_cache.ini"
+            )
+
+            client.open()
+
+            client.entities.merge(entities_list, entity_list_name='registration_trees', project_id=1, match_keys=['ecosia_site_id'], add_new_properties=True, update_matched=True, delete_not_matched=False, source_label_key='label', source_keys=None,create_source=None, source_size=None)
+
+            client.close()
+
+            print(f"Last batch of ({batch_size}) instances at offset {offset} processed.")
+
+            entities_list = []
+
+        except Exception as e:
+            print(f"ODK merge failed for batch at offset {offset}: {e}")
+            # Optionally: implement retry logic here
 
 
-        # --- CRITICAL: Free all memory before next iteration ---
-    entities_list.clear()
-    #rows_dict.clear() if isinstance(rows_dict, list) else None
-    rows_dict = []
-    id_list.clear()
-    lat_lon_coords.clear()
-    #del entities_list, rows_dict, lat_lon_coords, id_list
+        finally:
+            if client is not None:
+                client.close()  # <-- Always close if it was created
 
-    # 2. Force Python to immediately release this memory back to the OS
-    gc.collect()
 
-    offset += batch_size
-    print('Next offset: ', offset)
+            # --- CRITICAL: Free all memory before next iteration ---
+        entities_list.clear()
+        #rows_dict.clear() if isinstance(rows_dict, list) else None
+        rows_dict = []
+        id_list.clear()
+        lat_lon_coords.clear()
+        #del entities_list, rows_dict, lat_lon_coords, id_list
 
-    cur.close()
-    #conn.close()
+        # 2. Force Python to immediately release this memory back to the OS
+        gc.collect()
+
+        offset += batch_size
+        print('Next offset: ', offset)
+
+        cur.close()
+        #conn.close()
 
 
 # Close connection ONLY when the while loop breaks or crashes entirely
