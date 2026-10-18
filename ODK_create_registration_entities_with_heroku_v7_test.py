@@ -300,7 +300,7 @@ while True:
             ORDER BY row_number ASC
             LIMIT %s;''', (batch_size,))
 
-    rows = cur.fetchall()
+    rows = cur.fetchmany(batch_size)
 
     if not rows:
         break
