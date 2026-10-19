@@ -292,8 +292,8 @@ while True:
 
     # Declare a unique NAME for the cursor to force PostgreSQL to make it a Server-Side Cursor
     # This keeps row data on the database server rather than caching it all in your Python RAM
-    with conn.cursor(name='server_side_batch_fetch_cursor') as stream_cur:
-        # Optimize fetching speed over the network
+    with conn.cursor(name='server_side_batch_fetch_cursor', withhold=True) as stream_cur:
+    # Optimize fetching speed over the network
         stream_cur.itersize = batch_size
 
         stream_cur.execute('''
