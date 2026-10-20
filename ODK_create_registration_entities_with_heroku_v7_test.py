@@ -398,7 +398,7 @@ while True:
             entities_list = []
             #entities = {}
 
-            for column in cur.description:
+            for column in write_cur.description:
                 print('Column: ', column)
                 columns.append(column[0].lower())
             for row in rows_dict:
