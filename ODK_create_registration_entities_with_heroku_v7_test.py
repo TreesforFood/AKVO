@@ -410,7 +410,8 @@ while True:
                         if isinstance(row[i], str):
                             entities[columns[i]] = row[i].strip()
                     entities_list.append(entities.copy())
-                    #print('ENTITY LIST:', entities_list)
+                    for print_id in entities_list:
+                        print('ENTITY LIST:', print_id[0])
 
 
                 # --- Merge into ODK Central ---
