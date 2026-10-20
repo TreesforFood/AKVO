@@ -405,8 +405,8 @@ while True:
                     entities = {}
                     for i in range(len(row)):
                         entities[columns[i]] = row[i]
-                        counting = count += 1
-                        print("COUNT: ", counting)
+                        count += 1
+                        print("COUNT: ", count)
                         if isinstance(row[i], str):
                             entities[columns[i]] = row[i].strip()
                     entities_list.append(entities.copy())
