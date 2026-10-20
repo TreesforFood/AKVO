@@ -281,6 +281,7 @@ conn.commit()
 
 batch_size = 500
 offset = 0
+count = 0
 
 # Connect to the Postgresql database on Heroku
 conn = psycopg2.connect(os.environ["DATABASE_URL"], sslmode='require')
@@ -404,6 +405,8 @@ while True:
                     entities = {}
                     for i in range(len(row)):
                         entities[columns[i]] = row[i]
+                        counting = count += 1
+                        print("COUNT: ", counting)
                         if isinstance(row[i], str):
                             entities[columns[i]] = row[i].strip()
                     entities_list.append(entities.copy())
@@ -451,8 +454,8 @@ while True:
                 # 2. Force Python to immediately release this memory back to the OS
                 gc.collect()
 
-                offset += batch_size
-                print('Next offset: ', offset)
+                #offset += batch_size
+                #print('Next offset: ', offset)
 
                 cur.close()
                 #conn.close()
