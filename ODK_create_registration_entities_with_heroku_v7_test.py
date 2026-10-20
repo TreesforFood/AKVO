@@ -344,6 +344,7 @@ while True:
 
         # CURSOR 2: Standard unnamed cursor for bulk writing data IN
         if lat_lon_coords:
+
             with conn.cursor() as write_cur:
             # --- Batch UPDATE using executemany ---
                 id_list = [item[1] for item in lat_lon_coords]
@@ -384,11 +385,11 @@ while True:
             query = '''SELECT * FROM getodk_entities_upload_table_registrations
             WHERE ecosia_site_id IN ({})'''.format(placeholders)
 
-            cur.execute(query, id_list)
+            write_cur.execute(query, id_list)
 
             conn.commit()
 
-            rows_dict = cur.fetchall()
+            rows_dict = write_cur.fetchall()
 
 
             # Convert the postgres data into a dictionary and place these dictionaries into a list
