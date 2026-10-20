@@ -303,7 +303,7 @@ while True:
             AND name_partner IS NOT NULL
             AND contract_number IS NOT NULL
             AND ecosia_site_id IS NOT NULL
-            AND (monitor_check IS NULL OR monitor_check != '1'));'''
+            AND (monitor_check IS NULL OR monitor_check != '1');''')
             #ORDER BY row_number ASC, LIMIT %s;''', (batch_size,))
 
         rows = stream_cur.fetchmany(batch_size)
