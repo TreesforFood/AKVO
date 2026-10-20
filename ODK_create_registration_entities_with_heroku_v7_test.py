@@ -379,17 +379,17 @@ while True:
 
                 conn.commit()
 
-            id_list = [item[1] for item in lat_lon_coords]
+                #id_list = [item[1] for item in lat_lon_coords]
 
-            placeholders = ','.join(['%s'] * len(id_list))
-            query = '''SELECT * FROM getodk_entities_upload_table_registrations
-            WHERE ecosia_site_id IN ({})'''.format(placeholders)
+                placeholders = ','.join(['%s'] * len(id_list))
+                query = '''SELECT * FROM getodk_entities_upload_table_registrations
+                WHERE ecosia_site_id IN ({})'''.format(placeholders)
 
-            write_cur.execute(query, id_list)
+                write_cur.execute(query, id_list)
 
-            conn.commit()
+                conn.commit()
 
-            rows_dict = write_cur.fetchall()
+                rows_dict = write_cur.fetchall()
 
 
             # Convert the postgres data into a dictionary and place these dictionaries into a list
