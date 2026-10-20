@@ -379,84 +379,84 @@ while True:
 
                 conn.commit()
 
-            id_list = [item[1] for item in lat_lon_coords]
+                #id_list = [item[1] for item in lat_lon_coords]
 
-            placeholders = ','.join(['%s'] * len(id_list))
-            query = '''SELECT * FROM getodk_entities_upload_table_registrations
-            WHERE ecosia_site_id IN ({})'''.format(placeholders)
+                placeholders = ','.join(['%s'] * len(id_list))
+                query = '''SELECT * FROM getodk_entities_upload_table_registrations
+                WHERE ecosia_site_id IN ({})'''.format(placeholders)
 
-            write_cur.execute(query, id_list)
+                write_cur.execute(query, id_list)
 
-            conn.commit()
+                conn.commit()
 
-            rows_dict = write_cur.fetchall()
-
-
-            # Convert the postgres data into a dictionary and place these dictionaries into a list
-
-            columns = []
-            entities_list = []
-            #entities = {}
-
-            for column in write_cur.description:
-                print('Column: ', column)
-                columns.append(column[0].lower())
-            for row in rows_dict:
-                entities = {}
-                for i in range(len(row)):
-                    entities[columns[i]] = row[i]
-                    if isinstance(row[i], str):
-                        entities[columns[i]] = row[i].strip()
-                entities_list.append(entities.copy())
-                print('ENTITY LIST:', entities_list)
+                rows_dict = write_cur.fetchall()
 
 
-            # --- Merge into ODK Central ---
+                # Convert the postgres data into a dictionary and place these dictionaries into a list
 
-            client = None
-
-            try:
-                client = Client(
-                    config_path="/app/tmp/pyodk_config.ini",
-                    cache_path="/app/tmp/pyodk_cache.ini"
-                )
-
-                client.open()
-
-                client.entities.merge(entities_list, entity_list_name='registration_trees', project_id=1, match_keys=['ecosia_site_id'], add_new_properties=True, update_matched=True, delete_not_matched=False, source_label_key='label', source_keys=None,create_source=None, source_size=None)
-
-                client.close()
-
-                print(f"Last batch of ({batch_size}) instances at offset {offset} processed.")
-
+                columns = []
                 entities_list = []
+                #entities = {}
 
-            except Exception as e:
-                print(f"ODK merge failed for batch at offset {offset}: {e}")
-                # Optionally: implement retry logic here
+                for column in write_cur.description:
+                    print('Column: ', column)
+                    columns.append(column[0].lower())
+                for row in rows_dict:
+                    entities = {}
+                    for i in range(len(row)):
+                        entities[columns[i]] = row[i]
+                        if isinstance(row[i], str):
+                            entities[columns[i]] = row[i].strip()
+                    entities_list.append(entities.copy())
+                    print('ENTITY LIST:', entities_list)
 
 
-            finally:
-                if client is not None:
-                    client.close()  # <-- Always close if it was created
+                # --- Merge into ODK Central ---
+
+                client = None
+
+                try:
+                    client = Client(
+                        config_path="/app/tmp/pyodk_config.ini",
+                        cache_path="/app/tmp/pyodk_cache.ini"
+                    )
+
+                    client.open()
+
+                    client.entities.merge(entities_list, entity_list_name='registration_trees', project_id=1, match_keys=['ecosia_site_id'], add_new_properties=True, update_matched=True, delete_not_matched=False, source_label_key='label', source_keys=None,create_source=None, source_size=None)
+
+                    client.close()
+
+                    print(f"Last batch of ({batch_size}) instances at offset {offset} processed.")
+
+                    entities_list = []
+
+                except Exception as e:
+                    print(f"ODK merge failed for batch at offset {offset}: {e}")
+                    # Optionally: implement retry logic here
 
 
-                # --- CRITICAL: Free all memory before next iteration ---
-            entities_list.clear()
-            #rows_dict.clear() if isinstance(rows_dict, list) else None
-            rows_dict = []
-            id_list.clear()
-            lat_lon_coords.clear()
-            #del entities_list, rows_dict, lat_lon_coords, id_list
+                finally:
+                    if client is not None:
+                        client.close()  # <-- Always close if it was created
 
-            # 2. Force Python to immediately release this memory back to the OS
-            gc.collect()
 
-            offset += batch_size
-            print('Next offset: ', offset)
+                    # --- CRITICAL: Free all memory before next iteration ---
+                entities_list.clear()
+                #rows_dict.clear() if isinstance(rows_dict, list) else None
+                rows_dict = []
+                id_list.clear()
+                lat_lon_coords.clear()
+                #del entities_list, rows_dict, lat_lon_coords, id_list
 
-            cur.close()
-            #conn.close()
+                # 2. Force Python to immediately release this memory back to the OS
+                gc.collect()
+
+                offset += batch_size
+                print('Next offset: ', offset)
+
+                cur.close()
+                #conn.close()
 
 
 # Close connection ONLY when the while loop breaks or crashes entirely
