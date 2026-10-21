@@ -298,7 +298,7 @@ else:
                 geom_get = level1['responses']['1960007'][0]['50110008'] # Up to this level it can go wrong (due to empty entry)
                 if geom_get != None:
                     geom_get = level1['responses']['1960007'][0]['50110008']['features'][0].get('geometry','')
-                    # area_ha = area(geom_get)
+                    area_ha = area(geom_get)
                     # area_ha = round((area_ha/10000),3)
                     area_ha = round(abs(area_ha / 10000), 3) # This prevents negative values
                     geometry = convert.geojson_to_wkt(geom_get)
