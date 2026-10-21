@@ -406,6 +406,7 @@ def process_page(json_pcq_method):
             lat_pcq_sample = None
 
         tree_distance_q1 = json_extract(json_in_pcq, 'tree_distance_q1')[0]
+        print('tree_distance_q1: ', tree_distance_q1)
         tree_height_q1 = json_extract(json_in_pcq, 'tree_height_q1')[0]
         tree_species_pcq_q1 = json_extract(json_in_pcq, 'tree_species_pcq_q1')[0]
         tree_type_pcq1 = json_extract(json_in_pcq, 'tree_type_pcq1')[0]
