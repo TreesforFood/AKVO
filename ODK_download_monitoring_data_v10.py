@@ -390,7 +390,7 @@ def process_page(json_pcq_method):
 
 
     for json_in_pcq in json_pcq_method:
-        #print(json_in_pcq)
+        print('PCQ json: ', json_in_pcq)
         submissionid_odk = json_extract(json_in_pcq, '__Submissions-id')[0]
         instanceID = json_extract(json_in_pcq, '__Submissions-id')[0]
         repeatid_odk = json_extract(json_in_pcq, '__id')[0]
