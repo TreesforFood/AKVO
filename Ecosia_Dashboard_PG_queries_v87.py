@@ -1946,6 +1946,20 @@ WHERE EXISTS (SELECT 1 FROM akvo_tree_registration_areas_edits
 conn.commit()
 
 
+undo_deletes_from_update_table = '''
+-- Undo deletions by placing them back in the update table
+INSERT INTO akvo_tree_registration_areas_updated (identifier_akvo, display_name, device_id, instance, submission, submission_year, submissiontime, updated_at, submitter, modifiedat, akvo_form_version, data_source, form_source, country, test, organisation, contract_number, id_planting_site, land_title, name_village, name_region, name_owner, photo_owner, gender_owner, objective_site, site_preparation, planting_technique, planting_system, remark, nr_trees_option, planting_date, tree_number, estimated_area, calc_area, lat_y, lon_x, number_coord_polygon, centroid_coord, polygon, confirm_plant_location_own_land, one_multiple_planting_sites, nr_trees_given_away, nr_trees_received, url_photo_receiver_trees, location_house_tree_receiver, confirm_planting_location, url_signature_tree_receiver, total_number_trees_received, check_ownership_trees, gender_tree_receiver, name_tree_receiver, species_latin, self_intersection, overlap, outside_country, check_200_trees, check_duplicate_polygons, needle_shape, total_nr_geometric_errors, re_mapped_by_partner, edit_confirmation, chloris_uploaded, kanop_uploaded, delete_confirmation, monitored_confirmation)
+SELECT e.identifier_akvo, display_name, device_id, instance, submission, submission_year, submissiontime, updated_at, submitter, modifiedat, akvo_form_version, data_source, form_source, country, test, organisation, contract_number, id_planting_site, land_title, name_village, name_region, name_owner, photo_owner, gender_owner, objective_site, site_preparation, planting_technique, planting_system, remark, nr_trees_option, planting_date, tree_number, estimated_area, calc_area, lat_y, lon_x, number_coord_polygon, centroid_coord, polygon, confirm_plant_location_own_land, one_multiple_planting_sites, nr_trees_given_away, nr_trees_received, url_photo_receiver_trees, location_house_tree_receiver, confirm_planting_location, url_signature_tree_receiver, total_number_trees_received, check_ownership_trees, gender_tree_receiver, name_tree_receiver, species_latin, self_intersection, overlap, outside_country, check_200_trees, check_duplicate_polygons, needle_shape, total_nr_geometric_errors, re_mapped_by_partner, edit_confirmation, chloris_uploaded, kanop_uploaded, delete_confirmation, monitored_confirmation
+FROM akvo_tree_registration_areas_edits e
+WHERE e.delete_confirmation = false
+  AND NOT EXISTS (
+      SELECT 1
+      FROM akvo_tree_registration_areas_updated u
+      WHERE u.identifier_akvo = e.identifier_akvo
+  );'''
+
+conn.commit()
+
 # After a polygon modification in UPDATED, the calc_area needs to be recalculated.
 update_calc_area_updated_polygons = '''
 UPDATE akvo_tree_registration_areas_updated
@@ -9420,7 +9434,7 @@ CREATE POLICY ecosia_edit_policy ON qgis_repaired_self_intersection
     FOR ALL
     TO ecosia_editing
     USING (true);
-	
+
 CREATE POLICY ecosia_edit_policy ON qgis_tree_registration_areas
     FOR ALL
     TO ecosia_editing
@@ -9565,6 +9579,8 @@ cur.execute(create_a1_edits_qgis_layer_with_points)
 cur.execute(create_a1_edit_integration)
 
 cur.execute(delete_rows_from_update_table)
+
+cur.execute(undo_deletes_from_update_table)
 
 cur.execute(update_calc_area_updated_polygons)
 cur.execute(update_calc_area_updated_points_buffer25m)
