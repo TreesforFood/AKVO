@@ -4395,23 +4395,31 @@ lower(CTE_organisation_truncated.main_organisation) as organisation,
         CASE
             WHEN akvo_tree_registration_areas_updated.contract_number - FLOOR(akvo_tree_registration_areas_updated.contract_number) > 0 THEN FLOOR(akvo_tree_registration_areas_updated.contract_number)
             ELSE akvo_tree_registration_areas_updated.contract_number
-        END,
-        2
-    ) AS contract_number,
+        END, 2) AS contract_number,
 
 SUM(akvo_tree_registration_areas_updated.tree_number) AS "Registered tree number",
 MAX(akvo_tree_registration_areas_updated.submission) AS "Latest submitted registration",
 COUNT(*) AS "Nr of sites registered",
 COUNT(DISTINCT akvo_tree_registration_areas_updated.identifier_akvo) AS "Number of site registrations"
 FROM akvo_tree_registration_areas_updated
+
 JOIN CTE_organisation_truncated
 ON akvo_tree_registration_areas_updated.identifier_akvo = CTE_organisation_truncated.identifier_akvo
 JOIN CTE_country_random_select
-ON akvo_tree_registration_areas_updated.contract_number = CTE_country_random_select.rounded_contract
+ON ROUND(
+        CASE
+            WHEN akvo_tree_registration_areas_updated.contract_number - FLOOR(akvo_tree_registration_areas_updated.contract_number) > 0 THEN FLOOR(akvo_tree_registration_areas_updated.contract_number)
+            ELSE akvo_tree_registration_areas_updated.contract_number
+        END, 2) = CTE_country_random_select.rounded_contract
 WHERE (akvo_tree_registration_areas_updated.test = '' OR akvo_tree_registration_areas_updated.test = 'This is real, valid data')
 AND NOT akvo_tree_registration_areas_updated.id_planting_site = 'placeholder' AND NOT CTE_country_random_select.country = '' AND NOT CTE_organisation_truncated.organisation = ''
 GROUP BY
-akvo_tree_registration_areas_updated.contract_number,
+  ROUND(
+    CASE
+      WHEN akvo_tree_registration_areas_updated.contract_number - FLOOR(akvo_tree_registration_areas_updated.contract_number) > 0
+      THEN FLOOR(akvo_tree_registration_areas_updated.contract_number)
+      ELSE akvo_tree_registration_areas_updated.contract_number
+    END, 2),
 CTE_country_random_select.country,
 CTE_organisation_truncated.main_organisation),
 
