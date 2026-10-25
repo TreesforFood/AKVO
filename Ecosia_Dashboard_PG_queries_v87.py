@@ -4339,6 +4339,12 @@ create_a15 = '''CREATE TABLE CALC_TAB_tree_submissions_per_contract
 -- This table is to plot the registered tree number, number of site registrations and registration dates on site level
 AS WITH CTE_ranking_monitoring_audit_method AS (SELECT
 calc_tab_monitoring_calculations_per_site_merged.*,
+ROUND(
+    CASE
+      WHEN calc_tab_monitoring_calculations_per_site_merged.contract_number - FLOOR(calc_tab_monitoring_calculations_per_site_merged.contract_number) > 0
+      THEN FLOOR(calc_tab_monitoring_calculations_per_site_merged.contract_number)
+      ELSE calc_tab_monitoring_calculations_per_site_merged.contract_number
+    END, 2) AS rounded_contract_number,
 CASE
 WHEN calc_tab_monitoring_calculations_per_site_merged.procedure = 'Audit' and data_collection_method = 'PCQ'
 THEN 4
@@ -4353,81 +4359,108 @@ END AS rank_monitoring_audit_method
 FROM calc_tab_monitoring_calculations_per_site_merged),
 
 CTE_organisation_truncated AS (SELECT
-    identifier_akvo,
-	contract_number,
-	organisation,
+    --identifier_akvo,
+	--contract_number,
+	ROUND(
+            CASE
+                WHEN contract_number - FLOOR(contract_number) > 0 THEN FLOOR(contract_number)
+                ELSE contract_number
+            END,
+            2
+        ) AS rounded_contract_number,
+	--organisation,
     split_part(organisation, ' - ', 1) AS main_organisation
 FROM
     akvo_tree_registration_areas_updated
+WHERE NOT akvo_tree_registration_areas_updated.organisation = ''
+GROUP BY rounded_contract_number, main_organisation
 ),
 
 CTE_country_random_select AS (
 WITH RankedContracts AS (
     SELECT
-        country,
-        contract_number,
+        --identifier_akvo,
+		country,
+        --contract_number,
         ROUND(
             CASE
                 WHEN contract_number - FLOOR(contract_number) > 0 THEN FLOOR(contract_number)
                 ELSE contract_number
             END,
             2
-        ) AS rounded_contract,
-        ROW_NUMBER() OVER (
+        ) AS rounded_contract_number,
+
+		ROW_NUMBER() OVER (
             PARTITION BY contract_number
             ORDER BY RANDOM()  -- Use RAND() or NEWID() depending on your SQL dialect
         ) AS rn
     FROM akvo_tree_registration_areas_updated
+	WHERE NOT akvo_tree_registration_areas_updated.country = ''
 )
 SELECT
-    country,
-    contract_number,
-    rounded_contract
+    --identifier_akvo,
+	country,
+    --contract_number,
+    rounded_contract_number
 FROM RankedContracts
 WHERE rn = 1),
 
-CTE_total_tree_registrations AS (
+CTE_total_tree_registrations_calc AS (
 SELECT
-lower(CTE_country_random_select.country) as name_country,
-lower(CTE_organisation_truncated.main_organisation) as organisation,
-
     ROUND(
         CASE
             WHEN akvo_tree_registration_areas_updated.contract_number - FLOOR(akvo_tree_registration_areas_updated.contract_number) > 0 THEN FLOOR(akvo_tree_registration_areas_updated.contract_number)
             ELSE akvo_tree_registration_areas_updated.contract_number
-        END, 2) AS contract_number,
+        END, 2) AS rounded_contract_number,
 
 SUM(akvo_tree_registration_areas_updated.tree_number) AS "Registered tree number",
 MAX(akvo_tree_registration_areas_updated.submission) AS "Latest submitted registration",
 COUNT(*) AS "Nr of sites registered",
 COUNT(DISTINCT akvo_tree_registration_areas_updated.identifier_akvo) AS "Number of site registrations"
-FROM akvo_tree_registration_areas_updated
 
-JOIN CTE_organisation_truncated
-ON akvo_tree_registration_areas_updated.identifier_akvo = CTE_organisation_truncated.identifier_akvo
-JOIN CTE_country_random_select
-ON ROUND(
-        CASE
-            WHEN akvo_tree_registration_areas_updated.contract_number - FLOOR(akvo_tree_registration_areas_updated.contract_number) > 0 THEN FLOOR(akvo_tree_registration_areas_updated.contract_number)
-            ELSE akvo_tree_registration_areas_updated.contract_number
-        END, 2) = CTE_country_random_select.rounded_contract
+FROM akvo_tree_registration_areas_updated
 WHERE (akvo_tree_registration_areas_updated.test = '' OR akvo_tree_registration_areas_updated.test = 'This is real, valid data')
-AND NOT akvo_tree_registration_areas_updated.id_planting_site = 'placeholder' AND NOT CTE_country_random_select.country = '' AND NOT CTE_organisation_truncated.organisation = ''
+AND NOT akvo_tree_registration_areas_updated.id_planting_site = 'placeholder'
 GROUP BY
   ROUND(
     CASE
       WHEN akvo_tree_registration_areas_updated.contract_number - FLOOR(akvo_tree_registration_areas_updated.contract_number) > 0
       THEN FLOOR(akvo_tree_registration_areas_updated.contract_number)
       ELSE akvo_tree_registration_areas_updated.contract_number
-    END, 2),
-CTE_country_random_select.country,
-CTE_organisation_truncated.main_organisation),
+    END, 2)),
+
+
+CTE_total_tree_registrations AS (SELECT
+lower(c.country) as name_country,
+lower(b.main_organisation) as organisation,
+a.rounded_contract_number,
+a."Registered tree number",
+a."Latest submitted registration",
+a."Nr of sites registered",
+a."Number of site registrations"
+FROM CTE_total_tree_registrations_calc a
+
+JOIN CTE_organisation_truncated b
+ON a.rounded_contract_number = b.rounded_contract_number
+
+JOIN CTE_country_random_select c
+ON a.rounded_contract_number = c.rounded_contract_number
+GROUP BY a.rounded_contract_number, c.country, b.main_organisation, a."Registered tree number", a."Latest submitted registration", a."Nr of sites registered", a."Number of site registrations"),
+
 
 -- Prepare the calculation of the percentages of native versus exotic species on contract level
 CTE_percentage_exotic_native AS (
 SELECT
 b.test,
 b.contract_number,
+
+ ROUND(
+    CASE
+      WHEN b.contract_number - FLOOR(b.contract_number) > 0
+      THEN FLOOR(b.contract_number)
+      ELSE b.contract_number
+    END, 2) AS rounded_contract_number,
+
 'ODK' AS source_data,
 'Registration' AS methodology,
 a.species_name_latin,
@@ -4451,6 +4484,14 @@ UNION ALL
 SELECT
 d.test,
 d.contract_number AS contract_number,
+
+ROUND(
+    CASE
+      WHEN d.contract_number - FLOOR(d.contract_number) > 0
+      THEN FLOOR(d.contract_number)
+      ELSE d.contract_number
+    END, 2) AS rounded_contract_number,
+
 'AKVO' AS source_data,
 'Registration' AS methodology,
 c.lat_name_species AS species_name_latin,
@@ -4468,19 +4509,19 @@ WHERE d.test != 'This is a test, this record can be deleted.'),
 
 total_nr_trees AS (
     SELECT
-        contract_number,
-        SUM(CASE WHEN native_exotic_full IN ('native', 'exotic') THEN nr_trees_per_species ELSE 0 END) AS total_nr_trees
+    rounded_contract_number,
+    SUM(CASE WHEN native_exotic_full IN ('native', 'exotic') THEN nr_trees_per_species ELSE 0 END) AS total_nr_trees
     FROM CTE_percentage_exotic_native
-    GROUP BY contract_number),
+    GROUP BY rounded_contract_number),
 
 CTE_results_percentages_exotic_native AS (
     SELECT
-        c.contract_number,
+        c.rounded_contract_number,
         ROUND(SUM(CASE WHEN native_exotic_full = 'native' THEN nr_trees_per_species ELSE 0 END) * 100.0 / NULLIF(t.total_nr_trees, 0), 1) AS percentage_native,
         ROUND(SUM(CASE WHEN native_exotic_full = 'exotic' THEN nr_trees_per_species ELSE 0 END) * 100.0 / NULLIF(t.total_nr_trees, 0), 1) AS percentage_exotic
     FROM CTE_percentage_exotic_native c
-    JOIN total_nr_trees t ON c.contract_number = t.contract_number
-    GROUP BY c.contract_number, t.total_nr_trees),
+    JOIN total_nr_trees t ON c.rounded_contract_number = t.rounded_contract_number
+    GROUP BY c.rounded_contract_number, t.total_nr_trees),
 
 
 -- This table unifies all submissions from audits and monitorings on instance level.
@@ -4512,12 +4553,12 @@ FROM odk_tree_monitoring_main),
 CTE_tree_monitoring AS (
 SELECT
 
---WHEN akvo_tree_registration_areas_updated.contract_number NOTNULL
---THEN akvo_tree_registration_areas_updated.contract_number
---ELSE odk_tree_registration_main.contract_number
---END AS contract_number,
-
-akvo_tree_registration_areas_updated.contract_number,
+ROUND(
+    CASE
+      WHEN akvo_tree_registration_areas_updated.contract_number - FLOOR(akvo_tree_registration_areas_updated.contract_number) > 0
+      THEN FLOOR(akvo_tree_registration_areas_updated.contract_number)
+      ELSE akvo_tree_registration_areas_updated.contract_number
+    END, 2) AS rounded_contract_number,
 
 COUNT(DISTINCT CTE_union_monitorings_audits.identifier_akvo) as nr_sites_monitored_audited,
 COUNT(DISTINCT CTE_union_monitorings_audits.instance) as total_nr_monitorings_audits,
@@ -4527,13 +4568,23 @@ LEFT JOIN CTE_union_monitorings_audits
 ON akvo_tree_registration_areas_updated.identifier_akvo = CTE_union_monitorings_audits.identifier_akvo
 LEFT JOIN odk_tree_registration_main
 ON akvo_tree_registration_areas_updated.identifier_akvo = odk_tree_registration_main.ecosia_site_id
-GROUP BY akvo_tree_registration_areas_updated.contract_number),
+GROUP BY ROUND(
+    CASE
+      WHEN akvo_tree_registration_areas_updated.contract_number - FLOOR(akvo_tree_registration_areas_updated.contract_number) > 0
+      THEN FLOOR(akvo_tree_registration_areas_updated.contract_number)
+      ELSE akvo_tree_registration_areas_updated.contract_number
+    END, 2)),
 
 
 -- This table lists all tree species on contract level that were reported during the registration
 CTE_tree_species AS (
 SELECT
-akvo_tree_registration_areas_updated.contract_number,
+ROUND(
+    CASE
+      WHEN akvo_tree_registration_areas_updated.contract_number - FLOOR(akvo_tree_registration_areas_updated.contract_number) > 0
+      THEN FLOOR(akvo_tree_registration_areas_updated.contract_number)
+      ELSE akvo_tree_registration_areas_updated.contract_number
+    END, 2) AS rounded_contract_number,
 akvo_tree_registration_species.lat_name_species AS "Number of tree species registered"
 FROM akvo_tree_registration_areas_updated
 LEFT JOIN akvo_tree_registration_species
@@ -4542,20 +4593,27 @@ ON akvo_tree_registration_areas_updated.identifier_akvo = akvo_tree_registration
 UNION ALL
 
 SELECT
-odk_tree_registration_main.contract_number,
+ROUND(
+    CASE
+      WHEN odk_tree_registration_main.contract_number - FLOOR(odk_tree_registration_main.contract_number) > 0
+      THEN FLOOR(odk_tree_registration_main.contract_number)
+      ELSE odk_tree_registration_main.contract_number
+    END, 2) AS rounded_contract_number,
+
 odk_tree_registration_main.tree_species AS "Number of tree species registered"
 FROM odk_tree_registration_main),
 
+
 CTE_count_species AS (SELECT
-contract_number,
+rounded_contract_number,
 COUNT(DISTINCT "Number of tree species registered") AS "Number of tree species registered"
 FROM CTE_tree_species
-GROUP BY contract_number),
+GROUP BY rounded_contract_number),
 
 
 -- This table calculates results on contract for T=1
 CTE_contract_level_monitoring_audit_results_t1 AS (SELECT
-table_a.contract_number,
+table_a.rounded_contract_number, -- contract number is with decimal value
 ROUND(SUM(perc_trees_survived * registered_tree_number)/SUM(registered_tree_number),2) AS weighted_avg_perc_tree_survival_t1,
 COUNT(*) AS "number of sites monitored by partner in t=1",
 ROUND(COUNT(*)*1.00/table_b.total_nr_planting_sites_per_contract*1.00*100,2) AS "percentage of sites monitored by partner in t=1",
@@ -4567,12 +4625,19 @@ JOIN
 
 -- Below the number of trees in the entire contract is calculated. This cannot be retrieved from the CTE_ranking_monitoring_audit_method
 -- since this table only shows the registered trees (on site level)	multiple times for various label strata (0, 360, etc).
-(SELECT contract_number,
+(SELECT
+ROUND(
+    CASE
+      WHEN akvo_tree_registration_areas_updated.contract_number - FLOOR(akvo_tree_registration_areas_updated.contract_number) > 0
+      THEN FLOOR(akvo_tree_registration_areas_updated.contract_number)
+      ELSE akvo_tree_registration_areas_updated.contract_number
+    END, 2) AS rounded_contract_number,
 COUNT(identifier_akvo) AS total_nr_planting_sites_per_contract,
 SUM(tree_number) AS total_nr_trees_registered_per_contract
 FROM akvo_tree_registration_areas_updated
-GROUP BY contract_number) table_b
-ON table_a.contract_number = table_b.contract_number
+GROUP BY rounded_contract_number) table_b
+ON table_a.rounded_contract_number = table_b.rounded_contract_number
+
 JOIN (
 SELECT identifier_akvo,
 MAX(label_strata) AS max_label_strata_t1,
@@ -4584,12 +4649,14 @@ GROUP BY identifier_akvo) table_c
 ON table_a.identifier_akvo = table_c.identifier_akvo
 AND table_a.label_strata = table_c.max_label_strata_t1
 AND table_a.rank_monitoring_audit_method = table_c.max_method_ranking_t1
-GROUP BY table_a.contract_number, table_b.total_nr_trees_registered_per_contract,
+GROUP BY
+table_a.rounded_contract_number,
+table_b.total_nr_trees_registered_per_contract,
 table_b.total_nr_planting_sites_per_contract),
 
 -- This table calculates results on contract for T=2
 CTE_contract_level_monitoring_audit_results_t2 AS (SELECT
-table_a.contract_number,
+table_a.rounded_contract_number, -- contract number is with decimal value
 ROUND(SUM(perc_trees_survived * registered_tree_number)/SUM(registered_tree_number),2) AS weighted_avg_perc_tree_survival_t2,
 COUNT(*) AS "number of sites monitored by partner in t=2",
 ROUND(COUNT(*)*1.00/table_b.total_nr_planting_sites_per_contract*1.00*100,2) AS "percentage of sites monitored by partner in t=2",
@@ -4599,12 +4666,18 @@ FROM CTE_ranking_monitoring_audit_method AS table_a
 JOIN
 -- Below the number of trees in the entire contract is calculated. This cannot be retrieved from the CTE_ranking_monitoring_audit_method
 -- since this table only shows the registered trees (on site level)	for the sites that have been monitored.
-(SELECT contract_number,
+(SELECT ROUND(
+    CASE
+      WHEN akvo_tree_registration_areas_updated.contract_number - FLOOR(akvo_tree_registration_areas_updated.contract_number) > 0
+      THEN FLOOR(akvo_tree_registration_areas_updated.contract_number)
+      ELSE akvo_tree_registration_areas_updated.contract_number
+    END, 2) AS rounded_contract_number,
 COUNT(identifier_akvo) AS total_nr_planting_sites_per_contract,
 SUM(tree_number) AS total_nr_trees_registered_per_contract
 FROM akvo_tree_registration_areas_updated
-GROUP BY contract_number) table_b
-ON table_a.contract_number = table_b.contract_number
+GROUP BY rounded_contract_number) table_b
+ON table_a.rounded_contract_number = table_b.rounded_contract_number
+
 JOIN(
 SELECT identifier_akvo,
 MAX(label_strata) AS max_label_strata_t2,
@@ -4616,13 +4689,13 @@ GROUP BY identifier_akvo) table_c
 ON table_a.identifier_akvo = table_c.identifier_akvo
 AND table_a.label_strata = table_c.max_label_strata_t2
 AND table_a.rank_monitoring_audit_method = table_c.max_method_ranking_t2
-GROUP BY table_a.contract_number, table_b.total_nr_trees_registered_per_contract,
+GROUP BY table_a.rounded_contract_number, table_b.total_nr_trees_registered_per_contract,
 table_b.total_nr_planting_sites_per_contract),
 
 
 -- This table calculates results on contract for T=3
 CTE_contract_level_monitoring_audit_results_t3 AS (SELECT
-table_a.contract_number,
+table_a.rounded_contract_number, -- contract number is with decimal value
 ROUND(SUM(perc_trees_survived * registered_tree_number)/SUM(registered_tree_number),2) AS weighted_avg_perc_tree_survival_t3,
 COUNT(*) AS "number of sites monitored by partner in t=3",
 ROUND(COUNT(*)*1.00/table_b.total_nr_planting_sites_per_contract*1.00*100,2) AS "percentage of sites monitored by partner in t=3",
@@ -4634,12 +4707,17 @@ JOIN
 
 -- Below the number of trees in the entire contract is calculated. This cannot be retrieved from the CTE_ranking_monitoring_audit_method
 -- since this table only shows the registered trees (on site level)	for the sites that have been monitored.
-(SELECT contract_number,
+(SELECT ROUND(
+    CASE
+      WHEN akvo_tree_registration_areas_updated.contract_number - FLOOR(akvo_tree_registration_areas_updated.contract_number) > 0
+      THEN FLOOR(akvo_tree_registration_areas_updated.contract_number)
+      ELSE akvo_tree_registration_areas_updated.contract_number
+    END, 2) AS rounded_contract_number,
 COUNT(identifier_akvo) As total_nr_planting_sites_per_contract,
 SUM(tree_number) AS total_nr_trees_registered_per_contract
 FROM akvo_tree_registration_areas_updated
-GROUP BY contract_number) table_b
-ON table_a.contract_number = table_b.contract_number
+GROUP BY rounded_contract_number) table_b
+ON table_a.rounded_contract_number = table_b.rounded_contract_number
 
 JOIN(
 
@@ -4653,7 +4731,7 @@ GROUP BY identifier_akvo) table_c
 ON table_a.identifier_akvo = table_c.identifier_akvo
 AND table_a.label_strata = table_c.max_label_strata_t3
 AND table_a.rank_monitoring_audit_method = table_c.max_method_ranking_t3
-GROUP BY table_a.contract_number, table_b.total_nr_trees_registered_per_contract,
+GROUP BY table_a.rounded_contract_number, table_b.total_nr_trees_registered_per_contract,
 table_b.total_nr_planting_sites_per_contract),
 
 -- This table lists the maximum label_strata values for sites in t=1
@@ -4715,7 +4793,14 @@ AND table_a.label_strata = table_b.max_label_strata_t3),
 -- to determine survived tree numbers in t=1
 CTE_calculate_extrapolated_tree_number_site_level_t1 AS (SELECT
 akvo_tree_registration_areas_updated.identifier_akvo,
-akvo_tree_registration_areas_updated.contract_number,
+
+ROUND(
+    CASE
+      WHEN akvo_tree_registration_areas_updated.contract_number - FLOOR(akvo_tree_registration_areas_updated.contract_number) > 0
+      THEN FLOOR(akvo_tree_registration_areas_updated.contract_number)
+      ELSE akvo_tree_registration_areas_updated.contract_number
+    END, 2) AS rounded_contract_number,
+
 akvo_tree_registration_areas_updated.tree_number,
 
 -- Calculate T=1 results on site level. Check if a monitoring exists. If so, use the survival percentage for the
@@ -4732,7 +4817,12 @@ FROM akvo_tree_registration_areas_updated
 LEFT JOIN CTE_site_level_monitoring_audit_results_t1
 ON CTE_site_level_monitoring_audit_results_t1.identifier_akvo = akvo_tree_registration_areas_updated.identifier_akvo
 LEFT JOIN CTE_contract_level_monitoring_audit_results_t1
-ON CTE_contract_level_monitoring_audit_results_t1.contract_number = akvo_tree_registration_areas_updated.contract_number),
+ON CTE_contract_level_monitoring_audit_results_t1.rounded_contract_number = ROUND(
+    CASE
+      WHEN akvo_tree_registration_areas_updated.contract_number - FLOOR(akvo_tree_registration_areas_updated.contract_number) > 0
+      THEN FLOOR(akvo_tree_registration_areas_updated.contract_number)
+      ELSE akvo_tree_registration_areas_updated.contract_number
+    END, 2)),
 
 
 
@@ -4741,7 +4831,14 @@ ON CTE_contract_level_monitoring_audit_results_t1.contract_number = akvo_tree_re
 -- to determine survived tree numbers in t=2
 CTE_calculate_extrapolated_tree_number_site_level_t2 AS (SELECT
 akvo_tree_registration_areas_updated.identifier_akvo,
-akvo_tree_registration_areas_updated.contract_number,
+
+ROUND(
+    CASE
+      WHEN akvo_tree_registration_areas_updated.contract_number - FLOOR(akvo_tree_registration_areas_updated.contract_number) > 0
+      THEN FLOOR(akvo_tree_registration_areas_updated.contract_number)
+      ELSE akvo_tree_registration_areas_updated.contract_number
+    END, 2) AS rounded_contract_number,
+
 akvo_tree_registration_areas_updated.tree_number,
 
 -- Calculate T=2 results on site level. Check if a monitoring exists. If so, use the survival percentage for the
@@ -4760,7 +4857,12 @@ FROM akvo_tree_registration_areas_updated
 LEFT JOIN CTE_site_level_monitoring_audit_results_t2
 ON CTE_site_level_monitoring_audit_results_t2.identifier_akvo = akvo_tree_registration_areas_updated.identifier_akvo
 LEFT JOIN CTE_contract_level_monitoring_audit_results_t2
-ON CTE_contract_level_monitoring_audit_results_t2.contract_number = akvo_tree_registration_areas_updated.contract_number),
+ON CTE_contract_level_monitoring_audit_results_t2.rounded_contract_number = ROUND(
+    CASE
+      WHEN akvo_tree_registration_areas_updated.contract_number - FLOOR(akvo_tree_registration_areas_updated.contract_number) > 0
+      THEN FLOOR(akvo_tree_registration_areas_updated.contract_number)
+      ELSE akvo_tree_registration_areas_updated.contract_number
+    END, 2)),
 
 
 
@@ -4769,7 +4871,14 @@ ON CTE_contract_level_monitoring_audit_results_t2.contract_number = akvo_tree_re
 -- to determine survived tree numbers in t=3
 CTE_calculate_extrapolated_tree_number_site_level_t3 AS (SELECT
 akvo_tree_registration_areas_updated.identifier_akvo,
-akvo_tree_registration_areas_updated.contract_number,
+
+ROUND(
+    CASE
+      WHEN akvo_tree_registration_areas_updated.contract_number - FLOOR(akvo_tree_registration_areas_updated.contract_number) > 0
+      THEN FLOOR(akvo_tree_registration_areas_updated.contract_number)
+      ELSE akvo_tree_registration_areas_updated.contract_number
+    END, 2) AS rounded_contract_number,
+
 akvo_tree_registration_areas_updated.tree_number,
 
 -- Calculate T=3 results on site level. Check if a monitoring exists. If so, use the survival percentage for the
@@ -4787,34 +4896,46 @@ FROM akvo_tree_registration_areas_updated
 LEFT JOIN CTE_site_level_monitoring_audit_results_t3
 ON CTE_site_level_monitoring_audit_results_t3.identifier_akvo = akvo_tree_registration_areas_updated.identifier_akvo
 LEFT JOIN CTE_contract_level_monitoring_audit_results_t3
-ON CTE_contract_level_monitoring_audit_results_t3.contract_number = akvo_tree_registration_areas_updated.contract_number),
+ON CTE_contract_level_monitoring_audit_results_t3.rounded_contract_number = ROUND(
+    CASE
+      WHEN akvo_tree_registration_areas_updated.contract_number - FLOOR(akvo_tree_registration_areas_updated.contract_number) > 0
+      THEN FLOOR(akvo_tree_registration_areas_updated.contract_number)
+      ELSE akvo_tree_registration_areas_updated.contract_number
+    END, 2)),
 
 -- In this table we calculate TOTAL tree numbers for the entire contract for T=1
 CTE_calculate_extrapolated_tree_number_contract_level_t1 AS (SELECT
-CTE_calculate_extrapolated_tree_number_site_level_t1.contract_number,
+CTE_calculate_extrapolated_tree_number_site_level_t1.rounded_contract_number,
 SUM(extrapolated_tree_number_per_site_t1) AS "total tree number in t=1"
 FROM CTE_calculate_extrapolated_tree_number_site_level_t1
-GROUP BY CTE_calculate_extrapolated_tree_number_site_level_t1.contract_number),
+GROUP BY CTE_calculate_extrapolated_tree_number_site_level_t1.rounded_contract_number),
 
 -- In this table we calculate TOTAL tree numbers for the entire contract for T=2
 CTE_calculate_extrapolated_tree_number_contract_level_t2 AS (SELECT
-CTE_calculate_extrapolated_tree_number_site_level_t2.contract_number,
+CTE_calculate_extrapolated_tree_number_site_level_t2.rounded_contract_number,
 SUM(extrapolated_tree_number_per_site_t2) AS "total tree number in t=2"
 FROM CTE_calculate_extrapolated_tree_number_site_level_t2
-GROUP BY CTE_calculate_extrapolated_tree_number_site_level_t2.contract_number),
+GROUP BY CTE_calculate_extrapolated_tree_number_site_level_t2.rounded_contract_number),
 
 -- In this table we calculate TOTAL tree numbers for the entire contract for T=3
 CTE_calculate_extrapolated_tree_number_contract_level_t3 AS (SELECT
-CTE_calculate_extrapolated_tree_number_site_level_t3.contract_number,
+CTE_calculate_extrapolated_tree_number_site_level_t3.rounded_contract_number,
 SUM(extrapolated_tree_number_per_site_t3) AS "total tree number in t=3"
 FROM CTE_calculate_extrapolated_tree_number_site_level_t3
-GROUP BY CTE_calculate_extrapolated_tree_number_site_level_t3.contract_number)
+GROUP BY CTE_calculate_extrapolated_tree_number_site_level_t3.rounded_contract_number)
+
+
+-- SELECT * FROM CTE_total_tree_registrations
+-- -- --SELECT * FROM CTE_country_random_select
+-- where rounded_contract_number IN (105, 158)
+-- -- --where contract_number IN (105.10, 105.20, 105.30, 105.40, 105.50)
+
 
 -- Create the FINAL result table:
 SELECT
 CTE_total_tree_registrations.name_country,
 CTE_total_tree_registrations.organisation,
-CTE_total_tree_registrations.contract_number AS "Contract number",
+CTE_total_tree_registrations.rounded_contract_number AS "Contract number",
 CTE_total_tree_registrations."Nr of sites registered" AS "Total number of planting sites registered at t=0",
 CTE_total_tree_registrations."Registered tree number" AS "Total number of trees registered at t=0",
 CTE_total_tree_registrations."Latest submitted registration" AS "Latest submitted registration at t=0",
@@ -4933,28 +5054,26 @@ CTE_count_species."Number of tree species registered",
 
 CTE_results_percentages_exotic_native.percentage_native,
 CTE_results_percentages_exotic_native.percentage_exotic
---CTE_results_percentages_exotic_native.percentage_unknown
-
 
 FROM CTE_total_tree_registrations
 LEFT JOIN CTE_tree_monitoring
-ON CTE_tree_monitoring.contract_number = CTE_total_tree_registrations.contract_number
+ON CTE_tree_monitoring.rounded_contract_number = CTE_total_tree_registrations.rounded_contract_number
 LEFT JOIN CTE_count_species
-ON CTE_count_species.contract_number = CTE_total_tree_registrations.contract_number
+ON CTE_count_species.rounded_contract_number = CTE_total_tree_registrations.rounded_contract_number
 LEFT JOIN CTE_contract_level_monitoring_audit_results_t1
-ON CTE_contract_level_monitoring_audit_results_t1.contract_number = CTE_total_tree_registrations.contract_number
+ON CTE_contract_level_monitoring_audit_results_t1.rounded_contract_number = CTE_total_tree_registrations.rounded_contract_number
 LEFT JOIN CTE_contract_level_monitoring_audit_results_t2
-ON CTE_contract_level_monitoring_audit_results_t2.contract_number = CTE_total_tree_registrations.contract_number
+ON CTE_contract_level_monitoring_audit_results_t2.rounded_contract_number = CTE_total_tree_registrations.rounded_contract_number
 LEFT JOIN CTE_contract_level_monitoring_audit_results_t3
-ON CTE_contract_level_monitoring_audit_results_t3.contract_number = CTE_total_tree_registrations.contract_number
+ON CTE_contract_level_monitoring_audit_results_t3.rounded_contract_number = CTE_total_tree_registrations.rounded_contract_number
 LEFT JOIN CTE_calculate_extrapolated_tree_number_contract_level_t1
-ON CTE_calculate_extrapolated_tree_number_contract_level_t1.contract_number = CTE_total_tree_registrations.contract_number
+ON CTE_calculate_extrapolated_tree_number_contract_level_t1.rounded_contract_number = CTE_total_tree_registrations.rounded_contract_number
 LEFT JOIN CTE_calculate_extrapolated_tree_number_contract_level_t2
-ON CTE_calculate_extrapolated_tree_number_contract_level_t2.contract_number = CTE_total_tree_registrations.contract_number
+ON CTE_calculate_extrapolated_tree_number_contract_level_t2.rounded_contract_number = CTE_total_tree_registrations.rounded_contract_number
 LEFT JOIN CTE_calculate_extrapolated_tree_number_contract_level_t3
-ON CTE_calculate_extrapolated_tree_number_contract_level_t3.contract_number = CTE_total_tree_registrations.contract_number
+ON CTE_calculate_extrapolated_tree_number_contract_level_t3.rounded_contract_number = CTE_total_tree_registrations.rounded_contract_number
 LEFT JOIN CTE_results_percentages_exotic_native
-ON CTE_results_percentages_exotic_native.contract_number = CTE_total_tree_registrations.contract_number;'''
+ON CTE_results_percentages_exotic_native.rounded_contract_number = CTE_total_tree_registrations.rounded_contract_number;'''
 
 conn.commit()
 
