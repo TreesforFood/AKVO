@@ -4925,12 +4925,6 @@ FROM CTE_calculate_extrapolated_tree_number_site_level_t3
 GROUP BY CTE_calculate_extrapolated_tree_number_site_level_t3.rounded_contract_number)
 
 
--- SELECT * FROM CTE_total_tree_registrations
--- -- --SELECT * FROM CTE_country_random_select
--- where rounded_contract_number IN (105, 158)
--- -- --where contract_number IN (105.10, 105.20, 105.30, 105.40, 105.50)
-
-
 -- Create the FINAL result table:
 SELECT
 CTE_total_tree_registrations.name_country,
