@@ -981,20 +981,24 @@ ADD edit_confirmation BOOLEAN DEFAULT False,
 ADD delete_confirmation BOOLEAN DEFAULT False;
 
 
--- Below we transpose all species from multiple rows into 1 row
-WITH t as
-(SELECT akvo_tree_registration_species.identifier_akvo,
-	STRING_AGG(akvo_tree_registration_species.lat_name_species,' | ')
- species_list
-	  FROM akvo_tree_registration_species
- JOIN akvo_tree_registration_areas_integrated
- ON akvo_tree_registration_species.identifier_akvo = akvo_tree_registration_areas_integrated.identifier_akvo
- GROUP BY akvo_tree_registration_species.identifier_akvo)
+-- Below we transpose all species from multiple rows into 1 row FROM AKVO
+-- Note: The species from ODK and ODK/AKVO undistributed farmers forms are not integrated here (yet). Not done yet because it is probably not needed.
+-- The current species list from AKVO is maintained because this column is integrated in many subsequent INSERT queries. Maybe later remove it.
+table_species_akvo AS (
+SELECT
+a.identifier_akvo,
+STRING_AGG(s.lat_name_species, ' | ') AS species_list
+FROM akvo_tree_registration_areas_integrated a
+LEFT JOIN akvo_tree_registration_species s
+ON a.identifier_akvo = s.identifier_akvo
+GROUP BY a.identifier_akvo
+)
+
 
 UPDATE akvo_tree_registration_areas_integrated
-SET species_latin = t.species_list
-FROM t
-WHERE t.identifier_akvo = akvo_tree_registration_areas_integrated.identifier_akvo;'''
+SET species_latin = table_species_akvo.species_list
+FROM table_species_akvo
+WHERE table_species_akvo.identifier_akvo = akvo_tree_registration_areas_integrated.identifier_akvo;'''
 
 conn.commit()
 
