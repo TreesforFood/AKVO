@@ -984,7 +984,7 @@ ADD delete_confirmation BOOLEAN DEFAULT False;
 -- Below we transpose all species from multiple rows into 1 row FROM AKVO
 -- Note: The species from ODK and ODK/AKVO undistributed farmers forms are not integrated here (yet). Not done yet because it is probably not needed.
 -- The current species list from AKVO is maintained because this column is integrated in many subsequent INSERT queries. Maybe later remove it.
-table_species_akvo AS (
+WITH table_species_akvo AS (
 SELECT
 a.identifier_akvo,
 STRING_AGG(s.lat_name_species, ' | ') AS species_list
