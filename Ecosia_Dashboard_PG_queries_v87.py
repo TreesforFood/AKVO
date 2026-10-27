@@ -3045,9 +3045,9 @@ odk_tree_monitoring_main.submissionid_odk AS submissionid_odk_monitoring_main,
 odk_tree_monitoring_pcq.submissionid_odk AS submissionid_odk_monitoring_pcq
 FROM odk_tree_monitoring_main
 JOIN odk_tree_monitoring_pcq
-ON odk_tree_monitoring_main.submissionid_odk = odk_tree_monitoring_pcq.submissionid_odk
-JOIN odk_tree_registration_main
-ON odk_tree_registration_main.submissionid_odk = odk_tree_monitoring_main.ecosia_site_id),
+ON odk_tree_monitoring_main.submissionid_odk = odk_tree_monitoring_pcq.submissionid_odk),
+--JOIN odk_tree_registration_main
+--ON odk_tree_registration_main.submissionid_odk = odk_tree_monitoring_main.ecosia_site_id),
 
 -- Count of PCQ samples (gps points) per label strata
 count_pcq_samples AS (SELECT
@@ -7543,7 +7543,8 @@ JOIN akvo_tree_registration_areas_updated
 ON pcq_samples_monitorings.identifier_akvo = akvo_tree_registration_areas_updated.identifier_akvo
 JOIN akvo_tree_monitoring_areas
 ON akvo_tree_monitoring_areas.identifier_akvo = pcq_samples_monitorings.identifier_akvo
-GROUP BY pcq_samples_monitorings.identifier_akvo,
+GROUP BY
+pcq_samples_monitorings.identifier_akvo,
 akvo_tree_monitoring_areas.instance,
 akvo_tree_monitoring_areas.test,
 akvo_tree_registration_areas_updated.organisation,
