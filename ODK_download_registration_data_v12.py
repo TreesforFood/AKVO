@@ -19,7 +19,7 @@ username = os.environ["ODK_CENTRAL_USERNAME"]
 password = os.environ["ODK_CENTRAL_PASSWORD"]
 form_id = "planting_site_reporting"
 default_project_id = 1
-page_size = 5000
+page_size = 1000
 auth = HTTPBasicAuth(username, password)
 odk_photo_token = os.environ["ODK_photo_token"]
 
