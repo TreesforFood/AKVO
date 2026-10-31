@@ -19,7 +19,7 @@ username = os.environ["ODK_CENTRAL_USERNAME"]
 password = os.environ["ODK_CENTRAL_PASSWORD"]
 form_id = "planting_site_reporting"
 default_project_id = 1
-page_size = 500
+page_size = 50
 auth = HTTPBasicAuth(username, password)
 odk_photo_token = os.environ["ODK_photo_token"]
 
@@ -69,7 +69,7 @@ conn.commit()
 
 """Class to get ODK submissions in batches of pages"""
 class ODKCentralClient:
-    def __init__(self, base_url, default_project_id, table_name, username, password, page_size, timeout=60):
+    def __init__(self, base_url, default_project_id, table_name, username, password, page_size, timeout=180):
         """
         Initialize the client with ODK Central credentials and settings.
 
