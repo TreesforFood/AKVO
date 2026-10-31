@@ -14,7 +14,6 @@ from urllib.parse import quote
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
-
 # Retrieve environment variables from Heroku
 base_url = "https://ecosia.getodk.cloud"
 username = os.environ["ODK_CENTRAL_USERNAME"]
@@ -71,8 +70,24 @@ conn.commit()
 
 """Class to get ODK submissions in batches of pages"""
 class ODKCentralClient:
-    def __init__(self, ...):
-        ...
+    def __init__(
+        self,
+        base_url,
+        default_project_id,
+        table_name="Submissions",
+        username="",
+        password="",
+        page_size=50,
+        timeout=180,
+    ):
+        self.base_url = base_url.rstrip('/')
+        self.default_project_id = default_project_id
+        self.table_name = table_name
+        self.auth = HTTPBasicAuth(username, password)
+        self.page_size = page_size
+        self.timeout = timeout
+
+        # Create a session with automatic retries
         self.session = requests.Session()
         retry_strategy = Retry(
             total=3,
@@ -83,6 +98,12 @@ class ODKCentralClient:
         adapter = HTTPAdapter(max_retries=retry_strategy)
         self.session.mount("https://", adapter)
         self.session.mount("http://", adapter)
+
+    def _build_endpoint(self, form_id):
+        return (
+            f"{self.base_url}/v1/projects/{self.default_project_id}/forms/"
+            f"{form_id}.svc/{self.table_name}?$top={self.page_size}"
+        )
 
     def get_all_submissions(self, form_id, process_page_callback):
         endpoint = self._build_endpoint(form_id)
@@ -105,6 +126,7 @@ class ODKCentralClient:
             page_number += 1
 
         print(f"All pages processed. Total submissions: {total_processed}")
+
 
 
 
