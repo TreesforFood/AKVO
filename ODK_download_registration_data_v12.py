@@ -19,7 +19,7 @@ username = os.environ["ODK_CENTRAL_USERNAME"]
 password = os.environ["ODK_CENTRAL_PASSWORD"]
 form_id = "planting_site_reporting"
 default_project_id = 1
-page_size = 1000
+page_size = 500
 auth = HTTPBasicAuth(username, password)
 odk_photo_token = os.environ["ODK_photo_token"]
 
@@ -56,7 +56,17 @@ CREATE TABLE IF NOT EXISTS ODK_Tree_registration_tree_species (submissionid_odk 
 conn.commit()
 
 
-"""Class to get ODK submissions in pages"""
+
+# # check for audit requests: https://docs.getodk.org/central-api-system-endpoints/#server-audit-logs
+# audit_report_soft_deleted_submissions = client.get('audits?action=submission.delete', headers={'X-Extended-Metadata': 'true'}).json()
+# #print(audit_report_soft_deleted_submissions)
+# audit_report_modified_submissions = client.get('audits?action=submission.update.version', headers={'X-Extended-Metadata': 'true'}).json()
+# #print(audit_report_modified_submissions)
+# audit_report_created_submissions = client.get('audits?action=submission.create', headers={'X-Extended-Metadata': 'true'}).json()
+
+
+
+"""Class to get ODK submissions in batches of pages"""
 class ODKCentralClient:
     def __init__(self, base_url, default_project_id, table_name, username, password, page_size):
         """
@@ -96,7 +106,7 @@ class ODKCentralClient:
         page_number = 1
 
         while endpoint:
-            response = requests.get(endpoint, auth=self.auth)
+            response = requests.get(endpoint, auth=self.auth, timeout=30)
             if response.status_code == 200:
                 data = response.json()
                 current_page_submissions = data.get('value', [])
