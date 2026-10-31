@@ -106,7 +106,7 @@ class ODKCentralClient:
         page_number = 1
 
         while endpoint:
-            response = requests.get(endpoint, auth=self.auth, timeout=30)
+            response = requests.get(endpoint, auth=self.auth)
             if response.status_code == 200:
                 data = response.json()
                 current_page_submissions = data.get('value', [])
