@@ -24,6 +24,7 @@ auth = HTTPBasicAuth(username, password)
 odk_photo_token = os.environ["ODK_photo_token"]
 
 
+
 # Connect to the Postgresql database on Heroku
 conn = psycopg2.connect(os.environ["DATABASE_URL"], sslmode='require')
 cur = conn.cursor()
@@ -68,7 +69,7 @@ conn.commit()
 
 """Class to get ODK submissions in batches of pages"""
 class ODKCentralClient:
-    def __init__(self, base_url, default_project_id, table_name, username, password, page_size):
+    def __init__(self, base_url, default_project_id, table_name, username, password, page_size, timeout=60):
         """
         Initialize the client with ODK Central credentials and settings.
 
@@ -83,6 +84,7 @@ class ODKCentralClient:
         self.auth = HTTPBasicAuth(username, password)
         self.page_size = page_size
         self.table_name = table_name
+        self.timeout = timeout
 
     def _build_endpoint(self, form_id):
         """
@@ -106,7 +108,7 @@ class ODKCentralClient:
         page_number = 1
 
         while endpoint:
-            response = requests.get(endpoint, auth=self.auth)
+            response = requests.get(endpoint, auth=self.auth, timeout=self.timeout)
             if response.status_code == 200:
                 data = response.json()
                 current_page_submissions = data.get('value', [])
