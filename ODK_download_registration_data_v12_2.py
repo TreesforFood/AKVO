@@ -77,7 +77,7 @@ class ODKCentralClient:
         table_name="Submissions",
         username="",
         password="",
-        page_size=50,
+        page_size=20,
         timeout=180,
     ):
         self.base_url = base_url.rstrip('/')
