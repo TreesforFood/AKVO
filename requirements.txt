@@ -13,7 +13,7 @@ matplotlib
 numpy
 psycopg2
 sqlalchemy
-rq
+rq==1.13.0
 pyodk
 segno @ git+https://github.com/heuer/segno.git
 typing
