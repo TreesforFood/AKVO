@@ -21,8 +21,6 @@ base_url = "https://ecosia.getodk.cloud"
 form_id = "planting_site_reporting"
 default_project_id = 1
 page_size = 20
-username = "edmond.muller@ecosia.org"
-password = "NouHopelijkGaatDitWelGoed!@#$%"
 auth = HTTPBasicAuth(username, password)
 #odk_photo_token = os.environ["ODK_photo_token"]
 
