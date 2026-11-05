@@ -3052,6 +3052,7 @@ ON odk_tree_monitoring_main.submissionid_odk = odk_tree_monitoring_pcq.submissio
 -- Count of PCQ samples (gps points) per label strata
 count_pcq_samples AS (SELECT
 list_pcq_samples.ecosia_site_id,
+list_pcq_samples.submissionid_odk_monitoring_main,
 table_label_strata.method_selection,
 table_label_strata.label_strata,
 COUNT(list_pcq_samples.submissionid_odk_monitoring_pcq) AS number_pcq_samples
@@ -3061,6 +3062,7 @@ ON table_label_strata.submissionid_odk_monitoring_main = list_pcq_samples.submis
 WHERE table_label_strata.method_selection = 'PCQ'
 GROUP BY
 table_label_strata.method_selection,
+list_pcq_samples.submissionid_odk_monitoring_main,
 list_pcq_samples.ecosia_site_id,
 table_label_strata.label_strata),
 
@@ -3354,7 +3356,8 @@ LEFT JOIN pcq_monitoring_avg_hgt
 ON pcq_monitoring_avg_hgt.ecosia_site_id = odk_tree_monitoring_main.ecosia_site_id
 AND pcq_monitoring_avg_hgt.label_strata = table_label_strata.label_strata
 LEFT JOIN count_pcq_samples
-ON count_pcq_samples.ecosia_site_id = odk_tree_monitoring_main.ecosia_site_id
+-- ON count_pcq_samples.ecosia_site_id = odk_tree_monitoring_main.ecosia_site_id (Not working. This join creates multiple joins because the ecosia_site_id is identical for multiple label strata)
+ON count_pcq_samples.submissionid_odk_monitoring_main = odk_tree_monitoring_main.submissionid_odk
 LEFT JOIN submittors_monitoring
 ON submittors_monitoring.ecosia_site_id = odk_tree_monitoring_main.ecosia_site_id
 AND submittors_monitoring.label_strata = table_label_strata.label_strata
@@ -3797,6 +3800,7 @@ SELECT * FROM registration_results_non_polygon_odk
 SELECT * FROM monitoring_tree_numbers_odk;'''
 
 conn.commit()
+
 
 
 # Works well
