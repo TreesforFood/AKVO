@@ -1658,14 +1658,25 @@ conn.commit()
 
 
 # Update the UPDATE table with Chloris/Kanop uploads so that it is clear which are uploaded to Chloris and Kanop
-update_updated_table_kanop_chloris = '''
---Update (seperately) the kanop/chloris upload results. THis is sepertately needed because the update in the above SQL is restricted by the NOT true clause for kanop and chloris
+update_updated_table_kanop = '''
+--Update (seperately) the kanop upload results. THis is sepertately needed because the update in the above SQL is restricted by the NOT true clause for kanop and chloris
 UPDATE akvo_tree_registration_areas_updated
-SET chloris_uploaded = akvo_tree_registration_areas_edits.chloris_uploaded,
-kanop_uploaded = akvo_tree_registration_areas_edits.kanop_uploaded
-FROM akvo_tree_registration_areas_edits
-WHERE akvo_tree_registration_areas_updated.identifier_akvo = akvo_tree_registration_areas_edits.identifier_akvo
-AND (akvo_tree_registration_areas_edits.chloris_uploaded = TRUE OR akvo_tree_registration_areas_edits.kanop_uploaded = TRUE);'''
+SET
+kanop_uploaded = True
+FROM kanop_uploads
+WHERE akvo_tree_registration_areas_updated.identifier_akvo = kanop_uploads.identifier_akvo'''
+
+conn.commit()
+
+
+# Update the UPDATE table with Chloris/Kanop uploads so that it is clear which are uploaded to Chloris and Kanop
+update_updated_table_chloris = '''
+--Update (seperately) the chloris upload results. THis is sepertately needed because the update in the above SQL is restricted by the NOT true clause for kanop and chloris
+UPDATE akvo_tree_registration_areas_updated
+SET
+chloris_uploaded = True
+FROM chloris_uploads
+WHERE akvo_tree_registration_areas_updated.identifier_akvo = chloris_uploads.identifier_akvo'''
 
 conn.commit()
 
@@ -9695,7 +9706,9 @@ cur.execute(create_a1_updates_from_qgis_layer_points)
 cur.execute(create_a1_updates_from_updated_to_edits_geometric_corr)
 cur.execute(create_a1_remote_sensing_upload_chloris)
 cur.execute(create_a1_remote_sensing_upload_kanop)
-cur.execute(update_updated_table_kanop_chloris)
+
+cur.execute(update_updated_table_kanop)
+cur.execute(update_updated_table_chloris)
 
 cur.execute(update_calc_area_edits_polygons)
 cur.execute(update_calc_area_edits_points_buffer25m)
