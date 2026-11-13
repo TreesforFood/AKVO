@@ -5598,6 +5598,119 @@ OR test = '';'''
 conn.commit()
 
 
+
+create_a34 = '''
+CREATE TABLE IF NOT EXISTS qgis_tree_monitoring_areas AS (SELECT * FROM superset_ecosia_tree_monitoring)
+
+-- Use INSERT to not overwrite already edited data
+INSERT INTO qgis_tree_monitoring_areas (
+identifier_akvo,
+display_name,
+country,
+partnercode_main,
+partnercode_sub,
+organisation,
+partner,
+sub_partner,
+submitter,
+sub_contract,
+id_planting_site,
+calc_area,
+registered_tree_number,
+test,
+procedure,
+data_collection_method,
+avg_tree_distance_m,
+avg_tree_density,
+nr_trees_monitored,
+number_pcq_samples,
+planting_date,
+latest_monitoring_submission,
+nr_days_registration_monitoring,
+nr_years_registration_monitoring,
+label_strata,
+perc_trees_survived,
+avg_tree_height,
+site_impressions,
+contract
+)
+
+SELECT
+identifier_akvo,
+display_name,
+country,
+partnercode_main,
+partnercode_sub,
+organisation,
+partner,
+sub_partner,
+submitter,
+sub_contract,
+id_planting_site,
+calc_area,
+registered_tree_number,
+test,
+procedure,
+data_collection_method,
+avg_tree_distance_m,
+avg_tree_density,
+nr_trees_monitored,
+number_pcq_samples,
+planting_date,
+latest_monitoring_submission,
+nr_days_registration_monitoring,
+nr_years_registration_monitoring,
+label_strata,
+perc_trees_survived,
+avg_tree_height,
+site_impressions,
+contract
+
+FROM superset_ecosia_tree_monitoring
+WHERE
+NOT EXISTS (SELECT 1 FROM qgis_tree_monitoring_areas --The problem with matching identifiers (see below) is that through the form of unregistered farmers, multiple areas may be submitted, having the same identifier....
+WHERE superset_ecosia_tree_monitoring.identifier_akvo = qgis_tree_monitoring_areas.identifier_akvo);'''
+
+conn.commit()
+
+create_a35 = '''
+--Update the superset table "superset_ecosia_tree_monitoring" with the edited data
+UPDATE superset_ecosia_tree_monitoring
+SET
+    identifier_akvo = b.identifier_akvo,
+    display_name = b.display_name,
+    country = b.country,
+    partnercode_main = b.partnercode_main,
+    partnercode_sub = b.partnercode_sub,
+    organisation = b.organisation,
+    partner = b.partner,
+    sub_partner = b.sub_partner,
+    submitter = b.submitter,
+    sub_contract = b.sub_contract,
+    id_planting_site = b.id_planting_site,
+    calc_area = b.calc_area,
+    registered_tree_number = b.registered_tree_number,
+    test = b.test,
+    procedure = b.procedure,
+    data_collection_method = b.data_collection_method,
+    avg_tree_distance_m = b.avg_tree_distance_m,
+    avg_tree_density = b.avg_tree_density,
+    nr_trees_monitored = b.nr_trees_monitored,
+    number_pcq_samples = b.number_pcq_samples,
+    planting_date = b.planting_date,
+    latest_monitoring_submission = b.latest_monitoring_submission,
+    nr_days_registration_monitoring = b.nr_days_registration_monitoring,
+    nr_years_registration_monitoring = b.nr_years_registration_monitoring,
+    label_strata = b.label_strata,
+    perc_trees_survived = b.perc_trees_survived,
+    avg_tree_height = b.avg_tree_height,
+    site_impressions = b.site_impressions,
+    contract = b.contract
+FROM qgis_tree_monitoring_areas b
+WHERE superset_ecosia_tree_monitoring.identifier_akvo = b.identifier_akvo;'''
+
+conn.commit()
+
 create_a36 = '''CREATE TABLE superset_ecosia_nursery_monitoring
 AS WITH akvo_ecosia_nursery_monitoring AS (SELECT
 akvo_nursery_registration.display_name,
@@ -5862,6 +5975,7 @@ OR test = 'Valid data'
 OR test = 'This is no test data';'''
 
 conn.commit()
+
 
 create_a37 = '''CREATE TABLE superset_ecosia_nursery_monitoring_species
 AS WITH akvo_ecosia_nursery_monitoring_species AS (SELECT
@@ -9523,6 +9637,7 @@ DROP POLICY IF EXISTS ecosia_edit_policy_points ON akvo_tree_registration_areas_
 DROP POLICY IF EXISTS ecosia_edit_policy ON qgis_tree_registration_areas;
 DROP POLICY IF EXISTS ecosia_edit_policy ON qgis_tree_registration_points;
 DROP POLICY IF EXISTS ecosia_edit_policy ON qgis_repaired_self_intersection;
+DROP POLICY IF EXISTS ecosia_edit_policy ON qgis_tree_monitoring_areas;
 ---
 
 DROP POLICY IF EXISTS ecosia_edit_policy ON akvo_tree_registration_areas_edits;
@@ -9548,6 +9663,7 @@ GRANT UPDATE, DELETE ON ALL TABLES IN SCHEMA heroku_ext TO ecosia_editing;
 GRANT SELECT ON TABLE public.qgis_tree_registration_areas TO ecosia_editing;
 GRANT SELECT ON TABLE public.qgis_tree_registration_points TO ecosia_editing;
 GRANT SELECT ON TABLE public.qgis_repaired_self_intersection TO ecosia_editing;
+GRANT SELECT ON TABLE public.qgis_tree_monitoring_areas TO ecosia_editing;
 ---
 
 GRANT SELECT ON TABLE public.photo_locations TO ecosia_editing;
@@ -9563,7 +9679,8 @@ GRANT SELECT ON spatial_ref_sys TO ecosia_editing;
 --ingevoegd:
 ALTER TABLE qgis_tree_registration_areas ENABLE ROW LEVEL SECURITY;
 ALTER TABLE qgis_tree_registration_points ENABLE ROW LEVEL SECURITY;
-ALTER TABLE qgis_repaired_self_intersection ENABLE ROW LEVEL SECURITY;
+--ALTER TABLE qgis_repaired_self_intersection ENABLE ROW LEVEL SECURITY;
+ALTER TABLE qgis_tree_monitoring_areas ENABLE ROW LEVEL SECURITY;
 --
 
 ALTER TABLE superset_ecosia_tree_registration_photos ENABLE ROW LEVEL SECURITY;
@@ -9571,15 +9688,21 @@ ALTER TABLE kanop_chloris_uploads_spatial_overview ENABLE ROW LEVEL SECURITY;
 
 
 --- ingevoegd:
-CREATE POLICY ecosia_edit_policy ON qgis_repaired_self_intersection
-    FOR ALL
-    TO ecosia_editing
-    USING (true);
+--CREATE POLICY ecosia_edit_policy ON qgis_repaired_self_intersection
+--    FOR ALL
+--    TO ecosia_editing
+--    USING (true);
 
 CREATE POLICY ecosia_edit_policy ON qgis_tree_registration_areas
     FOR ALL
     TO ecosia_editing
     USING (true);
+
+CREATE POLICY ecosia_edit_policy ON qgis_tree_monitoring_areas
+    FOR ALL
+    TO ecosia_editing
+    USING (true);
+
 
 CREATE POLICY ecosia_edit_policy ON qgis_tree_registration_points
     FOR ALL
@@ -9746,6 +9869,8 @@ cur.execute(create_a15)
 cur.execute(create_a31)
 cur.execute(create_a32)
 cur.execute(create_a33)
+cur.execute(create_a34)
+cur.execute(create_a35)
 cur.execute(create_a36)
 cur.execute(create_a37)
 cur.execute(create_a38)
