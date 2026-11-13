@@ -113,7 +113,7 @@ count_areas_total = 0
 
 
 # ------- Create polygons for upload
-cur.execute("SELECT identifier_akvo, planting_date, polygon FROM KANOP_latest_uploads ORDER BY planting_date DESC")
+cur.execute("SELECT identifier_akvo, planting_date, polygon FROM KANOP_latest_uploads ORDER BY planting_date DESC LIMIT 1000")
 rows = cur.fetchall() # output is list of tuples named rows
 
 # Convert to DataFrame
