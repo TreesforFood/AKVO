@@ -5600,7 +5600,7 @@ conn.commit()
 
 
 create_a34 = '''
-CREATE TABLE IF NOT EXISTS qgis_tree_monitoring_areas AS (SELECT * FROM superset_ecosia_tree_monitoring)
+CREATE TABLE IF NOT EXISTS qgis_tree_monitoring_areas AS (SELECT * FROM superset_ecosia_tree_monitoring);
 
 -- Use INSERT to not overwrite already edited data
 INSERT INTO qgis_tree_monitoring_areas (
