@@ -5602,6 +5602,9 @@ conn.commit()
 create_a34 = '''
 CREATE TABLE IF NOT EXISTS qgis_tree_monitoring_areas AS (SELECT * FROM superset_ecosia_tree_monitoring);
 
+ALTER TABLE qgis_tree_monitoring_areas
+ADD COLUMN IF NOT EXISTS polygon geography(POLYGON, 4326); -- Needed in order to be able to edit in QGIS;
+
 -- Use INSERT to not overwrite already edited data
 INSERT INTO qgis_tree_monitoring_areas (
 identifier_akvo,
@@ -5615,6 +5618,7 @@ sub_partner,
 submitter,
 sub_contract,
 id_planting_site,
+polygon,
 calc_area,
 registered_tree_number,
 test,
@@ -5636,40 +5640,46 @@ contract
 )
 
 SELECT
-identifier_akvo,
-display_name,
-country,
-partnercode_main,
-partnercode_sub,
-organisation,
-partner,
-sub_partner,
-submitter,
-sub_contract,
-id_planting_site,
-calc_area,
-registered_tree_number,
-test,
-procedure,
-data_collection_method,
-avg_tree_distance_m,
-avg_tree_density,
-nr_trees_monitored,
-number_pcq_samples,
-planting_date,
-latest_monitoring_submission,
-nr_days_registration_monitoring,
-nr_years_registration_monitoring,
-label_strata,
-perc_trees_survived,
-avg_tree_height,
-site_impressions,
-contract
+a.identifier_akvo,
+a.display_name,
+a.country,
+a.partnercode_main,
+a.partnercode_sub,
+a.organisation,
+a.partner,
+a.sub_partner,
+a.submitter,
+a.sub_contract,
+a.id_planting_site,
+b.polygon,
+a.calc_area,
+a.registered_tree_number,
+a.test,
+a.procedure,
+a.data_collection_method,
+a.avg_tree_distance_m,
+a.avg_tree_density,
+a.nr_trees_monitored,
+a.number_pcq_samples,
+a.planting_date,
+a.latest_monitoring_submission,
+a.nr_days_registration_monitoring,
+a.nr_years_registration_monitoring,
+a.label_strata,
+a.perc_trees_survived,
+a.avg_tree_height,
+a.site_impressions,
+a.contract
 
-FROM superset_ecosia_tree_monitoring
+FROM superset_ecosia_tree_monitoring a
+JOIN akvo_tree_registration_areas_updated b
+ON a.identifier_akvo = b.identifier_akvo
 WHERE
 NOT EXISTS (SELECT 1 FROM qgis_tree_monitoring_areas --The problem with matching identifiers (see below) is that through the form of unregistered farmers, multiple areas may be submitted, having the same identifier....
-WHERE superset_ecosia_tree_monitoring.identifier_akvo = qgis_tree_monitoring_areas.identifier_akvo);'''
+WHERE a.identifier_akvo = qgis_tree_monitoring_areas.identifier_akvo);
+
+ALTER TABLE qgis_tree_monitoring_areas
+ADD COLUMN IF NOT EXISTS fid SERIAL PRIMARY KEY; -- Needed in order to be able to edit in QGIS;'''
 
 conn.commit()
 
@@ -9638,8 +9648,6 @@ DROP POLICY IF EXISTS ecosia_edit_policy ON qgis_tree_registration_areas;
 DROP POLICY IF EXISTS ecosia_edit_policy ON qgis_tree_registration_points;
 DROP POLICY IF EXISTS ecosia_edit_policy ON qgis_repaired_self_intersection;
 DROP POLICY IF EXISTS ecosia_edit_policy ON qgis_tree_monitoring_areas;
----
-
 DROP POLICY IF EXISTS ecosia_edit_policy ON akvo_tree_registration_areas_edits;
 DROP POLICY IF EXISTS ecosia_edit_policy ON superset_ecosia_tree_registration_photos;
 DROP POLICY IF EXISTS ecosia_edit_policy ON kanop_chloris_uploads_spatial_overview;
