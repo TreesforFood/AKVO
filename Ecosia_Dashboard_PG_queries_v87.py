@@ -4003,7 +4003,7 @@ conn.commit()
 
 
 create_a2_merge_akvo_odk = '''
---- MERGE tables from akvo monitoring results and odk monitoring results together
+--- MERGE tables from akvo monitoring results and odk monitoring and airtable results together
 
 CREATE TABLE calc_tab_monitoring_calculations_per_site_merged
 AS (
@@ -5600,10 +5600,19 @@ conn.commit()
 
 
 create_a34 = '''
+-- The QGIS table for monitoring is generated from the "superset_ecosia_tree_monitoring" table
+-- This is because there is not 1 (one) table for monitoring results. In that sense it differs from the registration results, as these are merged into 1 big table (from akvo and odk)
+-- For monitoring there are many different tables (counts, own method, PCQ) in either AKVO and ODK.
+-- Due to this, the results from monitoring (counts, own method and pcq) are merged into 1 table per data stream (ODK, AKVO and Airtable)
+-- From there, the results are merged into 1 table (results from akvo, airtable and odk), resulting in the table "calc_tab_calculations_per_site_merged"
+-- This table is copied to the "superset_ecosia_tree_monitoring" table. Hence, this is basicaly the main table (as akvo_tree_registration_areas_updated is the main table for registrations)
+-- Hence, the QGIS table "qgis_tree_monitoring_areas" is generated from the "superset_ecosia_tree_monitoring" table
+
 CREATE TABLE IF NOT EXISTS qgis_tree_monitoring_areas AS (SELECT * FROM superset_ecosia_tree_monitoring);
 
 ALTER TABLE qgis_tree_monitoring_areas
-ADD COLUMN IF NOT EXISTS polygon geography(POLYGON, 4326); -- Needed in order to be able to edit in QGIS;
+ADD COLUMN IF NOT EXISTS centroid_coord geography(POINT, 4326), -- Needed in order to be able to edit in QGIS;
+ADD COLUMN IF NOT EXISTS edit_confirmation BOOLEAN DEFAULT False;
 
 -- Use INSERT to not overwrite already edited data
 INSERT INTO qgis_tree_monitoring_areas (
@@ -5618,7 +5627,7 @@ sub_partner,
 submitter,
 sub_contract,
 id_planting_site,
-polygon,
+centroid_coord,
 calc_area,
 registered_tree_number,
 test,
@@ -5636,7 +5645,8 @@ label_strata,
 perc_trees_survived,
 avg_tree_height,
 site_impressions,
-contract
+contract,
+edit_confirmation
 )
 
 SELECT
@@ -5651,7 +5661,7 @@ a.sub_partner,
 a.submitter,
 a.sub_contract,
 a.id_planting_site,
-b.polygon,
+b.centroid_coord,
 a.calc_area,
 a.registered_tree_number,
 a.test,
@@ -5669,19 +5679,23 @@ a.label_strata,
 a.perc_trees_survived,
 a.avg_tree_height,
 a.site_impressions,
-a.contract
+a.contract,
+a.edit_confirmation
 
 FROM superset_ecosia_tree_monitoring a
 JOIN akvo_tree_registration_areas_updated b
 ON a.identifier_akvo = b.identifier_akvo
 WHERE
 NOT EXISTS (SELECT 1 FROM qgis_tree_monitoring_areas --The problem with matching identifiers (see below) is that through the form of unregistered farmers, multiple areas may be submitted, having the same identifier....
-WHERE a.identifier_akvo = qgis_tree_monitoring_areas.identifier_akvo);
+WHERE a.identifier_akvo = qgis_tree_monitoring_areas.identifier_akvo
+AND procedure != 'tree registration');
 
 ALTER TABLE qgis_tree_monitoring_areas
 ADD COLUMN IF NOT EXISTS fid SERIAL PRIMARY KEY; -- Needed in order to be able to edit in QGIS;'''
 
 conn.commit()
+
+
 
 create_a35 = '''
 --Update the superset table "superset_ecosia_tree_monitoring" with the edited data
@@ -5717,7 +5731,8 @@ SET
     site_impressions = b.site_impressions,
     contract = b.contract
 FROM qgis_tree_monitoring_areas b
-WHERE superset_ecosia_tree_monitoring.identifier_akvo = b.identifier_akvo;'''
+WHERE superset_ecosia_tree_monitoring.identifier_akvo = b.identifier_akvo
+AND b.edit_confirmation = True;'''
 
 conn.commit()
 
