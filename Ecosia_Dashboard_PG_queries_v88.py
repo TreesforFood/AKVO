@@ -1920,7 +1920,7 @@ conn.commit()
 create_a1_update_main_monitoring_tables = '''
 UPDATE akvo_tree_monitoring_areas AS target
 SET
-    identifier_akvo = source.identifier_akvo
+    identifier_akvo = source.identifier_akvo,
     submission = source.submission_date,
     submitter = source.submitter,
     akvo_form_version = source.form_version,
