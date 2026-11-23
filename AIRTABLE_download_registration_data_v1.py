@@ -180,7 +180,7 @@ for x in result:
 
         print(identifier)
 
-        cur.execute('''INSERT INTO airtable_registration_monitoring_results (identifier, submitter, partner, contract, site_id, ownership, baseline, planting_technique, planting_date, nr_trees_planted, lat_y, lon_x, geojson, comments, species1, species2, species3, species4)
+        cur.execute('''INSERT INTO airtable_download_registration_results (identifier, submitter, partner, contract, site_id, ownership, baseline, planting_technique, planting_date, nr_trees_planted, lat_y, lon_x, geojson, comments, species1, species2, species3, species4)
         VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)''', (identifier, submitter, partner, contract, site_id, ownership, baseline, planting_technique, planting_date, nr_trees_planted, lat_y, lon_x, geojson, comments, species1, species2, species3, species4))
 
         conn.commit()
