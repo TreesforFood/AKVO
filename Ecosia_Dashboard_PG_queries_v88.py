@@ -1708,7 +1708,7 @@ WITH combined_monitoring_data AS (
 
 SELECT * FROM combined_monitoring_data;
 
-ALTER TABLE qgis_tree_monitoring_areas 
+ALTER TABLE qgis_tree_monitoring_areas
 ADD COLUMN IF NOT EXISTS edit_confirmation BOOLEAN NOT NULL DEFAULT FALSE;
 
 
@@ -1800,6 +1800,7 @@ NULL AS tree_species_added,
 NULL AS tree_species_added_other,
 NULL AS overall_quality_site,
 NULL AS alert_for_site,
+false AS edit_confirmation,
 akvo_tree_registration_areas_updated.centroid_coord
 
 FROM
@@ -1856,6 +1857,7 @@ tree_species_added,
 tree_species_added_other,
 overall_quality_site,
 alert_for_site,
+edit_confirmation,
 centroid_coord)
 
 SELECT
@@ -1895,6 +1897,7 @@ odk_tree_monitoring_main.tree_species_added,
 odk_tree_monitoring_main.tree_species_added_other,
 odk_tree_monitoring_main.overall_quality_site,
 odk_tree_monitoring_main.alert_for_site,
+false AS edit_confirmation,
 akvo_tree_registration_areas_updated.centroid_coord
 
 FROM odk_tree_monitoring_main
