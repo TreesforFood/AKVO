@@ -1,0 +1,188 @@
+from shapely import wkt
+from shapely import wkb
+from shapely.ops import transform
+from pyodk.client import Client
+import pandas as pd
+import requests
+import psycopg2
+from sqlalchemy import create_engine
+import requests
+import os
+
+# Retrieve environment variables
+base_url = "https://ecosia.getodk.cloud"
+username = os.environ["ODK_CENTRAL_USERNAME"]
+password = os.environ["ODK_CENTRAL_PASSWORD"]
+default_project_id = 1
+
+# Define the file content
+file_content = f"""[central]
+base_url = "{base_url}"
+username = "{username}"
+password = "{password}"
+default_project_id = {default_project_id}
+"""
+
+# Define a writable path (/app/tmp is a writable directory on Heroku)
+file_path = "/app/tmp/pyodk_config.ini"
+
+# Create the directory if it doesn't exist
+os.makedirs(os.path.dirname(file_path), exist_ok=True)
+
+# Write the configuration to the file
+with open(file_path, "w") as file:
+    file.write(file_content)
+
+
+# Connect to the Postgresql database on Heroku
+conn = psycopg2.connect(os.environ["DATABASE_URL"], sslmode='require')
+cur = conn.cursor()
+
+# Drop the latests upload table
+cur.execute('''DROP TABLE IF EXISTS airtable_download_registration_results;''')
+conn.commit()
+
+cur.execute('''
+CREATE TABLE airtable_download_registration_results (identifier TEXT, submitter TEXT, partner TEXT, contract INTEGER, site_id TEXT, ownership TEXT, baseline TEXT, planting_technique TEXT, planting_date DATE, nr_trees_planted INTEGER, lat_y REAL, lon_x REAL, geojson TEXT, comments TEXT, species1 TEXT, species2 TEXT, species3 TEXT, species4 TEXT);''')
+conn.commit()
+
+
+# Connect to Airtable
+auth_token = os.environ["TOKEN_AIRTABLE"]
+headers = {"Authorization": f"Bearer {auth_token}"}
+url_contracts = os.environ["URL_AIRTABLE_CONTRACTS"]
+response = requests.get(url_contracts, headers=headers)
+data_contracts = response.json()
+
+
+# Pagination function to parse through all Airtable pages (Each Airtable page has 100 rows).
+global offset
+offset = '0'
+result = []
+desired_users = {}
+
+while True :
+    url = "https://api.airtable.com/v0/appkx2PPsqz3axWDy/Registration"
+
+    try :
+        response= requests.get(url +'?offset=' + offset, headers=headers)
+        response_Table = response.json()
+        records = list(response_Table['records'])
+        result.append(records)
+        #print(records[0]['fields']['Username'] , len(records))
+
+        try :
+            offset = response_Table['offset']
+
+        except Exception as ex:
+            break
+
+    except error as e:
+        print('Error: ', e)
+
+count = 0
+
+# Get the results from the pagination function
+for x in result:
+    for y in x:
+        identifier = y['fields']['identifier']
+
+        try:
+            nr_trees_survived = y['fields']['trees growing']
+        except KeyError:
+            nr_trees_survived = None
+
+        try:
+            submitter = y['fields']['Submitter']
+        except KeyError:
+            submitter = None
+
+        try:
+            partner = y['fields']['Partner']
+        except KeyError:
+            partner = None
+
+        try:
+            contract = y['fields']['Contract']
+        except KeyError:
+            contract = None
+
+        try:
+            site_id = y['fields']['Site ID']
+        except KeyError:
+            site_id = None
+
+        try:
+            ownership = y['fields']['Ownership']
+        except KeyError:
+            ownership = None
+
+        try:
+            baseline = y['fields']['Baseline']
+        except KeyError:
+            baseline = None
+
+        try:
+            planting_technique = y['fields']['Planting technique']
+        except KeyError:
+            planting_technique = None
+
+        try:
+            planting_date = y['fields']['Planting date']
+        except KeyError:
+            planting_date = None
+
+        try:
+            nr_trees_planted = y['fields']['#trees_planted']
+        except KeyError:
+            nr_trees_planted = None
+
+        try:
+            lat_y = y['fields']['lat (y)']
+        except KeyError:
+            lat_y = None
+
+        try:
+            lon_x = y['fields']['lon (x)']
+        except KeyError:
+            lon_x = None
+
+        try:
+            geojson = y['fields']['Submitter']
+        except KeyError:
+            geojson = None
+
+        try:
+            comments = y['fields']['Comments']
+        except KeyError:
+            comments = None
+
+        try:
+            species1 = y['fields']['Species_1']
+        except KeyError:
+            species1 = None
+
+        try:
+            species2 = y['fields']['Species_2']
+        except KeyError:
+            species2 = None
+
+        try:
+            species3 = y['fields']['Species_3']
+        except KeyError:
+            species3 = None
+
+        try:
+            species4 = y['fields']['Species_4']
+        except KeyError:
+            species4 = None
+
+
+        print(identifier)
+
+        cur.execute('''INSERT INTO airtable_registration_monitoring_results (identifier, submitter, partner, contract, site_id, ownership, baseline, planting_technique, planting_date, nr_trees_planted, lat_y, lon_x, geojson, comments, species1, species2, species3, species4)
+        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)''', (identifier, submitter, partner, contract, site_id, ownership, baseline, planting_technique, planting_date, nr_trees_planted, lat_y, lon_x, geojson, comments, species1, species2, species3, species4))
+
+        conn.commit()
+
+cur.close()
