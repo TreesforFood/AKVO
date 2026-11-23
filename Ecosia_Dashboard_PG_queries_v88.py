@@ -1913,8 +1913,8 @@ ADD COLUMN IF NOT EXISTS edit_confirmation BOOLEAN NOT NULL DEFAULT FALSE;'''
 conn.commit()
 
 
-create_a1_update_main_monitoring_tables =
-'''UPDATE akvo_tree_monitoring_areas AS target
+create_a1_update_main_monitoring_tables = '''
+UPDATE akvo_tree_monitoring_areas AS target
 SET
     identifier_akvo = source.identifier_akvo
     submission = source.submission_date,
