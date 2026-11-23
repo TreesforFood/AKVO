@@ -1708,6 +1708,7 @@ WITH combined_monitoring_data AS (
 
 SELECT * FROM combined_monitoring_data;
 
+ALTER TABLE qgis_tree_monitoring_areas 
 ADD COLUMN IF NOT EXISTS edit_confirmation BOOLEAN NOT NULL DEFAULT FALSE;
 
 
