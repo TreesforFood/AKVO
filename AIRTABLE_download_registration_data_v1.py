@@ -85,6 +85,7 @@ count = 0
 # Get the results from the pagination function
 for x in result:
     for y in x:
+        print('Print:',  y)
         identifier = y['fields']['identifier']
 
         try:
@@ -133,7 +134,7 @@ for x in result:
             planting_date = None
 
         try:
-            nr_trees_planted = y['fields']['#trees_planted']
+            nr_trees_planted = y['fields']['#trees planted']
         except KeyError:
             nr_trees_planted = None
 
