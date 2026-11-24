@@ -94,7 +94,7 @@ for x in result:
             nr_trees_survived = None
 
         try:
-            submitter = y['fields']['Submitter']
+            submitter = y['fields']['Submitter'][0]
         except KeyError:
             submitter = None
 
@@ -124,7 +124,7 @@ for x in result:
             baseline = None
 
         try:
-            planting_technique = y['fields']['Planting technique']
+            planting_technique = y['fields']['Planting technique'][0]
         except KeyError:
             planting_technique = None
 
@@ -149,7 +149,7 @@ for x in result:
             lon_x = None
 
         try:
-            geojson = y['fields']['Submitter']
+            geojson = y['fields']['geojson']
         except KeyError:
             geojson = None
 
