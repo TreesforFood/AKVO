@@ -131,6 +131,7 @@ class ODKCentralClient:
             response = requests.get(endpoint, auth=self.auth)
             if response.status_code == 200:
                 data = response.json()
+                print(data)
                 current_page_submissions = data.get('value', [])
                 print(f"Processing page {page_number} with {len(current_page_submissions)} submissions.")
 
