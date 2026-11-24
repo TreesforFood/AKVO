@@ -44,7 +44,7 @@ cur.execute('''CREATE TABLE ODK_Tree_monitoring_main (submissionid_odk TEXT, eco
 country TEXT, organisation TEXT, id_planting_site TEXT, test TEXT, reporting_type TEXT,
 monitoring_type TEXT, monitoring_method TEXT, contract_number_monitoring NUMERIC(20,2), landscape_element_type TEXT, remaped_polygon_planting_site geography(POLYGON, 4326),
 remap_line_planting_site geography(LINESTRING, 4326), remap_point_planting_site geography(POINT, 4326), nr_added_trees INTEGER, planting_date_added DATE, contract_number_added_trees NUMERIC(20,2), tree_species_added TEXT,
-tree_species_added_other TEXT, method_monitoring TEXT, overall_quality_site TEXT, alert_for_site TEXT, overall_observation_site TEXT);
+tree_species_added_other TEXT, method_monitoring TEXT, overall_quality_site TEXT, alert_for_site TEXT, overall_observation_site TEXT, monitoring_centroid_gps_location geography(POINT, 4326));
 
 CREATE TABLE ODK_Tree_monitoring_add_photos (submissionid_odk TEXT, repeatid_odk TEXT, add_photo_1 TEXT,
 add_photo_2 TEXT, add_photo_3 TEXT, add_photo_4 TEXT, add_photo_remark TEXT, add_photo_gps_location geography(POINT, 4326));
@@ -247,6 +247,7 @@ def process_page(json_monitoring_main):
             submissionid_odk = json_extract(json_in_main, 'instanceID')[0]
             ecosia_site_id = json_extract(json_in_main, 'instanceid_to_monitor')[0]
             id_planting_site = json_extract(json_in_main, 'id_planting_site_monitor')[0]
+            monitoring_centroid_gps_location = json_extract(json_in_main, 'gps_monitoring_key_backup')[0]
             submitter = json_extract(json_in_main, 'username')[0]
             submission_date = json_extract(json_in_main, 'submissionDate')[0]
             form_version = json_extract(json_in_main, 'formVersion')[0]
@@ -304,13 +305,13 @@ def process_page(json_monitoring_main):
             submissionid_odk, ecosia_site_id, submitter, submission_date, form_version, field_date, updated_at, username, country, organisation, id_planting_site, test, reporting_type,
             monitoring_type, monitoring_method, contract_number_monitoring, landscape_element_type, remaped_polygon_planting_site,
             remap_line_planting_site, remap_point_planting_site, nr_added_trees, planting_date_added, contract_number_added_trees, tree_species_added,
-            tree_species_added_other, method_monitoring, overall_quality_site, alert_for_site, overall_observation_site) VALUES
-            (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)''',
+            tree_species_added_other, method_monitoring, overall_quality_site, alert_for_site, overall_observation_site, monitoring_centroid_gps_location) VALUES
+            (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)''',
             (submissionid_odk, ecosia_site_id, submitter, submission_date, form_version, field_date, updated_at, username, country_registration_save, organisation, id_planting_site, test, reporting_type,
             monitoring_type, monitoring_method, contract_number_monitoring, landscape_element_type,
             remaped_polygon_planting_site,remaped_line_planting_site, remaped_point_planting_site, nr_added_trees, planting_date_added,
             contract_number_added_trees, tree_species_added,tree_species_added_other, method_monitoring, overall_quality_site,
-            alert_for_site, overall_observation_site))
+            alert_for_site, overall_observation_site, monitoring_centroid_gps_location))
 
             conn.commit()
 
