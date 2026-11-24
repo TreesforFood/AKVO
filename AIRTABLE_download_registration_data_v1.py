@@ -43,7 +43,7 @@ cur.execute('''DROP TABLE IF EXISTS airtable_download_registration_results;''')
 conn.commit()
 
 cur.execute('''
-CREATE TABLE airtable_download_registration_results (identifier TEXT, submitter TEXT, partner TEXT, contract INTEGER, site_id TEXT, ownership TEXT, baseline TEXT, planting_technique TEXT, planting_date DATE, nr_trees_planted INTEGER, lat_y REAL, lon_x REAL, geojson TEXT, comments TEXT, species1 TEXT, species2 TEXT, species3 TEXT, species4 TEXT);''')
+CREATE TABLE airtable_download_registration_results (identifier TEXT, submitter TEXT, partner TEXT, contract INTEGER, site_id TEXT, ownership TEXT, baseline TEXT, planting_technique TEXT, planting_date DATE, nr_trees_planted INTEGER, lat_y REAL, lon_x REAL, geojson TEXT, comments TEXT, species1 TEXT, species2 TEXT, species3 TEXT, species4 TEXT, photo_link TEXT);''')
 conn.commit()
 
 
@@ -179,10 +179,16 @@ for x in result:
             species4 = None
 
 
+        try:
+            photo_link = y['fields']['photo link']
+        except KeyError:
+            photo_link = None
+
+
         print(identifier)
 
-        cur.execute('''INSERT INTO airtable_download_registration_results (identifier, submitter, partner, contract, site_id, ownership, baseline, planting_technique, planting_date, nr_trees_planted, lat_y, lon_x, geojson, comments, species1, species2, species3, species4)
-        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)''', (identifier, submitter, partner, contract, site_id, ownership, baseline, planting_technique, planting_date, nr_trees_planted, lat_y, lon_x, geojson, comments, species1, species2, species3, species4))
+        cur.execute('''INSERT INTO airtable_download_registration_results (identifier, submitter, partner, contract, site_id, ownership, baseline, planting_technique, planting_date, nr_trees_planted, lat_y, lon_x, geojson, comments, species1, species2, species3, species4, photo_link)
+        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)''', (identifier, submitter, partner, contract, site_id, ownership, baseline, planting_technique, planting_date, nr_trees_planted, lat_y, lon_x, geojson, comments, species1, species2, species3, species4, photo_link))
 
         conn.commit()
 
