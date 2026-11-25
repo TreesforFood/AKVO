@@ -249,7 +249,7 @@ def process_page(json_monitoring_main):
             id_planting_site = json_extract(json_in_main, 'id_planting_site_monitor')[0]
 
 
-            if json_in_pcq['gps_monitoring_key_backup'] != None:
+            if json_in_main['gps_monitoring_key_backup'] != None:
                 return_list = convert_point_wkt(json_in_main['gps_monitoring_key_backup']['coordinates'])
                 monitoring_centroid_gps_location = return_list[0]
                 # lon_pcq_sample = return_list[1]
