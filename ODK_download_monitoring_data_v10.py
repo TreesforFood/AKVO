@@ -248,7 +248,14 @@ def process_page(json_monitoring_main):
             submissionid_odk = json_extract(json_in_main, 'instanceID')[0]
             ecosia_site_id = json_extract(json_in_main, 'instanceid_to_monitor')[0]
             id_planting_site = json_extract(json_in_main, 'id_planting_site_monitor')[0]
-            monitoring_centroid_gps_location = json_extract(json_in_main, 'gps_monitoring_key_backup')[0]
+
+            check_gps_coordinate = json_extract(json_in_main, 'gps_monitoring_key_backup')
+
+            if check_gps_coordinate and len(check_gps_coordinate) > 0:
+                monitoring_centroid_gps_location = check_gps_coordinate[0]
+            else:
+                monitoring_centroid_gps_location = None  # or a default value
+
             submitter = json_extract(json_in_main, 'username')[0]
             submission_date = json_extract(json_in_main, 'submissionDate')[0]
             form_version = json_extract(json_in_main, 'formVersion')[0]
