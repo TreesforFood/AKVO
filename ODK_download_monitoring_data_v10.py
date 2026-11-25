@@ -249,15 +249,22 @@ def process_page(json_monitoring_main):
             id_planting_site = json_extract(json_in_main, 'id_planting_site_monitor')[0]
 
 
-            if json_in_main.get('gps_monitoring_key_backup') != None:
-                return_list_gps = convert_point_wkt(json_in_main['gps_monitoring_key_backup']['coordinates'])
-                monitoring_centroid_gps_location = return_list_gps[0]
-                # lon_pcq_sample = return_list[1]
-                # lat_pcq_sample = return_list[2]
+            # if json_in_main.get('gps_monitoring_key_backup') != None:
+            #     return_list_gps = convert_point_wkt(json_in_main['gps_monitoring_key_backup']['coordinates'])
+            #     monitoring_centroid_gps_location = return_list_gps[0]
+            #     # lon_pcq_sample = return_list[1]
+            #     # lat_pcq_sample = return_list[2]
+            # else:
+            #     monitoring_centroid_gps_location = None
+            #     # lon_pcq_sample = None
+            #     # lat_pcq_sample = None
+
+
+            if json_in_main['group_existing_site']['gps_monitoring_key_backup'] != None:
+                monitoring_centroid_gps_location = convert_polygon_wkt(json_in_main['group_existing_site']['gps_monitoring_key_backup']['coordinates'][0])
+
             else:
                 monitoring_centroid_gps_location = None
-                # lon_pcq_sample = None
-                # lat_pcq_sample = None
 
 
 
