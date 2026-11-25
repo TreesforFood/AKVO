@@ -243,18 +243,21 @@ def process_page(json_monitoring_main):
 
     for json_in_main in json_monitoring_main:
         # Populate the tree monitoring main table
-        #print(json_in_main)
         if json_extract(json_in_main, 'reporting_type')[0] == 'existing_site':
             submissionid_odk = json_extract(json_in_main, 'instanceID')[0]
             ecosia_site_id = json_extract(json_in_main, 'instanceid_to_monitor')[0]
             id_planting_site = json_extract(json_in_main, 'id_planting_site_monitor')[0]
 
-            check_gps_coordinate = json_extract(json_in_main, 'gps_monitoring_key_backup')
 
-            if check_gps_coordinate and len(check_gps_coordinate) > 0:
-                monitoring_centroid_gps_location = check_gps_coordinate[0]
+            if json_in_pcq['gps_monitoring_key_backup'] != None:
+                return_list = convert_point_wkt(json_in_main['gps_monitoring_key_backup']['coordinates'])
+                monitoring_centroid_gps_location = return_list[0]
+                # lon_pcq_sample = return_list[1]
+                # lat_pcq_sample = return_list[2]
             else:
-                monitoring_centroid_gps_location = None  # or a default value
+                monitoring_centroid_gps_location = None
+                # lon_pcq_sample = None
+                # lat_pcq_sample = None
 
             submitter = json_extract(json_in_main, 'username')[0]
             submission_date = json_extract(json_in_main, 'submissionDate')[0]
