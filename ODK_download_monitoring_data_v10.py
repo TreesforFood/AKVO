@@ -250,8 +250,8 @@ def process_page(json_monitoring_main):
 
 
             if json_in_main.get('gps_monitoring_key_backup') != None:
-                return_list = convert_point_wkt(json_in_main['gps_monitoring_key_backup']['coordinates'])
-                monitoring_centroid_gps_location = return_list[0]
+                return_list_gps = convert_point_wkt(json_in_main['gps_monitoring_key_backup']['coordinates'])
+                monitoring_centroid_gps_location = return_list_gps[0]
                 # lon_pcq_sample = return_list[1]
                 # lat_pcq_sample = return_list[2]
             else:
