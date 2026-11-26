@@ -261,7 +261,7 @@ def process_page(json_monitoring_main):
 
 
             if json_in_main['group_existing_site']['gps_monitoring_key_backup'] != None:
-                monitoring_centroid_gps_location = convert_polygon_wkt(json_in_main['group_existing_site']['gps_monitoring_key_backup']['coordinates'][0])
+                monitoring_centroid_gps_location = convert_point_wkt(json_in_main['group_existing_site']['gps_monitoring_key_backup']['coordinates'][0])
 
             else:
                 monitoring_centroid_gps_location = None
