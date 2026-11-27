@@ -1956,9 +1956,9 @@ monitoring_type = source.monitoring_type,
 monitoring_method = source.monitoring_method,
 contract_number_monitoring = source.contract_number_monitoring,
 landscape_element_type = source.landscape_element_type,
-remaped_polygon_planting_site = source.remaped_polygon_planting_site,
-remap_line_planting_site = source.remap_line_planting_site,
-remap_point_planting_site = source.remap_point_planting_site,
+--remaped_polygon_planting_site = source.remaped_polygon_planting_site,
+--remap_line_planting_site = source.remap_line_planting_site,
+--remap_point_planting_site = source.remap_point_planting_site,
 nr_added_trees = source.nr_added_trees,
 planting_date_added = source.planting_date_added,
 contract_number_added_trees = source.contract_number_added_trees,
@@ -1975,145 +1975,6 @@ WHERE source.identifier_akvo = target.ecosia_site_id
 AND source.edit_confirmation = TRUE;'''
 
 conn.commit()
-
-
-# create_a1_qgis_monitoring_layer = '''
-# -- The QGIS table for monitoring is generated from the "superset_ecosia_tree_monitoring" table
-# -- This is because there is not 1 (one) table for monitoring results. In that sense it differs from the registration results, as these are merged into 1 big table (from akvo and odk)
-# -- For monitoring there are many different tables (counts, own method, PCQ) in either AKVO and ODK.
-# -- Due to this, the results from monitoring (counts, own method and pcq) are merged into 1 table per data stream (ODK, AKVO and Airtable)
-# -- From there, the results are merged into 1 table (results from akvo, airtable and odk), resulting in the table "calc_tab_calculations_per_site_merged"
-# -- This table is copied to the "superset_ecosia_tree_monitoring" table. Hence, this is basicaly the main table (as akvo_tree_registration_areas_updated is the main table for registrations)
-# -- Hence, the QGIS table "qgis_tree_monitoring_areas" is generated from the "superset_ecosia_tree_monitoring" table
-#
-# CREATE TABLE IF NOT EXISTS qgis_tree_monitoring_areas AS (SELECT * FROM superset_ecosia_tree_monitoring);
-#
-# ALTER TABLE qgis_tree_monitoring_areas
-# ADD COLUMN IF NOT EXISTS centroid_coord geography(POINT, 4326), -- Needed in order to be able to edit in QGIS;
-# ADD COLUMN IF NOT EXISTS edit_confirmation BOOLEAN DEFAULT False;
-#
-# -- Use INSERT to not overwrite already edited data
-# INSERT INTO qgis_tree_monitoring_areas (
-# identifier_akvo,
-# display_name,
-# country,
-# partnercode_main,
-# partnercode_sub,
-# organisation,
-# partner,
-# sub_partner,
-# submitter,
-# sub_contract,
-# id_planting_site,
-# centroid_coord,
-# calc_area,
-# registered_tree_number,
-# test,
-# procedure,
-# data_collection_method,
-# avg_tree_distance_m,
-# avg_tree_density,
-# nr_trees_monitored,
-# number_pcq_samples,
-# planting_date,
-# latest_monitoring_submission,
-# nr_days_registration_monitoring,
-# nr_years_registration_monitoring,
-# label_strata,
-# perc_trees_survived,
-# avg_tree_height,
-# site_impressions,
-# contract,
-# edit_confirmation
-# )
-#
-# SELECT
-# a.identifier_akvo,
-# a.display_name,
-# a.country,
-# a.partnercode_main,
-# a.partnercode_sub,
-# a.organisation,
-# a.partner,
-# a.sub_partner,
-# a.submitter,
-# a.sub_contract,
-# a.id_planting_site,
-# b.centroid_coord,
-# a.calc_area,
-# a.registered_tree_number,
-# a.test,
-# a.procedure,
-# a.data_collection_method,
-# a.avg_tree_distance_m,
-# a.avg_tree_density,
-# a.nr_trees_monitored,
-# a.number_pcq_samples,
-# a.planting_date,
-# a.latest_monitoring_submission,
-# a.nr_days_registration_monitoring,
-# a.nr_years_registration_monitoring,
-# a.label_strata,
-# a.perc_trees_survived,
-# a.avg_tree_height,
-# a.site_impressions,
-# a.contract,
-# a.edit_confirmation
-#
-# FROM superset_ecosia_tree_monitoring a
-# JOIN akvo_tree_registration_areas_updated b
-# ON a.identifier_akvo = b.identifier_akvo
-# WHERE
-# NOT EXISTS (SELECT 1 FROM qgis_tree_monitoring_areas --The problem with matching identifiers (see below) is that through the form of unregistered farmers, multiple areas may be submitted, having the same identifier....
-# WHERE a.identifier_akvo = qgis_tree_monitoring_areas.identifier_akvo
-# AND procedure != 'Registration');
-#
-# ALTER TABLE qgis_tree_monitoring_areas
-# ADD COLUMN IF NOT EXISTS fid SERIAL PRIMARY KEY; -- Needed in order to be able to edit in QGIS;'''
-#
-# conn.commit()
-#
-#
-#
-# create_a35 = '''
-# --Update the superset table "superset_ecosia_tree_monitoring" with the edited data
-# UPDATE superset_ecosia_tree_monitoring
-# SET
-#     identifier_akvo = b.identifier_akvo,
-#     display_name = b.display_name,
-#     country = b.country,
-#     partnercode_main = b.partnercode_main,
-#     partnercode_sub = b.partnercode_sub,
-#     organisation = b.organisation,
-#     partner = b.partner,
-#     sub_partner = b.sub_partner,
-#     submitter = b.submitter,
-#     sub_contract = b.sub_contract,
-#     id_planting_site = b.id_planting_site,
-#     calc_area = b.calc_area,
-#     registered_tree_number = b.registered_tree_number,
-#     test = b.test,
-#     procedure = b.procedure,
-#     data_collection_method = b.data_collection_method,
-#     avg_tree_distance_m = b.avg_tree_distance_m,
-#     avg_tree_density = b.avg_tree_density,
-#     nr_trees_monitored = b.nr_trees_monitored,
-#     number_pcq_samples = b.number_pcq_samples,
-#     planting_date = b.planting_date,
-#     latest_monitoring_submission = b.latest_monitoring_submission,
-#     nr_days_registration_monitoring = b.nr_days_registration_monitoring,
-#     nr_years_registration_monitoring = b.nr_years_registration_monitoring,
-#     label_strata = b.label_strata,
-#     perc_trees_survived = b.perc_trees_survived,
-#     avg_tree_height = b.avg_tree_height,
-#     site_impressions = b.site_impressions,
-#     contract = b.contract
-# FROM qgis_tree_monitoring_areas b
-# WHERE superset_ecosia_tree_monitoring.identifier_akvo = b.identifier_akvo
-# AND b.edit_confirmation = True;'''
-#
-# conn.commit()
-
 
 
 
