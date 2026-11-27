@@ -827,7 +827,7 @@ FROM CTE_join_tree_distribution_and_registration_empty_no_links AS p
 
 UNION ALL
 
--- Registration results from Airtable are merged into the INTEGRSTED table
+-- Registration results from Airtable are merged into the INTEGRATED table
 
 SELECT
 identifier AS identifier_akvo,
@@ -868,7 +868,10 @@ lat_y,
 lon_x,
 0 AS number_coord_pol,
 NULL AS centroid_coord,
-geojson AS polygon,
+
+-- In airtable, geojson can only be defined as TEXT so we need to convert it to PostGIS GEOGRAPHY type
+ST_SetSRID(ST_GeomFromGeoJSON(geojson), 4326)::GEOGRAPHY(POLYGON, 4326) AS polygon,
+
 --NULL AS multipoint,
 NULL AS confirm_plant_location_own_land,
 'n/a' AS one_multiple_planting_sites,
