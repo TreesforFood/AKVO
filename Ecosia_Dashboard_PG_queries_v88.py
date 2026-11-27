@@ -1651,9 +1651,9 @@ WITH combined_monitoring_data AS (
         NULL AS tree_species_added,
         NULL AS tree_species_added_other,
         NULL AS overall_quality_site,
-        NULL AS alert_for_site,
+        NULL AS alert_for_site
 
-        akvo_tree_registration_areas.centroid_coord
+        --akvo_tree_registration_areas.centroid_coord
 
     FROM akvo_tree_monitoring_areas
     JOIN akvo_tree_registration_areas
@@ -1697,8 +1697,8 @@ WITH combined_monitoring_data AS (
         odk_tree_monitoring_main.tree_species_added,
         odk_tree_monitoring_main.tree_species_added_other,
         odk_tree_monitoring_main.overall_quality_site,
-        odk_tree_monitoring_main.alert_for_site,
-        odk_tree_registration_main.centroid_coord
+        odk_tree_monitoring_main.alert_for_site
+        --odk_tree_registration_main.centroid_coord
 
     FROM odk_tree_monitoring_main
     JOIN odk_tree_registration_main
@@ -1750,8 +1750,8 @@ tree_species_added,
 tree_species_added_other,
 overall_quality_site,
 alert_for_site,
-edit_confirmation,
-centroid_coord)
+edit_confirmation)
+
 
 SELECT
 akvo_tree_monitoring_areas.identifier_akvo,
@@ -1799,8 +1799,8 @@ NULL AS tree_species_added,
 NULL AS tree_species_added_other,
 NULL AS overall_quality_site,
 NULL AS alert_for_site,
-false AS edit_confirmation,
-akvo_tree_registration_areas_updated.centroid_coord
+false AS edit_confirmation
+--akvo_tree_registration_areas_updated.centroid_coord
 
 FROM
     akvo_tree_monitoring_areas
@@ -1856,8 +1856,8 @@ tree_species_added,
 tree_species_added_other,
 overall_quality_site,
 alert_for_site,
-edit_confirmation,
-centroid_coord)
+edit_confirmation)
+--centroid_coord
 
 SELECT
 odk_tree_monitoring_main.ecosia_site_id AS identifier_akvo,
@@ -1896,8 +1896,8 @@ odk_tree_monitoring_main.tree_species_added,
 odk_tree_monitoring_main.tree_species_added_other,
 odk_tree_monitoring_main.overall_quality_site,
 odk_tree_monitoring_main.alert_for_site,
-false AS edit_confirmation,
-akvo_tree_registration_areas_updated.centroid_coord
+false AS edit_confirmation
+--akvo_tree_registration_areas_updated.centroid_coord
 
 FROM odk_tree_monitoring_main
 JOIN akvo_tree_registration_areas_updated
@@ -2113,6 +2113,9 @@ conn.commit()
 # AND b.edit_confirmation = True;'''
 #
 # conn.commit()
+
+
+
 
 # Update EDITS table with geometric error detection results. This is done from the UPDATED table.
 # The geometric analysis is done AFTER the run of the (this) dashboard script.
